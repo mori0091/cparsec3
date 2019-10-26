@@ -1,48 +1,33 @@
 /* -*- coding: utf-8-unix -*- */
 #include <cparsec3/stream/stream_string.h>
 
-#define s String
+#define S String
+#define T_GENERATOR CONCAT(S, generator)
 
-#define TestSuite Stream(s)
-#include "testit.h"
+#define Nothing                                                          \
+  { .none = true }
+#define Just(tok, rest)                                                  \
+  { .value.first = (tok), .value.second = (rest) }
 
-#define S cparsec_module(Stream(s))
-#define Tok Maybe(Tupple(Token(s), s))
+struct data {
+  S input;
+  Maybe(Tupple(Token(S), S)) expect;
+};
 
-test("if !empty(input) := true, then "
-     "take1(input) returns the 1st token and the rest of 'input'.") {
-  s input;
-  Tok r;
-  {
-    input = "abc";
-    r = S.take1(input);
-    c_assert(!r.none);
-    c_assert(eq(r.value.first, 'a'));
-    c_assert(eq(r.value.second, "bc"));
+static void* T_GENERATOR(size_t i) {
+  static struct data ret[] = {
+      {"abc", Just('a', "bc")},
+      {"bc", Just('b', "c")},
+      {"c", Just('c', "")},
+      {"", Nothing},
+  };
+  if (i < sizeof(ret) / sizeof(ret[0])) {
+    return &(ret[i]);
   }
-  {
-    input = r.value.second;
-    r = S.take1(input);
-    c_assert(!r.none);
-    c_assert(eq(r.value.first, 'b'));
-    c_assert(eq(r.value.second, "c"));
-  }
-  {
-    input = r.value.second;
-    r = S.take1(input);
-    c_assert(!r.none);
-    c_assert(eq(r.value.first, 'c'));
-    c_assert(eq(r.value.second, ""));
-  }
+  return NULL;
 }
 
-test("if empty(input) := true, then "
-     "take1(input) returns nothing.") {
-  s input;
-  Tok r;
-  {
-    input = "";
-    r = S.take1(input);
-    c_assert(r.none);
-  }
-}
+#undef Nothing
+#undef Just
+
+#include "./test_stream_take1.h"
