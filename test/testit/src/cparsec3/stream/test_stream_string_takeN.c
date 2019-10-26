@@ -16,7 +16,7 @@
 struct data {
   int n; /* max length of chunk */
   S input;
-  Maybe(Tupple(Tokens(S), S)) expect;
+  Maybe(Tuple(Tokens(S), S)) expect;
 };
 
 static void* T_GENERATOR(size_t i) {

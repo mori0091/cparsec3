@@ -8,7 +8,7 @@
 #include "testit.h"
 
 #define stream cparsec_module(Stream(S))
-#define Tok Maybe(Tupple(Token(S), S))
+#define Tok Maybe(Tuple(Token(S), S))
 
 test("if !empty(input) := true, then "
      "take1(input) returns the 1st token and the rest of 'input'.",
