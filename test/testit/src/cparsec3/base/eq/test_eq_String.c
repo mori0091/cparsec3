@@ -1,41 +1,45 @@
 /* -*- coding: utf-8-unix -*- */
-#define _DISABLE_TESTIT_OPERATORS
-#define TestSuite Eq_String
-#include "testit.h"
 
 #include <cparsec3/base/base.h>
 
-#define EQ cparsec_module(Eq(String)).eq
-#define NEQ cparsec_module(Eq(String)).neq
+#define T String
+#define T_GENERATOR CONCAT(T, generator)
 
-test("eq(\"abc\", \"abc\")") {
-  c_assert(EQ("abc", "abc"));
+struct data {
+  T a;
+  T b;
+  T c;
+  T (*f)(T);
+};
+
+static T id(T x) {
+  return x;
 }
 
-test("eq(\"abc\", \"abcd\")", .should_fail = true) {
-  c_assert(EQ("abc", "abcd"));
-}
+#define a ("a")
+#define b ("b")
+#define c ("c")
+static void* T_GENERATOR(size_t i) {
+  static struct data ret[] = {
+      {a, a, a, id}, {a, a, b, id}, {a, a, c, id}, //
+      {a, b, a, id}, {a, b, b, id}, {a, b, c, id}, //
+      {a, c, a, id}, {a, c, b, id}, {a, c, c, id}, //
 
-test("eq(\"abcd\", \"abc\")", .should_fail = true) {
-  c_assert(EQ("abc", "abcd"));
-}
+      {b, a, a, id}, {b, a, b, id}, {b, a, c, id}, //
+      {b, b, a, id}, {b, b, b, id}, {b, b, c, id}, //
+      {b, c, a, id}, {b, c, b, id}, {b, c, c, id}, //
 
-test("eq(\"abc\", \"ABC\")", .should_fail = true) {
-  c_assert(EQ("abc", "ABC"));
+      {c, a, a, id}, {c, a, b, id}, {c, a, c, id}, //
+      {c, b, a, id}, {c, b, b, id}, {c, b, c, id}, //
+      {c, c, a, id}, {c, c, b, id}, {c, c, c, id}, //
+  };
+  if (i < sizeof(ret) / sizeof(ret[0])) {
+    return &(ret[i]);
+  }
+  return NULL;
 }
+#undef a
+#undef b
+#undef c
 
-test("neq(\"abc\", \"abc\")", .should_fail = true) {
-  c_assert(NEQ("abc", "abc"));
-}
-
-test("neq(\"abc\", \"abcd\")") {
-  c_assert(NEQ("abc", "abcd"));
-}
-
-test("neq(\"abcd\", \"abc\")") {
-  c_assert(NEQ("abc", "abcd"));
-}
-
-test("neq(\"abc\", \"ABC\")") {
-  c_assert(NEQ("abc", "ABC"));
-}
+#include "./test_eq.h"
