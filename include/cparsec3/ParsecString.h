@@ -10,6 +10,7 @@
 #pragma once
 
 #include "core/core.h"
+#include "parsec/token.h"
 
 C_API_BEGIN
 // -------------------------------------------------------------

@@ -29,6 +29,9 @@
     LList(ErrorItem(S)) expecting;                                       \
   } ParseError(S)
 
+// type alias for expecting items
+#define Hints(S) LList(ErrorItem(S))
+
 #define ParseErrorBundle(S) CONCAT(ParseErrorBundle, S)
 #define typedef_ParseErrorBundle(S)                                      \
   typedef_ParseError(S);                                                 \

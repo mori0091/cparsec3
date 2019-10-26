@@ -14,7 +14,10 @@
 
 C_API_BEGIN
 // -------------------------------------------------------------
-#define typedef_Parser(T) typedef_Parsec(CPARSEC_STREAM_TYPE, T)
+#define typedef_Parser(T)                                                \
+  typedef_Parsec(CPARSEC_STREAM_TYPE, T);                                \
+  declare_token(CPARSEC_STREAM_TYPE, T);                                 \
+  END_OF_STATEMENTS
 FOREACH(typedef_Parser, TYPESET(ALL));
 #undef typedef_Parser
 // -------------------------------------------------------------
@@ -29,7 +32,7 @@ C_API_END
   GENERIC((p), Parser, runParserP_s, TYPESET(ALL))((p), (state))
 
 #define define_CPARSEC(T)                                                \
-  /* nothing yet */                                                      \
+  define_token(CPARSEC_STREAM_TYPE, T);                                  \
   END_OF_STATEMENTS
 
 #define CPARSEC_DEFINE_ALL()                                             \
