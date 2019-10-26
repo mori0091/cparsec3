@@ -7,8 +7,6 @@
 #define TestSuite Eq(T)
 #include "testit.h"
 
-#include <cparsec3/base/base.h>
-
 #define E cparsec_module(Eq(T))
 #define O cparsec_module(Ord(T))
 
