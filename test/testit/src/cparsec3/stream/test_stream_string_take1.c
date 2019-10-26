@@ -1,14 +1,18 @@
 /* -*- coding: utf-8-unix -*- */
-#define TestSuite ParsecString
+#include <cparsec3/stream/stream_string.h>
+
+#define s String
+
+#define TestSuite Stream(s)
 #include "testit.h"
 
-#include <cparsec3/ParsecString.h>
+#define S cparsec_module(Stream(s))
+#define Tok Maybe(Tupple(Token(s), s))
 
-#define S cparsec_module(Stream(String))
-
-test("take1") {
-  Maybe(Tupple(Token(String), String)) r;
-  String input;
+test("if !empty(input) := true, then "
+     "take1(input) returns the 1st token and the rest of 'input'.") {
+  s input;
+  Tok r;
   {
     input = "abc";
     r = S.take1(input);
@@ -30,8 +34,14 @@ test("take1") {
     c_assert(eq(r.value.first, 'c'));
     c_assert(eq(r.value.second, ""));
   }
+}
+
+test("if empty(input) := true, then "
+     "take1(input) returns nothing.") {
+  s input;
+  Tok r;
   {
-    input = r.value.second;
+    input = "";
     r = S.take1(input);
     c_assert(r.none);
   }
