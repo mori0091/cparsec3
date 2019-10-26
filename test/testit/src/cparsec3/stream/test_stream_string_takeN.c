@@ -1,101 +1,45 @@
 /* -*- coding: utf-8-unix -*- */
 #include <cparsec3/stream/stream_string.h>
 
-#define s String
+#define S String
+#define T_GENERATOR CONCAT(S, generator)
 
-#define TestSuite Stream(s)
-#include "testit.h"
-
-#define S cparsec_module(Stream(s))
-#define Toks Maybe(Tupple(Tokens(s), s))
-
-test("if (n < 0) && empty(input) := true, then "
-     "takeN(n, input) returns a 0-length chunk and `input`.") {
-  s input = "";
-  {
-    Toks r = S.takeN(-1, input);
-    c_assert(!r.none);
-    c_assert(eq(r.value.first.length, 0));
-    c_assert(eq(r.value.first.value, ""));
-    c_assert(eq(r.value.second, ""));
+#define Nothing                                                          \
+  { .none = true }
+#define Just(len, toks, rest)                                            \
+  {                                                                      \
+    .value.first = {.length = (len), .value = (toks)},                   \
+    .value.second = (rest)                                               \
   }
+#define may_follos_something ".."
+
+struct data {
+  int n; /* max length of chunk */
+  S input;
+  Maybe(Tupple(Tokens(S), S)) expect;
+};
+
+static void* T_GENERATOR(size_t i) {
+  static struct data ret[] = {
+      {-1, "", Just(0, "" may_follos_something, "")},
+      {+0, "", Just(0, "" may_follos_something, "")},
+      {+1, "", Nothing},
+
+      {-1, "abc", Just(0, "" may_follos_something, "abc")},
+      {+0, "abc", Just(0, "" may_follos_something, "abc")},
+      {+1, "abc", Just(1, "a" may_follos_something, "bc")},
+      {+2, "abc", Just(2, "ab" may_follos_something, "c")},
+      {+3, "abc", Just(3, "abc" may_follos_something, "")},
+      {+4, "abc", Just(3, "abc" may_follos_something, "")},
+  };
+  if (i < sizeof(ret) / sizeof(ret[0])) {
+    return &(ret[i]);
+  }
+  return NULL;
 }
 
-test("if (n == 0) && empty(input) := true, then "
-     "takeN(n, input) returns a 0-length chunk and `input`.") {
-  s input = "";
-  {
-    Toks r = S.takeN(0, input);
-    c_assert(!r.none);
-    c_assert(eq(r.value.first.length, 0));
-    c_assert(eq(r.value.first.value, ""));
-    c_assert(eq(r.value.second, ""));
-  }
-}
+#undef Nothing
+#undef Just
+#undef may_follos_something
 
-test("if (n > 0) && empty(input) := true, then "
-     "takeN(n, input) returns nothing. (i.e. end of input)") {
-  s input = "";
-  {
-    Toks r = S.takeN(1, input);
-    c_assert(r.none);
-  }
-}
-
-test("if (n < 0) && !empty(input) := true, then "
-     "takeN(n, input) returns a 0-length chunk and `input`.") {
-  s input = "abc";
-  {
-    Toks r = S.takeN(-1, input);
-    c_assert(!r.none);
-    c_assert(eq(r.value.first.length, 0));
-    c_assert(eq(r.value.first.value, ""));
-    c_assert(eq(r.value.second, "abc"));
-  }
-}
-
-test("if (n == 0) && !empty(input) := true, then "
-     "takeN(n, input) returns a 0-length chunk and `input`.") {
-  s input = "abc";
-  {
-    Toks r = S.takeN(0, input);
-    c_assert(!r.none);
-    c_assert(eq(r.value.first.length, 0));
-    c_assert(eq(r.value.first.value, ""));
-    c_assert(eq(r.value.second, "abc"));
-  }
-}
-
-test("if (n > 0) && !empty(input) := true, then "
-     "takeN(n, input) returns a chunk whose length is n at most "
-     "and the rest of `input`.") {
-  s input = "abc";
-  {
-    Toks r = S.takeN(1, input);
-    c_assert(!r.none);
-    c_assert(eq(r.value.first.length, 1));
-    c_assert(!strncmp(r.value.first.value, "a", 1));
-    c_assert(eq(r.value.second, "bc"));
-  }
-  {
-    Toks r = S.takeN(2, input);
-    c_assert(!r.none);
-    c_assert(eq(r.value.first.length, 2));
-    c_assert(!strncmp(r.value.first.value, "ab", 2));
-    c_assert(eq(r.value.second, "c"));
-  }
-  {
-    Toks r = S.takeN(3, input);
-    c_assert(!r.none);
-    c_assert(eq(r.value.first.length, 3));
-    c_assert(!strncmp(r.value.first.value, "abc", 3));
-    c_assert(eq(r.value.second, ""));
-  }
-  {
-    Toks r = S.takeN(4, input);
-    c_assert(!r.none);
-    c_assert(eq(r.value.first.length, 3));
-    c_assert(!strncmp(r.value.first.value, "abc", 3));
-    c_assert(eq(r.value.second, ""));
-  }
-}
+#include "./test_stream_takeN.h"
