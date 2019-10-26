@@ -8,7 +8,7 @@
 #include "testit.h"
 
 #define stream cparsec_module(Stream(S))
-#define Toks Maybe(Tupple(Tokens(S), S))
+#define Toks Maybe(Tuple(Tokens(S), S))
 
 test("if (n <= 0) := true, then "
      "takeN(n, input) returns a 0-length chunk and `input`.",

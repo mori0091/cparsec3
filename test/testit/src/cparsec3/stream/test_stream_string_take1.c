@@ -11,7 +11,7 @@
 
 struct data {
   S input;
-  Maybe(Tupple(Token(S), S)) expect;
+  Maybe(Tuple(Token(S), S)) expect;
 };
 
 static void* T_GENERATOR(size_t i) {

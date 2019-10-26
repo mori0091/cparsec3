@@ -9,14 +9,14 @@
 
 #define declare_Stream(S)                                                \
   C_API_BEGIN                                                            \
-  typedef_Tupple(Token(S), S);                                           \
-  typedef_Tupple(Tokens(S), S);                                          \
-  typedef_Maybe(Tupple(Token(S), S));                                    \
-  typedef_Maybe(Tupple(Tokens(S), S));                                   \
+  typedef_Tuple(Token(S), S);                                            \
+  typedef_Tuple(Tokens(S), S);                                           \
+  typedef_Maybe(Tuple(Token(S), S));                                     \
+  typedef_Maybe(Tuple(Tokens(S), S));                                    \
   typedef struct {                                                       \
     bool (*empty)(S s);                                                  \
-    Maybe(Tupple(Token(S), S)) (*take1)(S s);                            \
-    Maybe(Tupple(Tokens(S), S)) (*takeN)(int n, S s);                    \
+    Maybe(Tuple(Token(S), S)) (*take1)(S s);                             \
+    Maybe(Tuple(Tokens(S), S)) (*takeN)(int n, S s);                     \
   } Stream(S);                                                           \
   Stream(S) CPARSEC_MODULE(Stream(S))(void);                             \
   /* ---- */                                                             \

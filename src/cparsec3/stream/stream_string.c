@@ -25,8 +25,8 @@ static bool empty(String s) {
  *            - the token and the rest of stream, or
  *            - nothing (if `s` was empty)
  */
-static Maybe(Tupple(Token(String), String)) take1(String s) {
-  typedef Maybe(Tupple(Token(String), String)) R;
+static Maybe(Tuple(Token(String), String)) take1(String s) {
+  typedef Maybe(Tuple(Token(String), String)) R;
   if (empty(s)) {
     return (R){.none = true};
   } else {
@@ -50,8 +50,8 @@ static Maybe(Tupple(Token(String), String)) take1(String s) {
  *            - the chunk of tokens and the rest of stream, or
  *            - nothing (if `n > 0` and `s` was empty)
  */
-static Maybe(Tupple(Tokens(String), String)) takeN(int n, String s) {
-  typedef Maybe(Tupple(Tokens(String), String)) R;
+static Maybe(Tuple(Tokens(String), String)) takeN(int n, String s) {
+  typedef Maybe(Tuple(Tokens(String), String)) R;
   if (n <= 0) {
     Tokens(String) x = {.length = 0, .value = ""};
     return (R){.value = {{x}, {s}}};

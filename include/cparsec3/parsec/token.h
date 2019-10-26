@@ -21,7 +21,7 @@
   static PSResult(S, T) TOKEN_FN(S, T)(void* arg, PState(S) state) {     \
     TOKEN_ARG(S, T)* p = arg;                                            \
     Stream(S) stream = cparsec_module(Stream(S));                        \
-    Maybe(Tupple(Token(S), S)) r0 = stream.take1(state.input);           \
+    Maybe(Tuple(Token(S), S)) r0 = stream.take1(state.input);            \
     if (r0.none) {                                                       \
       return UNEXPECTED_EOM(S, T)(state, p->expecting);                  \
     }                                                                    \

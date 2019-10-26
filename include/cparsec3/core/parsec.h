@@ -32,8 +32,8 @@
 #define typedef_Parsec(S, T)                                             \
   typedef_Result(T, PEBundle(S));                                        \
   typedef Result(T, PEBundle(S)) PResult(S, T);                          \
-  typedef_Tupple(PState(S), Result(T, PEBundle(S)));                     \
-  typedef Tupple(PState(S), Result(T, PEBundle(S))) PSResult(S, T);      \
+  typedef_Tuple(PState(S), Result(T, PEBundle(S)));                      \
+  typedef Tuple(PState(S), Result(T, PEBundle(S))) PSResult(S, T);       \
   typedef struct {                                                       \
     PSResult(S, T) (*run)(void* arg, PState(S) state);                   \
     void* arg;                                                           \
