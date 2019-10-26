@@ -6,6 +6,7 @@
 #else
 
 #include "../core/core.h"
+#include "../parsec/token.h"
 
 #define Parser(T) Parsec(CPARSEC_STREAM_TYPE, T)
 #define parseTest_s(T) PARSE_TEST(CPARSEC_STREAM_TYPE, T)

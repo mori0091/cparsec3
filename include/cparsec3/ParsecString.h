@@ -10,23 +10,7 @@
 #pragma once
 
 #include "core/core.h"
-#include "parsec/token.h"
-
-C_API_BEGIN
-// -------------------------------------------------------------
-
-/** Token(S) : A data element taken from stream of type S */
-typedef char Token(String);
-/** Tokens(S) : A chunk of data elements taken from stream of type S */
-typedef struct {
-  size_t length;
-  const char* value;
-} Tokens(String);
-
-declare_Stream(String);
-
-// -------------------------------------------------------------
-C_API_END
+#include "stream/stream_string.h"
 
 #define CPARSEC_STREAM_TYPE String
 #include "specialize/specialize.h"
