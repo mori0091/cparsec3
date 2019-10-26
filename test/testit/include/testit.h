@@ -241,6 +241,7 @@ static struct {
   bool list;
   bool verbose;
   bool should_fail;
+  enum {DEFAULT, YES, NO} color;
 } options = {0};
 
 typedef struct TestListSt* TestList;
@@ -320,9 +321,12 @@ static bool is_ANSI_escape_available(void) {
 #define WHITE ";37"
 
 static void print(const char* esc, const char* fmt, ...) {
+  bool use_color = is_ANSI_escape_available();
+  if (options.color == YES) use_color = true;
+  if (options.color == NO) use_color = false;
   va_list ap;
   va_start(ap, fmt);
-  if (!is_ANSI_escape_available()) {
+  if (!use_color) {
     vprintf(fmt, ap);
   } else {
     printf("\033[0%sm", esc);
@@ -479,6 +483,8 @@ static void testit_help(const char* appName) {
          "show all outuput, also a passed tests");
   printf(opt_fmt, "    --should-fail",
          "show also a passed tests w/ .should_fail = true");
+  printf(opt_fmt, "    --color={yes|no}",
+         "enable/disable ANSI color escape sequence");
   printf("\n");
 }
 
@@ -499,6 +505,14 @@ static void testit_init(int argc, char** argv) {
     }
     if (!strcmp(arg, "--should-fail")) {
       options.should_fail = true;
+      continue;
+    }
+    if (!strcmp(arg, "--color=yes")) {
+      options.color = YES;
+      continue;
+    }
+    if (!strcmp(arg, "--color=no")) {
+      options.color = NO;
       continue;
     }
     //...
