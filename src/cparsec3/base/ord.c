@@ -58,7 +58,8 @@ define_Ord(uint32_t);
 define_Ord(uint64_t);
 
 static int CMP(String)(String a, String b) {
-  return strcmp(a, b);
+  int x = strcmp(a, b);
+  return (x <= 0 ? (x == 0 ? 0 : -1) : 1);
 }
 static bool LT(String)(String a, String b) {
   return CMP(String)(a, b) < 0;
