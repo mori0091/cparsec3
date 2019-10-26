@@ -58,13 +58,13 @@ summary=$(deco "$0 $*" bold underline)${NEWLINE}
 pass=0
 fail=0
 
-for i in $(find * -type f -name "GNUmakefile" -o -name "Makefile")
+for i in $(find ./* -type f -name "GNUmakefile" -o -name "Makefile")
 do
     d=$(dirname "$i")
     task="make $@ -C \"$d\""
-    echo ${task}
+    echo "${task}"
     echo "----------------------------------------------------------------"
-    if eval ${task} ; then
+    if eval "${task}" ; then
         summary="${summary}[${PASS_MARK}] ${task}${NEWLINE}"
         pass=$((pass + 1))
     else
