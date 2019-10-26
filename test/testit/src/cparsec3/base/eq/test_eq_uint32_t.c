@@ -1,25 +1,45 @@
 /* -*- coding: utf-8-unix -*- */
-#define _DISABLE_TESTIT_OPERATORS
-#define TestSuite Eq_uint32_t
-#include "testit.h"
 
 #include <cparsec3/base/base.h>
 
-#define EQ cparsec_module(Eq(uint32_t)).eq
-#define NEQ cparsec_module(Eq(uint32_t)).neq
+#define T uint32_t
+#define T_GENERATOR CONCAT(T, generator)
 
-test("eq((uint32_t)1, (uint32_t)1)") {
-  c_assert(EQ(1, 1));
+struct data {
+  T a;
+  T b;
+  T c;
+  T (*f)(T);
+};
+
+static T suc(T x) {
+  return x + 1;
 }
 
-test("eq((uint32_t)1, (uint32_t)0)", .should_fail = true) {
-  c_assert(EQ(1, 0));
-}
+#define a (0)
+#define b (1)
+#define c (UINT32_MAX)
+static void* T_GENERATOR(size_t i) {
+  static struct data ret[] = {
+      {a, a, a, suc}, {a, a, b, suc}, {a, a, c, suc}, //
+      {a, b, a, suc}, {a, b, b, suc}, {a, b, c, suc}, //
+      {a, c, a, suc}, {a, c, b, suc}, {a, c, c, suc}, //
 
-test("neq((uint32_t)1, (uint32_t)1)", .should_fail = true) {
-  c_assert(NEQ(1, 1));
-}
+      {b, a, a, suc}, {b, a, b, suc}, {b, a, c, suc}, //
+      {b, b, a, suc}, {b, b, b, suc}, {b, b, c, suc}, //
+      {b, c, a, suc}, {b, c, b, suc}, {b, c, c, suc}, //
 
-test("neq((uint32_t)1, (uint32_t)0)") {
-  c_assert(NEQ(1, 0));
+      {c, a, a, suc}, {c, a, b, suc}, {c, a, c, suc}, //
+      {c, b, a, suc}, {c, b, b, suc}, {c, b, c, suc}, //
+      {c, c, a, suc}, {c, c, b, suc}, {c, c, c, suc}, //
+  };
+  if (i < sizeof(ret) / sizeof(ret[0])) {
+    return &(ret[i]);
+  }
+  return NULL;
 }
+#undef a
+#undef b
+#undef c
+
+#include "./test_eq.h"
