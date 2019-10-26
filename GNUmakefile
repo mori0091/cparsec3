@@ -1,7 +1,9 @@
 # -*- coding:utf-8-unix -*-
-.PHONY: all build clean cov gcov lib test
+.PHONY: all build clean depend cov gcov lib test
 
 all: build lib
+
+depend:
 
 include .project.mk
 
@@ -42,7 +44,7 @@ build: $(TARGET)
 
 lib: $(LIBTARGET)
 
-test: $(TARGET)
+test: build
 	$(info [TEST] $(TEST_COMMAND))
 	@$(TEST_COMMAND)
 
@@ -69,12 +71,15 @@ gcov:
 			-o $(patsubst $(SRCDIR)/%, $(OBJDIR)/%, $(d)) \
 			$(wildcard $(d)*.c $(d)*.cpp $(d)*.cxx) ;)
 
-$(TARGET): $(OBJS)
+
+$(TARGET):: depend
+$(TARGET):: $(OBJS)
 	$(info [LD]    Build   : $@	[$(notdir $(CURDIR))])
 	@mkdir -p $(dir $@)
 	@$(CXX) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
-$(LIBTARGET): $(LIBOBJS)
+$(LIBTARGET):: depend
+$(LIBTARGET):: $(LIBOBJS)
 	$(info [AR]    Build   : $@	[$(notdir $(CURDIR))])
 	@mkdir -p $(dir $@)
 	@$(AR) cr $@ $^
