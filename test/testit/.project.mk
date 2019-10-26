@@ -1,5 +1,5 @@
 # -*- coding: utf-8-unix -*-
-TARGET = AllTests
+TARGET = bin/AllTests
 
 CFLAGS   += -D_POSIX_C_SOURCE
 CFLAGS   += -std=c11 -I include -I ../../include
