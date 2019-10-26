@@ -1,0 +1,8 @@
+# -*- coding: utf-8-unix -*-
+#+STARTUP: showall indent
+
+* CPARSEC3 - a parser combinator library for C language
+
+# [[https://app.codacy.com/project/mori-d/cparsec2/dashboard][https://img.shields.io/codacy/grade/3884708954694573829f978709ff6dae.svg?logo=codacy]]
+# [[https://circleci.com/gh/mori0091/cparsec2][https://circleci.com/gh/mori0091/cparsec3.svg?style=shield]]
+# [[https://codecov.io/gh/mori0091/cparsec2][https://codecov.io/gh/mori0091/cparsec3/branch/master/graph/badge.svg]]
