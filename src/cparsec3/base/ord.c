@@ -7,8 +7,8 @@
 #define LE(T) CONCAT(le, T)
 #define GT(T) CONCAT(gt, T)
 #define GE(T) CONCAT(ge, T)
-#define MIN(T) CONCAT(MIN, T)
-#define MAX(T) CONCAT(MAX, T)
+#define MIN(T) CONCAT(min, T)
+#define MAX(T) CONCAT(max, T)
 #define EQ(T) cparsec_module(Eq(T)).eq
 
 #define define_Ord(T)                                                    \
