@@ -9,22 +9,16 @@ struct data {
   T a;
   T b;
   T c;
-  T (*f)(T);
 };
-
-static T suc(T x) {
-  x.none = !x.none;
-  return x;
-}
 
 #define a {.value = {0}}
 #define x {.none = true}
 static void* T_GENERATOR(size_t i) {
   static struct data ret[] = {
       // clang-format off
-      {x, x, x, suc},                                 //
-      {x, x, a, suc}, {x, a, x, suc}, {x, a, a, suc}, //
-      {a, x, x, suc}, {a, x, a, suc}, {a, a, x, suc}, //
+      {x, x, x},                       //
+      {x, x, a}, {x, a, x}, {x, a, a}, //
+      {a, x, x}, {a, x, a}, {a, a, x}, //
       // clang-format on
   };
   if (i < sizeof(ret) / sizeof(ret[0])) {
@@ -35,4 +29,4 @@ static void* T_GENERATOR(size_t i) {
 #undef a
 #undef x
 
-#include "../eq/test_eq.h"
+#include "../ord/test_ord.h"
