@@ -44,18 +44,54 @@
   }                                                                      \
   END_OF_STATEMENTS
 
-define_Ord(char);
-define_Ord(int);
+#define DISMISS_None JUST(1)
+#define DISMISS_String JUST(1)
+FOREACH(define_Ord, FILTER_OUT_DISMISSED(TYPESET(ALL)));
+#undef DISMISS_None
+#undef DISMISS_String
 
-define_Ord(int8_t);
-define_Ord(int16_t);
-define_Ord(int32_t);
-define_Ord(int64_t);
-
-define_Ord(uint8_t);
-define_Ord(uint16_t);
-define_Ord(uint32_t);
-define_Ord(uint64_t);
+static int CMP(None)(None a, None b) {
+  UNUSED(a);
+  UNUSED(b);
+  return 0;
+}
+static bool LT(None)(None a, None b) {
+  UNUSED(a);
+  UNUSED(b);
+  return false;
+}
+static bool LE(None)(None a, None b) {
+  UNUSED(a);
+  UNUSED(b);
+  return true;
+}
+static bool GT(None)(None a, None b) {
+  UNUSED(a);
+  UNUSED(b);
+  return false;
+}
+static bool GE(None)(None a, None b) {
+  UNUSED(a);
+  UNUSED(b);
+  return true;
+}
+static None MIN(None)(None a, None b) {
+  UNUSED(b);
+  return a;
+}
+static None MAX(None)(None a, None b) {
+  UNUSED(b);
+  return a;
+}
+Ord(None) CPARSEC_MODULE(Ord(None))(void) {
+  return (Ord(None)){.cmp = CMP(None),
+                     .lt = LT(None),
+                     .le = LE(None),
+                     .gt = GT(None),
+                     .ge = GE(None),
+                     .min = MIN(None),
+                     .max = MAX(None)};
+}
 
 static int CMP(String)(String a, String b) {
   int x = strcmp(a, b);

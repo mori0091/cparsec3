@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "module.h"
+#include "typeset.h"
 
 #define Ord(T) CONCAT(Ord, T)
 #define declare_Ord(T)                                                   \
@@ -35,17 +36,4 @@
   C_API_END                                                              \
   END_OF_STATEMENTS
 
-declare_Ord(char);
-declare_Ord(int);
-
-declare_Ord(int8_t);
-declare_Ord(int16_t);
-declare_Ord(int32_t);
-declare_Ord(int64_t);
-
-declare_Ord(uint8_t);
-declare_Ord(uint16_t);
-declare_Ord(uint32_t);
-declare_Ord(uint64_t);
-
-declare_Ord(String);
+FOREACH(declare_Ord, TYPESET(ALL));
