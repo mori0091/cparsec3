@@ -33,8 +33,6 @@ static void* T_GENERATOR(size_t i) {
   return NULL;
 }
 #undef a
-#undef b
-#undef c
 #undef x
 
 #include "../eq/test_eq.h"
