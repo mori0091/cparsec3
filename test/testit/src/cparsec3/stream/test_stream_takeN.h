@@ -10,6 +10,20 @@
 #define stream cparsec_module(Stream(S))
 #define Toks Maybe(Tuple(Tokens(S), S))
 
+static inline bool toks_eq(Toks a, Toks b) {
+  if (a.none) {
+    return b.none;
+  }
+  if (b.none) {
+    return a.none;
+  }
+  tie((Tokens(S) a_chunk, S a_rest), a.value);
+  tie((Tokens(S) b_chunk, S b_rest), b.value);
+  return eq(a_chunk.length, b_chunk.length) &&
+         !strncmp(a_chunk.value, b_chunk.value, a_chunk.length) &&
+         eq(a_rest, b_rest);
+}
+
 test("if (n <= 0) := true, then "
      "takeN(n, input) returns a 0-length chunk and `input`.",
      .generator = T_GENERATOR) {
@@ -17,11 +31,11 @@ test("if (n <= 0) := true, then "
   int n = x->n;
   S input = x->input;
   if (n <= 0) {
+    Toks expect = x->expect;
     Toks actual = stream.takeN(n, input);
+    c_assert(!expect.none);
     c_assert(!actual.none);
-    c_assert(eq(actual.value.first.length, 0));
-    c_assert(!strncmp("", actual.value.first.value, 0));
-    c_assert(eq(input, actual.value.second));
+    c_assert(toks_eq(expect, actual));
   }
 }
 
@@ -47,10 +61,8 @@ test("if (n > 0) && !empty(input) := true, then "
   if (n > 0 && !stream.empty(input)) {
     Toks expect = x->expect;
     Toks actual = stream.takeN(n, input);
+    c_assert(!expect.none);
     c_assert(!actual.none);
-    c_assert(eq(expect.value.first.length, actual.value.first.length));
-    c_assert(!strncmp(expect.value.first.value, actual.value.first.value,
-                      expect.value.first.length));
-    c_assert(eq(expect.value.second, actual.value.second));
+    c_assert(toks_eq(expect, actual));
   }
 }
