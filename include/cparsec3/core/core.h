@@ -9,6 +9,5 @@
 #include "parsestate.h"
 #include "posstate.h"
 #include "sourcepos.h"
-#include "typeset.h"
 
 #include "parsec.h"
