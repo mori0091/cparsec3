@@ -15,3 +15,7 @@
   END_OF_STATEMENTS
 
 FOREACH(typedef_Maybe, TYPESET(ALL));
+
+// Maybe(T) is an instance of type-class Eq
+#include "eq.h"
+FOREACH(declare_Eq, APPLY(Maybe, TYPESET(ALL)));
