@@ -94,7 +94,7 @@ test("(7) (min(a, b) == if a <= b then a else b) := true)",
   struct data* x = testit_current_test_data();
   T a = x->a;
   T b = x->b;
-  c_assert(MIN(a, b) == (LE(a, b) ? a : b));
+  c_assert(EQ(MIN(a, b), (LE(a, b) ? a : b)));
 }
 
 test("(8) (max(a, b) == if a >= b then a else b) := true)",
@@ -102,5 +102,5 @@ test("(8) (max(a, b) == if a >= b then a else b) := true)",
   struct data* x = testit_current_test_data();
   T a = x->a;
   T b = x->b;
-  c_assert(MAX(a, b) == (GE(a, b) ? a : b));
+  c_assert(EQ(MAX(a, b), (GE(a, b) ? a : b)));
 }

@@ -9,7 +9,7 @@
 #define TOKEN_FN(S, T) CONCAT(cparsec_token_fn, S, T)
 #define TOKEN_ARG(S, T) CONCAT(cparsec_token_arg, S, T)
 #define declare_token(S, T)                                              \
-  typedef_Maybe(T);                                                      \
+  /* typedef_Maybe(T); */                                                \
   typedef Maybe(T) (*Match(S, T))(Token(S));                             \
   Parsec(S, T) TOKEN(S, T)(Match(S, T) match, Hints(S) expecting)
 

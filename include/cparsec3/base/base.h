@@ -5,10 +5,12 @@
 #include "module.h"
 #include "traits.h"
 
+#include "none.h"
+#include "typeset.h"
+
 #include "array.h"
 #include "llist.h"
 #include "maybe.h"
-#include "none.h"
 #include "result.h"
 #include "tuple.h"
 

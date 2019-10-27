@@ -22,6 +22,24 @@
 // ---- F(T); ... for each T in varargs
 #define FOREACH(F, ...) SEP_BY(SEMICOLON, F, __VA_ARGS__)
 
+/**
+ * \brief Filters out dismissed items in the list.
+ *
+ * ~~~c
+ * #define DISMISS_String JUST(1)
+ * FILTER_OUT_DISMISSED(char, int, String, double)
+ * // -> char, int, double
+ * #undef DISMISS_String
+ * FILTER_OUT_DISMISSED(char, int, String, double)
+ * // -> char, int, String, double
+ * ~~~
+ */
+#define FILTER_OUT_DISMISSED(...)                                        \
+  FILTER(EXCLUDE_IF_DISMISSED, __VA_ARGS__)
+#define FILTER(F, ...) SQUASH(APPLY(F, __VA_ARGS__))
+#define EXCLUDE_IF_DISMISSED(x) IF(DISMISSED(x))(, x)
+#define DISMISSED(x) EXTRACT_OR_DEFAULT(CAT(DISMISS_, x), 0)
+
 #ifdef __cplusplus
 #define C_API_BEGIN extern "C" {
 #define C_API_END }

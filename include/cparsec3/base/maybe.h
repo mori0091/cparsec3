@@ -2,10 +2,16 @@
 #pragma once
 
 #include "common.h"
+#include "typeset.h"
 
 #define Maybe(T) CONCAT(Maybe, T)
 #define typedef_Maybe(T)                                                 \
+  C_API_BEGIN                                                            \
   typedef struct {                                                       \
     bool none;                                                           \
     T value;                                                             \
-  } Maybe(T)
+  } Maybe(T);                                                            \
+  C_API_END                                                              \
+  END_OF_STATEMENTS
+
+FOREACH(typedef_Maybe, TYPESET(ALL));

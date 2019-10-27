@@ -17,18 +17,25 @@
   }                                                                      \
   END_OF_STATEMENTS
 
-define_Eq(char);
-define_Eq(int);
+#define DISMISS_None JUST(1)
+#define DISMISS_String JUST(1)
+FOREACH(define_Eq, FILTER_OUT_DISMISSED(TYPESET(ALL)));
+#undef DISMISS_None
+#undef DISMISS_String
 
-define_Eq(int8_t);
-define_Eq(int16_t);
-define_Eq(int32_t);
-define_Eq(int64_t);
-
-define_Eq(uint8_t);
-define_Eq(uint16_t);
-define_Eq(uint32_t);
-define_Eq(uint64_t);
+static bool EQ(None)(None a, None b) {
+  UNUSED(a);
+  UNUSED(b);
+  return true;
+}
+static bool NEQ(None)(None a, None b) {
+  UNUSED(a);
+  UNUSED(b);
+  return false;
+}
+Eq(None) CPARSEC_MODULE(Eq(None))(void) {
+  return (Eq(None)){.eq = EQ(None), .neq = NEQ(None)};
+}
 
 static bool EQ(String)(String a, String b) {
   return !strcmp(a, b);
