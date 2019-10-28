@@ -3,11 +3,11 @@
 
 #include "../core/core.h"
 
-#define Match(S, T) CONCAT(Match, S, T)
+#define Match(S, T) TYPE_NAME(Match, S, T)
 
-#define TOKEN(S, T) CONCAT(cparsec_token, S, T)
-#define TOKEN_FN(S, T) CONCAT(cparsec_token_fn, S, T)
-#define TOKEN_ARG(S, T) CONCAT(cparsec_token_arg, S, T)
+#define TOKEN(S, T) FUNC_NAME(token, S, T)
+#define TOKEN_FN(S, T) FUNC_NAME(token_fn, S, T)
+#define TOKEN_ARG(S, T) TYPE_NAME(token_arg, S, T)
 #define declare_token(S, T)                                              \
   /* typedef_Maybe(T); */                                                \
   typedef Maybe(T) (*Match(S, T))(Token(S));                             \

@@ -5,7 +5,7 @@
 
 #include "posstate.h"
 
-#define ParseState(S) CONCAT(ParseState, S)
+#define ParseState(S) TYPE_NAME(ParseState, S)
 #define typedef_ParseState(S)                                            \
   typedef struct {                                                       \
     /** the rest of input to process */                                  \

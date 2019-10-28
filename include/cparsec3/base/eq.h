@@ -5,7 +5,7 @@
 #include "module.h"
 #include "typeset.h"
 
-#define Eq(T) CONCAT(Eq, T)
+#define Eq(T) TYPE_NAME(Eq, T)
 #define declare_Eq(T)                                                    \
   C_API_BEGIN                                                            \
   typedef struct {                                                       \

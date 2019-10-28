@@ -10,25 +10,25 @@
 #include "stream.h"
 
 // parseTest(p, name, input)
-#define PARSE_TEST(S, T) CONCAT(cparsec_parseTest, S, T)
+#define PARSE_TEST(S, T) FUNC_NAME(parseTest, S, T)
 // runParser(p, name, input)
-#define RUN_PARSER(S, T) CONCAT(cparsec_runParser, S, T)
+#define RUN_PARSER(S, T) FUNC_NAME(runParser, S, T)
 // runParserP(p, state)
-#define RUN_PARSERP(S, T) CONCAT(cparsec_runParserP, S, T)
+#define RUN_PARSERP(S, T) FUNC_NAME(runParserP, S, T)
 
-#define PARSE_OK(S, T) CONCAT(cparsec_parseOk, S, T)
-#define PARSE_ERR(S, T) CONCAT(cparsec_parseErr, S, T)
-#define UNEXPECTED_EOM(S, T) CONCAT(cparsec_unexpectedEOM, S, T)
-#define UNEXPECTED_TOKEN(S, T) CONCAT(cparsec_unexpectedToken, S, T)
+#define PARSE_OK(S, T) FUNC_NAME(parseOk, S, T)
+#define PARSE_ERR(S, T) FUNC_NAME(parseErr, S, T)
+#define UNEXPECTED_EOM(S, T) FUNC_NAME(unexpectedEOM, S, T)
+#define UNEXPECTED_TOKEN(S, T) FUNC_NAME(unexpectedToken, S, T)
 
-#define ParseResult(S, T) CONCAT(ParseResult, S, T)
-#define ParseStateResult(S, T) CONCAT(ParseStateResult, S, T)
+#define ParseResult(S, T) TYPE_NAME(ParseResult, S, T)
+#define ParseStateResult(S, T) TYPE_NAME(ParseStateResult, S, T)
 #define PState(S) ParseState(S)
 #define PResult(S, T) ParseResult(S, T)
 #define PSResult(S, T) ParseStateResult(S, T)
 #define PEBundle(S) ParseErrorBundle(S)
 
-#define Parsec(S, T) CONCAT(Parsec, S, T)
+#define Parsec(S, T) TYPE_NAME(Parsec, S, T)
 #define typedef_Parsec(S, T)                                             \
   typedef_Result(T, PEBundle(S));                                        \
   typedef Result(T, PEBundle(S)) PResult(S, T);                          \

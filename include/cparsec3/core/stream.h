@@ -3,9 +3,9 @@
 
 #include "core.h"
 
-#define Stream(S) CONCAT(Stream, S)
-#define Token(S) CONCAT(Token, S)
-#define Tokens(S) CONCAT(Tokens, S)
+#define Stream(S) TYPE_NAME(Stream, S)
+#define Token(S) TYPE_NAME(Token, S)
+#define Tokens(S) TYPE_NAME(Tokens, S)
 
 #define declare_Stream(S)                                                \
   C_API_BEGIN                                                            \

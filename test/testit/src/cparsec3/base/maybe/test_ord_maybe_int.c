@@ -4,7 +4,7 @@
 #include <limits.h>
 
 #define T Maybe(int)
-#define T_GENERATOR CONCAT(T, generator)
+#define T_GENERATOR FUNC_NAME(T, generator)
 
 struct data {
   T a;

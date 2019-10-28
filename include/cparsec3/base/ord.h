@@ -5,7 +5,7 @@
 #include "module.h"
 #include "typeset.h"
 
-#define Ord(T) CONCAT(Ord, T)
+#define Ord(T) TYPE_NAME(Ord, T)
 #define declare_Ord(T)                                                   \
   C_API_BEGIN                                                            \
   typedef struct {                                                       \

@@ -3,7 +3,7 @@
 #include <cparsec3/base/base.h>
 
 #define T uint32_t
-#define T_GENERATOR CONCAT(T, generator)
+#define T_GENERATOR FUNC_NAME(T, generator)
 
 struct data {
   T a;

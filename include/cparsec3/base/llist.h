@@ -3,10 +3,10 @@
 
 #include "common.h"
 
-#define LList_CONS(T) CAT(LList(T), _cons)
-#define LList_DROP(T) CAT(LList(T), _drop)
-#define LList(T) CONCAT(LList, T)
-#define LListSt(T) CONCAT(LListSt, T)
+#define LList_CONS(T) FUNC_NAME(llist_cons, T)
+#define LList_DROP(T) FUNC_NAME(llist_drop, T)
+#define LList(T) TYPE_NAME(LList, T)
+#define LListSt(T) TYPE_NAME(LListSt, T)
 #define typedef_LList(T)                                                 \
   C_API_BEGIN                                                            \
   typedef struct LListSt(T) * LList(T);                                  \
