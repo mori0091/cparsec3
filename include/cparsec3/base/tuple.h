@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#define Tuple(...) CONCAT(Tuple, __VA_ARGS__)
+#define Tuple(...) TYPE_NAME(Tuple, __VA_ARGS__)
 #define typedef_Tuple(...)                                               \
   CAT(typedef_Tuple, VARIADIC_SIZE(__VA_ARGS__))(__VA_ARGS__)
 #define typedef_Tuple1(T1)                                               \

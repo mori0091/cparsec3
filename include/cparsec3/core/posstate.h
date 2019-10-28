@@ -5,7 +5,7 @@
 
 #include "sourcepos.h"
 
-#define PosState(S) CONCAT(PosState, S)
+#define PosState(S) TYPE_NAME(PosState, S)
 #define typedef_PosState(S)                                              \
   typedef struct {                                                       \
     S input; /* a Stream */                                              \

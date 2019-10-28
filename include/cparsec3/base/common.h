@@ -14,12 +14,42 @@
 
 #define END_OF_STATEMENTS static_assert(1, "end of statements")
 
-#define CONCAT(...) CONCAT0(__VA_ARGS__, )
-#define CONCAT0(x, ...)                                                  \
-  IF(IS_NIL(__VA_ARGS__))(x, FOLDL(CONCAT1, SQUASH(x, __VA_ARGS__)))
-#define CONCAT1(x, y) CAT(x, CAT(_, y))
+/**
+ * \brief Constructs a type-name identifier.
+ */
+#define TYPE_NAME(...) MANGLE(__VA_ARGS__)
 
-// ---- F(T); ... for each T in varargs
+/**
+ * \brief Constructs a function-name identifier.
+ */
+#define FUNC_NAME(x, ...) CAT(f_, CAT(x, CAT(_, MANGLE(__VA_ARGS__))))
+
+/**
+ * \brief Constructs an identifier.
+ *
+ * ~~~c
+ * MANGLE(A)       // -> A
+ * MANGLE(A, B)    // -> pA_B
+ * MANGLE(A, B, C) // -> ppA_B_C
+ * ~~~
+ */
+#define MANGLE(...)                                                      \
+  IF(IS_NIL(__VA_ARGS__))                                                \
+  (HEAD(__VA_ARGS__), FOLDL(MANGLE_PAIR, __VA_ARGS__))
+#define MANGLE_PAIR(x, y) CAT(p, CAT(x, CAT(_, y)))
+
+/**
+ * \brief F(T); ... for each T in variadic arguments.
+ *
+ * ~~~c
+ * FOREACH(F, int, char, String);
+ * // -> F(int); F(char); F(String);
+ *
+ * #define F(T) T CAT(T, _value)
+ * FOREACH(F, int, char, String);
+ * // -> int int_value; char char_value; String String_value;
+ * ~~~
+ */
 #define FOREACH(F, ...) SEP_BY(SEMICOLON, F, __VA_ARGS__)
 
 /**

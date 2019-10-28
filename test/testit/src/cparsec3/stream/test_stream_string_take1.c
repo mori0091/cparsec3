@@ -2,7 +2,7 @@
 #include <cparsec3/stream/stream_string.h>
 
 #define S String
-#define T_GENERATOR CONCAT(S, generator)
+#define T_GENERATOR FUNC_NAME(S, generator)
 
 #define Nothing                                                          \
   { .none = true }

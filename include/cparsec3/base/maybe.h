@@ -4,7 +4,7 @@
 #include "common.h"
 #include "typeset.h"
 
-#define Maybe(T) CONCAT(Maybe, T)
+#define Maybe(T) TYPE_NAME(Maybe, T)
 #define typedef_Maybe(T)                                                 \
   C_API_BEGIN                                                            \
   typedef struct {                                                       \

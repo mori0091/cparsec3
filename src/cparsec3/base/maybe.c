@@ -2,8 +2,8 @@
 
 #include <cparsec3/base/base.h>
 
-#define EQ(T) CONCAT(eq, T)
-#define NEQ(T) CONCAT(neq, T)
+#define EQ(T) FUNC_NAME(eq, T)
+#define NEQ(T) FUNC_NAME(neq, T)
 #define _EQ_(T) cparsec_module(Eq(T)).eq
 #define _NEQ_(T) cparsec_module(Eq(T)).neq
 
@@ -35,13 +35,13 @@ FOREACH(define_Eq_Maybe, TYPESET(ALL));
 
 // -----------------------------------------------------------------------
 
-#define CMP(T) CONCAT(cmp, T)
-#define LT(T) CONCAT(lt, T)
-#define LE(T) CONCAT(le, T)
-#define GT(T) CONCAT(gt, T)
-#define GE(T) CONCAT(ge, T)
-#define MIN(T) CONCAT(min, T)
-#define MAX(T) CONCAT(max, T)
+#define CMP(T) FUNC_NAME(cmp, T)
+#define LT(T) FUNC_NAME(lt, T)
+#define LE(T) FUNC_NAME(le, T)
+#define GT(T) FUNC_NAME(gt, T)
+#define GE(T) FUNC_NAME(ge, T)
+#define MIN(T) FUNC_NAME(min, T)
+#define MAX(T) FUNC_NAME(max, T)
 
 #define _LE_(T) cparsec_module(Ord(T)).le
 

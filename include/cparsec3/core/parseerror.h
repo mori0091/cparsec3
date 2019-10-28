@@ -3,7 +3,7 @@
 
 #include "../base/base.h"
 
-#define ErrorItem(S) CONCAT(ErrorItem, S)
+#define ErrorItem(S) TYPE_NAME(ErrorItem, S)
 #define typedef_ErrorItem(S)                                             \
   typedef_LList(Token(S));                                               \
   typedef struct {                                                       \
@@ -18,7 +18,7 @@
     };                                                                   \
   } ErrorItem(S)
 
-#define ParseError(S) CONCAT(ParseError, S)
+#define ParseError(S) TYPE_NAME(ParseError, S)
 #define typedef_ParseError(S)                                            \
   typedef_ErrorItem(S);                                                  \
   typedef_Maybe(ErrorItem(S));                                           \
@@ -32,7 +32,7 @@
 // type alias for expecting items
 #define Hints(S) LList(ErrorItem(S))
 
-#define ParseErrorBundle(S) CONCAT(ParseErrorBundle, S)
+#define ParseErrorBundle(S) TYPE_NAME(ParseErrorBundle, S)
 #define typedef_ParseErrorBundle(S)                                      \
   typedef_ParseError(S);                                                 \
   typedef_LList(ParseError(S));                                          \

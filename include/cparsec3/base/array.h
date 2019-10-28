@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#define Array(T) CONCAT(Array, T)
+#define Array(T) TYPE_NAME(Array, T)
 #define typedef_Array(T)                                                 \
   typedef struct {                                                       \
     size_t length;                                                       \

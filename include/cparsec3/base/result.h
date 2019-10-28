@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#define Result(T, E) CONCAT(Result, T, E)
+#define Result(T, E) TYPE_NAME(Result, T, E)
 #define typedef_Result(T, E)                                             \
   typedef struct {                                                       \
     bool success;                                                        \
