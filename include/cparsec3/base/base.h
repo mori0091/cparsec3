@@ -8,6 +8,8 @@
 #include "none.h"
 #include "typeset.h"
 
+#include "mem.h"
+
 #include "eq.h"
 #include "ord.h"
 
