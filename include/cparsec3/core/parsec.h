@@ -73,7 +73,7 @@
     return (PSResult(S, T)){                                             \
         .first = (state),                                                \
         .second.err = (ParseErrorBundle(S)){                             \
-            .errors = LList_CONS(ParseError(S))(err, NULL),              \
+            .errors = trait(Data(LList(ParseError(S)))).cons(err, NULL), \
             .posState = (state).posState}};                              \
   }                                                                      \
   /* UNEXPECTED_EOM(S,T)(state, expecting) */                            \
@@ -88,10 +88,11 @@
   static inline PSResult(S, T) UNEXPECTED_TOKEN(S, T)(                   \
       PState(S) state, Token(S) actual, LList(ErrorItem(S)) expecting) { \
     return PARSE_ERR(S, T)(                                              \
-        state, (ParseError(S)){.offset = state.offset,                   \
-                               .unexpected.value.type = TOKENS,          \
-                               .unexpected.value.tokens =                \
-                                   LList_CONS(Token(S))(actual, NULL),   \
-                               .expecting = expecting});                 \
+        state, (ParseError(S)){                                          \
+                   .offset = state.offset,                               \
+                   .unexpected.value.type = TOKENS,                      \
+                   .unexpected.value.tokens =                            \
+                       trait(Data(LList(Token(S)))).cons(actual, NULL),  \
+                   .expecting = expecting});                             \
   }                                                                      \
   END_OF_STATEMENTS
