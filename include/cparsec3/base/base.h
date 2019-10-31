@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "module.h"
-#include "traits.h"
 
 #include "none.h"
 #include "typeset.h"
