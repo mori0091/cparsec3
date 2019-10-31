@@ -2,7 +2,6 @@
 #pragma once
 
 #include "common.h"
-#include "traits.h"
 
 C_API_BEGIN
 
@@ -23,6 +22,6 @@ inline auto isNONE(None) { return true; }
 
 #else
 
-#define isNONE(x) type_eq(None, x)
+#define isNONE(x) (_Generic((x), None : 1, default : 0))
 
 #endif
