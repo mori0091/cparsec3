@@ -2,7 +2,6 @@
 #pragma once
 
 #include "common.h"
-#include "module.h" // for backward compatibility
 #include "trait.h"
 
 #include "none.h"
