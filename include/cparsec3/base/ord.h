@@ -2,11 +2,11 @@
 #pragma once
 
 #include "common.h"
-#include "module.h"
+#include "trait.h"
 #include "typeset.h"
 
 #define Ord(T) TYPE_NAME(Ord, T)
-#define declare_Ord(T)                                                   \
+#define trait_Ord(T)                                                     \
   C_API_BEGIN                                                            \
   typedef struct {                                                       \
     union {                                                              \
@@ -32,8 +32,8 @@
     T (*min)(T, T);                                                      \
     T (*max)(T, T);                                                      \
   } Ord(T);                                                              \
-  Ord(T) CPARSEC_MODULE(Ord(T))(void);                                   \
+  Ord(T) Trait(Ord(T));                                                  \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
-FOREACH(declare_Ord, TYPESET(ALL));
+FOREACH(trait_Ord, TYPESET(ALL));

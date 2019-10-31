@@ -7,8 +7,8 @@
 #define TestSuite Ord(T)
 #include "testit.h"
 
-#define E cparsec_module(Eq(T))
-#define O cparsec_module(Ord(T))
+#define E trait(Eq(T))
+#define O trait(Ord(T))
 
 #define EQ E.eq   /* == E.equal */
 #define NEQ E.neq /* == E.notEqual */

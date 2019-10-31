@@ -11,7 +11,7 @@
  * |-----------+----------------+-----------------------------|
  * | Stream(S) | Stream(String) | a set of stream I/F         |
  *
- * Calling to `cparsec_module(Stream(String))` returns a Stream(String).
+ * Calling to `trait(Stream(String))` returns a Stream(String).
  *
  * A Stream(String) object is a struct contains the following functions:
  *   - empty(String)
@@ -36,7 +36,7 @@ typedef struct {
 } Tokens(String);
 
 /** S : A stream */
-declare_Stream(String);
+trait_Stream(String);
 
 // -------------------------------------------------------------
 C_API_END

@@ -18,8 +18,8 @@ FOREACH(typedef_Maybe, TYPESET(ALL));
 
 // Maybe(T) is an instance of type-class Eq
 #include "eq.h"
-FOREACH(declare_Eq, APPLY(Maybe, TYPESET(ALL)));
+FOREACH(trait_Eq, APPLY(Maybe, TYPESET(ALL)));
 
 // Maybe(T) is an instance of type-class Ord
 #include "ord.h"
-FOREACH(declare_Ord, APPLY(Maybe, TYPESET(ALL)));
+FOREACH(trait_Ord, APPLY(Maybe, TYPESET(ALL)));

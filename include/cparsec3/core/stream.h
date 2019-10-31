@@ -7,7 +7,7 @@
 #define Token(S) TYPE_NAME(Token, S)
 #define Tokens(S) TYPE_NAME(Tokens, S)
 
-#define declare_Stream(S)                                                \
+#define trait_Stream(S)                                                  \
   C_API_BEGIN                                                            \
   typedef_Tuple(Token(S), S);                                            \
   typedef_Tuple(Tokens(S), S);                                           \
@@ -18,7 +18,7 @@
     Maybe(Tuple(Token(S), S)) (*take1)(S s);                             \
     Maybe(Tuple(Tokens(S), S)) (*takeN)(int n, S s);                     \
   } Stream(S);                                                           \
-  Stream(S) CPARSEC_MODULE(Stream(S))(void);                             \
+  Stream(S) Trait(Stream(S));                                            \
   /* ---- */                                                             \
   typedef_PosState(S);                                                   \
   typedef_ParseState(S);                                                 \

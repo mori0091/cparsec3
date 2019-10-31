@@ -7,7 +7,7 @@
 #define TestSuite Stream(S)
 #include "testit.h"
 
-#define stream cparsec_module(Stream(S))
+#define stream trait(Stream(S))
 #define Toks Maybe(Tuple(Tokens(S), S))
 
 static inline bool toks_eq(Toks a, Toks b) {

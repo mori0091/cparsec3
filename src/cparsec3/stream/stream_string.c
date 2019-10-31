@@ -68,6 +68,6 @@ static Maybe(Tuple(Tokens(String), String)) takeN(int n, String s) {
 /**
  * Returns a set of Stream API functions.
  */
-Stream(String) CPARSEC_MODULE(Stream(String))(void) {
+Stream(String) Trait(Stream(String)) {
   return (Stream(String)){.empty = empty, .take1 = take1, .takeN = takeN};
 }
