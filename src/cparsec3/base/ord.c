@@ -9,9 +9,9 @@
 #define GE(T) FUNC_NAME(ge, T)
 #define MIN(T) FUNC_NAME(min, T)
 #define MAX(T) FUNC_NAME(max, T)
-#define EQ(T) cparsec_module(Eq(T)).eq
+#define EQ(T) trait(Eq(T)).eq
 
-#define define_Ord(T)                                                    \
+#define impl_Ord(T)                                                      \
   static bool LT(T)(T a, T b) {                                          \
     return a < b;                                                        \
   }                                                                      \
@@ -33,7 +33,7 @@
   static T MAX(T)(T a, T b) {                                            \
     return LE(T)(b, a) ? a : b;                                          \
   }                                                                      \
-  Ord(T) CPARSEC_MODULE(Ord(T))(void) {                                  \
+  Ord(T) Trait(Ord(T)) {                                                 \
     return (Ord(T)){.cmp = CMP(T),                                       \
                     .lt = LT(T),                                         \
                     .le = LE(T),                                         \
@@ -46,7 +46,7 @@
 
 #define DISMISS_None JUST(1)
 #define DISMISS_String JUST(1)
-FOREACH(define_Ord, FILTER_OUT_DISMISSED(TYPESET(ALL)));
+FOREACH(impl_Ord, FILTER_OUT_DISMISSED(TYPESET(ALL)));
 #undef DISMISS_None
 #undef DISMISS_String
 
@@ -83,7 +83,7 @@ static None MAX(None)(None a, None b) {
   UNUSED(b);
   return a;
 }
-Ord(None) CPARSEC_MODULE(Ord(None))(void) {
+Ord(None) Trait(Ord(None)) {
   return (Ord(None)){.cmp = CMP(None),
                      .lt = LT(None),
                      .le = LE(None),
@@ -115,7 +115,7 @@ static String MIN(String)(String a, String b) {
 static String MAX(String)(String a, String b) {
   return LE(String)(b, a) ? a : b;
 }
-Ord(String) CPARSEC_MODULE(Ord(String))(void) {
+Ord(String) Trait(Ord(String)) {
   return (Ord(String)){.cmp = CMP(String),
                        .lt = LT(String),
                        .le = LE(String),

@@ -5,21 +5,21 @@
 #define EQ(T) FUNC_NAME(eq, T)
 #define NEQ(T) FUNC_NAME(neq, T)
 
-#define define_Eq(T)                                                     \
+#define impl_Eq(T)                                                       \
   static bool EQ(T)(T a, T b) {                                          \
     return a == b;                                                       \
   }                                                                      \
   static bool NEQ(T)(T a, T b) {                                         \
     return a != b;                                                       \
   }                                                                      \
-  Eq(T) CPARSEC_MODULE(Eq(T))(void) {                                    \
+  Eq(T) Trait(Eq(T)) {                                                   \
     return (Eq(T)){.eq = EQ(T), .neq = NEQ(T)};                          \
   }                                                                      \
   END_OF_STATEMENTS
 
 #define DISMISS_None JUST(1)
 #define DISMISS_String JUST(1)
-FOREACH(define_Eq, FILTER_OUT_DISMISSED(TYPESET(ALL)));
+FOREACH(impl_Eq, FILTER_OUT_DISMISSED(TYPESET(ALL)));
 #undef DISMISS_None
 #undef DISMISS_String
 
@@ -33,7 +33,7 @@ static bool NEQ(None)(None a, None b) {
   UNUSED(b);
   return false;
 }
-Eq(None) CPARSEC_MODULE(Eq(None))(void) {
+Eq(None) Trait(Eq(None)) {
   return (Eq(None)){.eq = EQ(None), .neq = NEQ(None)};
 }
 
@@ -43,6 +43,6 @@ static bool EQ(String)(String a, String b) {
 static bool NEQ(String)(String a, String b) {
   return !!strcmp(a, b);
 }
-Eq(String) CPARSEC_MODULE(Eq(String))(void) {
+Eq(String) Trait(Eq(String)) {
   return (Eq(String)){.eq = EQ(String), .neq = NEQ(String)};
 }
