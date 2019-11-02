@@ -2,43 +2,31 @@
 #pragma once
 
 #include "../core/core.h"
+#include "combinator.h"
 
 #define Match(S, T) TYPE_NAME(Match, S, T)
 
-#define TOKEN(S, T) FUNC_NAME(token, S, T)
-#define TOKEN_FN(S, T) FUNC_NAME(token_fn, S, T)
-#define TOKEN_ARG(S, T) TYPE_NAME(token_arg, S, T)
 #define declare_token(S, T)                                              \
   /* typedef_Maybe(T); */                                                \
   typedef Maybe(T) (*Match(S, T))(Token(S));                             \
-  Parsec(S, T) TOKEN(S, T)(Match(S, T) match, Hints(S) expecting)
+  declare_parsec(S, T, token, Match(S, T), Hints(S))
 
 #define define_token(S, T)                                               \
-  typedef struct {                                                       \
-    Match(S, T) match;                                                   \
-    Hints(S) expecting;                                                  \
-  } TOKEN_ARG(S, T);                                                     \
-  static PSResult(S, T) TOKEN_FN(S, T)(void* arg, PState(S) state) {     \
-    TOKEN_ARG(S, T)* p = arg;                                            \
+  define_parsec(S, T, token, Match(S, T), Hints(S)) {                    \
+    Match(S, T) match = arg->_1;                                         \
+    Hints(S) expecting = arg->_2;                                        \
     Stream(S) stream = trait(Stream(S));                                 \
     Maybe(Tuple(Token(S), S)) r0 = stream.take1(state.input);            \
     if (r0.none) {                                                       \
-      return UNEXPECTED_EOM(S, T)(state, p->expecting);                  \
+      return UNEXPECTED_EOM(S, T)(state, expecting);                     \
     }                                                                    \
     state.input = r0.value.second;                                       \
     state.offset++;                                                      \
     Token(S) actual = r0.value.first;                                    \
-    Maybe(T) r = p->match(actual);                                       \
+    Maybe(T) r = match(actual);                                          \
     if (r.none) {                                                        \
-      return UNEXPECTED_TOKEN(S, T)(state, actual, p->expecting);        \
+      return UNEXPECTED_TOKEN(S, T)(state, actual, expecting);           \
     }                                                                    \
     return PARSE_OK(S, T)(state, r.value);                               \
-  }                                                                      \
-  /* token(match, expecting)*/                                           \
-  Parsec(S, T) TOKEN(S, T)(Match(S, T) match, Hints(S) expecting) {      \
-    TOKEN_ARG(S, T)* arg = malloc(sizeof(TOKEN_ARG(S, T)));              \
-    arg->match = match;                                                  \
-    arg->expecting = expecting;                                          \
-    return (Parsec(S, T)){.run = TOKEN_FN(S, T), .arg = arg};            \
   }                                                                      \
   END_OF_STATEMENTS
