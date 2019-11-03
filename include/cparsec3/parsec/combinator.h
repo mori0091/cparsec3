@@ -27,7 +27,7 @@
  *
  */
 #define declare_parsec(S, T, ...)                                        \
-  IF(IS_NIL(__VA_ARGS__, ))                                              \
+  IF(IS_NIL(__VA_ARGS__))                                                \
   (declare_parser, declare_combinator)(S, T, __VA_ARGS__)
 
 /**
@@ -50,9 +50,8 @@
  *
  */
 #define define_parsec(S, T, ...)                                         \
-  IF(IS_NIL(__VA_ARGS__, ))                                              \
+  IF(IS_NIL(__VA_ARGS__))                                                \
   (define_parser, define_combinator)(S, T, __VA_ARGS__)
-
 
 // -----------------------------------------------------------------------
 #define PARAMETERS(...)                                                  \
