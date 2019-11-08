@@ -193,8 +193,8 @@
 
 #define APPLY(f, ...) APPLY_EVAL(APPLY_I(f, __VA_ARGS__, ))
 #define APPLY_I(f, x, ...)                                               \
-  IF(IS_NIL(__VA_ARGS__))                                                \
-  (f(x), f(x) DEFER2(COMMA)() DEFER2(APPLY_INDIRECT)()(f, __VA_ARGS__))
+  f ENCLOSE(DISCLOSE(x)) IF(IS_NIL(__VA_ARGS__))(                        \
+      , DEFER2(COMMA)() DEFER2(APPLY_INDIRECT)()(f, __VA_ARGS__))
 #define APPLY_INDIRECT() APPLY_I
 #define APPLY_EVAL1(...) __VA_ARGS__
 #define APPLY_EVAL2(...) APPLY_EVAL1(APPLY_EVAL1(__VA_ARGS__))
@@ -208,13 +208,12 @@
 // APPLY(F, a, b, c)
 // -> F(a) , F(b) , F(c)
 // APPLY(F, (a,b), (c,d))
-// -> F((a,b)) , F((c,d))
+// -> F(a,b) , F(c,d)
 
 #define SEP_BY(sep, f, ...) SEP_BY_EVAL(SEP_BY_I(sep, f, __VA_ARGS__, ))
 #define SEP_BY_I(sep, f, x, ...)                                         \
-  IF(IS_NIL(__VA_ARGS__))                                                \
-  (f(x),                                                                 \
-   f(x) DEFER2(sep)() DEFER2(SEP_BY_INDIRECT)()(sep, f, __VA_ARGS__))
+  f ENCLOSE(DISCLOSE(x)) IF(IS_NIL(__VA_ARGS__))(                        \
+      , DEFER2(sep)() DEFER2(SEP_BY_INDIRECT)()(sep, f, __VA_ARGS__))
 #define SEP_BY_INDIRECT() SEP_BY_I
 #define SEP_BY_EVAL1(...) __VA_ARGS__
 #define SEP_BY_EVAL2(...) SEP_BY_EVAL1(SEP_BY_EVAL1(__VA_ARGS__))
@@ -228,12 +227,12 @@
 // SEP_BY(SEMICOLON, F, a, b, c)
 // -> F(a) ; F(b) ; F(c)
 // SEP_BY(SEMICOLON, F, (a,b), (c,d))
-// -> F((a,b)) ; F((c,d))
+// -> F(a,b) ; F(c,d)
 
 #define FOR_EACH(f, ...) FOR_EACH_EVAL(FOR_EACH_I(f, __VA_ARGS__, ))
 #define FOR_EACH_I(f, x, ...)                                            \
-  IF(IS_NIL(__VA_ARGS__))                                                \
-  (f(x), f(x) DEFER2(FOR_EACH_INDIRECT)()(f, __VA_ARGS__))
+  f ENCLOSE(DISCLOSE(x)) IF(IS_NIL(__VA_ARGS__))(                        \
+      , DEFER2(FOR_EACH_INDIRECT)()(f, __VA_ARGS__))
 #define FOR_EACH_INDIRECT() FOR_EACH_I
 #define FOR_EACH_EVAL1(...) __VA_ARGS__
 #define FOR_EACH_EVAL2(...) FOR_EACH_EVAL1(FOR_EACH_EVAL1(__VA_ARGS__))
@@ -247,18 +246,17 @@
 // FOR_EACH(F, a, b, c)
 // -> F(a) F(b) F(c)
 // FOR_EACH(F, (a,b), (c,d))
-// -> F((a,b)) F((c,d))
+// -> F(a,b) F(c,d)
 
 #define GENERIC(expr, f, g, ...)                                         \
   _Generic((expr), GENERIC_SELECTORS(f, g, __VA_ARGS__))
 #define GENERIC_SELECTORS(f, g, ...)                                     \
   GENERIC_SELECTORS_EVAL(GENERIC_SELECTORS_I(f, g, __VA_ARGS__, ))
 #define GENERIC_SELECTORS_I(f, g, x, ...)                                \
-  IF(IS_NIL(__VA_ARGS__))                                                \
-  (f(x)                                                                  \
-   : g(x), f(x)                                                          \
-   : g(x) DEFER2(COMMA)()                                                \
-       DEFER2(GENERIC_SELECTORS_INDIRECT)()(f, g, __VA_ARGS__))
+  f ENCLOSE(DISCLOSE(x))                                                 \
+      : g ENCLOSE(DISCLOSE(x)) IF(IS_NIL(__VA_ARGS__))(                  \
+            , DEFER2(COMMA)() DEFER2(GENERIC_SELECTORS_INDIRECT)()(      \
+                  f, g, __VA_ARGS__))
 #define GENERIC_SELECTORS_INDIRECT() GENERIC_SELECTORS_I
 #define GENERIC_SELECTORS_EVAL1(...) __VA_ARGS__
 #define GENERIC_SELECTORS_EVAL2(...)                                     \
