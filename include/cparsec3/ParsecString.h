@@ -14,3 +14,6 @@
 
 #define CPARSEC_STREAM_TYPE String
 #include "specialize/specialize.h"
+
+// -------------------------------------------------------------
+CPARSEC_DECLARE_ALL(String);
