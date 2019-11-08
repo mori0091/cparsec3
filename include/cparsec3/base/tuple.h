@@ -92,7 +92,6 @@
 /**
  * \brief tie((v1, v2, ...), t) - Maps tuple t to (v1, v2, ...)
  *
- * tie(x, t)       -> x = t
  * tie((x,y), t)   -> x = t.e1; y = t.e2
  * tie((x, ), t)   -> x = t.e1
  * tie(( ,y), t)   -> y = t.e2
@@ -132,5 +131,5 @@
        (_6, _6 = t.e6))
 // clang-format on
 #define tie0(...) FOREACH(tie0_id, SQUASH(APPLY(tie0_f, __VA_ARGS__)))
-#define tie0_f(x) IF(IS_NULL(FST x))(EAT, SND) x
+#define tie0_f(x, y) IF(IS_NULL(x))(, y)
 #define tie0_id(x) x

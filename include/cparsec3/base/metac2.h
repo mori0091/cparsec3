@@ -193,8 +193,8 @@
 
 #define APPLY(f, ...) APPLY_EVAL(APPLY_I(f, __VA_ARGS__, ))
 #define APPLY_I(f, x, ...)                                               \
-  IF(IS_NIL(__VA_ARGS__))                                                \
-  (f(x), f(x) DEFER2(COMMA)() DEFER2(APPLY_INDIRECT)()(f, __VA_ARGS__))
+  f ENCLOSE(DISCLOSE(x)) IF(IS_NIL(__VA_ARGS__))(                        \
+      , DEFER2(COMMA)() DEFER2(APPLY_INDIRECT)()(f, __VA_ARGS__))
 #define APPLY_INDIRECT() APPLY_I
 #define APPLY_EVAL1(...) __VA_ARGS__
 #define APPLY_EVAL2(...) APPLY_EVAL1(APPLY_EVAL1(__VA_ARGS__))
@@ -208,13 +208,12 @@
 // APPLY(F, a, b, c)
 // -> F(a) , F(b) , F(c)
 // APPLY(F, (a,b), (c,d))
-// -> F((a,b)) , F((c,d))
+// -> F(a,b) , F(c,d)
 
 #define SEP_BY(sep, f, ...) SEP_BY_EVAL(SEP_BY_I(sep, f, __VA_ARGS__, ))
 #define SEP_BY_I(sep, f, x, ...)                                         \
-  IF(IS_NIL(__VA_ARGS__))                                                \
-  (f(x),                                                                 \
-   f(x) DEFER2(sep)() DEFER2(SEP_BY_INDIRECT)()(sep, f, __VA_ARGS__))
+  f ENCLOSE(DISCLOSE(x)) IF(IS_NIL(__VA_ARGS__))(                        \
+      , DEFER2(sep)() DEFER2(SEP_BY_INDIRECT)()(sep, f, __VA_ARGS__))
 #define SEP_BY_INDIRECT() SEP_BY_I
 #define SEP_BY_EVAL1(...) __VA_ARGS__
 #define SEP_BY_EVAL2(...) SEP_BY_EVAL1(SEP_BY_EVAL1(__VA_ARGS__))
@@ -228,12 +227,12 @@
 // SEP_BY(SEMICOLON, F, a, b, c)
 // -> F(a) ; F(b) ; F(c)
 // SEP_BY(SEMICOLON, F, (a,b), (c,d))
-// -> F((a,b)) ; F((c,d))
+// -> F(a,b) ; F(c,d)
 
 #define FOR_EACH(f, ...) FOR_EACH_EVAL(FOR_EACH_I(f, __VA_ARGS__, ))
 #define FOR_EACH_I(f, x, ...)                                            \
-  IF(IS_NIL(__VA_ARGS__))                                                \
-  (f(x), f(x) DEFER2(FOR_EACH_INDIRECT)()(f, __VA_ARGS__))
+  f ENCLOSE(DISCLOSE(x)) IF(IS_NIL(__VA_ARGS__))(                        \
+      , DEFER2(FOR_EACH_INDIRECT)()(f, __VA_ARGS__))
 #define FOR_EACH_INDIRECT() FOR_EACH_I
 #define FOR_EACH_EVAL1(...) __VA_ARGS__
 #define FOR_EACH_EVAL2(...) FOR_EACH_EVAL1(FOR_EACH_EVAL1(__VA_ARGS__))
@@ -247,18 +246,40 @@
 // FOR_EACH(F, a, b, c)
 // -> F(a) F(b) F(c)
 // FOR_EACH(F, (a,b), (c,d))
-// -> F((a,b)) F((c,d))
+// -> F(a,b) F(c,d)
+
+#define BIND(a, ...) BIND_SEP_BY(COMMA, , a, __VA_ARGS__)
+#define BIND_FOR(f, a, ...) BIND_SEP_BY(SEMICOLON, f, a, __VA_ARGS__)
+#define BIND_APPLY(f, a, ...) BIND_SEP_BY(COMMA, f, a, __VA_ARGS__)
+#define BIND_SEP_BY(sep, f, a, ...)                                      \
+  BIND_EVAL(BIND1(sep, f, a, __VA_ARGS__, ))
+#define BIND_INDIRECT() BIND1
+#define BIND1(sep, f, a, x, ...)                                         \
+  f(DISCLOSE(a), x) IF(IS_NIL(__VA_ARGS__))(                             \
+      , DEFER2(sep)() DEFER2(BIND_INDIRECT)()(sep, f, a, __VA_ARGS__))
+#define BIND_EVAL1(...) __VA_ARGS__
+#define BIND_EVAL2(...) BIND_EVAL1(BIND_EVAL1(__VA_ARGS__))
+#define BIND_EVAL3(...) BIND_EVAL2(BIND_EVAL2(__VA_ARGS__))
+#define BIND_EVAL4(...) BIND_EVAL3(BIND_EVAL3(__VA_ARGS__))
+#define BIND_EVAL5(...) BIND_EVAL4(BIND_EVAL4(__VA_ARGS__))
+#define BIND_EVAL6(...) BIND_EVAL5(BIND_EVAL5(__VA_ARGS__))
+#define BIND_EVAL7(...) BIND_EVAL6(BIND_EVAL6(__VA_ARGS__))
+#define BIND_EVAL8(...) BIND_EVAL7(BIND_EVAL7(__VA_ARGS__))
+#define BIND_EVAL(...) BIND_EVAL8(__VA_ARGS__)
+// BIND(a, b, c, d)
+// -> (a, b), (a, c), (a, d)
+// BIND((a,b), c, d)
+// -> (a,b,c), (a,b,d)
 
 #define GENERIC(expr, f, g, ...)                                         \
   _Generic((expr), GENERIC_SELECTORS(f, g, __VA_ARGS__))
 #define GENERIC_SELECTORS(f, g, ...)                                     \
   GENERIC_SELECTORS_EVAL(GENERIC_SELECTORS_I(f, g, __VA_ARGS__, ))
 #define GENERIC_SELECTORS_I(f, g, x, ...)                                \
-  IF(IS_NIL(__VA_ARGS__))                                                \
-  (f(x)                                                                  \
-   : g(x), f(x)                                                          \
-   : g(x) DEFER2(COMMA)()                                                \
-       DEFER2(GENERIC_SELECTORS_INDIRECT)()(f, g, __VA_ARGS__))
+  f ENCLOSE(DISCLOSE(x))                                                 \
+      : g ENCLOSE(DISCLOSE(x)) IF(IS_NIL(__VA_ARGS__))(                  \
+            , DEFER2(COMMA)() DEFER2(GENERIC_SELECTORS_INDIRECT)()(      \
+                  f, g, __VA_ARGS__))
 #define GENERIC_SELECTORS_INDIRECT() GENERIC_SELECTORS_I
 #define GENERIC_SELECTORS_EVAL1(...) __VA_ARGS__
 #define GENERIC_SELECTORS_EVAL2(...)                                     \
