@@ -2,4 +2,4 @@
 
 #include <cparsec3/ParsecString.h>
 
-CPARSEC_DEFINE_ALL();
+CPARSEC_DEFINE_ALL(String);
