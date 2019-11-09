@@ -16,9 +16,10 @@
 #define trait_Data(T)                                                    \
   C_API_BEGIN                                                            \
   /* ---- */                                                             \
+  trait_Mem(T);                                                         \
   trait_Array(T);                                                        \
   trait_List(T);                                                         \
-  trait_Mem(T);                                                          \
+  /* ---- */                                                             \
   typedef struct {                                                       \
     MemT(T) Mem;                                                         \
     ArrayT(T) Array;                                                     \

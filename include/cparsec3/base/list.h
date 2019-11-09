@@ -23,6 +23,7 @@
 // -----------------------------------------------------------------------
 #define trait_List(T)                                                    \
   C_API_BEGIN                                                            \
+  typedef_List(T);                                                       \
   typedef struct {                                                       \
     List(T) (*cons)(T x, List(T) xs);                                    \
     void (*free)(List(T) xs);                                            \

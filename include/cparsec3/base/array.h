@@ -18,6 +18,7 @@
 // -----------------------------------------------------------------------
 #define trait_Array(T)                                                   \
   C_API_BEGIN                                                            \
+  typedef_Array(T);                                                      \
   typedef struct {                                                       \
     Array(T) (*create)(size_t n);                                        \
     void (*free)(Array(T) a);                                            \
