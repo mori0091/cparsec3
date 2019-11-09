@@ -24,8 +24,12 @@
 #define trait_List(T)                                                    \
   C_API_BEGIN                                                            \
   typedef struct {                                                       \
-    List(T) (*cons)(T, List(T));                                         \
-    void (*free)(List(T));                                               \
+    List(T) (*cons)(T x, List(T) xs);                                    \
+    void (*free)(List(T) xs);                                            \
+    List(T) (*drop)(size_t n, List(T) xs);                               \
+    T (*head)(List(T) xs);                                               \
+    List(T) (*tail)(List(T) xs);                                         \
+    bool (*null)(List(T) xs);                                            \
   } ListT(T);                                                            \
   ListT(T) Trait(List(T));                                               \
   C_API_END                                                              \
@@ -48,9 +52,34 @@
       trait(Mem(stList(T))).free(ys);                                    \
     }                                                                    \
   }                                                                      \
+  static List(T) FUNC_NAME(drop, List(T))(size_T n, List(T) xs) {        \
+    while (xs && n) {                                                    \
+      List(T) ys = xs;                                                   \
+      xs = xs->tail;                                                     \
+      *ys = (stList(T)){0};                                              \
+      trait(Mem(stList(T))).free(ys);                                    \
+      n--;                                                               \
+    }                                                                    \
+    return xs;                                                           \
+  }                                                                      \
+  static T FUNC_NAME(head, List(T))(List(T) xs) {                        \
+    return xs->head;                                                     \
+  }                                                                      \
+  static List(T) FUNC_NAME(tail, List(T))(List(T) xs) {                  \
+    return xs->tail;                                                     \
+  }                                                                      \
+  static bool FUNC_NAME(null, List(T))(List(T) xs) {                     \
+    return !xs;                                                          \
+  }                                                                      \
   ListT(T) Trait(List(T)) {                                              \
-    return (ListT(T)){.cons = FUNC_NAME(cons, List(T)),                  \
-                      .free = FUNC_NAME(free, List(T))};                 \
+    return (ListT(T)){                                                   \
+        .cons = FUNC_NAME(cons, List(T)),                                \
+        .free = FUNC_NAME(free, List(T)),                                \
+        .drop = FUNC_NAME(drop, List(T)),                                \
+        .head = FUNC_NAME(head, List(T)),                                \
+        .tail = FUNC_NAME(tail, List(T)),                                \
+        .null = FUNC_NAME(null, List(T)),                                \
+    };                                                                   \
   }                                                                      \
   C_API_END                                                              \
   END_OF_STATEMENTS
