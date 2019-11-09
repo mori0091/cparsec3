@@ -17,7 +17,7 @@ static T suc(T x) {
 }
 
 static void* T_GENERATOR(size_t i) {
-  static struct data ret = { {0}, {0}, {0}, suc };
+  static struct data ret = {{0}, {0}, {0}, suc};
   if (i < 1) {
     return &ret;
   }
