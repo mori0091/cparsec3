@@ -241,7 +241,7 @@ static struct {
   bool list;
   bool verbose;
   bool should_fail;
-  enum {DEFAULT, YES, NO} color;
+  enum { DEFAULT, YES, NO } color;
 } options = {0};
 
 typedef struct TestListSt* TestList;
@@ -322,8 +322,10 @@ static bool is_ANSI_escape_available(void) {
 
 static void print(const char* esc, const char* fmt, ...) {
   bool use_color = is_ANSI_escape_available();
-  if (options.color == YES) use_color = true;
-  if (options.color == NO) use_color = false;
+  if (options.color == YES)
+    use_color = true;
+  if (options.color == NO)
+    use_color = false;
   va_list ap;
   va_start(ap, fmt);
   if (!use_color) {

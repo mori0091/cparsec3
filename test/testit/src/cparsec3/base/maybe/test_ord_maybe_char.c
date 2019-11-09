@@ -11,10 +11,14 @@ struct data {
   T c;
 };
 
-#define a {.value = 'a'}
-#define b {.value = 'b'}
-#define c {.value = 'c'}
-#define x {.none = true}
+#define a                                                                \
+  { .value = 'a' }
+#define b                                                                \
+  { .value = 'b' }
+#define c                                                                \
+  { .value = 'c' }
+#define x                                                                \
+  { .none = true }
 static void* T_GENERATOR(size_t i) {
   static struct data ret[] = {
       // clang-format off

@@ -16,9 +16,13 @@ C_API_END
 #ifdef __cplusplus
 
 template <typename T>
-inline auto isNONE(T) { return false; }
+inline auto isNONE(T) {
+  return false;
+}
 template <>
-inline auto isNONE(None) { return true; }
+inline auto isNONE(None) {
+  return true;
+}
 
 #else
 

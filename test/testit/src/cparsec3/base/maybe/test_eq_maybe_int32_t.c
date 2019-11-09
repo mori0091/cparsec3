@@ -19,10 +19,14 @@ static T suc(T x) {
   return x;
 }
 
-#define a {.value = INT32_MIN}
-#define b {.value = 0}
-#define c {.value = INT32_MAX}
-#define x {.none = true}
+#define a                                                                \
+  { .value = INT32_MIN }
+#define b                                                                \
+  { .value = 0 }
+#define c                                                                \
+  { .value = INT32_MAX }
+#define x                                                                \
+  { .none = true }
 static void* T_GENERATOR(size_t i) {
   static struct data ret[] = {
       // clang-format off
