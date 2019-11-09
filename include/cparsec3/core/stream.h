@@ -24,7 +24,7 @@
   typedef_ParseState(S);                                                 \
   typedef_ParseErrorBundle(S);                                           \
   /* ---- */                                                             \
-  trait_DataLList(ParseError(S));                                        \
-  trait_DataLList(Token(S));                                             \
+  trait_DataList(ParseError(S));                                         \
+  trait_DataList(Token(S));                                              \
   C_API_END                                                              \
   END_OF_STATEMENTS
