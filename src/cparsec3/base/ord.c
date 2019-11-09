@@ -55,72 +55,10 @@ static int CMP(None)(None a, None b) {
   UNUSED(b);
   return 0;
 }
-static bool LT(None)(None a, None b) {
-  UNUSED(a);
-  UNUSED(b);
-  return false;
-}
-static bool LE(None)(None a, None b) {
-  UNUSED(a);
-  UNUSED(b);
-  return true;
-}
-static bool GT(None)(None a, None b) {
-  UNUSED(a);
-  UNUSED(b);
-  return false;
-}
-static bool GE(None)(None a, None b) {
-  UNUSED(a);
-  UNUSED(b);
-  return true;
-}
-static None MIN(None)(None a, None b) {
-  UNUSED(b);
-  return a;
-}
-static None MAX(None)(None a, None b) {
-  UNUSED(b);
-  return a;
-}
-Ord(None) Trait(Ord(None)) {
-  return (Ord(None)){.cmp = CMP(None),
-                     .lt = LT(None),
-                     .le = LE(None),
-                     .gt = GT(None),
-                     .ge = GE(None),
-                     .min = MIN(None),
-                     .max = MAX(None)};
-}
+instance_Ord(None, CMP(None));
 
 static int CMP(String)(String a, String b) {
   int x = strcmp(a, b);
   return (x <= 0 ? (x == 0 ? 0 : -1) : 1);
 }
-static bool LT(String)(String a, String b) {
-  return CMP(String)(a, b) < 0;
-}
-static bool LE(String)(String a, String b) {
-  return CMP(String)(a, b) <= 0;
-}
-static bool GT(String)(String a, String b) {
-  return CMP(String)(a, b) > 0;
-}
-static bool GE(String)(String a, String b) {
-  return CMP(String)(a, b) >= 0;
-}
-static String MIN(String)(String a, String b) {
-  return LE(String)(a, b) ? a : b;
-}
-static String MAX(String)(String a, String b) {
-  return LE(String)(b, a) ? a : b;
-}
-Ord(String) Trait(Ord(String)) {
-  return (Ord(String)){.cmp = CMP(String),
-                       .lt = LT(String),
-                       .le = LE(String),
-                       .gt = GT(String),
-                       .ge = GE(String),
-                       .min = MIN(String),
-                       .max = MAX(String)};
-}
+instance_Ord(String, CMP(String));
