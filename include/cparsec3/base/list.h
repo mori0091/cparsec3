@@ -38,6 +38,8 @@
 // -----------------------------------------------------------------------
 #define impl_List(T)                                                     \
   C_API_BEGIN                                                            \
+  trait_Mem(stList(T));                                                  \
+  impl_Mem(stList(T));                                                   \
   static List(T) FUNC_NAME(cons, List(T))(T x, List(T) xs) {             \
     List(T) ys = trait(Mem(stList(T))).create(1);                        \
     ys->head = x;                                                        \
@@ -52,7 +54,7 @@
       trait(Mem(stList(T))).free(ys);                                    \
     }                                                                    \
   }                                                                      \
-  static List(T) FUNC_NAME(drop, List(T))(size_T n, List(T) xs) {        \
+  static List(T) FUNC_NAME(drop, List(T))(size_t n, List(T) xs) {        \
     while (xs && n) {                                                    \
       List(T) ys = xs;                                                   \
       xs = xs->tail;                                                     \
