@@ -33,7 +33,8 @@ enum eGuard { ANY, UNARY, BINARY };
     case BINARY:                                                         \
       return g.op2(g.lhs, x);                                            \
     }                                                                    \
-    assert(0);                                                           \
+    fprintf(stderr, "Malformed Guard(T) object");                        \
+    abort();                                                             \
   }                                                                      \
   END_OF_STATEMENTS
 
@@ -56,7 +57,6 @@ enum eGuard { ANY, UNARY, BINARY };
       return t.value;                                                    \
     }                                                                    \
     return t.transmute(x);                                               \
-    assert(0);                                                           \
   }                                                                      \
   END_OF_STATEMENTS
 
