@@ -6,51 +6,51 @@
 
 #include "mem.h"
 
-#define LList(T) TYPE_NAME(LList, T)
-#define stLList(T) TYPE_NAME(stLList, T)
+#define List(T) TYPE_NAME(List, T)
+#define stList(T) TYPE_NAME(stList, T)
 // -----------------------------------------------------------------------
-#define typedef_LList(T)                                                 \
+#define typedef_List(T)                                                  \
   C_API_BEGIN                                                            \
-  typedef struct LList(T) {                                              \
-    struct LList(T) * tail;                                              \
+  typedef struct List(T) {                                               \
+    struct List(T) * tail;                                               \
     T head;                                                              \
   }                                                                      \
-  stLList(T), *LList(T);                                                 \
+  stList(T), *List(T);                                                   \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-#define trait_DataLList(T)                                               \
+#define trait_DataList(T)                                                \
   C_API_BEGIN                                                            \
   typedef struct {                                                       \
-    LList(T) (*cons)(T, LList(T));                                       \
-    void (*drop)(LList(T));                                              \
-  } Data(LList(T));                                                      \
-  Data(LList(T)) Trait(Data(LList(T)));                                  \
+    List(T) (*cons)(T, List(T));                                         \
+    void (*drop)(List(T));                                               \
+  } Data(List(T));                                                       \
+  Data(List(T)) Trait(Data(List(T)));                                    \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-#define impl_DataLList(T)                                                \
+#define impl_DataList(T)                                                 \
   C_API_BEGIN                                                            \
-  static LList(T) FUNC_NAME(cons, LList(T))(T x, LList(T) xs) {          \
-    LList(T) ys = trait(Mem(stLList(T))).create(1);                      \
+  static List(T) FUNC_NAME(cons, List(T))(T x, List(T) xs) {             \
+    List(T) ys = trait(Mem(stList(T))).create(1);                        \
     ys->head = x;                                                        \
     ys->tail = xs;                                                       \
     return ys;                                                           \
   }                                                                      \
-  static void FUNC_NAME(drop, LList(T))(LList(T) xs) {                   \
+  static void FUNC_NAME(drop, List(T))(List(T) xs) {                     \
     while (xs) {                                                         \
-      LList(T) ys = xs;                                                  \
+      List(T) ys = xs;                                                   \
       xs = xs->tail;                                                     \
       /* trait(Mem(T)).free(ys->head); */                                \
-      *ys = (stLList(T)){0};                                             \
-      trait(Mem(stLList(T))).free(ys);                                   \
+      *ys = (stList(T)){0};                                              \
+      trait(Mem(stList(T))).free(ys);                                    \
     }                                                                    \
   }                                                                      \
-  Data(LList(T)) Trait(Data(LList(T))) {                                 \
-    return (Data(LList(T))){.cons = FUNC_NAME(cons, LList(T)),           \
-                            .drop = FUNC_NAME(drop, LList(T))};          \
+  Data(List(T)) Trait(Data(List(T))) {                                   \
+    return (Data(List(T))){.cons = FUNC_NAME(cons, List(T)),             \
+                           .drop = FUNC_NAME(drop, List(T))};            \
   }                                                                      \
   C_API_END                                                              \
   END_OF_STATEMENTS
