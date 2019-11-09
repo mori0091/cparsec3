@@ -25,7 +25,7 @@
   C_API_BEGIN                                                            \
   typedef struct {                                                       \
     List(T) (*cons)(T, List(T));                                         \
-    void (*drop)(List(T));                                               \
+    void (*free)(List(T));                                               \
   } ListT(T);                                                            \
   ListT(T) Trait(List(T));                                               \
   C_API_END                                                              \
@@ -40,18 +40,17 @@
     ys->tail = xs;                                                       \
     return ys;                                                           \
   }                                                                      \
-  static void FUNC_NAME(drop, List(T))(List(T) xs) {                     \
+  static void FUNC_NAME(free, List(T))(List(T) xs) {                     \
     while (xs) {                                                         \
       List(T) ys = xs;                                                   \
       xs = xs->tail;                                                     \
-      /* trait(Mem(T)).free(ys->head); */                                \
       *ys = (stList(T)){0};                                              \
       trait(Mem(stList(T))).free(ys);                                    \
     }                                                                    \
   }                                                                      \
-  Data(List(T)) Trait(Data(List(T))) {                                   \
-    return (Data(List(T))){.cons = FUNC_NAME(cons, List(T)),             \
-                           .drop = FUNC_NAME(drop, List(T))};            \
+  ListT(T) Trait(List(T)) {                                              \
+    return (ListT(T)){.cons = FUNC_NAME(cons, List(T)),                  \
+                      .free = FUNC_NAME(free, List(T))};                 \
   }                                                                      \
   C_API_END                                                              \
   END_OF_STATEMENTS
