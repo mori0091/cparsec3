@@ -11,6 +11,8 @@
 #include "list.h"
 #include "mem.h"
 
+#include "data.h"
+
 #include "eq.h"
 #include "ord.h"
 
