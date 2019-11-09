@@ -28,21 +28,9 @@ static bool EQ(None)(None a, None b) {
   UNUSED(b);
   return true;
 }
-static bool NEQ(None)(None a, None b) {
-  UNUSED(a);
-  UNUSED(b);
-  return false;
-}
-Eq(None) Trait(Eq(None)) {
-  return (Eq(None)){.eq = EQ(None), .neq = NEQ(None)};
-}
+instance_Eq(None, EQ(None));
 
 static bool EQ(String)(String a, String b) {
   return !strcmp(a, b);
 }
-static bool NEQ(String)(String a, String b) {
-  return !!strcmp(a, b);
-}
-Eq(String) Trait(Eq(String)) {
-  return (Eq(String)){.eq = EQ(String), .neq = NEQ(String)};
-}
+instance_Eq(String, EQ(String));
