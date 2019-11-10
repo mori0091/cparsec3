@@ -26,6 +26,7 @@
   typedef_List(T);                                                       \
   typedef struct {                                                       \
     List(T) (*cons)(T x, List(T) xs);                                    \
+    List(T) (*nil)(void);                                                \
     void (*free)(List(T) xs);                                            \
     List(T) (*drop)(size_t n, List(T) xs);                               \
     T (*head)(List(T) xs);                                               \
@@ -46,6 +47,9 @@
     ys->head = x;                                                        \
     ys->tail = xs;                                                       \
     return ys;                                                           \
+  }                                                                      \
+  static List(T) FUNC_NAME(nil, List(T))(void) {                         \
+    return NULL;                                                         \
   }                                                                      \
   static void FUNC_NAME(free, List(T))(List(T) xs) {                     \
     while (xs) {                                                         \
@@ -77,6 +81,7 @@
   ListT(T) Trait(List(T)) {                                              \
     return (ListT(T)){                                                   \
         .cons = FUNC_NAME(cons, List(T)),                                \
+        .nil = FUNC_NAME(nil, List(T)),                                  \
         .free = FUNC_NAME(free, List(T)),                                \
         .drop = FUNC_NAME(drop, List(T)),                                \
         .head = FUNC_NAME(head, List(T)),                                \
