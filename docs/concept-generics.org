@@ -1,0 +1,71 @@
+# -*- coding: utf-8-unix -*-
+#+STARTUP: showall indent
+
+* Generics
+
+- Generic Data Type ::
+     A parametric typed struct/union.
+- Trait             ::
+     A struct that provides a set of parametric typed functions/constants.
+
+** Generic Data Type
+
+*Generic Data Type* is a parametric typed struct/union.
+
+*Generic Data Type* is a similar concept as known as *parameterized type*,
+*polymorphic type*, *template class (C++)*, and so on.
+
+The below shows a example of Generic Data Types :
+
+- Array(T)       :: Array of objects of ~T~ type.
+
+- List(T)        :: Linked-list of objects of ~T~ type or ~NULL~.
+
+- Maybe(T)       :: Wraps an object of ~T~ type or nothing.
+
+- Result(T, E)   :: Wraps an ok value of ~T~ type or an error value of ~E~ type.
+
+- Tuple(T1, ...) :: A tuple of values of various types.
+  - Tuple(T1)
+  - Tuple(T1, T2)
+  - Tuple(T1, T2, T3)
+  - Tuple(T1, T2, T3, T4)
+  - Tuple(T1, T2, T3, T4, T5)
+  - Tuple(T1, T2, T3, T4, T5, T6)
+
+** Trait
+
+*Trait* provides a set of functions against a particular concrete type.
+
+*Trait* is a similar concept as known as *type class (Haskell)*, *trait (Rust)*,
+*interface (Java)*, and so on.
+
+For example, an ~Eq(T)~ trait provides the following two functions :
+- ~bool eq(T, T)~
+- ~bool neq(T, T)~
+
+To use *Trait*, calling to ~trait(M)~ creates a concrete trait object.
+
+The parameter ~M~ is the name of the resulting concrete trait type (e.g.
+~Eq(int)~), or a name of corresponding concrete type (e.g. ~Array(int)~).
+
+#+begin_src c
+  /* Eq(String) is a trait type to test equality of two String values */
+  Eq(String) E = trait(Eq(String));
+  if (E.eq("foo", "foo")) { printf("foo == foo\n"); }
+  if (E.neq("foo", "foo")) { printf("foo != foo\n");}
+  // -> foo == foo
+#+end_src
+
+#+begin_src c
+  /* ArrayT(int) is a trait type to construct, destruct, and manipulate Array(T) */
+  ArrayT(int) m = trait(Array(int));
+  Array(int) a = m.create(5);
+  size_t n = m.length(a); /* -> n = 5 */
+  for (int* it = m.begin(a); it != m.end(a); *it++ = n--)
+    ;
+  for (int* it = m.begin(a); it != m.end(a); it++) {
+    printf("%d ", *it); /* -> 5 4 3 2 1 */
+  }
+  m.free(a);
+#+end_src

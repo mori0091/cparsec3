@@ -6,3 +6,50 @@
 [[https://app.codacy.com/project/mori-d/cparsec3/dashboard][https://img.shields.io/codacy/grade/52aa85279ec5451b94fec5924651362f.svg?logo=codacy]]
 [[https://circleci.com/gh/mori0091/cparsec3][https://circleci.com/gh/mori0091/cparsec3.svg?style=shield]]
 [[https://codecov.io/gh/mori0091/cparsec3][https://codecov.io/gh/mori0091/cparsec3/branch/master/graph/badge.svg]]
+
+
+* Feature
+
+- *[[file:docs/concept-generics.org][Generics]]* - Generic programming for C11
+  - Generic Data Types
+  - Traits
+
+- *[[file:docs/concept-parsec.org][Parsec]]* - parsers and parser combinators
+  - Stream
+  - Parser
+  - Parser combinator
+  - Parser invocation (applying a parser to input stream)
+
+* How to build
+
+To build and test the CPARSEC3 library, do as follows :
+- *NOTE* Suppose that the leading '*$*' is a shell prompt.
+- *NOTE* Suppose that the '*#*' follows words are comment.
+
+#+begin_src shell
+# at the project top directory
+$ ./build.sh all test
+#+end_src
+
+Or do as follows at for each directory that the GNUmakefile exists:
+#+begin_src shell
+# at the project top directory
+$ make all
+# go to the sub directory that the GNUmakefile exists
+$ cd test/testit
+# at the sub directory
+$ make all test
+#+end_src
+
+* API references
+
+- [[file:docs/api-base.org][Base library]] :: Provides basic Generic Data Types and Traits.
+
+- [[file:docs/api-parsec.org][Parsec library]] :: Parser Combinator library for C11
+  - Stream
+  - Built-in parsers
+  - Built-in parser combinators
+  - Parser invocation APIs
+
+- [[file:docs/api-misc.org][Misc.]] :: Other miscellernious APIs
+

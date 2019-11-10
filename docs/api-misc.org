@@ -1,0 +1,40 @@
+# -*- coding: utf-8-unix -*-
+#+STARTUP: showall indent
+
+* Misc.
+
+** TYPESET macro
+
+*TYPESET* macro defines a list of types.
+
+These macros are used to declare/define various *Generic Data Types* and
+*Traits* in the library implementation.
+
+- TYPESET(ALL)       ::
+     ~TYPESET(PRIMITIVE)~
+- TYPESET(PRIMITIVE) ::
+     ~None~, ~char~, ~String~, ~TYPESET(STD_INT)~
+- TYPESET(STD_INT)   ::
+     ~int~,
+     ~int8_t~, ~int16_t~, ~int32_t~, ~int64_t~
+     ~uint8_t~, ~uint16_t~, ~uint32_t~, ~uint64_t~
+
+** Primitive Types
+
+- None :: a type that represents a value of nothing.
+  - NONE :: a value of type ~None~.
+  - isNONE(x) :: macro that returns ~true~ if ~x~ was a ~None~ value.
+
+- char :: a 8-bit character
+
+- String :: a string. - alias of ~const char*~ (i.e. *typedef*)
+
+- int  :: an integer
+- int8_t :: an 8-bit integer
+- int16_t :: a 16-bit integer
+- int32_t :: a 32-bit integer
+- int64_t :: a 64-bit integer
+- uint8_t :: an 8-bit unsigned integer
+- uint16_t :: a 16-bit unsigned integer
+- uint32_t :: a 32-bit unsigned integer
+- uint64_t :: a 64-bit unsigned integer
