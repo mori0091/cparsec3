@@ -1,0 +1,66 @@
+# -*- coding: utf-8-unix -*-
+#+STARTUP: showall indent
+
+* Parsec library
+
+** Generic Data Type
+
+- Parsec(S, T)     ::
+     A parser, which takes tokens from stream of type ~S~ and returns a value of
+     type ~T~ when it is applied successfully.
+
+- Token(S)         ::
+     A token, which was taken from a stream of type ~S~.
+
+- Tokens(S)        ::
+     A chunk of tokens, which was taken from a stream of type ~S~.
+
+** Trait
+
+*** Stream(S) - trait to take tokens from a stream
+
+#+begin_src c
+  #define EQ(T) trait(Eq(T)).eq
+  /* String is an instance of Stream */
+  Stream(String) s = trait(Stream(String));
+  Maybe(Tuple(Token(String), String)) r = s.take1("abc");
+  assert(!r.none);
+  assert(EQ(char)(r.value.e1, 'a'));
+  assert(EQ(String)(r.value.e2, "bc"));
+#+end_src
+
+- Stream(S)           ::
+     Type of a trait that provides a set of functions to take token of
+     ~Token(S)~ type and/or chunk of tokens of ~Tokens(S)~ type from a stream of
+     ~S~ type.
+
+- trait(Stream(S))    ::
+     Constructs a new trait of ~Stream(S)~ type.\\
+     For example, ~trait(Stream(String))~ creates an object of ~Stream(String)~
+     type.
+
+A ~Stream(S)~ trait provides the following member functions :
+- bool empty(S s) ::
+     Returns ~true~ if the stream ~s~ was empty, ~false~ otherwise.
+- Maybe(Tuple(Token(S), S)) take1(S s) ::
+     Try to take a token from the stream ~s~.
+  - If the stream ~s~ was empty, returns ~m~ that satisfies the following :
+    - ~m.none~ \equal ~true~.
+  - Otherwise returns ~m~ that satisfies the following :
+    - ~m.none~ \equal ~false~.
+    - ~m.value.e1~ is the 1st token of ~Token(S)~ type.
+    - ~m.value.e2~ is the *rest* of the stream ~s~.
+- Maybe(Tuple(Tokens(S), S)) takeN(int n, S s) ::
+     Try to take a chunk of tokens from the stream ~s~.
+  - If n \gt 0 and the stream ~s~ was empty, returns ~m~ that satisfies the
+    following :
+    - ~m.none~ \equal ~true~.
+  - If n \gt 0 and the stream ~s~ was NOT empty, returns ~m~ that satisfies the
+    following :
+    - ~m.none~ \equal ~false~.
+    - ~m.value.e1~ is a chunk of tokens of ~Tokens(S)~ type, of ~n~ length at most.
+    - ~m.value.e2~ is the *rest* of the stream ~s~.
+  - If n \le 0, returns ~m~ that satisfies the following :
+    - ~m.none~ \equal ~false~
+    - ~m.value.e1~ is a chunk of tokens of ~Tokens(S)~ type, of 0 length.
+    - ~m.value.e2~ is the stream ~s~.
