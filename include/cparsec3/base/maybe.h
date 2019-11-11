@@ -27,11 +27,10 @@
   trait_Eq(Maybe(T));                                                    \
   trait_Ord(Maybe(T));                                                   \
   typedef struct {                                                       \
+    Maybe(T) empty;                                                      \
+    bool (*null)(Maybe(T) m);                                            \
+    size_t (*length)(Maybe(T) m);                                        \
     Maybe(T) (*just)(T value);                                           \
-    union {                                                              \
-      Maybe(T) (*none)(void);                                            \
-      Maybe(T) (*nothing)(void);                                         \
-    };                                                                   \
   } MaybeT(T);                                                           \
   MaybeT(T) Trait(Maybe(T));                                             \
   C_API_END                                                              \
@@ -41,16 +40,21 @@
 #define impl_Maybe(T)                                                    \
   C_API_BEGIN                                                            \
   /* ---- trait Maybe(T) */                                              \
+  static bool FUNC_NAME(null, Maybe(T))(Maybe(T) m) {                    \
+    return m.none;                                                       \
+  }                                                                      \
+  static size_t FUNC_NAME(length, Maybe(T))(Maybe(T) m) {                \
+    return m.none ? 0 : 1;                                               \
+  }                                                                      \
   static Maybe(T) FUNC_NAME(just, Maybe(T))(T value) {                   \
     return (Maybe(T)){.value = value};                                   \
   }                                                                      \
-  static Maybe(T) FUNC_NAME(none, Maybe(T))(void) {                      \
-    return (Maybe(T)){.none = true};                                     \
-  }                                                                      \
   MaybeT(T) Trait(Maybe(T)) {                                            \
     return (MaybeT(T)){                                                  \
+        .empty = {0},                                                    \
+        .null = FUNC_NAME(null, Maybe(T)),                               \
+        .length = FUNC_NAME(length, Maybe(T)),                           \
         .just = FUNC_NAME(just, Maybe(T)),                               \
-        .none = FUNC_NAME(none, Maybe(T)),                               \
     };                                                                   \
   }                                                                      \
   /* ---- instance Eq(Maybe(T)) */                                       \

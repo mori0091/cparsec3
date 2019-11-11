@@ -25,13 +25,14 @@
   C_API_BEGIN                                                            \
   typedef_List(T);                                                       \
   typedef struct {                                                       \
+    List(T) empty;                                                       \
+    bool (*null)(List(T) xs);                                            \
+    size_t (*length)(List(T) xs);                                        \
     List(T) (*cons)(T x, List(T) xs);                                    \
-    List(T) (*nil)(void);                                                \
     void (*free)(List(T) xs);                                            \
     List(T) (*drop)(size_t n, List(T) xs);                               \
     T (*head)(List(T) xs);                                               \
     List(T) (*tail)(List(T) xs);                                         \
-    bool (*null)(List(T) xs);                                            \
   } ListT(T);                                                            \
   ListT(T) Trait(List(T));                                               \
   C_API_END                                                              \
@@ -42,14 +43,21 @@
   C_API_BEGIN                                                            \
   trait_Mem(stList(T));                                                  \
   impl_Mem(stList(T));                                                   \
+  static bool FUNC_NAME(null, List(T))(List(T) xs) {                     \
+    return !xs;                                                          \
+  }                                                                      \
+  static size_t FUNC_NAME(length, List(T))(List(T) xs) {                 \
+    size_t len = 0;                                                      \
+    for (; xs; xs = xs->tail) {                                          \
+      len++;                                                             \
+    }                                                                    \
+    return len;                                                          \
+  }                                                                      \
   static List(T) FUNC_NAME(cons, List(T))(T x, List(T) xs) {             \
     List(T) ys = trait(Mem(stList(T))).create(1);                        \
     ys->head = x;                                                        \
     ys->tail = xs;                                                       \
     return ys;                                                           \
-  }                                                                      \
-  static List(T) FUNC_NAME(nil, List(T))(void) {                         \
-    return NULL;                                                         \
   }                                                                      \
   static void FUNC_NAME(free, List(T))(List(T) xs) {                     \
     while (xs) {                                                         \
@@ -75,18 +83,16 @@
   static List(T) FUNC_NAME(tail, List(T))(List(T) xs) {                  \
     return xs->tail;                                                     \
   }                                                                      \
-  static bool FUNC_NAME(null, List(T))(List(T) xs) {                     \
-    return !xs;                                                          \
-  }                                                                      \
   ListT(T) Trait(List(T)) {                                              \
     return (ListT(T)){                                                   \
+        .empty = NULL,                                                   \
+        .null = FUNC_NAME(null, List(T)),                                \
+        .length = FUNC_NAME(length, List(T)),                            \
         .cons = FUNC_NAME(cons, List(T)),                                \
-        .nil = FUNC_NAME(nil, List(T)),                                  \
         .free = FUNC_NAME(free, List(T)),                                \
         .drop = FUNC_NAME(drop, List(T)),                                \
         .head = FUNC_NAME(head, List(T)),                                \
         .tail = FUNC_NAME(tail, List(T)),                                \
-        .null = FUNC_NAME(null, List(T)),                                \
     };                                                                   \
   }                                                                      \
   C_API_END                                                              \

@@ -138,7 +138,16 @@ An ~MemT(T)~ trait provides the following member functions :
      Constructs a new trait of ~ArrayT(T)~ type.\\
      For example, ~trait(Array(int))~ creates an object of ~ArrayT(int)~ type.
 
-An ~ArrayT(T)~ trait provides the following member functions :
+An ~ArrayT(T)~ trait provides the following member variables/functions :
+- Array(T) empty         ::
+     An empty array.\\
+     i.e. 0-length array.
+- bool null(Array(T) a) ::
+     Returns ~true~ if length of the array ~a~ was 0, ~false~ otherwise.\\
+     i.e. returns ~!a.length~
+- size_t length(Array(T) a) ::
+     Returns the length of the array ~a~.\\
+     i.e. returns ~a.length~.
 - Array(T) create(size_t n) ::
      Constructs an array of length ~n~.
 - void free(Array(T) a) ::
@@ -150,18 +159,12 @@ An ~ArrayT(T)~ trait provides the following member functions :
 - T* end(Array(T) a) ::
      Returns the out of bounds address over the last element of the array ~a~.\\
      i.e. returns ~a.data + a.length~.
-- size_t length(Array(T) a) ::
-     Returns the length of the array ~a~.\\
-     i.e. returns ~a.length~.
-- bool empty(Array(T) a) ::
-     Returns ~true~ if length of the array ~a~ was 0, ~false~ otherwise.\\
-     i.e. returns ~!a.length~
 
 *** ListT(T) - trait for List(T) container.
 
 #+begin_src c
   ListT(int) m = trait(List(int));
-  List(int) xs = m.cons(1, m.cons(2, m.cons(3, m.nil())));
+  List(int) xs = m.cons(1, m.cons(2, m.cons(3, m.empty)));
   for (List(int) ys = xs; !m.null(ys); ys = m.tail(ys)) {
     printf("%d ", m.head(ys));    /* -> 1 2 3 */
   }
@@ -176,11 +179,17 @@ An ~ArrayT(T)~ trait provides the following member functions :
      Constructs a new trait of ~ListT(T)~ type.\\
      For example, ~trait(List(int))~ creates an object of ~ListT(int)~ type.
 
-An ~ListT(T)~ trait provides the following member functions :
+An ~ListT(T)~ trait provides the following member variables/functions :
+- List(T) empty         ::
+     An empty list.\\
+     i.e. ~NULL~
+- bool null(List(T) xs) ::
+     Returns ~true~ if the list ~xs~ was ~NULL~, ~false~ otherwise.\\
+     i.e. returns ~!xs~.
+- size_t length(List(T) xs) ::
+     Returns length of the list ~xs~.
 - List(T) cons(T x, List(T) xs) ::
      Constructs a linked-list (cons-cell).
-- List(T) nil(void) ::
-     Constructs an empty list.
 - void free(List(T) xs) ::
      Destructs all cells of the list ~xs~.
 - List(T) drop(size_t n, List(T) xs) ::
@@ -192,9 +201,47 @@ An ~ListT(T)~ trait provides the following member functions :
 - List(T) tail(List(T) xs) ::
      Returns the tail list of the list ~xs~.\\
      i.e. returns ~xs->tail~.
-- bool null(List(T) xs) ::
-     Returns ~true~ if the list ~xs~ was ~NULL~, ~false~ otherwise.\\
-     i.e. returns ~!xs~.
+
+*** MaybeT(T) - trait for Maybe(T) container.
+
+#+begin_src c
+  /* MaybeT(int) is a trait type to construct and manipulate Maybe(T) */
+  MaybeT(int) M = trait(Maybe(int));
+
+  Maybe(int) m = M.just(5);
+  assert(M.length(m) == 1);
+  assert(!M.null(m));
+  assert(!m.none);
+  assert(m.value == 5);
+
+  Maybe(int) e = M.empty;
+  assert(M.length(e) == 0);
+  assert(M.null(e));
+  assert(e.none);
+  int x = e.value; // undefined behaviour
+#+end_src
+
+- MaybeT(T)       ::
+     Type of a trait that provides a set of functions to construct and
+     manipulate ~Maybe(T)~.
+
+- trait(Maybe(T))   :: 
+     Constructs a new trait of ~MaybeT(T)~ type.\\
+     For example, ~trait(Maybe(int))~ creates an object of ~MaybeT(int)~ type.
+
+A ~MaybeT(T)~ trait provides the following member variables/functions :
+- Maybe(T) empty         ::
+     An object that represents nothing.\\
+     i.e. ~empty.none~ \equal ~true~.
+- bool null(Maybe(T) m) ::
+     Returns ~true~ if the ~m~ was nothing, ~false~ otherwise.\\
+     i.e. returns ~m.none~
+- size_t length(Maybe(T) m) ::
+     Returns 0 if the ~m~ was nothing, 1 otherwise.\\
+     i.e. returns ~(m.none ? 0 : 1)~.
+- Maybe(T) just(T value) ::
+     Constructs a Maybe(T) object that represents the ~value~.\\
+     i.e. returns ~(Maybe(T)){.none = false, .value = value}~.
 
 *** Show(T) - trait to represent a value as a string
 
