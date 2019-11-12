@@ -22,22 +22,24 @@
 // -----------------------------------------------------------------------
 #define impl_Mem(T)                                                      \
   C_API_BEGIN                                                            \
-  static T* FUNC_NAME(create, T)(size_t n) {                             \
+  static T* FUNC_NAME(create, Mem(T))(size_t n) {                        \
     return (T*)malloc(n * sizeof(T));                                    \
   }                                                                      \
-  static T* FUNC_NAME(recreate, T)(T * ptr, size_t n) {                  \
+  static T* FUNC_NAME(recreate, Mem(T))(T * ptr, size_t n) {             \
     return (T*)realloc(ptr, n * sizeof(T));                              \
   }                                                                      \
-  static void FUNC_NAME(free, T)(T * p) {                                \
+  static void FUNC_NAME(free, Mem(T))(T * p) {                           \
     free((void*)p);                                                      \
   }                                                                      \
   MemT(T) Trait(Mem(T)) {                                                \
-    return (MemT(T)){.create = FUNC_NAME(create, T),                     \
-                     .recreate = FUNC_NAME(recreate, T),                 \
-                     .free = FUNC_NAME(free, T)};                        \
+    return (MemT(T)){                                                    \
+        .create = FUNC_NAME(create, Mem(T)),                             \
+        .recreate = FUNC_NAME(recreate, Mem(T)),                         \
+        .free = FUNC_NAME(free, Mem(T)),                                 \
+    };                                                                   \
   }                                                                      \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-FOREACH(trait_Mem, TYPESET(ALL));
+// FOREACH(trait_Mem, TYPESET(ALL));
