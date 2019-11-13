@@ -12,3 +12,5 @@
 #define TYPESET_PRIMITIVE char, int, String, TYPESET_STD_INT
 
 #define TYPESET_ALL None, TYPESET_PRIMITIVE
+
+#define TYPESET_ALL_BUT_INT None, char, String, TYPESET_STD_INT
