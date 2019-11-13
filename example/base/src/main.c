@@ -2,6 +2,20 @@
 // #include <cparsec3/base/base.h>
 #include <cparsec3/base/base_generics.h>
 
+void test0(void) {
+  assert(g_eq(1, 1));
+  assert(g_neq(0, 1));
+  assert(g_le(0, 1));
+  assert(g_lt(0, 1));
+  assert(g_ge(2, 1));
+  assert(g_gt(2, 1));
+  assert(g_min(2, 1) == 1);
+  assert(g_max(2, 1) == 2);
+  assert(g_cmp(0, 1) == -1);
+  assert(g_cmp(1, 1) == 0);
+  assert(g_cmp(1, 0) == 1);
+}
+
 void test1(void) {
   Array(int) a = g_array(int, 1, 2, 3, 4, 5);
   printf("length(a) = %zu\n", g_length(a));
@@ -43,6 +57,7 @@ void test4(void) {
 }
 
 int main(void) {
+  test0();
   test1();
   test2();
   test3();
