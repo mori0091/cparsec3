@@ -112,7 +112,7 @@
     };                                                                   \
   }                                                                      \
   /* ---- instance Eq(List(T)) */                                        \
-  static bool FUNC_NAME(eq, List(T))(List(T) a, List(T) b) {             \
+  static bool FUNC_NAME(eq, Eq(List(T)))(List(T) a, List(T) b) {         \
     for (;;) {                                                           \
       if (a == b) {                                                      \
         return true;                                                     \
@@ -127,9 +127,9 @@
       b = b->tail;                                                       \
     }                                                                    \
   }                                                                      \
-  instance_Eq(List(T), FUNC_NAME(eq, List(T)));                          \
+  instance_Eq(List(T), FUNC_NAME(eq, Eq(List(T))));                      \
   /* ---- instance Ord(List(T)) */                                       \
-  static int FUNC_NAME(cmp, List(T))(List(T) a, List(T) b) {             \
+  static int FUNC_NAME(cmp, Ord(List(T)))(List(T) a, List(T) b) {        \
     for (;;) {                                                           \
       if (a == b) {                                                      \
         return 0;                                                        \
@@ -148,10 +148,7 @@
       b = b->tail;                                                       \
     }                                                                    \
   }                                                                      \
-  instance_Ord(List(T), FUNC_NAME(cmp, List(T)));                        \
+  instance_Ord(List(T), FUNC_NAME(cmp, Ord(List(T))));                   \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-// FOREACH(trait_List, TYPESET(ALL));

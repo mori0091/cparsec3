@@ -40,6 +40,3 @@
   }                                                                      \
   C_API_END                                                              \
   END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-// FOREACH(trait_Mem, TYPESET(ALL));

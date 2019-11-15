@@ -82,7 +82,7 @@
     };                                                                   \
   }                                                                      \
   /* ---- instance Eq(Array(T)) */                                       \
-  static bool FUNC_NAME(eq, Array(T))(Array(T) a, Array(T) b) {          \
+  static bool FUNC_NAME(eq, Eq(Array(T)))(Array(T) a, Array(T) b) {      \
     if (a.length != b.length) {                                          \
       return false;                                                      \
     }                                                                    \
@@ -96,9 +96,9 @@
     }                                                                    \
     return true;                                                         \
   }                                                                      \
-  instance_Eq(Array(T), FUNC_NAME(eq, Array(T)));                        \
+  instance_Eq(Array(T), FUNC_NAME(eq, Eq(Array(T))));                    \
   /* ---- instance Ord(Array(T)) */                                      \
-  static int FUNC_NAME(cmp, Array(T))(Array(T) a, Array(T) b) {          \
+  static int FUNC_NAME(cmp, Ord(Array(T)))(Array(T) a, Array(T) b) {     \
     if (a.data == b.data) {                                              \
       return trait(Ord(uint64_t)).cmp(a.length, b.length);               \
     }                                                                    \
@@ -111,10 +111,7 @@
     }                                                                    \
     return (a.length < b.length ? -1 : 1);                               \
   }                                                                      \
-  instance_Ord(Array(T), FUNC_NAME(cmp, Array(T)));                      \
+  instance_Ord(Array(T), FUNC_NAME(cmp, Ord(Array(T))));                 \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-// FOREACH(trait_Array, TYPESET(ALL));

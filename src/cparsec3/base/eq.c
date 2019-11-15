@@ -2,8 +2,8 @@
 
 #include <cparsec3/base/base.h>
 
-#define EQ(T) FUNC_NAME(eq, T)
-#define NEQ(T) FUNC_NAME(neq, T)
+#define EQ(T) FUNC_NAME(eq, Eq(T))
+#define NEQ(T) FUNC_NAME(neq, Eq(T))
 
 #define impl_Eq(T)                                                       \
   static bool EQ(T)(T a, T b) {                                          \
