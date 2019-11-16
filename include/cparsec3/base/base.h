@@ -28,6 +28,9 @@ FOREACH(trait_Array, TYPESET(ALL));
 FOREACH(trait_List, TYPESET(ALL));
 FOREACH(trait_Maybe, TYPESET(ALL));
 
+#if !defined(CPARSEC_ENABLE_NESTED_CONTAINER)
+#define TYPESET_COMPONENT TYPESET(ALL)
+#else
 #define TYPESET_COMPONENT TYPESET(ALL), TYPESET_CONTAINER
 #define TYPESET_CONTAINER                                                \
   APPLY(Array, TYPESET(ALL)), APPLY(List, TYPESET(ALL)),                 \
@@ -37,3 +40,4 @@ FOREACH(trait_Mem, TYPESET_CONTAINER);
 FOREACH(trait_Array, TYPESET_CONTAINER);
 FOREACH(trait_List, TYPESET_CONTAINER);
 FOREACH(trait_Maybe, TYPESET_CONTAINER);
+#endif
