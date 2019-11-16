@@ -46,64 +46,64 @@
 
 // -----------------------------------------------------------------------
 #define instance_Ord_cmp(T, _cmp_)                                       \
-  static bool FUNC_NAME(lt, T)(T a, T b) {                               \
+  static bool FUNC_NAME(lt, Ord(T))(T a, T b) {                          \
     return _cmp_(a, b) < 0;                                              \
   }                                                                      \
-  static bool FUNC_NAME(le, T)(T a, T b) {                               \
+  static bool FUNC_NAME(le, Ord(T))(T a, T b) {                          \
     return _cmp_(a, b) <= 0;                                             \
   }                                                                      \
-  static bool FUNC_NAME(gt, T)(T a, T b) {                               \
+  static bool FUNC_NAME(gt, Ord(T))(T a, T b) {                          \
     return _cmp_(a, b) > 0;                                              \
   }                                                                      \
-  static bool FUNC_NAME(ge, T)(T a, T b) {                               \
+  static bool FUNC_NAME(ge, Ord(T))(T a, T b) {                          \
     return _cmp_(a, b) >= 0;                                             \
   }                                                                      \
-  static T FUNC_NAME(min, T)(T a, T b) {                                 \
+  static T FUNC_NAME(min, Ord(T))(T a, T b) {                            \
     return _cmp_(a, b) <= 0 ? a : b;                                     \
   }                                                                      \
-  static T FUNC_NAME(max, T)(T a, T b) {                                 \
+  static T FUNC_NAME(max, Ord(T))(T a, T b) {                            \
     return _cmp_(a, b) >= 0 ? a : b;                                     \
   }                                                                      \
   Ord(T) Trait(Ord(T)) {                                                 \
     return (Ord(T)){.cmp = _cmp_,                                        \
-                    .lt = FUNC_NAME(lt, T),                              \
-                    .le = FUNC_NAME(le, T),                              \
-                    .gt = FUNC_NAME(gt, T),                              \
-                    .ge = FUNC_NAME(ge, T),                              \
-                    .min = FUNC_NAME(min, T),                            \
-                    .max = FUNC_NAME(max, T)};                           \
+                    .lt = FUNC_NAME(lt, Ord(T)),                         \
+                    .le = FUNC_NAME(le, Ord(T)),                         \
+                    .gt = FUNC_NAME(gt, Ord(T)),                         \
+                    .ge = FUNC_NAME(ge, Ord(T)),                         \
+                    .min = FUNC_NAME(min, Ord(T)),                       \
+                    .max = FUNC_NAME(max, Ord(T))};                      \
   }                                                                      \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
 #define instance_Ord_le_eq(T, _le_, _eq_)                                \
-  static int FUNC_NAME(cmp, T)(T a, T b) {                               \
+  static int FUNC_NAME(cmp, Ord(T))(T a, T b) {                          \
     return (_le_(a, b) ? (_eq_(a, b) ? 0 : -1) : 1);                     \
   }                                                                      \
-  static bool FUNC_NAME(lt, T)(T a, T b) {                               \
+  static bool FUNC_NAME(lt, Ord(T))(T a, T b) {                          \
     return _le_(a, b) && !_eq_(a, b);                                    \
   }                                                                      \
-  static bool FUNC_NAME(ge, T)(T a, T b) {                               \
+  static bool FUNC_NAME(ge, Ord(T))(T a, T b) {                          \
     return _le_(b, a);                                                   \
   }                                                                      \
-  static bool FUNC_NAME(gt, T)(T a, T b) {                               \
-    return FUNC_NAME(lt, T)(b, a);                                       \
+  static bool FUNC_NAME(gt, Ord(T))(T a, T b) {                          \
+    return FUNC_NAME(lt, Ord(T))(b, a);                                  \
   }                                                                      \
-  static T FUNC_NAME(min, T)(T a, T b) {                                 \
+  static T FUNC_NAME(min, Ord(T))(T a, T b) {                            \
     return _le_(a, b) ? a : b;                                           \
   }                                                                      \
-  static T FUNC_NAME(max, T)(T a, T b) {                                 \
+  static T FUNC_NAME(max, Ord(T))(T a, T b) {                            \
     return _le_(b, a) ? a : b;                                           \
   }                                                                      \
   Ord(T) Trait(Ord(T)) {                                                 \
     return (Ord(T)){                                                     \
-        .cmp = FUNC_NAME(cmp, T),                                        \
-        .lt = FUNC_NAME(lt, T),                                          \
+        .cmp = FUNC_NAME(cmp, Ord(T)),                                   \
+        .lt = FUNC_NAME(lt, Ord(T)),                                     \
         .le = _le_,                                                      \
-        .gt = FUNC_NAME(gt, T),                                          \
-        .ge = FUNC_NAME(ge, T),                                          \
-        .min = FUNC_NAME(min, T),                                        \
-        .max = FUNC_NAME(max, T),                                        \
+        .gt = FUNC_NAME(gt, Ord(T)),                                     \
+        .ge = FUNC_NAME(ge, Ord(T)),                                     \
+        .min = FUNC_NAME(min, Ord(T)),                                   \
+        .max = FUNC_NAME(max, Ord(T)),                                   \
     };                                                                   \
   }                                                                      \
   END_OF_STATEMENTS

@@ -12,6 +12,8 @@
 
 #include "mem.h"
 
+#include "itr.h"
+
 #include "array.h"
 #include "list.h"
 #include "maybe.h"
@@ -21,16 +23,21 @@
 
 #include "data.h"
 
-#define TYPESET_0 TYPESET(ALL)
-#define TYPESET_1                                                        \
-  APPLY(Array, TYPESET_0), APPLY(List, TYPESET_0), APPLY(Maybe, TYPESET_0)
+FOREACH(trait_Mem, TYPESET(ALL));
+FOREACH(trait_Array, TYPESET(ALL));
+FOREACH(trait_List, TYPESET(ALL));
+FOREACH(trait_Maybe, TYPESET(ALL));
 
-FOREACH(trait_Mem, TYPESET_0);
-FOREACH(trait_Array, TYPESET_0);
-FOREACH(trait_List, TYPESET_0);
-FOREACH(trait_Maybe, TYPESET_0);
+#if !defined(CPARSEC_ENABLE_NESTED_CONTAINER)
+#define TYPESET_COMPONENT TYPESET(ALL)
+#else
+#define TYPESET_COMPONENT TYPESET(ALL), TYPESET_CONTAINER
+#define TYPESET_CONTAINER                                                \
+  APPLY(Array, TYPESET(ALL)), APPLY(List, TYPESET(ALL)),                 \
+      APPLY(Maybe, TYPESET(ALL))
 
-FOREACH(trait_Mem, TYPESET_1);
-FOREACH(trait_Array, TYPESET_1);
-FOREACH(trait_List, TYPESET_1);
-FOREACH(trait_Maybe, TYPESET_1);
+FOREACH(trait_Mem, TYPESET_CONTAINER);
+FOREACH(trait_Array, TYPESET_CONTAINER);
+FOREACH(trait_List, TYPESET_CONTAINER);
+FOREACH(trait_Maybe, TYPESET_CONTAINER);
+#endif

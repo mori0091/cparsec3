@@ -10,6 +10,8 @@
 
 #include "mem.h"
 
+#include "itr.h"
+
 #define List(T) TYPE_NAME(List, T)
 #define stList(T) TYPE_NAME(stList, T)
 #define ListT(T) TYPE_NAME(ListT, T)
@@ -27,9 +29,18 @@
 // -----------------------------------------------------------------------
 #define trait_List(T)                                                    \
   C_API_BEGIN                                                            \
+  /* ---- */                                                             \
   typedef_List(T);                                                       \
+  /* ---- */                                                             \
   trait_Eq(List(T));                                                     \
   trait_Ord(List(T));                                                    \
+  /* ---- */                                                             \
+  typedef T Item(List(T));                                               \
+  typedef struct {                                                       \
+    List(T) xs;                                                          \
+  } Itr(List(T));                                                        \
+  trait_Itr(List(T));                                                    \
+  /* ---- */                                                             \
   typedef struct {                                                       \
     List(T) empty;                                                       \
     bool (*null)(List(T) xs);                                            \
@@ -42,6 +53,7 @@
     List(T) (*tail)(List(T) xs);                                         \
   } ListT(T);                                                            \
   ListT(T) Trait(List(T));                                               \
+  /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
@@ -112,7 +124,7 @@
     };                                                                   \
   }                                                                      \
   /* ---- instance Eq(List(T)) */                                        \
-  static bool FUNC_NAME(eq, List(T))(List(T) a, List(T) b) {             \
+  static bool FUNC_NAME(eq, Eq(List(T)))(List(T) a, List(T) b) {         \
     for (;;) {                                                           \
       if (a == b) {                                                      \
         return true;                                                     \
@@ -127,9 +139,9 @@
       b = b->tail;                                                       \
     }                                                                    \
   }                                                                      \
-  instance_Eq(List(T), FUNC_NAME(eq, List(T)));                          \
+  instance_Eq(List(T), FUNC_NAME(eq, Eq(List(T))));                      \
   /* ---- instance Ord(List(T)) */                                       \
-  static int FUNC_NAME(cmp, List(T))(List(T) a, List(T) b) {             \
+  static int FUNC_NAME(cmp, Ord(List(T)))(List(T) a, List(T) b) {        \
     for (;;) {                                                           \
       if (a == b) {                                                      \
         return 0;                                                        \
@@ -148,10 +160,37 @@
       b = b->tail;                                                       \
     }                                                                    \
   }                                                                      \
-  instance_Ord(List(T), FUNC_NAME(cmp, List(T)));                        \
+  instance_Ord(List(T), FUNC_NAME(cmp, Ord(List(T))));                   \
+  /* ---- instance Itr(List(T))*/                                        \
+  static Itr(List(T)) FUNC_NAME(itr, Itr(List(T)))(List(T) xs) {         \
+    return (Itr(List(T))){.xs = xs};                                     \
+  }                                                                      \
+  static bool FUNC_NAME(null, Itr(List(T)))(Itr(List(T)) it) {           \
+    return !it.xs;                                                       \
+  }                                                                      \
+  static Itr(List(T)) FUNC_NAME(next, Itr(List(T)))(Itr(List(T)) it) {   \
+    if (it.xs) {                                                         \
+      it.xs = it.xs->tail;                                               \
+    }                                                                    \
+    return it;                                                           \
+  }                                                                      \
+  static T FUNC_NAME(get, Itr(List(T)))(Itr(List(T)) it) {               \
+    assert(it.xs);                                                       \
+    return it.xs->head;                                                  \
+  }                                                                      \
+  static void FUNC_NAME(set, Itr(List(T)))(T x, Itr(List(T)) it) {       \
+    assert(it.xs);                                                       \
+    it.xs->head = x;                                                     \
+  }                                                                      \
+  ItrT(List(T)) Trait(Itr(List(T))) {                                    \
+    return (ItrT(List(T))){                                              \
+        .itr = FUNC_NAME(itr, Itr(List(T))),                             \
+        .null = FUNC_NAME(null, Itr(List(T))),                           \
+        .next = FUNC_NAME(next, Itr(List(T))),                           \
+        .get = FUNC_NAME(get, Itr(List(T))),                             \
+        .set = FUNC_NAME(set, Itr(List(T))),                             \
+    };                                                                   \
+  }                                                                      \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-// FOREACH(trait_List, TYPESET(ALL));

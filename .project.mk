@@ -4,5 +4,7 @@ LIBTARGET = lib/libcparsec3.a
 
 CFLAGS   += -D_POSIX_C_SOURCE=200809L
 CFLAGS   += -std=c11 -I include
+CFLAGS   += -DCPARSEC_ENABLE_NESTED_CONTAINER
+CFLAGS   += -ftrack-macro-expansion=0
 LDFLAGS  +=
 LDLIBS   +=

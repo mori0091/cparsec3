@@ -58,7 +58,7 @@
     };                                                                   \
   }                                                                      \
   /* ---- instance Eq(Maybe(T)) */                                       \
-  static bool FUNC_NAME(eq, Maybe(T))(Maybe(T) a, Maybe(T) b) {          \
+  static bool FUNC_NAME(eq, Eq(Maybe(T)))(Maybe(T) a, Maybe(T) b) {      \
     if (a.none && b.none) {                                              \
       return true;                                                       \
     }                                                                    \
@@ -67,9 +67,9 @@
     }                                                                    \
     return trait(Eq(T)).eq(a.value, b.value);                            \
   }                                                                      \
-  instance_Eq(Maybe(T), FUNC_NAME(eq, Maybe(T)));                        \
+  instance_Eq(Maybe(T), FUNC_NAME(eq, Eq(Maybe(T))));                    \
   /* ---- instance Ord(Maybe(T)) */                                      \
-  static bool FUNC_NAME(le, Maybe(T))(Maybe(T) a, Maybe(T) b) {          \
+  static bool FUNC_NAME(le, Ord(Maybe(T)))(Maybe(T) a, Maybe(T) b) {     \
     if (a.none) {                                                        \
       return true;                                                       \
     }                                                                    \
@@ -78,11 +78,8 @@
     }                                                                    \
     return trait(Ord(T)).le(a.value, b.value);                           \
   }                                                                      \
-  instance_Ord(Maybe(T), FUNC_NAME(le, Maybe(T)),                        \
-               FUNC_NAME(eq, Maybe(T)));                                 \
+  instance_Ord(Maybe(T), FUNC_NAME(le, Ord(Maybe(T))),                   \
+               FUNC_NAME(eq, Eq(Maybe(T))));                             \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-// FOREACH(trait_Maybe, TYPESET(ALL));

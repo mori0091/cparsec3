@@ -2,13 +2,13 @@
 
 #include <cparsec3/base/base.h>
 
-#define CMP(T) FUNC_NAME(cmp, T)
-#define LT(T) FUNC_NAME(lt, T)
-#define LE(T) FUNC_NAME(le, T)
-#define GT(T) FUNC_NAME(gt, T)
-#define GE(T) FUNC_NAME(ge, T)
-#define MIN(T) FUNC_NAME(min, T)
-#define MAX(T) FUNC_NAME(max, T)
+#define CMP(T) FUNC_NAME(cmp, Ord(T))
+#define LT(T) FUNC_NAME(lt, Ord(T))
+#define LE(T) FUNC_NAME(le, Ord(T))
+#define GT(T) FUNC_NAME(gt, Ord(T))
+#define GE(T) FUNC_NAME(ge, Ord(T))
+#define MIN(T) FUNC_NAME(min, Ord(T))
+#define MAX(T) FUNC_NAME(max, Ord(T))
 #define EQ(T) trait(Eq(T)).eq
 
 #define impl_Ord(T)                                                      \
