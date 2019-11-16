@@ -12,6 +12,8 @@
 
 #include "mem.h"
 
+#include "itr.h"
+
 #include "array.h"
 #include "list.h"
 #include "maybe.h"
