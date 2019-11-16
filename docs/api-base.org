@@ -5,6 +5,11 @@
 
 ** Generic Data Type
 
+*Generic Data Type* is a parametric typed struct/union.
+
+*Generic Data Type* is a similar concept as known as *parameterized type*,
+*polymorphic type*, *template class (C++)*, and so on.
+
 *** Array(T) - an array of objects
 
 - Array(T)       :: Array of objects of ~T~ type.
@@ -26,6 +31,13 @@
 - Tuple(T1, ...) :: A tuple of values of various types.
 
 ** Trait
+
+*Trait* provides a set of functions against a particular concrete type.
+
+*Trait* is a similar concept as known as *type class (Haskell)*, *trait (Rust)*,
+*interface (Java)*, and so on.
+
+To use *Trait*, calling to ~trait(M)~ creates a concrete trait object.
 
 *** Eq(T) - trait to test equality of two values
 
@@ -82,6 +94,8 @@ An ~Ord(T)~ trait provides the following member functions :
 - bool lt(T a, T b) :: Returns ~true~ if a \lt b
 - bool ge(T a, T b) :: Returns ~true~ if a \ge b
 - bool gt(T a, T b) :: Returns ~true~ if a \gt b
+- T min(T a, T b)   :: Returns ~a~ if a \le b, ~b~ otherwise.
+- T max(T a, T b)   :: Returns ~a~ if a \ge b, ~b~ otherwise.
 - int compare(T a, T b) :: Returns
   - -1 if a \lt b,
   - 0 if a \equal b, or
@@ -257,3 +271,115 @@ A ~MaybeT(T)~ trait provides the following member variables/functions :
 
 An ~Show(T)~ trait provides the following member functions :
 - String show(T a) :: Returns a ~String~ representation of ~a~.
+
+
+** Generic Macros
+
+/CPARSEC3/ provides also *Generic Macros* for easy to use various *traits* and
+*containers*.
+
+- Pros of Generic Macros ::
+     Makes it easy to use various traits and containers.
+- Cons of Generic Macros ::
+     Needs much more compile time / memory.
+
+*** Tests Equality of two objects
+- g_eq(a, b)      ::
+     Returns ~true~ if ~a~ \equal ~b~, ~false~ otherwise.
+- g_neq(a, b)     :: 
+     Returns ~true~ if ~a~ \neq ~b~, ~false~ otherwise.
+
+*** Tests Ordering of two objects
+- g_le(a, b)      ::
+     Returns ~true~ if ~a~ \le ~b~, ~false~ otherwise.
+- g_lt(a, b)      ::
+     Returns ~true~ if ~a~ \lt ~b~, ~false~ otherwise.
+- g_ge(a, b)      ::
+     Returns ~true~ if ~a~ \ge ~b~, ~false~ otherwise.
+- g_gt(a, b)      ::
+     Returns ~true~ if ~a~ \gt ~b~, ~false~ otherwise.
+- g_min(a, b)     ::
+     Returns ~a~ if ~a~ \le ~b~, ~b~ otherwise.
+- g_max(a, b)     ::
+     Returns ~a~ if ~a~ \ge ~b~, ~b~ otherwise.
+- g_cmp(a, b)     ::
+  - Returns -1 if ~a~ \lt ~b~
+  - Returns 0 if ~a~ \equal ~b~
+  - Returns 1 if ~a~ \gt ~b~
+- g_compare(a, b) ::
+     Same as ~g_cmp(a, b)~.
+
+*** Array Constructors, Destructors, and Manipulators
+- g_array(T, ...) ::
+     Constructs a new ~Array(T)~ object.\\
+     For example, ~g_array(int, 1, 2, 3)~ creates a 3 length array.
+
+- g_begin(a)      ::
+     Returns the address of the 1st element of the array ~a~.
+
+- g_end(a)        :: 
+     Returns the out of bounds address over the last element of the array ~a~.
+
+- g_free(a)       ::
+     Destructs the array ~a~.
+
+*** List Constructors, Destructors, and Manipulators
+- g_list(T, ...)  ::
+     Constructs a new ~List(T)~ object.\\
+     For example, ~g_list(int, 1, 2, 3)~ creates a 3 length list.
+
+- g_cons(x, xs)   ::
+     Constructs a new ~List(T)~ object.\\
+     ~x~ shall be a ~T~ and ~xs~ shall be a ~List(T)~.
+
+- g_head(xs)      ::
+     Returns the head value of the list ~xs~.
+
+- g_tail(xs)      ::
+     Returns the tail list of the list ~xs~.
+
+- g_drop(n, xs)   ::
+     Destructs leading at most ~n~ cells of the list ~xs~, and returns remaining
+     list.
+
+- g_free(xs)      ::
+     Destructs all cells of the list ~xs~.
+
+*** Container Length
+- g_null(c)       ::
+     Returns ~true~ if ~c~ was empty, otherwise ~false~.\\
+     ~c~ shall be an ~Array(T)~, ~List(T)~, ~Maybe(T)~. (see also ~g_null(it)~)
+
+- g_length(c)     ::
+     Returns length of the container ~c~.\\
+     ~c~ shall be an ~Array(T)~, ~List(T)~, or ~Maybe(T)~.
+
+*** Iterator
+- g_itr(c)        ::
+     Constructs an iterator ~Itr(C)~ object.\\
+     ~c~ shall be an ~Array(T)~ or ~List(T)~.
+
+- g_null(it)      :: 
+     Returns ~true~ if ~it~ was empty, otherwise ~false~.\\
+     ~it~ shall be an ~Itr(Array(T))~ or ~Itr(List(T))~. (see also ~g_null(c)~)
+
+- g_next(it)      ::
+     Returns the next iterator of the ~it~.\\
+     ~it~ shall be an ~Itr(Array(T))~ or ~Itr(List(T))~.
+
+- g_get(it)       ::
+     Returns the value of container's element of that the iterator ~it~ points
+     to.\\
+     ~it~ shall be an ~Itr(Array(T))~ or ~Itr(List(T))~.
+
+- g_set(v, it)    ::
+     Assign the value ~v~ to the container's element of that the iterator ~it~
+     points to.\\
+     ~it~ shall be an ~Itr(Array(T))~ or ~Itr(List(T))~, thus ~v~ shall be a ~T~.
+
+*** For-Loop /(GCC only)/
+- g_for(it, c)    ::
+     Expanded to ~for (__auto_type it = g_itr(c); !g_null(it); it = g_next(it))~.\\
+     ~it~ is the name of variable to be used as an iterator, ~c~ shall be an
+     ~Array(T)~ or ~List(T)~.
+  - *NOTE* : Available if and only if ~__GNUC__~ was defined.

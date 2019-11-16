@@ -7,6 +7,9 @@
      A parametric typed struct/union.
 - Trait             ::
      A struct that provides a set of parametric typed functions/constants.
+- Generic Macros    ::
+     A type-safe macro that provides a functionallity for easy to use
+     traits/containers.
 
 ** Generic Data Type
 
@@ -58,7 +61,7 @@ The parameter ~M~ is the name of the resulting concrete trait type (e.g.
 #+end_src
 
 #+begin_src c
-  /* ArrayT(int) is a trait type to construct, destruct, and manipulate Array(T) */
+  /* ArrayT(int) is a trait type to construct, destruct, and manipulate Array(int) */
   ArrayT(int) m = trait(Array(int));
   Array(int) a = m.create(5);
   size_t n = m.length(a); /* -> n = 5 */
@@ -68,4 +71,53 @@ The parameter ~M~ is the name of the resulting concrete trait type (e.g.
     printf("%d ", *it); /* -> 5 4 3 2 1 */
   }
   m.free(a);
+#+end_src
+
+#+begin_src c
+  /* ItrT(C) is a trait type to iterate each items in container C */
+  ArrayT(int) m = trait(Array(int));
+  ItrT(Array(int)) I = trait(Itr(Array(int)));
+  Array(int) a = m.create(5);
+  size_t n = m.length(a); /* -> n = 5 */
+  for (Itr(Array(int)) it = I.itr(a); !I.null(it); it = I.next(it)) {
+    I.set(n--, it);
+  }
+  for (Itr(Array(int)) it = I.itr(a); !I.null(it); it = I.next(it)) {
+    printf("%d ", I.get(it)); /* -> 5 4 3 2 1 */
+  }
+  m.free(a);
+#+end_src
+
+
+** Generic Macros
+
+/CPARSEC3/ provides also *Generic Macros* for easy to use various *traits* and
+*containers*. The name of each Generic Macros starts with prefix ~g_~, such as
+for example ~g_array(T, ...)~, ~g_list(T, ...)~, ~g_eq(a, b)~, ~g_le(a, b)~, and
+so on.
+
+- Pros of Generic Macros ::
+     Makes it easy to use various traits and containers.
+- Cons of Generic Macros ::
+     Needs much more compile time / memory.
+
+#+begin_src c
+  Array(int) a = g_array(int, 5, 4, 3, 2, 1);
+  size_t n = m.length(a); /* -> n = 5 */
+  for (Itr(Array(int)) it = g_itr(a); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it)); /* -> 5 4 3 2 1 */
+  }
+  m.free(a);
+#+end_src
+
+#+begin_src c
+  // GCC only
+  #ifdef __GNUC__
+  __auto_type a = g_array(int, 5, 4, 3, 2, 1);
+  size_t n = m.length(a); /* -> n = 5 */
+  g_for(it, a) {
+    printf("%d ", g_get(it)); /* -> 5 4 3 2 1 */
+  }
+  m.free(a);
+  #endif
 #+end_src
