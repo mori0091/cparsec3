@@ -16,4 +16,4 @@
 #include "specialize/specialize.h"
 
 // -------------------------------------------------------------
-//CPARSEC_DECLARE_ALL(String);
+CPARSEC_DECLARE_ALL(String);

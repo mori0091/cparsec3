@@ -21,8 +21,6 @@
 #include "result.h"
 #include "tuple.h"
 
-#include "data.h"
-
 FOREACH(trait_Mem, TYPESET(ALL));
 FOREACH(trait_Array, TYPESET(ALL));
 FOREACH(trait_List, TYPESET(ALL));

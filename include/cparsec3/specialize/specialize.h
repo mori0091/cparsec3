@@ -15,22 +15,18 @@
 #define CPARSEC_DECLARE_ALL(S)                                           \
   C_API_BEGIN                                                            \
   /* ---- */                                                             \
-  trait_Data(Token(S));                                                  \
-  trait_Data(Tokens(S));                                                 \
+  FOREACH(trait_Eq, Token(S), Tokens(S));                                \
+  FOREACH(trait_Ord, Token(S), Tokens(S));                               \
+  FOREACH(trait_Mem, Token(S), Tokens(S));                               \
+  FOREACH(trait_Array, Token(S), Tokens(S));                             \
+  FOREACH(trait_List, Token(S), Tokens(S));                              \
+  FOREACH(trait_Maybe, Token(S), Tokens(S));                             \
   /* ---- */                                                             \
   typedef_PosState(S);                                                   \
   typedef_ParseState(S);                                                 \
-  typedef_ErrorItem(S);                                                  \
-  typedef_Maybe(ErrorItem(S));                                           \
-  trait_Data(ErrorItem(S));                                              \
-  typedef_ParseError(S);                                                 \
-  trait_Data(ParseError(S));                                             \
-  typedef_ParseErrorBundle(S);                                           \
+  trait_ParseErrorBundle(S);                                             \
   /* ---- */                                                             \
-  typedef_Maybe(Token(S));                                               \
-  typedef_Maybe(Tokens(S));                                              \
-  typedef_Guard(Token(S));                                               \
-  typedef_Guard(Tokens(S));                                              \
+  FOREACH(typedef_Guard, Token(S), Tokens(S));                           \
   FOREACH(typedef_Trans,                                                 \
           BIND(Token(S), CPARSEC_PARSER_RETURN_TYPES(S)));               \
   FOREACH(typedef_Match,                                                 \
@@ -46,14 +42,14 @@
 #define CPARSEC_DEFINE_ALL(S)                                            \
   C_API_BEGIN                                                            \
   /* ---- */                                                             \
-  impl_Data(Token(S));                                                   \
-  impl_Data(Tokens(S));                                                  \
+  FOREACH(impl_Mem, Token(S), Tokens(S));                                \
+  FOREACH(impl_Array, Token(S), Tokens(S));                              \
+  FOREACH(impl_List, Token(S), Tokens(S));                               \
+  FOREACH(impl_Maybe, Token(S), Tokens(S));                              \
   /* ---- */                                                             \
-  impl_Data(ErrorItem(S));                                               \
-  impl_Data(ParseError(S));                                              \
+  impl_ParseErrorBundle(S);                                              \
   /* ---- */                                                             \
-  define_Guard(Token(S));                                                \
-  define_Guard(Tokens(S));                                               \
+  FOREACH(define_Guard, Token(S), Tokens(S));                            \
   FOREACH(define_Trans, BIND(Token(S), CPARSEC_PARSER_RETURN_TYPES(S))); \
   FOREACH(define_Match, BIND(Token(S), CPARSEC_PARSER_RETURN_TYPES(S))); \
   /* ---- */                                                             \
