@@ -257,6 +257,53 @@ A ~MaybeT(T)~ trait provides the following member variables/functions :
      Constructs a Maybe(T) object that represents the ~value~.\\
      i.e. returns ~(Maybe(T)){.none = false, .value = value}~.
 
+*** ItrT(C) - trait to construct and manipulate an iterator
+
+#+begin_src c
+  ItrT(List(int)) I = trait(Itr(List(int)));
+  ListT(int) m = trait(List(int));
+  List(int) xs = m.cons(1, m.cons(2, m.cons(3, m.empty)));
+  for (Itr(List(int)) it = I.itr(xs); !I.null(it); it = I.next(it)) {
+    printf("%d ", I.get(it));    /* -> 1 2 3 */
+  }
+  m.free(xs);
+#+end_src
+
+- ItrT(C)         ::
+     Type of a trait that provides a set of functions to construct and
+     manipulate ~Itr(C)~.
+
+- Item(C)         ::
+     Type of an item of ~C~ type.
+  - *NOTE* : ~Item(C)~ type is a type alias of ~T~ when ~C~ was ~Array(T)~ or
+    ~List(T)~.
+
+- trait(Itr(C))   :: 
+     Constructs a new trait of ~ItrT(C)~ type.\\
+     For example, ~trait(Itr(List(int)))~ creates an object of ~ItrT(List(int))~
+     type.
+
+An ~ItrT(C)~ trait provides the following member variables/functions :
+- Itr(C) itr(C c) ::
+     Constructs an iterator that points to the 1st element (or nothing) of the
+     container ~c~. The type of ~c~ shall be a ~Array(T)~ or a ~List(T)~.
+
+- bool null(Itr(C) it)      :: 
+     Returns ~true~ if ~it~ was empty (i.e. ~it~ points to nothing), otherwise ~false~.
+
+- Itr(C) next(Itr(C) it) ::
+     Returns the iterator that points to the next element (or nothing) of the
+     iterator ~it~ points to.
+
+- Item(C) get(Itr(C) it) ::
+     Returns the value of container's element of that the iterator ~it~ points
+     to.
+
+- void set(Item(C) v, Itr(C) it) ::
+     Assign the value ~v~ to the container's element of that the iterator ~it~
+     points to.
+
+
 *** Show(T) - trait to represent a value as a string
 
 *NOTE* Not implemented yet.
