@@ -3,30 +3,67 @@
 
 * Parsec library
 
-** Generic Data Type
+/CPARSEC3/ *Parsec* library provides functionality of parser-combinators.
+
+-----
+- *NOTE* : *Parsec* library is *UNDER CONSTRUCTION*.
+-----
+
+* Generic Data Type
+
+*Generic Data Type* is a parametric typed struct/union.
+
+*Generic Data Type* is a similar concept as known as *parameterized type*,
+*polymorphic type*, *template class (C++)*, and so on.
+
+The below sections show *Generic Data Types* provided by /CPARSEC3/ *Parsec*
+library.
+
+** Parsec(S, T) - a parser object
 
 - Parsec(S, T)     ::
-     A parser, which takes tokens from stream of type ~S~ and returns a value of
-     type ~T~ when it is applied successfully.
+     A parser object that tries to take token(s) from a stream of type ~S~ and
+     returns a corresponding value of type ~T~ when it was applied to a stream
+     successfully.\\
+     See also ~ParsecT(S, T)~ trait.
+
+** Token(S) - a token object
 
 - Token(S)         ::
-     A token, which was taken from a stream of type ~S~.
+     A token, which was taken from a stream of type ~S~.\\
+     See also ~Stream(S)~ trait.
+
+
+** Tokens(S) - a chunk of tokens
 
 - Tokens(S)        ::
-     A chunk of tokens, which was taken from a stream of type ~S~.
+     A chunk of tokens, which was taken from a stream of type ~S~.\\
+     See also ~Stream(S)~ trait.
 
-** Trait
+* Trait
 
-*** Stream(S) - trait to take tokens from a stream
+*Trait* provides a set of functions against a particular concrete type.
+
+*Trait* is a similar concept as known as *type class (Haskell)*, *trait (Rust)*,
+*interface (Java)*, and so on.
+
+To use *Trait*, calling to ~trait(M)~ creates a concrete trait object.
+
+The below sections show *Traits* provided by /CPARSEC3/ *Parsec* library.
+
+** ParsecT(S, T) - trait to construct, combinate, or apply parser
+
+- *NOTE* : Not implemented yet.
+
+** Stream(S) - trait to take tokens from a stream
 
 #+begin_src c
-  #define EQ(T) trait(Eq(T)).eq
   /* String is an instance of Stream */
   Stream(String) s = trait(Stream(String));
   Maybe(Tuple(Token(String), String)) r = s.take1("abc");
   assert(!r.none);
-  assert(EQ(char)(r.value.e1, 'a'));
-  assert(EQ(String)(r.value.e2, "bc"));
+  assert(g_eq(r.value.e1, 'a'));  /* a token */
+  assert(g_eq(r.value.e2, "bc")); /* rest of the stream */
 #+end_src
 
 - Stream(S)           ::
@@ -40,8 +77,10 @@
      type.
 
 A ~Stream(S)~ trait provides the following member functions :
+
 - bool empty(S s) ::
      Returns ~true~ if the stream ~s~ was empty, ~false~ otherwise.
+
 - Maybe(Tuple(Token(S), S)) take1(S s) ::
      Try to take a token from the stream ~s~.
   - If the stream ~s~ was empty, returns ~m~ that satisfies the following :
@@ -50,6 +89,7 @@ A ~Stream(S)~ trait provides the following member functions :
     - ~m.none~ \equal ~false~.
     - ~m.value.e1~ is the 1st token of ~Token(S)~ type.
     - ~m.value.e2~ is the *rest* of the stream ~s~.
+
 - Maybe(Tuple(Tokens(S), S)) takeN(int n, S s) ::
      Try to take a chunk of tokens from the stream ~s~.
   - If n \gt 0 and the stream ~s~ was empty, returns ~m~ that satisfies the

@@ -7,34 +7,46 @@
 
 *TYPESET* macro defines a list of types.
 
-These macros are used to declare/define various *Generic Data Types* and
-*Traits* in the library implementation.
+These macros are used to declare/define various *Generic Data Types*, *Traits*,
+and *Generic Macros* in the library implementation.
 
 - TYPESET(ALL)       ::
-     ~TYPESET(PRIMITIVE)~
+     ~int~, ~TYPESET(PRIMITIVE)~
 - TYPESET(PRIMITIVE) ::
      ~None~, ~char~, ~String~, ~TYPESET(STD_INT)~
 - TYPESET(STD_INT)   ::
-     ~int~,
-     ~int8_t~, ~int16_t~, ~int32_t~, ~int64_t~
+     ~int8_t~, ~int16_t~, ~int32_t~, ~int64_t~, 
      ~uint8_t~, ~uint16_t~, ~uint32_t~, ~uint64_t~
 
 ** Primitive Types
 
-- None :: a type that represents a value of nothing.
-  - NONE :: a value of type ~None~.
-  - isNONE(x) :: macro that returns ~true~ if ~x~ was a ~None~ value.
+- None            ::
+     a type that represents a value of nothing.\\
+     ~None~ type is mainly used instead of ~void~ as return type of some parsers
+     that have no meaningful return value.
 
-- char :: a 8-bit character
+  - NONE            ::
+       a value of ~None~ type.
 
-- String :: a string. - alias of ~const char*~ (i.e. *typedef*)
+  - isNONE(x)       ::
+       macro that returns ~true~ if ~x~ was a ~None~ value.
 
-- int  :: an integer
-- int8_t :: an 8-bit integer
-- int16_t :: a 16-bit integer
-- int32_t :: a 32-bit integer
-- int64_t :: a 64-bit integer
-- uint8_t :: an 8-bit unsigned integer
+- char            ::
+     a 8-bit character
+
+- String          ::
+     a string. - type alias to ~const char*~ (i.e. *typedef*)
+
+- int             ::
+     an integer.
+  - *NOTE* : ~int~ is not a member of ~TYPESET(PRIMITIVE)~ nor ~TYPESET(STD_INT)~,
+     since it may be a type alias to other standard integer type.
+
+- int8_t   :: an 8-bit integer
+- int16_t  :: a 16-bit integer
+- int32_t  :: a 32-bit integer
+- int64_t  :: a 64-bit integer
+- uint8_t  :: an 8-bit unsigned integer
 - uint16_t :: a 16-bit unsigned integer
 - uint32_t :: a 32-bit unsigned integer
 - uint64_t :: a 64-bit unsigned integer
