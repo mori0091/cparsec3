@@ -12,31 +12,16 @@
 
 #define Array(T) TYPE_NAME(Array, T)
 #define ArrayT(T) TYPE_NAME(ArrayT, T)
-// -----------------------------------------------------------------------
-#define typedef_Array(T)                                                 \
-  C_API_BEGIN                                                            \
-  typedef struct {                                                       \
-    size_t length;                                                       \
-    T* data;                                                             \
-  } Array(T);                                                            \
-  C_API_END                                                              \
-  END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
 #define trait_Array(T)                                                   \
   C_API_BEGIN                                                            \
-  /* ---- */                                                             \
-  typedef_Array(T);                                                      \
-  /* ---- */                                                             \
-  trait_Eq(Array(T));                                                    \
-  trait_Ord(Array(T));                                                   \
-  /* ---- */                                                             \
-  typedef T Item(Array(T));                                              \
+  /* ---- Array(T) */                                                    \
   typedef struct {                                                       \
-    Array(T) a;                                                          \
-  } Itr(Array(T));                                                       \
-  trait_Itr(Array(T));                                                   \
-  /* ---- */                                                             \
+    size_t length;                                                       \
+    T* data;                                                             \
+  } Array(T);                                                            \
+  /* ---- trait Array(T) */                                              \
   typedef struct {                                                       \
     Array(T) empty;                                                      \
     bool (*null)(Array(T) a);                                            \
@@ -48,6 +33,16 @@
     T* (*end)(Array(T) a);                                               \
   } ArrayT(T);                                                           \
   ArrayT(T) Trait(Array(T));                                             \
+  /* ---- instance Eq(Array(T)) */                                       \
+  trait_Eq(Array(T));                                                    \
+  /* ---- instance Ord(Array(T)) */                                      \
+  trait_Ord(Array(T));                                                   \
+  /* ---- instance Itr(Array(T)) */                                      \
+  typedef T Item(Array(T));                                              \
+  typedef struct {                                                       \
+    Array(T) a;                                                          \
+  } Itr(Array(T));                                                       \
+  trait_Itr(Array(T));                                                   \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -128,8 +123,8 @@
   static Itr(Array(T)) FUNC_NAME(itr, Itr(Array(T)))(Array(T) a) {       \
     return (Itr(Array(T))){.a = a};                                      \
   }                                                                      \
-  static bool FUNC_NAME(null, Itr(Array(T)))(Itr(Array(T)) it) {         \
-    return !it.a.length;                                                 \
+  static T* FUNC_NAME(ptr, Itr(Array(T)))(Itr(Array(T)) it) {            \
+    return (it.a.length ? it.a.data : 0);                                \
   }                                                                      \
   static Itr(Array(T))                                                   \
       FUNC_NAME(next, Itr(Array(T)))(Itr(Array(T)) it) {                 \
@@ -140,23 +135,9 @@
     }                                                                    \
     return it;                                                           \
   }                                                                      \
-  static T FUNC_NAME(get, Itr(Array(T)))(Itr(Array(T)) it) {             \
-    assert(it.a.length&& it.a.data);                                     \
-    return it.a.data[0];                                                 \
-  }                                                                      \
-  static void FUNC_NAME(set, Itr(Array(T)))(T x, Itr(Array(T)) it) {     \
-    assert(it.a.length&& it.a.data);                                     \
-    it.a.data[0] = x;                                                    \
-  }                                                                      \
-  ItrT(Array(T)) Trait(Itr(Array(T))) {                                  \
-    return (ItrT(Array(T))){                                             \
-        .itr = FUNC_NAME(itr, Itr(Array(T))),                            \
-        .null = FUNC_NAME(null, Itr(Array(T))),                          \
-        .next = FUNC_NAME(next, Itr(Array(T))),                          \
-        .get = FUNC_NAME(get, Itr(Array(T))),                            \
-        .set = FUNC_NAME(set, Itr(Array(T))),                            \
-    };                                                                   \
-  }                                                                      \
+  instance_Itr(Array(T), FUNC_NAME(itr, Itr(Array(T))),                  \
+               FUNC_NAME(ptr, Itr(Array(T))),                            \
+               FUNC_NAME(next, Itr(Array(T))));                          \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
