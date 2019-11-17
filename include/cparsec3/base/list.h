@@ -15,32 +15,17 @@
 #define List(T) TYPE_NAME(List, T)
 #define stList(T) TYPE_NAME(stList, T)
 #define ListT(T) TYPE_NAME(ListT, T)
+
 // -----------------------------------------------------------------------
-#define typedef_List(T)                                                  \
+#define trait_List(T)                                                    \
   C_API_BEGIN                                                            \
+  /* ---- List(T) */                                                     \
   typedef struct stList(T) {                                             \
     struct stList(T) * tail;                                             \
     T head;                                                              \
   }                                                                      \
   stList(T), *List(T);                                                   \
-  C_API_END                                                              \
-  END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-#define trait_List(T)                                                    \
-  C_API_BEGIN                                                            \
-  /* ---- */                                                             \
-  typedef_List(T);                                                       \
-  /* ---- */                                                             \
-  trait_Eq(List(T));                                                     \
-  trait_Ord(List(T));                                                    \
-  /* ---- */                                                             \
-  typedef T Item(List(T));                                               \
-  typedef struct {                                                       \
-    List(T) xs;                                                          \
-  } Itr(List(T));                                                        \
-  trait_Itr(List(T));                                                    \
-  /* ---- */                                                             \
+  /* ---- trait List(T) */                                               \
   typedef struct {                                                       \
     List(T) empty;                                                       \
     bool (*null)(List(T) xs);                                            \
@@ -53,6 +38,16 @@
     List(T) (*tail)(List(T) xs);                                         \
   } ListT(T);                                                            \
   ListT(T) Trait(List(T));                                               \
+  /* ---- instance Eq(List(T)) */                                        \
+  trait_Eq(List(T));                                                     \
+  /* ---- instance Ord(List(T)) */                                       \
+  trait_Ord(List(T));                                                    \
+  /* ---- instance Itr(List(T)) */                                       \
+  typedef T Item(List(T));                                               \
+  typedef struct {                                                       \
+    List(T) xs;                                                          \
+  } Itr(List(T));                                                        \
+  trait_Itr(List(T));                                                    \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -165,8 +160,8 @@
   static Itr(List(T)) FUNC_NAME(itr, Itr(List(T)))(List(T) xs) {         \
     return (Itr(List(T))){.xs = xs};                                     \
   }                                                                      \
-  static bool FUNC_NAME(null, Itr(List(T)))(Itr(List(T)) it) {           \
-    return !it.xs;                                                       \
+  static T* FUNC_NAME(ptr, Itr(List(T)))(Itr(List(T)) it) {              \
+    return (it.xs ? &(it.xs->head) : 0);                                 \
   }                                                                      \
   static Itr(List(T)) FUNC_NAME(next, Itr(List(T)))(Itr(List(T)) it) {   \
     if (it.xs) {                                                         \
@@ -174,23 +169,9 @@
     }                                                                    \
     return it;                                                           \
   }                                                                      \
-  static T FUNC_NAME(get, Itr(List(T)))(Itr(List(T)) it) {               \
-    assert(it.xs);                                                       \
-    return it.xs->head;                                                  \
-  }                                                                      \
-  static void FUNC_NAME(set, Itr(List(T)))(T x, Itr(List(T)) it) {       \
-    assert(it.xs);                                                       \
-    it.xs->head = x;                                                     \
-  }                                                                      \
-  ItrT(List(T)) Trait(Itr(List(T))) {                                    \
-    return (ItrT(List(T))){                                              \
-        .itr = FUNC_NAME(itr, Itr(List(T))),                             \
-        .null = FUNC_NAME(null, Itr(List(T))),                           \
-        .next = FUNC_NAME(next, Itr(List(T))),                           \
-        .get = FUNC_NAME(get, Itr(List(T))),                             \
-        .set = FUNC_NAME(set, Itr(List(T))),                             \
-    };                                                                   \
-  }                                                                      \
+  instance_Itr(List(T), FUNC_NAME(itr, Itr(List(T))),                    \
+               FUNC_NAME(ptr, Itr(List(T))),                             \
+               FUNC_NAME(next, Itr(List(T))));                           \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
