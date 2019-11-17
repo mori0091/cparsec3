@@ -10,22 +10,16 @@
 
 #define Maybe(T) TYPE_NAME(Maybe, T)
 #define MaybeT(T) TYPE_NAME(MaybeT, T)
-// -----------------------------------------------------------------------
-#define typedef_Maybe(T)                                                 \
-  C_API_BEGIN                                                            \
-  typedef struct {                                                       \
-    bool none;                                                           \
-    T value;                                                             \
-  } Maybe(T);                                                            \
-  C_API_END                                                              \
-  END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
 #define trait_Maybe(T)                                                   \
   C_API_BEGIN                                                            \
-  typedef_Maybe(T);                                                      \
-  trait_Eq(Maybe(T));                                                    \
-  trait_Ord(Maybe(T));                                                   \
+  /* ---- Maybe(T) */                                                    \
+  typedef struct {                                                       \
+    bool none;                                                           \
+    T value;                                                             \
+  } Maybe(T);                                                            \
+  /* ---- trait Maybe(T) */                                              \
   typedef struct {                                                       \
     Maybe(T) empty;                                                      \
     bool (*null)(Maybe(T) m);                                            \
@@ -33,6 +27,11 @@
     Maybe(T) (*just)(T value);                                           \
   } MaybeT(T);                                                           \
   MaybeT(T) Trait(Maybe(T));                                             \
+  /* ---- instance Eq(Maybe(T)) */                                       \
+  trait_Eq(Maybe(T));                                                    \
+  /* ---- instance Ord(Maybe(T)) */                                      \
+  trait_Ord(Maybe(T));                                                   \
+  /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
 

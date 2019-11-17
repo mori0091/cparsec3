@@ -12,8 +12,8 @@
   /* ---- */                                                             \
   typedef_Tuple(Token(S), S);                                            \
   typedef_Tuple(Tokens(S), S);                                           \
-  typedef_Maybe(Tuple(Token(S), S));                                     \
-  typedef_Maybe(Tuple(Tokens(S), S));                                    \
+  trait_Maybe(Tuple(Token(S), S));                                       \
+  trait_Maybe(Tuple(Tokens(S), S));                                      \
   /* ---- */                                                             \
   typedef struct {                                                       \
     bool (*empty)(S s);                                                  \
