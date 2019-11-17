@@ -288,16 +288,27 @@ An ~ItrT(C)~ trait provides the following member variables/functions :
      Constructs an iterator that points to the 1st element (or nothing) of the
      container ~c~. The type of ~c~ shall be a ~Array(T)~ or a ~List(T)~.
 
-- bool null(Itr(C) it)      :: 
-     Returns ~true~ if ~it~ was empty (i.e. ~it~ points to nothing), otherwise ~false~.
+- Item(C)* ptr(Itr(C) it) ::
+     Returns the pointer to the container's element of that the iterator ~it~
+     points to.
+  - *NOTE* :
+    - ~Item(C)* ptr(Itr(C) it)~ is introduced for easy to implement typical
+      iterator.
+    - ~ptr(it)~ is called from typical implementation of ~null(it)~, ~get(it)~,
+      and ~set(v, it)~.
+    - Use ~null(it)~, ~get(it)~, or ~set(v, it)~ instead of ~ptr(it)~ unless you
+      have necessary to call ~ptr(it)~.
 
 - Itr(C) next(Itr(C) it) ::
      Returns the iterator that points to the next element (or nothing) of the
      iterator ~it~ points to.
 
+- bool null(Itr(C) it)      :: 
+     Returns ~true~ if ~it~ was empty (i.e. ~it~ points to nothing), otherwise ~false~.
+
 - Item(C) get(Itr(C) it) ::
-     Returns the value of container's element of that the iterator ~it~ points
-     to.
+     Returns the value of the container's element of that the iterator ~it~
+     points to.
 
 - void set(Item(C) v, Itr(C) it) ::
      Assign the value ~v~ to the container's element of that the iterator ~it~
@@ -306,7 +317,7 @@ An ~ItrT(C)~ trait provides the following member variables/functions :
 
 *** Show(T) - trait to represent a value as a string
 
-*NOTE* Not implemented yet.
+- *NOTE* : Not implemented yet.
 
 - Show(T)          ::
      Type of a trait that provides a set of functions to represent a value of
