@@ -3,6 +3,8 @@
 
 * Generics
 
+*Generics* concept of the /CPARSEC3/ library consists of the following concepts:
+
 - Generic Data Type ::
      A parametric typed struct/union.
 - Trait             ::
@@ -11,7 +13,7 @@
      A type-safe macro that provides a functionallity for easy to use
      traits/containers.
 
-** Generic Data Type
+* Generic Data Type
 
 *Generic Data Type* is a parametric typed struct/union.
 
@@ -36,7 +38,7 @@ The below shows a example of Generic Data Types :
   - Tuple(T1, T2, T3, T4, T5)
   - Tuple(T1, T2, T3, T4, T5, T6)
 
-** Trait
+* Trait
 
 *Trait* provides a set of functions against a particular concrete type.
 
@@ -47,11 +49,11 @@ For example, an ~Eq(T)~ trait provides the following two functions :
 - ~bool eq(T, T)~
 - ~bool neq(T, T)~
 
-To use *Trait*, calling to ~trait(M)~ creates a concrete trait object.
-
+To use *Trait* object, call to ~trait(M)~ that creates a concrete trait object.
 The parameter ~M~ is the name of the resulting concrete trait type (e.g.
 ~Eq(int)~), or a name of corresponding concrete type (e.g. ~Array(int)~).
 
+*Usecase 1.* Use ~Eq(String)~ trait to test equality of two ~String~ values.
 #+begin_src c
   /* Eq(String) is a trait type to test equality of two String values */
   Eq(String) E = trait(Eq(String));
@@ -60,6 +62,8 @@ The parameter ~M~ is the name of the resulting concrete trait type (e.g.
   // -> foo == foo
 #+end_src
 
+*Usecase 2.* Use ~ArrayT(int)~ trait to construct, destruct, and manipulate
+~Array(int)~ object.
 #+begin_src c
   /* ArrayT(int) is a trait type to construct, destruct, and manipulate Array(int) */
   ArrayT(int) m = trait(Array(int));
@@ -73,10 +77,12 @@ The parameter ~M~ is the name of the resulting concrete trait type (e.g.
   m.free(a);
 #+end_src
 
+*Usecase 3.* Use ~ItrT(Array(int))~ trait to iterate each items in ~Array(int)~
+container.
 #+begin_src c
   /* ItrT(C) is a trait type to iterate each items in container C */
-  ArrayT(int) m = trait(Array(int));
   ItrT(Array(int)) I = trait(Itr(Array(int)));
+  ArrayT(int) m = trait(Array(int));
   Array(int) a = m.create(5);
   size_t n = m.length(a); /* -> n = 5 */
   for (Itr(Array(int)) it = I.itr(a); !I.null(it); it = I.next(it)) {
@@ -89,7 +95,7 @@ The parameter ~M~ is the name of the resulting concrete trait type (e.g.
 #+end_src
 
 
-** Generic Macros
+* Generic Macros
 
 /CPARSEC3/ provides also *Generic Macros* for easy to use various *traits* and
 *containers*. The name of each Generic Macros starts with prefix ~g_~, such as
@@ -101,23 +107,56 @@ so on.
 - Cons of Generic Macros ::
      Needs much more compile time / memory.
 
+-----
+
+*Usecase 1a.* Constructs / initializes an *array* then iterates for each items
+ in the *array*.
 #+begin_src c
   Array(int) a = g_array(int, 5, 4, 3, 2, 1);
-  size_t n = m.length(a); /* -> n = 5 */
+  size_t n = g_length(a); /* -> n = 5 */
   for (Itr(Array(int)) it = g_itr(a); !g_null(it); it = g_next(it)) {
     printf("%d ", g_get(it)); /* -> 5 4 3 2 1 */
   }
-  m.free(a);
+  g_free(a);
 #+end_src
 
+*Usecase 1b.* Constructs / initializes an *list* then iterates for each items in
+ the *list*.
+#+begin_src c
+  List(int) a = g_list(int, 5, 4, 3, 2, 1);
+  size_t n = g_length(a); /* -> n = 5 */
+  for (Itr(List(int)) it = g_itr(a); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it)); /* -> 5 4 3 2 1 */
+  }
+  g_free(a);
+#+end_src
+
+-----
+
+*Usecase 2a.* Use ~__auto_type~ and ~g_for(it, c)~ GCC extension to consruct and
+ iterate an *array*.
 #+begin_src c
   // GCC only
   #ifdef __GNUC__
   __auto_type a = g_array(int, 5, 4, 3, 2, 1);
-  size_t n = m.length(a); /* -> n = 5 */
+  size_t n = g_length(a); /* -> n = 5 */
   g_for(it, a) {
     printf("%d ", g_get(it)); /* -> 5 4 3 2 1 */
   }
-  m.free(a);
+  g_free(a);
+  #endif
+#+end_src
+
+*Usecase 2a.* Use ~__auto_type~ and ~g_for(it, c)~ GCC extension to construct
+ and iterata a *list*.
+#+begin_src c
+  // GCC only
+  #ifdef __GNUC__
+  __auto_type a = g_list(int, 5, 4, 3, 2, 1);
+  size_t n = g_length(a); /* -> n = 5 */
+  g_for(it, a) {
+    printf("%d ", g_get(it)); /* -> 5 4 3 2 1 */
+  }
+  g_free(a);
   #endif
 #+end_src
