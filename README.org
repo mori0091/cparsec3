@@ -13,6 +13,7 @@
 - *[[file:docs/concept-generics.org][Generics]]* - Generic programming for C11
   - Generic Data Types
   - Traits
+  - Generic Macros
 
 - *[[file:docs/concept-parsec.org][Parsec]]* - parsers and parser combinators
   - Stream
@@ -22,34 +23,33 @@
 
 * How to build
 
-To build and test the CPARSEC3 library, do as follows :
-- *NOTE* Suppose that the leading '*$*' is a shell prompt.
-- *NOTE* Suppose that the '*#*' follows words are comment.
-
-#+begin_src shell
-# at the project top directory
-$ ./build.sh all test
-#+end_src
-
-Or do as follows at for each directory that the GNUmakefile exists:
-#+begin_src shell
-# at the project top directory
-$ make all
-# go to the sub directory that the GNUmakefile exists
-$ cd test/testit
-# at the sub directory
-$ make all test
-#+end_src
+See [[file:docs/how_to_build.org][build-instraction]] contents for the below:
+  - How to build
+  - Disrectory structure of source tree
 
 * API references
 
-- [[file:docs/api-base.org][Base library]] :: Provides basic Generic Data Types and Traits.
+The /CPARSEC3/ library consists of the following portions:
 
-- [[file:docs/api-parsec.org][Parsec library]] :: Parser Combinator library for C11
+- [[file:docs/api-base.org][Base library]]   ::
+     /CPARSEC3/ *Base* library provides basic functionality of general purpose
+     *Generic Data Types*, *Traits*, and *Generic Macros*.
+  - Generic Data Types :
+       ~Array(T)~, ~List(T)~, ~Maybe(T)~, and so on.
+  - Traits             :
+       ~Eq(T)~, ~Ord(T)~, and so on.
+  - Generic Macros     :
+       ~g_array(T, ...)~, ~g_eq(a, b)~, ~g_itr(c)~, and so on.
+
+- [[file:docs/api-parsec.org][Parsec library]] ::
+     /CPARSEC3/ *Parsec* library provides functionality of parser-combinators.
   - Stream
   - Built-in parsers
   - Built-in parser combinators
   - Parser invocation APIs
 
-- [[file:docs/api-misc.org][Misc.]] :: Other miscellernious APIs
+- [[file:docs/api-misc.org][Misc.]]          ::
+     Other miscellernious APIs
+  - TYEPSET macro
+  - Primitive types
 

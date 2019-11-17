@@ -13,6 +13,9 @@
 *Generic Data Type* is a similar concept as known as *parameterized type*,
 *polymorphic type*, *template class (C++)*, and so on.
 
+The below sections show *Generic Data Types* provided by /CPARSEC3/ *Base*
+library.
+
 ** Array(T) - an array of objects
 
 - Array(T)        ::
@@ -72,6 +75,8 @@
 *interface (Java)*, and so on.
 
 To use *Trait*, calling to ~trait(M)~ creates a concrete trait object.
+
+The below sections show *Traits* provided by /CPARSEC3/ *Base* library.
 
 ** Eq(T) - trait to test equality of two values
 
@@ -375,6 +380,8 @@ An ~Show(T)~ trait provides the following member functions :
      Makes it easy to use various traits and containers.
 - Cons of Generic Macros ::
      Needs much more compile time / memory.
+
+The below sections show *Generic Macros* provided by /CPARSEC3/ *Base* library.
 
 ** Tests Equality of two objects
 - g_eq(a, b)      ::

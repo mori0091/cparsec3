@@ -3,11 +3,11 @@
 
 * TODO Parsec
 
-** Stream
+* Stream
 
-** Parser
+* Parser
 
-** Parser Combinator
+* Parser Combinator
 
-** Parser Invocation
+* Parser Invocation
 

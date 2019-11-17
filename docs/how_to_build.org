@@ -1,0 +1,58 @@
+# -*- coding: utf-8-unix -*-
+#+STARTUP: showall indent
+
+* How to build
+
+To build and test the CPARSEC3 library, do as follows :
+- *NOTE* Suppose that the leading '*$*' is a shell prompt.
+- *NOTE* Suppose that the '*#*' follows words are comment.
+
+#+begin_src shell
+# at the project top directory
+$ ./build.sh all test
+#+end_src
+
+Or do as follows at for each directory that the GNUmakefile exists:
+#+begin_src shell
+# at the project top directory
+$ make all
+# go to the sub directory that the GNUmakefile exists
+$ cd test/testit
+# at the sub directory
+$ make all test
+#+end_src
+
+* Directory strucuture of source tree
+
+The source tree of /CPARSEC3/ library consists of the contents of the /CPARSEC3/
+main project and the contents of sub-projects.
+
+- The /CPARSEC3/ main project ::
+     The /CPARSEC3/ library main project.\\
+     Placed at the top directory of the git repository.
+
+- test/testit sub project     ::
+     The /CPARSEC3/ unit-test sub project, powered by /TestIt testing
+     framework/.\\
+     Placed at the ~test/testit/~ sub directory.
+
+- example/base sub project    ::
+     The /CPARSEC3/ sample sub project, that is a usecase of the /CPARSEC3 Base
+     library/.\\
+     Placed at the ~exmaple/base/~ sub directory.
+
+-----
+
+The below shows the structure of the top directory for each main project and
+sub-projects. Note that the ~bin/~, ~lib/~, and ~obj/~ directories and its
+contents are made by ~make~ command automatically if and only if needed.
+
+*Directory structure for each main / sub project*
+- (top directory of the main / sub project)
+  - GNUmakefile :: the makefile for the project
+  - .project.mk :: the makefile for the project-specific definition
+  - include/    :: public header files
+  - src/        :: source files / private header files
+  - bin/        :: executable file
+  - lib/        :: static library / archive file (~lib*.a~)
+  - obj/        :: intermediate object files (~*.o~)
