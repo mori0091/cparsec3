@@ -3,34 +3,68 @@
 
 * Base library
 
-** Generic Data Type
+/CPARSEC3/ *Base* library provides basic functionality of general purpose
+*Generic Data Types*, *Traits*, and *Generic Macros*.
+
+* Generic Data Type
 
 *Generic Data Type* is a parametric typed struct/union.
 
 *Generic Data Type* is a similar concept as known as *parameterized type*,
 *polymorphic type*, *template class (C++)*, and so on.
 
-*** Array(T) - an array of objects
+** Array(T) - an array of objects
 
-- Array(T)       :: Array of objects of ~T~ type.
+- Array(T)        ::
+     Array of objects of ~T~ type.\\
+     See also ~ArrayT(T)~ trait.
 
-*** List(T) - a linked-list of objects or NULL
+** List(T) - a linked-list of objects or NULL
 
-- List(T)        :: Linked-list of objects of ~T~ type or ~NULL~.
+- List(T)         ::
+     Linked-list of objects of ~T~ type or ~NULL~.\\
+     See also ~ListT(T)~ trait.
 
-*** Maybe(T) - wraps an object or nothing
+** Maybe(T) - wraps an object or nothing
 
-- Maybe(T)       :: Wraps an object of ~T~ type or nothing.
+- Maybe(T)        ::
+     Wraps an object of ~T~ type or nothing.\\
+     See also ~MaybeT(T)~ trait.
 
-*** Result(T, E) - wraps an ok value or an error value.
+** Itr(C) - an iterator that points to a container's item.
 
-- Result(T, E)   :: Wraps an ok value of ~T~ type or an error value of ~E~ type.
+- Itr(C)          ::
+     An iterator that points to an item (or nothing) of the container of ~C~
+     type. An ~Itr(C)~ object is used to operate iteration / traversal for each
+     item of a container of ~C~ type.\\
+     See also ~ItrT(C)~ trait.
 
-*** Tuple(T1, ...) - a tuple of values of various types.
+** Result(T, E) - wraps an ok value or an error value.
 
-- Tuple(T1, ...) :: A tuple of values of various types.
+- Result(T, E)    ::
+     Wraps an ok value of ~T~ type or an error value of ~E~ type.
 
-** Trait
+** Tuple(T1, ...) - a tuple of values of various types.
+
+- Tuple(T1)       ::
+     1-tuple of a value of ~T1~ type.
+
+- Tuple(T1, T2)   ::
+     2-tuple of values of ~T1~ and ~T2~ type.
+
+- Tuple(T1, T2, T3) ::
+     3-tuple of values of ~T1~, ~T2~, and ~T3~ type.
+
+- Tuple(T1, T2, T3, T4) ::
+     4-tuple of values of ~T1~, ~T2~, ~T3~, and ~T4~ type.
+
+- Tuple(T1, T2, T3, T4, T5) ::
+     5-tuple of values of ~T1~, ~T2~, ~T3~, ~T4~, and ~T5~ type.
+
+- Tuple(T1, T2, T3, T4, T5, T6) ::
+     6-tuple of values of ~T1~, ~T2~, ~T3~, ~T4~, ~T5~, and ~T6~ type.
+
+* Trait
 
 *Trait* provides a set of functions against a particular concrete type.
 
@@ -39,7 +73,7 @@
 
 To use *Trait*, calling to ~trait(M)~ creates a concrete trait object.
 
-*** Eq(T) - trait to test equality of two values
+** Eq(T) - trait to test equality of two values
 
 #+begin_src c
   /* Eq(String) is a trait type to test equality of two String values */
@@ -61,7 +95,7 @@ An ~Eq(T)~ trait provides the following member functions :
 - bool eq(T a, T b) :: Returns ~true~ if a \equal b
 - bool neq(T a, T b) :: Returns ~true~ if a \neq b
 
-*** Ord(T) - trait to compare two values
+** Ord(T) - trait to compare two values
 
 #+begin_src c
   String s = "foo";
@@ -83,7 +117,7 @@ An ~Eq(T)~ trait provides the following member functions :
 
 - Ord(T)          ::
      Type of a trait that provides a set of functions to compare two values of
-     type ~T~
+     ~T~ type.
 
 - trait(Ord(T))   :: 
      Constructs a new trait of ~Ord(T)~ type.\\
@@ -101,7 +135,7 @@ An ~Ord(T)~ trait provides the following member functions :
   - 0 if a \equal b, or
   - 1 if a \gt b
 
-*** MemT(T) - trait to allocate/deallocate memory
+** MemT(T) - trait to allocate/deallocate memory
 
 #+begin_src c
   MemT(int) m = trait(Mem(int));
@@ -111,7 +145,7 @@ An ~Ord(T)~ trait provides the following member functions :
 
 - MemT(T)         ::
      Type of a trait that provides a set of functions to malloc/free memory of
-     type ~T~
+     ~T~ type.
 
 - trait(Mem(T))   :: 
      Constructs a new trait of ~MemT(T)~ type.\\
@@ -129,7 +163,7 @@ An ~MemT(T)~ trait provides the following member functions :
      Deallocates (free) the allocated memory.\\
      i.e. ~free(ptr)~.
 
-*** ArrayT(T) - trait for Array(T) container.
+** ArrayT(T) - trait for Array(T) container.
 
 #+begin_src c
   /* ArrayT(int) is a trait type to construct, destruct, and manipulate Array(T) */
@@ -168,13 +202,13 @@ An ~ArrayT(T)~ trait provides the following member variables/functions :
      Destructs the array ~a~.\\
      i.e. ~free(a.data)~.
 - T* begin(Array(T) a) ::
-     Returns the address of the 1st element of the array ~a~.\\
+     Returns the address of the 1st item of the array ~a~.\\
      i.e. returns ~a.data~.
 - T* end(Array(T) a) ::
-     Returns the out of bounds address over the last element of the array ~a~.\\
+     Returns the out of bounds address over the last item of the array ~a~.\\
      i.e. returns ~a.data + a.length~.
 
-*** ListT(T) - trait for List(T) container.
+** ListT(T) - trait for List(T) container.
 
 #+begin_src c
   ListT(int) m = trait(List(int));
@@ -216,7 +250,7 @@ An ~ListT(T)~ trait provides the following member variables/functions :
      Returns the tail list of the list ~xs~.\\
      i.e. returns ~xs->tail~.
 
-*** MaybeT(T) - trait for Maybe(T) container.
+** MaybeT(T) - trait for Maybe(T) container.
 
 #+begin_src c
   /* MaybeT(int) is a trait type to construct and manipulate Maybe(T) */
@@ -257,7 +291,7 @@ A ~MaybeT(T)~ trait provides the following member variables/functions :
      Constructs a Maybe(T) object that represents the ~value~.\\
      i.e. returns ~(Maybe(T)){.none = false, .value = value}~.
 
-*** ItrT(C) - trait to construct and manipulate an iterator
+** ItrT(C) - trait to construct and manipulate an iterator
 
 #+begin_src c
   ItrT(List(int)) I = trait(Itr(List(int)));
@@ -285,11 +319,11 @@ A ~MaybeT(T)~ trait provides the following member variables/functions :
 
 An ~ItrT(C)~ trait provides the following member variables/functions :
 - Itr(C) itr(C c) ::
-     Constructs an iterator that points to the 1st element (or nothing) of the
+     Constructs an iterator that points to the 1st item (or nothing) of the
      container ~c~. The type of ~c~ shall be a ~Array(T)~ or a ~List(T)~.
 
 - Item(C)* ptr(Itr(C) it) ::
-     Returns the pointer to the container's element of that the iterator ~it~
+     Returns the pointer to the container's item of that the iterator ~it~
      points to.
   - *NOTE* :
     - ~Item(C)* ptr(Itr(C) it)~ is introduced for easy to implement typical
@@ -300,22 +334,23 @@ An ~ItrT(C)~ trait provides the following member variables/functions :
       have necessary to call ~ptr(it)~.
 
 - Itr(C) next(Itr(C) it) ::
-     Returns the iterator that points to the next element (or nothing) of the
+     Returns the iterator that points to the next item (or nothing) of the
      iterator ~it~ points to.
 
 - bool null(Itr(C) it)      :: 
-     Returns ~true~ if ~it~ was empty (i.e. ~it~ points to nothing), otherwise ~false~.
+     Returns ~true~ if ~it~ was empty (i.e. ~it~ points to nothing), otherwise
+     ~false~.
 
 - Item(C) get(Itr(C) it) ::
-     Returns the value of the container's element of that the iterator ~it~
-     points to.
+     Returns the value of the container's item of that the iterator ~it~ points
+     to.
 
 - void set(Item(C) v, Itr(C) it) ::
-     Assign the value ~v~ to the container's element of that the iterator ~it~
+     Assign the value ~v~ to the container's item of that the iterator ~it~
      points to.
 
 
-*** Show(T) - trait to represent a value as a string
+** Show(T) - trait to represent a value as a string
 
 - *NOTE* : Not implemented yet.
 
@@ -331,7 +366,7 @@ An ~Show(T)~ trait provides the following member functions :
 - String show(T a) :: Returns a ~String~ representation of ~a~.
 
 
-** Generic Macros
+* Generic Macros
 
 /CPARSEC3/ provides also *Generic Macros* for easy to use various *traits* and
 *containers*.
@@ -341,13 +376,13 @@ An ~Show(T)~ trait provides the following member functions :
 - Cons of Generic Macros ::
      Needs much more compile time / memory.
 
-*** Tests Equality of two objects
+** Tests Equality of two objects
 - g_eq(a, b)      ::
      Returns ~true~ if ~a~ \equal ~b~, ~false~ otherwise.
 - g_neq(a, b)     :: 
      Returns ~true~ if ~a~ \neq ~b~, ~false~ otherwise.
 
-*** Tests Ordering of two objects
+** Tests Ordering of two objects
 - g_le(a, b)      ::
      Returns ~true~ if ~a~ \le ~b~, ~false~ otherwise.
 - g_lt(a, b)      ::
@@ -367,21 +402,21 @@ An ~Show(T)~ trait provides the following member functions :
 - g_compare(a, b) ::
      Same as ~g_cmp(a, b)~.
 
-*** Array Constructors, Destructors, and Manipulators
+** Array Constructors, Destructors, and Manipulators
 - g_array(T, ...) ::
      Constructs a new ~Array(T)~ object.\\
      For example, ~g_array(int, 1, 2, 3)~ creates a 3 length array.
 
 - g_begin(a)      ::
-     Returns the address of the 1st element of the array ~a~.
+     Returns the address of the 1st item of the array ~a~.
 
 - g_end(a)        :: 
-     Returns the out of bounds address over the last element of the array ~a~.
+     Returns the out of bounds address over the last item of the array ~a~.
 
 - g_free(a)       ::
      Destructs the array ~a~.
 
-*** List Constructors, Destructors, and Manipulators
+** List Constructors, Destructors, and Manipulators
 - g_list(T, ...)  ::
      Constructs a new ~List(T)~ object.\\
      For example, ~g_list(int, 1, 2, 3)~ creates a 3 length list.
@@ -403,7 +438,7 @@ An ~Show(T)~ trait provides the following member functions :
 - g_free(xs)      ::
      Destructs all cells of the list ~xs~.
 
-*** Container Length
+** Container Length
 - g_null(c)       ::
      Returns ~true~ if ~c~ was empty, otherwise ~false~.\\
      ~c~ shall be an ~Array(T)~, ~List(T)~, ~Maybe(T)~. (see also ~g_null(it)~)
@@ -412,7 +447,7 @@ An ~Show(T)~ trait provides the following member functions :
      Returns length of the container ~c~.\\
      ~c~ shall be an ~Array(T)~, ~List(T)~, or ~Maybe(T)~.
 
-*** Iterator
+** Iterator
 - g_itr(c)        ::
      Constructs an iterator ~Itr(C)~ object.\\
      ~c~ shall be an ~Array(T)~ or ~List(T)~.
@@ -426,16 +461,16 @@ An ~Show(T)~ trait provides the following member functions :
      ~it~ shall be an ~Itr(Array(T))~ or ~Itr(List(T))~.
 
 - g_get(it)       ::
-     Returns the value of container's element of that the iterator ~it~ points
+     Returns the value of container's item of that the iterator ~it~ points
      to.\\
      ~it~ shall be an ~Itr(Array(T))~ or ~Itr(List(T))~.
 
 - g_set(v, it)    ::
-     Assign the value ~v~ to the container's element of that the iterator ~it~
+     Assign the value ~v~ to the container's item of that the iterator ~it~
      points to.\\
      ~it~ shall be an ~Itr(Array(T))~ or ~Itr(List(T))~, thus ~v~ shall be a ~T~.
 
-*** For-Loop /(GCC only)/
+** For-Loop /(GCC only)/
 - g_for(it, c)    ::
      Expanded to ~for (__auto_type it = g_itr(c); !g_null(it); it = g_next(it))~.\\
      ~it~ is the name of variable to be used as an iterator, ~c~ shall be an
