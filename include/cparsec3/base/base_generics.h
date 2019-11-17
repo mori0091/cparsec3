@@ -11,7 +11,7 @@
 // clang-format off
 #define GENERIC_EQ(x)                           \
   GENERIC(x, SND, CREATE_TRAIT,                 \
-          BIND(Eq, TYPESET(ALL_BUT_INT),        \
+          BIND(Eq, TYPESET(PRIMITIVE),          \
                APPLY_TYPESET(Array),            \
                APPLY_TYPESET(List),             \
                APPLY_TYPESET(Maybe)))
@@ -20,7 +20,7 @@
 // clang-format off
 #define GENERIC_ORD(x)                          \
   GENERIC(x, SND, CREATE_TRAIT,                 \
-          BIND(Ord, TYPESET(ALL_BUT_INT),       \
+          BIND(Ord, TYPESET(PRIMITIVE),         \
                APPLY_TYPESET(Array),            \
                APPLY_TYPESET(List),             \
                APPLY_TYPESET(Maybe)))
