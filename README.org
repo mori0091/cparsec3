@@ -25,7 +25,7 @@
 
 See [[file:docs/how_to_build.org][build-instraction]] contents for the below:
   - How to build
-  - Disrectory structure of source tree
+  - Directory structure of source tree
 
 * API references
 
