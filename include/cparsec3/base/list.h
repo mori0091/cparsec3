@@ -11,6 +11,7 @@
 #include "mem.h"
 
 #include "itr.h"
+#include "slice.h"
 
 #define List(T) TYPE_NAME(List, T)
 #define stList(T) TYPE_NAME(stList, T)
@@ -48,6 +49,8 @@
     List(T) xs;                                                          \
   } Itr(List(T));                                                        \
   trait_Itr(List(T));                                                    \
+  /* ---- instance Slice(List(T)) */                                     \
+  trait_Slice(List(T));                                                  \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -171,6 +174,8 @@
   instance_Itr(List(T), FUNC_NAME(itr, Itr(List(T))),                    \
                FUNC_NAME(ptr, Itr(List(T))),                             \
                FUNC_NAME(next, Itr(List(T))));                           \
+  /* ---- instance Slice(List(T)) */                                     \
+  instance_Slice(List(T));                                               \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS

@@ -9,6 +9,7 @@
 #include "ord.h"
 
 #include "itr.h"
+#include "slice.h"
 
 #define Array(T) TYPE_NAME(Array, T)
 #define ArrayT(T) TYPE_NAME(ArrayT, T)
@@ -43,6 +44,8 @@
     Array(T) a;                                                          \
   } Itr(Array(T));                                                       \
   trait_Itr(Array(T));                                                   \
+  /* ---- instance Slice(Array(T)) */                                    \
+  trait_Slice(Array(T));                                                 \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -139,6 +142,8 @@
   instance_Itr(Array(T), FUNC_NAME(itr, Itr(Array(T))),                  \
                FUNC_NAME(ptr, Itr(Array(T))),                            \
                FUNC_NAME(next, Itr(Array(T))));                          \
+  /* ---- instance Slice(Array(T)) */                                    \
+  instance_Slice(Array(T));                                              \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
