@@ -42,6 +42,16 @@ library.
      item of a container of ~C~ type.\\
      See also ~ItrT(C)~ trait.
 
+** Slice(C) - a partial (or whole) view of the underlying container.
+
+- Slice(C)        ::
+     A partial (or whole) view of the underlying containter of ~C~ type. In
+     other words, a ~Slice(C)~ object is a reference to a portion of underlying
+     container. A ~Slice(C)~ object is also iterable (i.e. ~Itr(Slice(C))~ is
+     available). The ~C~ must be iterable (i.e. ~Itr(C)~ must be available).
+     Therefore ~C~ shall be ~Array(T)~ or ~List(T)~ for now.\\
+     See also ~SliceT(C)~ trait.
+
 ** Result(T, E) - wraps an ok value or an error value.
 
 - Result(T, E)    ::
@@ -240,7 +250,7 @@ An ~ListT(T)~ trait provides the following member variables/functions :
      Returns ~true~ if the list ~xs~ was ~NULL~, ~false~ otherwise.\\
      i.e. returns ~!xs~.
 - size_t length(List(T) xs) ::
-     Returns length of the list ~xs~.
+     Returns the length of the list ~xs~.
 - List(T) cons(T x, List(T) xs) ::
      Constructs a linked-list (cons-cell).
 - void free(List(T) xs) ::
@@ -355,6 +365,51 @@ An ~ItrT(C)~ trait provides the following member variables/functions :
      points to.
 
 
+** SliceT(C) - trait to construct and manipulate a slice of container
+
+#+begin_src c
+  ListT(int) L = trait(List(int));
+  SliceT(List(int)) S = trait(Slice(List(int)));
+  ItrT(Slice(List(int))) I = trait(Itr(Slice(List(int))));
+
+  List(int) xs = L.cons(1, L.cons(2, L.cons(3, L.cons(4, L.cons(5, L.empty)))));
+  Slice(List(int)) s = S.slice(xs, 0, 3);
+  for (Itr(Slice(List(int))) it = I.itr(xs); !I.null(it); it = I.next(it)) {
+    printf("%d ", I.get(it));    /* -> 1 2 3 */
+  }
+  m.free(xs);
+#+end_src
+
+- SliceT(C)       ::
+     Type of a trait that provides a set of functions to construct and
+     manipulate ~Slice(C)~.
+
+- trait(Slice(C)) ::
+     Constructs a new trait of ~SliceT(C)~ type.\\
+     For example, ~trait(Slice(List(int)))~ creates an object of
+     ~SliceT(List(int))~ type.
+
+An ~SliceT(C)~ trait provides the following member variables/functions :
+- Slice(T) empty  ::
+     An empty slice.
+
+- bool null(Slice(C) s) ::
+     Returns ~true~ if the slice ~s~ was empty, ~false~ otherwise.
+
+- size_t length(Slice(C) s) ::
+     Returns the length of the slice ~s~.
+
+- Slice(T) slice(C c, size_t start, size_t length) ::
+     Constructs a slice, partial or whole view of the container ~c~, that is a
+     reference to a portion of ~c~. Suppose that /N/ is the length of ~c~ then:
+  - if ~start~ \ge /N/ ::
+       Returns an *empty* slice.
+  - if ~start~ \lt /N/ \le ~start + length~ ::
+       Returns the trailing portion of ~c~ starting at ~start~.
+  - if ~start~ \lt /N/ and ~start + length~ \le /N/ ::
+       Returns the portion of ~c~ starting at ~start~ and of length ~length~.
+
+
 ** Show(T) - trait to represent a value as a string
 
 - *NOTE* : Not implemented yet.
@@ -445,41 +500,57 @@ The below sections show *Generic Macros* provided by /CPARSEC3/ *Base* library.
 - g_free(xs)      ::
      Destructs all cells of the list ~xs~.
 
+** Slice Constructors
+- g_slice(c, start, length) ::
+     Constructs a new ~Slice(C)~ object that is a reference to a portion of
+     underlying container ~c~ of ~C~ type.
+
+- g_slice(c, start) ::
+     Same as ~g_slice(c, start, SIZE_MAX)~. This is a syntax sugar to construct
+     a slice that refers the trailing portion of the container.
+
 ** Container Length
 - g_null(c)       ::
      Returns ~true~ if ~c~ was empty, otherwise ~false~.\\
-     ~c~ shall be an ~Array(T)~, ~List(T)~, ~Maybe(T)~. (see also ~g_null(it)~)
+     ~c~ shall be an ~Array(T)~, ~List(T)~, ~Maybe(T)~, ~Slice(Array(T))~, or
+     ~Slice(List(T))~. (see also ~g_null(it)~)
 
 - g_length(c)     ::
      Returns length of the container ~c~.\\
-     ~c~ shall be an ~Array(T)~, ~List(T)~, or ~Maybe(T)~.
+     ~c~ shall be an ~Array(T)~, ~List(T)~, ~Maybe(T)~, ~Slice(Array(T))~, or
+     ~Slice(List(T))~.
 
 ** Iterator
 - g_itr(c)        ::
      Constructs an iterator ~Itr(C)~ object.\\
-     ~c~ shall be an ~Array(T)~ or ~List(T)~.
+     ~c~ shall be an ~Array(T)~, ~List(T)~, ~Slice(Array(T))~, or
+     ~Slice(List(T))~.
 
 - g_null(it)      :: 
      Returns ~true~ if ~it~ was empty, otherwise ~false~.\\
-     ~it~ shall be an ~Itr(Array(T))~ or ~Itr(List(T))~. (see also ~g_null(c)~)
+     ~it~ shall be an ~Itr(Array(T))~, ~Itr(List(T))~, ~Itr(Slice(Array(T))~, or
+     ~Itr(Slice(List(T))~. (see also ~g_null(c)~)
 
 - g_next(it)      ::
      Returns the next iterator of the ~it~.\\
-     ~it~ shall be an ~Itr(Array(T))~ or ~Itr(List(T))~.
+     ~it~ shall be an ~Itr(Array(T))~, ~Itr(List(T))~, ~Itr(Slice(Array(T))~, or
+     ~Itr(Slice(List(T))~.
 
 - g_get(it)       ::
      Returns the value of container's item of that the iterator ~it~ points
      to.\\
-     ~it~ shall be an ~Itr(Array(T))~ or ~Itr(List(T))~.
+     ~it~ shall be an ~Itr(Array(T))~, ~Itr(List(T))~, ~Itr(Slice(Array(T))~, or
+     ~Itr(Slice(List(T))~.
 
 - g_set(v, it)    ::
      Assign the value ~v~ to the container's item of that the iterator ~it~
      points to.\\
-     ~it~ shall be an ~Itr(Array(T))~ or ~Itr(List(T))~, thus ~v~ shall be a ~T~.
+     ~it~ shall be an ~Itr(Array(T))~, ~Itr(List(T))~, ~Itr(Slice(Array(T))~, or
+     ~Itr(Slice(List(T))~, thus ~v~ shall be a ~T~.
 
 ** For-Loop /(GCC only)/
 - g_for(it, c)    ::
      Expanded to ~for (__auto_type it = g_itr(c); !g_null(it); it = g_next(it))~.\\
      ~it~ is the name of variable to be used as an iterator, ~c~ shall be an
-     ~Array(T)~ or ~List(T)~.
+     ~Array(T)~, ~List(T)~, ~Slice(Array(T))~, or ~Slice(List(T))~..
   - *NOTE* : Available if and only if ~__GNUC__~ was defined.
