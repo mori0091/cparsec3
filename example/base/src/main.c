@@ -160,6 +160,102 @@ void test_List5(void) {
 
 #endif
 
+void test_Array6(void) {
+  printf("a = g_array(int, 1, 2, 3, 4, 5)\n");
+  Array(int) a = g_array(int, 1, 2, 3, 4, 5);
+
+  printf("s = g_slice(a, 2, 3)\n");
+  Slice(Array(int)) s = g_slice(a, 2, 3);
+  for (Itr(Slice(Array(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  printf("s = g_slice(a, 3, 3)\n");
+  s = g_slice(a, 3, 3);
+  for (Itr(Slice(Array(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(a);
+}
+
+void test_List6(void) {
+  printf("xs = g_list(int, 1, 2, 3, 4, 5)\n");
+  List(int) xs = g_list(int, 1, 2, 3, 4, 5);
+
+  printf("s = g_slice(xs, 2, 3)\n");
+  Slice(List(int)) s = g_slice(xs, 2, 3);
+  for (Itr(Slice(List(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  printf("s = g_slice(xs, 3, 3)\n");
+  s = g_slice(xs, 3, 3);
+  for (Itr(Slice(List(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(xs);
+}
+
+
+#if !defined(__GNUC__)
+
+void test_Array7(void) {
+}
+void test_List7(void) {
+}
+
+#else
+
+void test_Array7(void) {
+  printf("a = g_array(int, 1, 2, 3, 4, 5)\n");
+  __auto_type a = g_array(int, 1, 2, 3, 4, 5);
+
+  printf("s = g_slice(a, 2, 3)\n");
+  __auto_type s = g_slice(a, 2, 3);
+  g_for(it, s) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  printf("s = g_slice(a, 2)\n");
+  s = g_slice(a, 2);
+  g_for(it, s) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(a);
+}
+
+void test_List7(void) {
+  printf("xs = g_list(int, 1, 2, 3, 4, 5)\n");
+  __auto_type xs = g_list(int, 1, 2, 3, 4, 5);
+
+  printf("s = g_slice(xs, 2, 3)\n");
+  __auto_type s = g_slice(xs, 2, 3);
+  g_for(it, s) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  printf("s = g_slice(xs, 2)\n");
+  s = g_slice(xs, 2);
+  g_for(it, s) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(xs);
+}
+
+#endif
+
 int main(void) {
   test_Eq();
   test_Ord();
@@ -173,5 +269,9 @@ int main(void) {
   test_List4();
   test_Array5();
   test_List5();
+  test_Array6();
+  test_List6();
+  test_Array7();
+  test_List7();
   return 0;
 }

@@ -9,6 +9,7 @@
 #include "ord.h"
 
 #include "itr.h"
+#include "slice.h"
 
 #define Array(T) TYPE_NAME(Array, T)
 #define ArrayT(T) TYPE_NAME(ArrayT, T)
@@ -43,6 +44,8 @@
     Array(T) a;                                                          \
   } Itr(Array(T));                                                       \
   trait_Itr(Array(T));                                                   \
+  /* ---- instance Slice(Array(T)) */                                    \
+  trait_Slice(Array(T));                                                 \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -124,20 +127,23 @@
     return (Itr(Array(T))){.a = a};                                      \
   }                                                                      \
   static T* FUNC_NAME(ptr, Itr(Array(T)))(Itr(Array(T)) it) {            \
-    return (it.a.length ? it.a.data : 0);                                \
+    return it.a.data;                                                    \
   }                                                                      \
   static Itr(Array(T))                                                   \
       FUNC_NAME(next, Itr(Array(T)))(Itr(Array(T)) it) {                 \
-    if (it.a.length) {                                                   \
-      assert(it.a.data);                                                 \
-      it.a.length--;                                                     \
+    assert(it.a.length&& it.a.data);                                     \
+    if (--it.a.length) {                                                 \
       it.a.data++;                                                       \
+    } else {                                                             \
+      it.a.data = 0;                                                     \
     }                                                                    \
     return it;                                                           \
   }                                                                      \
   instance_Itr(Array(T), FUNC_NAME(itr, Itr(Array(T))),                  \
                FUNC_NAME(ptr, Itr(Array(T))),                            \
                FUNC_NAME(next, Itr(Array(T))));                          \
+  /* ---- instance Slice(Array(T)) */                                    \
+  instance_Slice(Array(T));                                              \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS

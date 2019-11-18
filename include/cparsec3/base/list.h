@@ -11,6 +11,7 @@
 #include "mem.h"
 
 #include "itr.h"
+#include "slice.h"
 
 #define List(T) TYPE_NAME(List, T)
 #define stList(T) TYPE_NAME(stList, T)
@@ -48,6 +49,8 @@
     List(T) xs;                                                          \
   } Itr(List(T));                                                        \
   trait_Itr(List(T));                                                    \
+  /* ---- instance Slice(List(T)) */                                     \
+  trait_Slice(List(T));                                                  \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -164,14 +167,15 @@
     return (it.xs ? &(it.xs->head) : 0);                                 \
   }                                                                      \
   static Itr(List(T)) FUNC_NAME(next, Itr(List(T)))(Itr(List(T)) it) {   \
-    if (it.xs) {                                                         \
-      it.xs = it.xs->tail;                                               \
-    }                                                                    \
+    assert(it.xs);                                                       \
+    it.xs = it.xs->tail;                                                 \
     return it;                                                           \
   }                                                                      \
   instance_Itr(List(T), FUNC_NAME(itr, Itr(List(T))),                    \
                FUNC_NAME(ptr, Itr(List(T))),                             \
                FUNC_NAME(next, Itr(List(T))));                           \
+  /* ---- instance Slice(List(T)) */                                     \
+  instance_Slice(List(T));                                               \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS

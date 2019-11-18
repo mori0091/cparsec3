@@ -27,27 +27,35 @@
 // clang-format on
 
 // clang-format off
-#define GENERIC_CONTAINER(x)                    \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
-          BIND_TYPESET(Array),                  \
-          BIND_TYPESET(List),                   \
-          BIND_TYPESET(Maybe),                  \
-          BIND(Itr, APPLY_TYPESET(Array)),      \
-          BIND(Itr, APPLY_TYPESET(List)))
+#define GENERIC_CONTAINER(x)                              \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT,                     \
+          BIND_TYPESET(Array),                            \
+          BIND_TYPESET(List),                             \
+          BIND_TYPESET(Maybe),                            \
+          BIND(Itr, APPLY_TYPESET(Array)),                \
+          BIND(Itr, APPLY_TYPESET(List)),                 \
+          BIND(Slice, APPLY_TYPESET(Array)),              \
+          BIND(Slice, APPLY_TYPESET(List)),               \
+          BIND(Itr, APPLY(Slice, APPLY_TYPESET(Array))),  \
+          BIND(Itr, APPLY(Slice, APPLY_TYPESET(List))))
 // clang-format on
 
 // clang-format off
-#define GENERIC_ITERABLE(x)                     \
-  GENERIC(x, SND, CREATE_TRAIT,                 \
-          BIND(Itr, APPLY_TYPESET(Array)),      \
-          BIND(Itr, APPLY_TYPESET(List)))
+#define GENERIC_ITERABLE(x)                               \
+  GENERIC(x, SND, CREATE_TRAIT,                           \
+          BIND(Itr, APPLY_TYPESET(Array)),                \
+          BIND(Itr, APPLY_TYPESET(List)),                 \
+          BIND(Itr, APPLY(Slice, APPLY_TYPESET(Array))),  \
+          BIND(Itr, APPLY(Slice, APPLY_TYPESET(List))))
 // clang-format on
 
 // clang-format off
-#define GENERIC_ITR(x)                          \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
-          BIND(Itr, APPLY_TYPESET(Array)),      \
-          BIND(Itr, APPLY_TYPESET(List)))
+#define GENERIC_ITR(x)                                    \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT,                     \
+          BIND(Itr, APPLY_TYPESET(Array)),                \
+          BIND(Itr, APPLY_TYPESET(List)),                 \
+          BIND(Itr, APPLY(Slice, APPLY_TYPESET(Array))),  \
+          BIND(Itr, APPLY(Slice, APPLY_TYPESET(List))))
 // clang-format on
 
 #define GENERIC_ARRAY(x)                                                 \
@@ -55,6 +63,20 @@
 
 #define GENERIC_LIST(x)                                                  \
   GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(List))
+
+// clang-format off
+#define GENERIC_BOXED_CONTAINER(x)              \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
+          BIND_TYPESET(Array),                  \
+          BIND_TYPESET(List))
+// clang-format on
+
+// clang-format off
+#define GENERIC_SLICE(x)                        \
+  GENERIC(x, SND, CREATE_TRAIT,                 \
+          BIND(Slice, APPLY_TYPESET(Array)),    \
+          BIND(Slice, APPLY_TYPESET(List)))
+// clang-format on
 
 #define g_eq(a, b) GENERIC_EQ(a).eq(a, b)
 #define g_neq(a, b) GENERIC_EQ(a).neq(a, b)
@@ -70,7 +92,8 @@
 
 #define g_length(x) GENERIC_CONTAINER(x).length(x)
 #define g_null(x) GENERIC_CONTAINER(x).null(x)
-#define g_free(x) GENERIC_CONTAINER(x).free(x)
+
+#define g_free(x) GENERIC_BOXED_CONTAINER(x).free(x)
 
 #define g_itr(x) GENERIC_ITERABLE(x).itr(x)
 
@@ -85,6 +108,11 @@
 #define g_head(xs) GENERIC_LIST(xs).head(xs)
 #define g_tail(xs) GENERIC_LIST(xs).tail(xs)
 #define g_drop(n, xs) GENERIC_LIST(xs).drop(n, xs)
+
+#define g_slice(c, ...)                                                  \
+  CAT(g_slice, VARIADIC_SIZE(__VA_ARGS__))(c, __VA_ARGS__)
+#define g_slice1(c, idx) g_slice2(c, idx, SIZE_MAX)
+#define g_slice2(c, idx, len) GENERIC_SLICE(c).slice(c, idx, len)
 
 #if defined(__GNUC__)
 
