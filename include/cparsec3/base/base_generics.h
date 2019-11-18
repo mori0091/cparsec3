@@ -71,6 +71,13 @@
           BIND_TYPESET(List))
 // clang-format on
 
+// clang-format off
+#define GENERIC_SLICE(x)                        \
+  GENERIC(x, SND, CREATE_TRAIT,                 \
+          BIND(Slice, APPLY_TYPESET(Array)),    \
+          BIND(Slice, APPLY_TYPESET(List)))
+// clang-format on
+
 #define g_eq(a, b) GENERIC_EQ(a).eq(a, b)
 #define g_neq(a, b) GENERIC_EQ(a).neq(a, b)
 
@@ -101,6 +108,11 @@
 #define g_head(xs) GENERIC_LIST(xs).head(xs)
 #define g_tail(xs) GENERIC_LIST(xs).tail(xs)
 #define g_drop(n, xs) GENERIC_LIST(xs).drop(n, xs)
+
+#define g_slice(c, ...)                                                  \
+  CAT(g_slice, VARIADIC_SIZE(__VA_ARGS__))(c, __VA_ARGS__)
+#define g_slice1(c, idx) g_slice2(c, idx, SIZE_MAX)
+#define g_slice2(c, idx, len) GENERIC_SLICE(c).slice(c, idx, len)
 
 #if defined(__GNUC__)
 
