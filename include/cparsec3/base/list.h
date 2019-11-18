@@ -164,9 +164,8 @@
     return (it.xs ? &(it.xs->head) : 0);                                 \
   }                                                                      \
   static Itr(List(T)) FUNC_NAME(next, Itr(List(T)))(Itr(List(T)) it) {   \
-    if (it.xs) {                                                         \
-      it.xs = it.xs->tail;                                               \
-    }                                                                    \
+    assert(it.xs);                                                       \
+    it.xs = it.xs->tail;                                                 \
     return it;                                                           \
   }                                                                      \
   instance_Itr(List(T), FUNC_NAME(itr, Itr(List(T))),                    \
