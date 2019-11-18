@@ -56,6 +56,13 @@
 #define GENERIC_LIST(x)                                                  \
   GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(List))
 
+// clang-format off
+#define GENERIC_BOXED_CONTAINER(x)              \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
+          BIND_TYPESET(Array),                  \
+          BIND_TYPESET(List))
+// clang-format on
+
 #define g_eq(a, b) GENERIC_EQ(a).eq(a, b)
 #define g_neq(a, b) GENERIC_EQ(a).neq(a, b)
 
@@ -70,7 +77,8 @@
 
 #define g_length(x) GENERIC_CONTAINER(x).length(x)
 #define g_null(x) GENERIC_CONTAINER(x).null(x)
-#define g_free(x) GENERIC_CONTAINER(x).free(x)
+
+#define g_free(x) GENERIC_BOXED_CONTAINER(x).free(x)
 
 #define g_itr(x) GENERIC_ITERABLE(x).itr(x)
 
