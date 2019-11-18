@@ -27,27 +27,35 @@
 // clang-format on
 
 // clang-format off
-#define GENERIC_CONTAINER(x)                    \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
-          BIND_TYPESET(Array),                  \
-          BIND_TYPESET(List),                   \
-          BIND_TYPESET(Maybe),                  \
-          BIND(Itr, APPLY_TYPESET(Array)),      \
-          BIND(Itr, APPLY_TYPESET(List)))
+#define GENERIC_CONTAINER(x)                              \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT,                     \
+          BIND_TYPESET(Array),                            \
+          BIND_TYPESET(List),                             \
+          BIND_TYPESET(Maybe),                            \
+          BIND(Itr, APPLY_TYPESET(Array)),                \
+          BIND(Itr, APPLY_TYPESET(List)),                 \
+          BIND(Slice, APPLY_TYPESET(Array)),              \
+          BIND(Slice, APPLY_TYPESET(List)),               \
+          BIND(Itr, APPLY(Slice, APPLY_TYPESET(Array))),  \
+          BIND(Itr, APPLY(Slice, APPLY_TYPESET(List))))
 // clang-format on
 
 // clang-format off
-#define GENERIC_ITERABLE(x)                     \
-  GENERIC(x, SND, CREATE_TRAIT,                 \
-          BIND(Itr, APPLY_TYPESET(Array)),      \
-          BIND(Itr, APPLY_TYPESET(List)))
+#define GENERIC_ITERABLE(x)                               \
+  GENERIC(x, SND, CREATE_TRAIT,                           \
+          BIND(Itr, APPLY_TYPESET(Array)),                \
+          BIND(Itr, APPLY_TYPESET(List)),                 \
+          BIND(Itr, APPLY(Slice, APPLY_TYPESET(Array))),  \
+          BIND(Itr, APPLY(Slice, APPLY_TYPESET(List))))
 // clang-format on
 
 // clang-format off
-#define GENERIC_ITR(x)                          \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
-          BIND(Itr, APPLY_TYPESET(Array)),      \
-          BIND(Itr, APPLY_TYPESET(List)))
+#define GENERIC_ITR(x)                                    \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT,                     \
+          BIND(Itr, APPLY_TYPESET(Array)),                \
+          BIND(Itr, APPLY_TYPESET(List)),                 \
+          BIND(Itr, APPLY(Slice, APPLY_TYPESET(Array))),  \
+          BIND(Itr, APPLY(Slice, APPLY_TYPESET(List))))
 // clang-format on
 
 #define GENERIC_ARRAY(x)                                                 \
