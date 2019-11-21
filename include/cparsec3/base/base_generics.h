@@ -111,8 +111,8 @@
 
 #define g_slice(c, ...)                                                  \
   CAT(g_slice, VARIADIC_SIZE(__VA_ARGS__))(c, __VA_ARGS__)
-#define g_slice1(c, idx) g_slice2(c, idx, SIZE_MAX)
-#define g_slice2(c, idx, len) GENERIC_SLICE(c).slice(c, idx, len)
+#define g_slice1(c, s2) GENERIC_SLICE(c).slice(c, 0, s2)
+#define g_slice2(c, s1, s2) GENERIC_SLICE(c).slice(c, s1, s2)
 
 #if defined(__GNUC__)
 
