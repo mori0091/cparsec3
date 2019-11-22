@@ -50,6 +50,6 @@ The /CPARSEC3/ library consists of the following portions:
 
 - [[file:docs/api-misc.org][Misc.]]          ::
      Other miscellernious APIs
-  - TYEPSET macro
+  - TYPESET macro
   - Primitive types
 
