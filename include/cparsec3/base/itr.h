@@ -16,8 +16,8 @@
     Itr(C) (*itr)(C c);                                                  \
     Item(C) * (*ptr)(Itr(C) it);                                         \
     Itr(C) (*next)(Itr(C) it);                                           \
-    bool (*null)(Itr(C) it);                                             \
     Itr(C) (*skip)(size_t n, Itr(C) it);                                 \
+    bool (*null)(Itr(C) it);                                             \
     Item(C) (*get)(Itr(C) it);                                           \
     void (*set)(Item(C) x, Itr(C) it);                                   \
   } ItrT(C);                                                             \
@@ -28,14 +28,15 @@
 // -----------------------------------------------------------------------
 #define instance_Itr(C, _itr_, _ptr_, _next_)                            \
   C_API_BEGIN                                                            \
-  static bool FUNC_NAME(null, Itr(C))(Itr(C) it) {                       \
-    return !_ptr_(it);                                                   \
-  }                                                                      \
   static Itr(C) FUNC_NAME(skip, Itr(C))(size_t n, Itr(C) it) {           \
-    for (; !FUNC_NAME(null, Itr(C))(it) && n; --n) {                     \
+    while (_ptr_(it) && n) {                                             \
       it = _next_(it);                                                   \
+      n--;                                                               \
     }                                                                    \
     return it;                                                           \
+  }                                                                      \
+  static bool FUNC_NAME(null, Itr(C))(Itr(C) it) {                       \
+    return !_ptr_(it);                                                   \
   }                                                                      \
   static Item(C) FUNC_NAME(get, Itr(C))(Itr(C) it) {                     \
     Item(C)* p = _ptr_(it);                                              \
@@ -51,8 +52,8 @@
         .itr = _itr_,                                                    \
         .ptr = _ptr_,                                                    \
         .next = _next_,                                                  \
-        .null = FUNC_NAME(null, Itr(C)),                                 \
         .skip = FUNC_NAME(skip, Itr(C)),                                 \
+        .null = FUNC_NAME(null, Itr(C)),                                 \
         .get = FUNC_NAME(get, Itr(C)),                                   \
         .set = FUNC_NAME(set, Itr(C)),                                   \
     };                                                                   \
