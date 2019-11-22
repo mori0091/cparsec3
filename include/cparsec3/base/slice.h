@@ -7,6 +7,13 @@
 
 #include "itr.h"
 
+static inline size_t adjust_index(int idx, size_t len) {
+  if (idx < 0) {
+    idx += len;
+  }
+  return (idx < 0 ? 0 : ((size_t)idx <= len ? (size_t)idx : len));
+}
+
 #define Slice(C) TYPE_NAME(Slice, C)
 #define SliceT(C) TYPE_NAME(SliceT, C)
 
@@ -15,22 +22,23 @@
   C_API_BEGIN                                                            \
   /* ---- Slice(C) */                                                    \
   typedef struct {                                                       \
-    Itr(C) begin;                                                        \
-    Itr(C) end;                                                          \
+    size_t start;                                                        \
+    size_t stop;                                                         \
+    C c;                                                                 \
   } Slice(C);                                                            \
   /* ---- trait Slice(C) */                                              \
   typedef struct {                                                       \
     Slice(C) empty;                                                      \
     bool (*null)(Slice(C) s);                                            \
     size_t (*length)(Slice(C) s);                                        \
-    Slice(C) (*slice)(C c, size_t start, size_t length);                 \
+    Slice(C) (*slice)(C c, int start, int stop);                         \
   } SliceT(C);                                                           \
   SliceT(C) Trait(Slice(C));                                             \
   /* ---- instance Itr(Slice(C)) */                                      \
   typedef Item(C) Item(Slice(C));                                        \
   typedef struct {                                                       \
-    Itr(C) itr;                                                          \
-    Itr(C) end;                                                          \
+    size_t rest;                                                         \
+    Itr(C) it;                                                           \
   } Itr(Slice(C));                                                       \
   trait_Itr(Slice(C));                                                   \
   /* ---- */                                                             \
@@ -42,34 +50,28 @@
   C_API_BEGIN                                                            \
   /* ---- trait Slice(C) */                                              \
   static bool FUNC_NAME(null, Slice(C))(Slice(C) s) {                    \
-    ItrT(C) I = trait(Itr(C));                                           \
-    return I.ptr(s.begin) == I.ptr(s.end);                               \
+    assert(s.start <= s.stop);                                           \
+    return (s.start == s.stop);                                          \
   }                                                                      \
   static size_t FUNC_NAME(length, Slice(C))(Slice(C) s) {                \
-    ItrT(C) I = trait(Itr(C));                                           \
-    size_t len = 0;                                                      \
-    for (; I.ptr(s.begin) != I.ptr(s.end); s.begin = I.next(s.begin)) {  \
-      len++;                                                             \
-    }                                                                    \
-    return len;                                                          \
+    assert(s.start <= s.stop);                                           \
+    return (s.stop - s.start);                                           \
   }                                                                      \
-  static Slice(C)                                                        \
-      FUNC_NAME(slice, Slice(C))(C c, size_t start, size_t length) {     \
-    ItrT(C) I = trait(Itr(C));                                           \
-    Itr(C) begin = I.itr(c);                                             \
-    for (; 0 < start && !I.null(begin); begin = I.next(begin)) {         \
-      start--;                                                           \
+  static Slice(C) FUNC_NAME(slice, Slice(C))(C c, int start, int stop) { \
+    if (trait(C).null(c)) {                                              \
+      return (Slice(C)){0};                                              \
     }                                                                    \
-    Itr(C) end = begin;                                                  \
-    for (; 0 < length && !I.null(end); end = I.next(end)) {              \
-      length--;                                                          \
+    size_t len = trait(C).length(c);                                     \
+    size_t s1 = adjust_index(start, len);                                \
+    size_t s2 = adjust_index(stop, len);                                 \
+    if (s1 >= s2) {                                                      \
+      return (Slice(C)){0};                                              \
     }                                                                    \
-    return (Slice(C)){.begin = begin, .end = end};                       \
+    return (Slice(C)){.start = s1, .stop = s2, .c = c};                  \
   }                                                                      \
   SliceT(C) Trait(Slice(C)) {                                            \
-    Itr(C) it = trait(Itr(C)).itr(trait(C).empty);                       \
     return (SliceT(C)){                                                  \
-        .empty = {.begin = it, .end = it},                               \
+        .empty = {0},                                                    \
         .null = FUNC_NAME(null, Slice(C)),                               \
         .length = FUNC_NAME(length, Slice(C)),                           \
         .slice = FUNC_NAME(slice, Slice(C)),                             \
@@ -77,16 +79,22 @@
   }                                                                      \
   /* ---- instance Itr(Slice(C))*/                                       \
   static Itr(Slice(C)) FUNC_NAME(itr, Itr(Slice(C)))(Slice(C) s) {       \
-    return (Itr(Slice(C))){.itr = s.begin, .end = s.end};                \
+    ItrT(C) I = trait(Itr(C));                                           \
+    Itr(C) it = I.skip(s.start, I.itr(s.c));                             \
+    return (Itr(Slice(C))){                                              \
+        .rest = FUNC_NAME(length, Slice(C))(s),                          \
+        .it = it,                                                        \
+    };                                                                   \
   }                                                                      \
   static Item(C) * FUNC_NAME(ptr, Itr(Slice(C)))(Itr(Slice(C)) it) {     \
-    return trait(Itr(C)).ptr(it.itr);                                    \
+    return (it.rest ? trait(Itr(C)).ptr(it.it) : 0);                     \
   }                                                                      \
   static Itr(Slice(C))                                                   \
       FUNC_NAME(next, Itr(Slice(C)))(Itr(Slice(C)) it) {                 \
     ItrT(C) I = trait(Itr(C));                                           \
-    assert(I.ptr(it.itr) != I.ptr(it.end));                              \
-    it.itr = I.next(it.itr);                                             \
+    assert(it.rest && !I.null(it.it));                                   \
+    it.rest--;                                                           \
+    it.it = I.next(it.it);                                               \
     return it;                                                           \
   }                                                                      \
   instance_Itr(Slice(C), FUNC_NAME(itr, Itr(Slice(C))),                  \

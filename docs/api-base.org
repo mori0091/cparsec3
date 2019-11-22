@@ -390,7 +390,7 @@ An ~ItrT(C)~ trait provides the following member variables/functions :
      ~SliceT(List(int))~ type.
 
 An ~SliceT(C)~ trait provides the following member variables/functions :
-- Slice(T) empty  ::
+- Slice(C) empty  ::
      An empty slice.
 
 - bool null(Slice(C) s) ::
@@ -399,15 +399,17 @@ An ~SliceT(C)~ trait provides the following member variables/functions :
 - size_t length(Slice(C) s) ::
      Returns the length of the slice ~s~.
 
-- Slice(T) slice(C c, size_t start, size_t length) ::
-     Constructs a slice, partial or whole view of the container ~c~, that is a
-     reference to a portion of ~c~. Suppose that /N/ is the length of ~c~ then:
-  - if ~start~ \ge /N/ ::
-       Returns an *empty* slice.
-  - if ~start~ \lt /N/ \le ~start + length~ ::
-       Returns the trailing portion of ~c~ starting at ~start~.
-  - if ~start~ \lt /N/ and ~start + length~ \le /N/ ::
-       Returns the portion of ~c~ starting at ~start~ and of length ~length~.
+- Slice(C) slice(C c, int start, int stop) ::
+     Constructs a new ~Slice(C)~ object that is a reference to a portion of
+     underlying container ~c~ of ~C~ type. Returns an empty ~Slice(C)~ object if
+     ~f(start)~ \ge ~f(stop)~. Otherwise, returns a ~Slice(C)~ object refering
+     to a range of the ~c~ that starts with index ~f(start)~ (included) and ends
+     with index ~f(stop)~ (excluded), where \\
+  - ~f(x)~ \equal ~x~ if 0 \le ~x~ \le ~length(c)~
+  - ~f(x)~ \equal ~length(c)~ if ~length(c)~ \le ~x~
+  - ~f(x)~ \equal ~x~ + ~length(c)~ if ~x~ \lt 0 and 0 \le ~x~ + ~length(c)~
+  - ~f(x)~ \equal 0 if ~x~ + ~length(c)~ \lt 0
+  - note that always 0 \le ~length(c)~
 
 
 ** Show(T) - trait to represent a value as a string
@@ -501,13 +503,21 @@ The below sections show *Generic Macros* provided by /CPARSEC3/ *Base* library.
      Destructs all cells of the list ~xs~.
 
 ** Slice Constructors
-- g_slice(c, start, length) ::
+- g_slice(c, start, stop) ::
      Constructs a new ~Slice(C)~ object that is a reference to a portion of
-     underlying container ~c~ of ~C~ type.
+     underlying container ~c~ of ~C~ type. Returns an empty ~Slice(C)~ object if
+     ~f(start)~ \ge ~f(stop)~. Otherwise, returns a ~Slice(C)~ object refering
+     to a range of the ~c~ that starts with index ~f(start)~ (included) and ends
+     with index ~f(stop)~ (excluded), where \\
+  - ~f(x)~ \equal ~x~ if 0 \le ~x~ \le ~length(c)~
+  - ~f(x)~ \equal ~length(c)~ if ~length(c)~ \le ~x~
+  - ~f(x)~ \equal ~x~ + ~length(c)~ if ~x~ \lt 0 and 0 \le ~x~ + ~length(c)~
+  - ~f(x)~ \equal 0 if ~x~ + ~length(c)~ \lt 0
+  - note that always 0 \le ~length(c)~
 
-- g_slice(c, start) ::
-     Same as ~g_slice(c, start, SIZE_MAX)~. This is a syntax sugar to construct
-     a slice that refers the trailing portion of the container.
+- g_slice(c, n) ::
+     Same as ~g_slice(c, 0, n)~. This is a syntax sugar to construct
+     a slice that refers the leading portion of the container.
 
 ** Container Length
 - g_null(c)       ::
