@@ -98,6 +98,7 @@
 #define g_itr(x) GENERIC_ITERABLE(x).itr(x)
 
 #define g_next(it) GENERIC_ITR(it).next(it)
+#define g_skip(n, it) GENERIC_ITR(it).skip(n, it)
 #define g_get(it) GENERIC_ITR(it).get(it)
 #define g_set(v, it) GENERIC_ITR(it).set(v, it)
 
@@ -116,8 +117,15 @@
 
 #if defined(__GNUC__)
 
-#define g_for(it, c)                                                     \
+#define g_for(it, ...)                                                   \
+  CAT(g_for, VARIADIC_SIZE(__VA_ARGS__))(it, __VA_ARGS__)
+
+#define g_for1(it, c)                                                    \
   for (__auto_type it = g_itr(c); !g_null(it); it = g_next(it))
+
+#define g_for2(it, c, step)                                              \
+  assert(step && "g_for(it, c, step): step == 0 not permitted.");        \
+  for (__auto_type it = g_itr(c); !g_null(it); it = g_skip(step, it))
 
 #endif
 

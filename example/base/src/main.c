@@ -246,7 +246,6 @@ void test_List6(void) {
   g_free(xs);
 }
 
-
 #if !defined(__GNUC__)
 
 void test_Array7(void) {
@@ -300,6 +299,69 @@ void test_List7(void) {
 
 #endif
 
+void test_Array8(void) {
+  printf("a = g_array(int, 1, 2, 3, 4, 5)\n");
+  Array(int) a = g_array(int, 1, 2, 3, 4, 5);
+
+  printf("iterate by using g_skip(2, it) instead of g_next(it)\n");
+  for (Itr(Array(int)) it = g_itr(a); !g_null(it); it = g_skip(2, it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(a);
+}
+
+void test_List8(void) {
+  printf("xs = g_list(int, 1, 2, 3, 4, 5)\n");
+  List(int) xs = g_list(int, 1, 2, 3, 4, 5);
+
+  printf("iterate by using g_skip(2, it) instead of g_next(it)\n");
+  for (Itr(List(int)) it = g_itr(xs); !g_null(it); it = g_skip(2, it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(xs);
+}
+
+#if !defined(__GNUC__)
+
+void test_Array9(void) {
+}
+void test_List9(void) {
+}
+
+#else
+
+void test_Array9(void) {
+  printf("a = g_array(int, 1, 2, 3, 4, 5)\n");
+  __auto_type a = g_array(int, 1, 2, 3, 4, 5);
+
+  printf("iterate by using g_for(it, a, 2) instead of g_for(it, a)\n");
+  g_for(it, a, 2) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(a);
+}
+
+void test_List9(void) {
+  printf("xs = g_list(int, 1, 2, 3, 4, 5)\n");
+  __auto_type xs = g_list(int, 1, 2, 3, 4, 5);
+
+  printf("iterate by using g_for(it, xs, 2) instead of g_for(it, xs)\n");
+  g_for(it, xs, 2) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(xs);
+}
+
+#endif
+
 int main(void) {
   test_Eq();
   test_Ord();
@@ -317,5 +379,9 @@ int main(void) {
   test_List6();
   test_Array7();
   test_List7();
+  test_Array8();
+  test_List8();
+  test_Array9();
+  test_List9();
   return 0;
 }
