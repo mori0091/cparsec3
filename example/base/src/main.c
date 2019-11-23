@@ -362,6 +362,62 @@ void test_List9(void) {
 
 #endif
 
+void test_Array10(void) {
+  printf("a = g_array(int, 1, 2, 3, 4, 5)\n");
+  Array(int) a = g_array(int, 1, 2, 3, 4, 5);
+  printf("iterator Itr(C) is also an iterable\n");
+  Itr(Array(int)) i = g_itr(a);
+  for (Itr(Array(int)) it = g_itr(i); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(a);
+}
+
+void test_List10(void) {
+  printf("xs = g_list(int, 1, 2, 3, 4, 5)\n");
+  List(int) xs = g_list(int, 1, 2, 3, 4, 5);
+  printf("iterator Itr(C) is also an iterable\n");
+  Itr(List(int)) i = g_itr(xs);
+  for (Itr(List(int)) it = g_itr(i); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(xs);
+}
+
+void test_Array11(void) {
+  printf("a = g_array(int, 1, 2, 3, 4, 5)\n");
+  Array(int) a = g_array(int, 1, 2, 3, 4, 5);
+  printf("s = g_slice(a, 1, -1)\n");
+  Slice(Array(int)) s = g_slice(a, 1, -1);
+  printf("iterator Itr(Slice(C)) is also an iterable\n");
+  Itr(Slice(Array(int))) i = g_itr(s);
+  for (Itr(Slice(Array(int))) it = g_itr(i); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(a);
+}
+
+void test_List11(void) {
+  printf("xs = g_list(int, 1, 2, 3, 4, 5)\n");
+  List(int) xs = g_list(int, 1, 2, 3, 4, 5);
+  printf("s = g_slice(xs, 1, -1)\n");
+  Slice(List(int)) s = g_slice(xs, 1, -1);
+  printf("iterator Itr(Slice(C)) is also an iterable\n");
+  Itr(Slice(List(int))) i = g_itr(s);
+  for (Itr(Slice(List(int))) it = g_itr(i); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(xs);
+}
+
 int main(void) {
   test_Eq();
   test_Ord();
@@ -383,5 +439,9 @@ int main(void) {
   test_List8();
   test_Array9();
   test_List9();
+  test_Array10();
+  test_List10();
+  test_Array11();
+  test_List11();
   return 0;
 }
