@@ -8,75 +8,88 @@
 #define BIND_TYPESET(CONTAINER) BIND(CONTAINER, TYPESET_COMPONENT)
 #define APPLY_TYPESET(CONTAINER) APPLY(CONTAINER, TYPESET_COMPONENT)
 
-// clang-format off
+// clang-format off ------------------------------------------------------
 #define GENERIC_EQ(x)                           \
   GENERIC(x, SND, CREATE_TRAIT,                 \
           BIND(Eq, TYPESET(PRIMITIVE),          \
                APPLY_TYPESET(Array),            \
                APPLY_TYPESET(List),             \
                APPLY_TYPESET(Maybe)))
-// clang-format on
 
-// clang-format off
 #define GENERIC_ORD(x)                          \
   GENERIC(x, SND, CREATE_TRAIT,                 \
           BIND(Ord, TYPESET(PRIMITIVE),         \
                APPLY_TYPESET(Array),            \
                APPLY_TYPESET(List),             \
                APPLY_TYPESET(Maybe)))
-// clang-format on
 
-// clang-format off
-#define GENERIC_CONTAINER(x)                              \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT,                     \
-          BIND_TYPESET(Array),                            \
-          BIND_TYPESET(List),                             \
-          BIND_TYPESET(Maybe),                            \
-          BIND(Itr, APPLY_TYPESET(Array)),                \
-          BIND(Itr, APPLY_TYPESET(List)),                 \
-          BIND(Slice, APPLY_TYPESET(Array)),              \
-          BIND(Slice, APPLY_TYPESET(List)),               \
-          BIND(Itr, APPLY(Slice, APPLY_TYPESET(Array))),  \
-          BIND(Itr, APPLY(Slice, APPLY_TYPESET(List))))
-// clang-format on
+#define GENERIC_ARRAY(x)                        \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
+          BIND_TYPESET(Array))
 
-// clang-format off
-#define GENERIC_ITERABLE(x)                               \
-  GENERIC(x, SND, CREATE_TRAIT,                           \
-          BIND(Itr, APPLY_TYPESET(Array)),                \
-          BIND(Itr, APPLY_TYPESET(List)),                 \
-          BIND(Itr, APPLY(Slice, APPLY_TYPESET(Array))),  \
-          BIND(Itr, APPLY(Slice, APPLY_TYPESET(List))))
-// clang-format on
+#define GENERIC_LIST(x)                         \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
+          BIND_TYPESET(List))
 
-// clang-format off
-#define GENERIC_ITR(x)                                    \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT,                     \
-          BIND(Itr, APPLY_TYPESET(Array)),                \
-          BIND(Itr, APPLY_TYPESET(List)),                 \
-          BIND(Itr, APPLY(Slice, APPLY_TYPESET(Array))),  \
-          BIND(Itr, APPLY(Slice, APPLY_TYPESET(List))))
-// clang-format on
+#define GENERIC_SLICE(x)                        \
+  GENERIC(x, SND, CREATE_TRAIT,                 \
+          BIND(Slice,                           \
+               APPLY_TYPESET(Array),            \
+               APPLY_TYPESET(List)))
 
-#define GENERIC_ARRAY(x)                                                 \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(Array))
+#define GENERIC_CONTAINER(x)                    \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
+          BIND_TYPESET(Array),                  \
+          BIND_TYPESET(List),                   \
+          BIND_TYPESET(Maybe),                  \
+          BIND(Slice,                           \
+               APPLY_TYPESET(Array),            \
+               APPLY_TYPESET(List)),            \
+          BIND(Itr,                             \
+               APPLY_TYPESET(Array),            \
+               APPLY_TYPESET(List),             \
+               APPLY(Slice,                     \
+                     APPLY_TYPESET(Array),      \
+                     APPLY_TYPESET(List))))
 
-#define GENERIC_LIST(x)                                                  \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(List))
-
-// clang-format off
 #define GENERIC_BOXED_CONTAINER(x)              \
   GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
           BIND_TYPESET(Array),                  \
           BIND_TYPESET(List))
-// clang-format on
 
-// clang-format off
-#define GENERIC_SLICE(x)                        \
-  GENERIC(x, SND, CREATE_TRAIT,                 \
-          BIND(Slice, APPLY_TYPESET(Array)),    \
-          BIND(Slice, APPLY_TYPESET(List)))
-// clang-format on
+#define GENERIC_FINITE_SEQUENCE(x)              \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
+          BIND_TYPESET(Array),                  \
+          BIND_TYPESET(List),                   \
+          BIND_TYPESET(Maybe),                  \
+          BIND(Slice,                           \
+               APPLY_TYPESET(Array),            \
+               APPLY_TYPESET(List)))
+
+#define GENERIC_ITERABLE(x)                         \
+  GENERIC(x, SND, CREATE_TRAIT,                     \
+          BIND(Itr,                                 \
+               APPLY_TYPESET(Array),                \
+               APPLY_TYPESET(List),                 \
+               APPLY(Slice,                         \
+                     APPLY_TYPESET(Array),          \
+                     APPLY_TYPESET(List)),          \
+               APPLY(Itr,                           \
+                     APPLY_TYPESET(Array),          \
+                     APPLY_TYPESET(List),           \
+                     APPLY(Slice,                   \
+                           APPLY_TYPESET(Array),    \
+                           APPLY_TYPESET(List)))))
+
+#define GENERIC_ITR(x)                          \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
+          BIND(Itr,                             \
+               APPLY_TYPESET(Array),            \
+               APPLY_TYPESET(List),             \
+               APPLY(Slice,                     \
+                     APPLY_TYPESET(Array),      \
+                     APPLY_TYPESET(List))))
+// clang-format on -------------------------------------------------------
 
 #define g_eq(a, b) GENERIC_EQ(a).eq(a, b)
 #define g_neq(a, b) GENERIC_EQ(a).neq(a, b)
@@ -90,7 +103,7 @@
 #define g_cmp(a, b) GENERIC_ORD(a).cmp(a, b)
 #define g_compare(a, b) GENERIC_ORD(a).cmp(a, b)
 
-#define g_length(x) GENERIC_CONTAINER(x).length(x)
+#define g_length(x) GENERIC_FINITE_SEQUENCE(x).length(x)
 #define g_null(x) GENERIC_CONTAINER(x).null(x)
 
 #define g_free(x) GENERIC_BOXED_CONTAINER(x).free(x)
