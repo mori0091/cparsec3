@@ -9,7 +9,8 @@
 // -----------------------------------------------------------------------
 #define trait_Ord(T)                                                     \
   C_API_BEGIN                                                            \
-  typedef struct {                                                       \
+  typedef struct Ord(T) Ord(T);                                          \
+  struct Ord(T) {                                                        \
     union {                                                              \
       int (*cmp)(T, T);                                                  \
       int (*compare)(T, T);                                              \
@@ -32,7 +33,7 @@
     };                                                                   \
     T (*min)(T, T);                                                      \
     T (*max)(T, T);                                                      \
-  } Ord(T);                                                              \
+  };                                                                     \
   Ord(T) Trait(Ord(T));                                                  \
   C_API_END                                                              \
   END_OF_STATEMENTS

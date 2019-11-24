@@ -10,11 +10,12 @@
 // -----------------------------------------------------------------------
 #define trait_Mem(T)                                                     \
   C_API_BEGIN                                                            \
-  typedef struct {                                                       \
+  typedef struct MemT(T) MemT(T);                                        \
+  struct MemT(T) {                                                       \
     T* (*create)(size_t);                                                \
     T* (*recreate)(T*, size_t);                                          \
     void (*free)(T*);                                                    \
-  } MemT(T);                                                             \
+  };                                                                     \
   MemT(T) Trait(Mem(T));                                                 \
   C_API_END                                                              \
   END_OF_STATEMENTS

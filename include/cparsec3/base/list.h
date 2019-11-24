@@ -21,11 +21,12 @@
 #define trait_List(T)                                                    \
   C_API_BEGIN                                                            \
   /* ---- List(T) */                                                     \
-  typedef struct stList(T) {                                             \
+  typedef struct stList(T) * List(T);                                    \
+  typedef struct stList(T) stList(T);                                    \
+  struct stList(T) {                                                     \
     struct stList(T) * tail;                                             \
     T head;                                                              \
-  }                                                                      \
-  stList(T), *List(T);                                                   \
+  };                                                                     \
   /* ---- trait List(T) */                                               \
   typedef struct {                                                       \
     List(T) empty;                                                       \
@@ -45,9 +46,10 @@
   trait_Ord(List(T));                                                    \
   /* ---- instance Itr(List(T)) */                                       \
   typedef T Item(List(T));                                               \
-  typedef struct {                                                       \
+  typedef struct Itr(List(T)) Itr(List(T));                              \
+  struct Itr(List(T)) {                                                  \
     List(T) xs;                                                          \
-  } Itr(List(T));                                                        \
+  };                                                                     \
   trait_Itr(List(T));                                                    \
   /* ---- instance Slice(List(T)) */                                     \
   trait_Slice(List(T));                                                  \
