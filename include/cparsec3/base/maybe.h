@@ -15,17 +15,19 @@
 #define trait_Maybe(T)                                                   \
   C_API_BEGIN                                                            \
   /* ---- Maybe(T) */                                                    \
-  typedef struct {                                                       \
+  typedef struct Maybe(T) Maybe(T);                                      \
+  struct Maybe(T) {                                                      \
     bool none;                                                           \
     T value;                                                             \
-  } Maybe(T);                                                            \
+  };                                                                     \
   /* ---- trait Maybe(T) */                                              \
-  typedef struct {                                                       \
+  typedef struct MaybeT(T) MaybeT(T);                                    \
+  struct MaybeT(T) {                                                     \
     Maybe(T) empty;                                                      \
     bool (*null)(Maybe(T) m);                                            \
     size_t (*length)(Maybe(T) m);                                        \
     Maybe(T) (*just)(T value);                                           \
-  } MaybeT(T);                                                           \
+  };                                                                     \
   MaybeT(T) Trait(Maybe(T));                                             \
   /* ---- instance Eq(Maybe(T)) */                                       \
   trait_Eq(Maybe(T));                                                    \

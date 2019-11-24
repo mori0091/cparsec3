@@ -9,10 +9,11 @@
 // -----------------------------------------------------------------------
 #define trait_Eq(T)                                                      \
   C_API_BEGIN                                                            \
-  typedef struct {                                                       \
+  typedef struct Eq(T) Eq(T);                                            \
+  struct Eq(T) {                                                         \
     bool (*eq)(T, T);                                                    \
     bool (*neq)(T, T);                                                   \
-  } Eq(T);                                                               \
+  };                                                                     \
   Eq(T) Trait(Eq(T));                                                    \
   C_API_END                                                              \
   END_OF_STATEMENTS

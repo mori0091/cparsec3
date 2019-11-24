@@ -5,9 +5,10 @@
 
 C_API_BEGIN
 
-typedef struct {
+typedef struct None None;
+struct None {
   char _;
-} None;
+};
 
 static const None NONE = {0};
 

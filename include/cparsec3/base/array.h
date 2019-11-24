@@ -18,21 +18,23 @@
 #define trait_Array(T)                                                   \
   C_API_BEGIN                                                            \
   /* ---- Array(T) */                                                    \
-  typedef struct {                                                       \
+  typedef struct Array(T) Array(T);                                      \
+  struct Array(T) {                                                      \
     size_t length;                                                       \
     T* data;                                                             \
-  } Array(T);                                                            \
+  };                                                                     \
   /* ---- trait Array(T) */                                              \
-  typedef struct {                                                       \
+  typedef struct ArrayT(T) ArrayT(T);                                    \
+  struct ArrayT(T) {                                                     \
     Array(T) empty;                                                      \
     bool (*null)(Array(T) a);                                            \
     size_t (*length)(Array(T) a);                                        \
-    Array(T) (*from_array)(size_t n, T* a);                              \
+    Array(T) (*from_array)(size_t n, T * a);                             \
     Array(T) (*create)(size_t n);                                        \
     void (*free)(Array(T) a);                                            \
     T* (*begin)(Array(T) a);                                             \
     T* (*end)(Array(T) a);                                               \
-  } ArrayT(T);                                                           \
+  };                                                                     \
   ArrayT(T) Trait(Array(T));                                             \
   /* ---- instance Eq(Array(T)) */                                       \
   trait_Eq(Array(T));                                                    \
@@ -40,9 +42,10 @@
   trait_Ord(Array(T));                                                   \
   /* ---- instance Itr(Array(T)) */                                      \
   typedef T Item(Array(T));                                              \
-  typedef struct {                                                       \
+  typedef struct Itr(Array(T)) Itr(Array(T));                            \
+  struct Itr(Array(T)) {                                                 \
     Array(T) a;                                                          \
-  } Itr(Array(T));                                                       \
+  };                                                                     \
   trait_Itr(Array(T));                                                   \
   /* ---- instance Slice(Array(T)) */                                    \
   trait_Slice(Array(T));                                                 \

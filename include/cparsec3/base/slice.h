@@ -21,25 +21,28 @@ static inline size_t adjust_index(int idx, size_t len) {
 #define trait_Slice(C)                                                   \
   C_API_BEGIN                                                            \
   /* ---- Slice(C) */                                                    \
-  typedef struct {                                                       \
+  typedef struct Slice(C) Slice(C);                                      \
+  struct Slice(C) {                                                      \
     size_t start;                                                        \
     size_t stop;                                                         \
     C c;                                                                 \
-  } Slice(C);                                                            \
+  };                                                                     \
   /* ---- trait Slice(C) */                                              \
-  typedef struct {                                                       \
+  typedef struct SliceT(C) SliceT(C);                                    \
+  struct SliceT(C) {                                                     \
     Slice(C) empty;                                                      \
     bool (*null)(Slice(C) s);                                            \
     size_t (*length)(Slice(C) s);                                        \
     Slice(C) (*slice)(C c, int start, int stop);                         \
-  } SliceT(C);                                                           \
+  };                                                                     \
   SliceT(C) Trait(Slice(C));                                             \
   /* ---- instance Itr(Slice(C)) */                                      \
   typedef Item(C) Item(Slice(C));                                        \
-  typedef struct {                                                       \
+  typedef struct Itr(Slice(C)) Itr(Slice(C));                            \
+  struct Itr(Slice(C)) {                                                 \
     size_t rest;                                                         \
     Itr(C) it;                                                           \
-  } Itr(Slice(C));                                                       \
+  };                                                                     \
   trait_Itr(Slice(C));                                                   \
   /* ---- */                                                             \
   C_API_END                                                              \
