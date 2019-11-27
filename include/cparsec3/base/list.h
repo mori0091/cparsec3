@@ -28,17 +28,18 @@
     T head;                                                              \
   };                                                                     \
   /* ---- trait List(T) */                                               \
-  typedef struct {                                                       \
+  typedef struct ListT(T) ListT(T);                                      \
+  struct ListT(T) {                                                      \
     List(T) empty;                                                       \
     bool (*null)(List(T) xs);                                            \
     size_t (*length)(List(T) xs);                                        \
     List(T) (*cons)(T x, List(T) xs);                                    \
-    List(T) (*from_array)(size_t n, T* a);                               \
+    List(T) (*from_array)(size_t n, T * a);                              \
     void (*free)(List(T) xs);                                            \
     List(T) (*drop)(size_t n, List(T) xs);                               \
     T (*head)(List(T) xs);                                               \
     List(T) (*tail)(List(T) xs);                                         \
-  } ListT(T);                                                            \
+  };                                                                     \
   ListT(T) Trait(List(T));                                               \
   /* ---- instance Eq(List(T)) */                                        \
   trait_Eq(List(T));                                                     \

@@ -9,7 +9,9 @@ enum eGuard { ANY, UNARY, BINARY };
 #define testGuard(T) FUNC_NAME(testGuard, T)
 #define Guard(T) TYPE_NAME(Guard, T)
 #define typedef_Guard(T)                                                 \
-  typedef struct {                                                       \
+  C_API_BEGIN                                                            \
+  typedef struct Guard(T) Guard(T);                                      \
+  struct Guard(T) {                                                      \
     enum eGuard type;                                                    \
     union {                                                              \
       struct {                                                           \
@@ -20,10 +22,13 @@ enum eGuard { ANY, UNARY, BINARY };
         T lhs;                                                           \
       };                                                                 \
     };                                                                   \
-  } Guard(T);                                                            \
-  bool testGuard(T)(Guard(T) g, T x)
+  };                                                                     \
+  bool testGuard(T)(Guard(T) g, T x);                                    \
+  C_API_END                                                              \
+  END_OF_STATEMENTS
 
 #define define_Guard(T)                                                  \
+  C_API_BEGIN                                                            \
   bool testGuard(T)(Guard(T) g, T x) {                                   \
     switch (g.type) {                                                    \
     case ANY:                                                            \
@@ -36,49 +41,62 @@ enum eGuard { ANY, UNARY, BINARY };
     fprintf(stderr, "Malformed Guard(T) object");                        \
     abort();                                                             \
   }                                                                      \
+  C_API_END                                                              \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
 #define applyTrans(T, R) FUNC_NAME(applyTrans, T, R)
 #define Trans(T, R) TYPE_NAME(Trans, T, R)
 #define typedef_Trans(T, R)                                              \
-  typedef struct {                                                       \
+  C_API_BEGIN                                                            \
+  typedef struct Trans(T, R) Trans(T, R);                                \
+  struct Trans(T, R) {                                                   \
     bool constant;                                                       \
     union {                                                              \
       R value;                                                           \
       R (*transmute)(T);                                                 \
     };                                                                   \
-  } Trans(T, R);                                                         \
-  R applyTrans(T, R)(Trans(T, R) t, T x)
+  };                                                                     \
+  R applyTrans(T, R)(Trans(T, R) t, T x);                                \
+  C_API_END                                                              \
+  END_OF_STATEMENTS
 
 #define define_Trans(T, R)                                               \
+  C_API_BEGIN                                                            \
   R applyTrans(T, R)(Trans(T, R) t, T x) {                               \
     if (t.constant) {                                                    \
       return t.value;                                                    \
     }                                                                    \
     return t.transmute(x);                                               \
   }                                                                      \
+  C_API_END                                                              \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
 #define testMatch(T, R) FUNC_NAME(testMatch, T, R)
 #define Match(T, R) TYPE_NAME(Match, T, R)
 #define typedef_Match(T, R)                                              \
+  C_API_BEGIN                                                            \
   /* typedef_Guard(T); */                                                \
   /* typedef_Trans(T, R); */                                             \
-  typedef struct {                                                       \
+  typedef struct Match(T, R) Match(T, R);                                \
+  struct Match(T, R) {                                                   \
     Guard(T) guard;                                                      \
     Trans(T, R) trans;                                                   \
-  } Match(T, R);                                                         \
-  Maybe(R) testMatch(T, R)(Match(T, R) m, T x)
+  };                                                                     \
+  Maybe(R) testMatch(T, R)(Match(T, R) m, T x);                          \
+  C_API_END                                                              \
+  END_OF_STATEMENTS
 
 #define define_Match(T, R)                                               \
+  C_API_BEGIN                                                            \
   Maybe(R) testMatch(T, R)(Match(T, R) m, T x) {                         \
     if (!testGuard(T)(m.guard, x)) {                                     \
       return (Maybe(R)){.none = true};                                   \
     }                                                                    \
     return (Maybe(R)){.value = applyTrans(T, R)(m.trans, x)};            \
   }                                                                      \
+  C_API_END                                                              \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------

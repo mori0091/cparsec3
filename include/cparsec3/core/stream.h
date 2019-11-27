@@ -15,11 +15,12 @@
   trait_Maybe(Tuple(Token(S), S));                                       \
   trait_Maybe(Tuple(Tokens(S), S));                                      \
   /* ---- */                                                             \
-  typedef struct {                                                       \
+  typedef struct Stream(S) Stream(S);                                    \
+  struct Stream(S) {                                                     \
     bool (*empty)(S s);                                                  \
     Maybe(Tuple(Token(S), S)) (*take1)(S s);                             \
     Maybe(Tuple(Tokens(S), S)) (*takeN)(int n, S s);                     \
-  } Stream(S);                                                           \
+  };                                                                     \
   Stream(S) Trait(Stream(S));                                            \
   /* ---- */                                                             \
   C_API_END                                                              \

@@ -7,13 +7,14 @@
 
 #define PosState(S) TYPE_NAME(PosState, S)
 #define typedef_PosState(S)                                              \
-  typedef struct {                                                       \
+  typedef struct PosState(S) PosState(S);                                \
+  struct PosState(S) {                                                   \
     S input; /* a Stream */                                              \
     Offset offset;                                                       \
     SourcePos pos;                                                       \
     size_t tabWidth;                                                     \
     String linePrefix;                                                   \
-  } PosState(S);                                                         \
+  };                                                                     \
   static inline PosState(S) initialPosState(String name, S input) {      \
     return (PosState(S)){.input = input,                                 \
                          .offset = 0,                                    \
