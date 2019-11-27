@@ -3,11 +3,12 @@
 
 #include "../base/base.h"
 
-typedef struct {
+typedef struct SourcePos SourcePos;
+struct SourcePos {
   String name;
   Offset line;
   Offset column;
-} SourcePos;
+};
 
 static inline SourcePos initialSourcePos(String name) {
   return (SourcePos){.name = name, .line = 1, .column = 1};

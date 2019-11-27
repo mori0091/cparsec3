@@ -30,10 +30,11 @@ C_API_BEGIN
 typedef char Token(String);
 
 /** Tokens(S) : A chunk of data elements taken from stream of type S */
-typedef struct {
+typedef struct Tokens(String) Tokens(String);
+struct Tokens(String) {
   size_t length;
   const char* value;
-} Tokens(String);
+};
 
 /** S : A stream */
 trait_Stream(String);

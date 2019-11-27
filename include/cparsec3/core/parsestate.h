@@ -7,14 +7,15 @@
 
 #define ParseState(S) TYPE_NAME(ParseState, S)
 #define typedef_ParseState(S)                                            \
-  typedef struct {                                                       \
+  typedef struct ParseState(S) ParseState(S);                            \
+  struct ParseState(S) {                                                 \
     /** the rest of input to process */                                  \
     S input;                                                             \
     /** number of processed tokens so far */                             \
     Offset offset;                                                       \
     /** state that is used for line/col calculation */                   \
     PosState(S) posState;                                                \
-  } ParseState(S);                                                       \
+  };                                                                     \
   static inline ParseState(S) initialParseState(String name, S input) {  \
     return (ParseState(S)){.input = input,                               \
                            .offset = 0,                                  \

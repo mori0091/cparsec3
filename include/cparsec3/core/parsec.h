@@ -34,10 +34,11 @@
   typedef Result(T, PEBundle(S)) PResult(S, T);                          \
   typedef_Tuple(PState(S), Result(T, PEBundle(S)));                      \
   typedef Tuple(PState(S), Result(T, PEBundle(S))) PSResult(S, T);       \
-  typedef struct {                                                       \
+  typedef struct Parsec(S, T) Parsec(S, T);                              \
+  struct Parsec(S, T) {                                                  \
     PSResult(S, T) (*run)(void* arg, PState(S) state);                   \
     void* arg;                                                           \
-  } Parsec(S, T);                                                        \
+  };                                                                     \
   /* runParserP(p, state) */                                             \
   static inline PSResult(S, T)                                           \
       RUN_PARSERP(S, T)(Parsec(S, T) p, PState(S) state) {               \

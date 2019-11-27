@@ -5,7 +5,9 @@
 
 #define ErrorItem(S) TYPE_NAME(ErrorItem, S)
 #define typedef_ErrorItem(S)                                             \
-  typedef struct {                                                       \
+  C_API_BEGIN                                                            \
+  typedef struct ErrorItem(S) ErrorItem(S);                              \
+  struct ErrorItem(S) {                                                  \
     enum {                                                               \
       LABEL,                                                             \
       TOKENS,                                                            \
@@ -15,7 +17,9 @@
       String label;                                                      \
       List(Token(S)) tokens;                                             \
     };                                                                   \
-  } ErrorItem(S)
+  };                                                                     \
+  C_API_END                                                              \
+  END_OF_STATEMENTS
 
 #define trait_ErrorItem(S)                                               \
   C_API_BEGIN                                                            \
@@ -27,14 +31,18 @@
 
 #define ParseError(S) TYPE_NAME(ParseError, S)
 #define typedef_ParseError(S)                                            \
+  C_API_BEGIN                                                            \
   trait_ErrorItem(S);                                                    \
   trait_Maybe(ErrorItem(S));                                             \
   trait_List(ErrorItem(S));                                              \
-  typedef struct {                                                       \
+  typedef struct ParseError(S) ParseError(S);                            \
+  struct ParseError(S) {                                                 \
     Offset offset;                                                       \
     Maybe(ErrorItem(S)) unexpected;                                      \
     List(ErrorItem(S)) expecting;                                        \
-  } ParseError(S)
+  };                                                                     \
+  C_API_END                                                              \
+  END_OF_STATEMENTS
 
 #define trait_ParseError(S)                                              \
   C_API_BEGIN                                                            \
@@ -56,10 +64,14 @@
 
 #define ParseErrorBundle(S) TYPE_NAME(ParseErrorBundle, S)
 #define typedef_ParseErrorBundle(S)                                      \
-  typedef struct {                                                       \
+  C_API_BEGIN                                                            \
+  typedef struct ParseErrorBundle(S) ParseErrorBundle(S);                \
+  struct ParseErrorBundle(S) {                                           \
     List(ParseError(S)) errors;                                          \
     PosState(S) posState;                                                \
-  } ParseErrorBundle(S)
+  };                                                                     \
+  C_API_END                                                              \
+  END_OF_STATEMENTS
 
 #define trait_ParseErrorBundle(S)                                        \
   C_API_BEGIN                                                            \
