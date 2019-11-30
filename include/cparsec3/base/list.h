@@ -33,12 +33,13 @@
     List(T) empty;                                                       \
     bool (*null)(List(T) xs);                                            \
     size_t (*length)(List(T) xs);                                        \
-    List(T) (*cons)(T x, List(T) xs);                                    \
-    List(T) (*from_array)(size_t n, T * a);                              \
+    void (*reverse)(List(T) * pxs);                                      \
     void (*free)(List(T) xs);                                            \
+    List(T) (*cons)(T x, List(T) xs);                                    \
     List(T) (*drop)(size_t n, List(T) xs);                               \
     T (*head)(List(T) xs);                                               \
     List(T) (*tail)(List(T) xs);                                         \
+    List(T) (*from_array)(size_t n, T * a);                              \
   };                                                                     \
   ListT(T) Trait(List(T));                                               \
   /* ---- instance Eq(List(T)) */                                        \
@@ -74,18 +75,21 @@
     }                                                                    \
     return len;                                                          \
   }                                                                      \
-  static List(T) FUNC_NAME(cons, List(T))(T x, List(T) xs) {             \
-    List(T) ys = trait(Mem(stList(T))).create(1);                        \
-    ys->head = x;                                                        \
-    ys->tail = xs;                                                       \
-    return ys;                                                           \
-  }                                                                      \
-  static List(T) FUNC_NAME(from_array, List(T))(size_t n, T * a) {       \
-    List(T) xs = NULL;                                                   \
-    while (n) {                                                          \
-      xs = FUNC_NAME(cons, List(T))(a[--n], xs);                         \
+  static void FUNC_NAME(reverse, List(T))(List(T) * pxs) {               \
+    assert(pxs);                                                         \
+    if (!*pxs) {                                                         \
+      return;                                                            \
     }                                                                    \
-    return xs;                                                           \
+    List(T) xs = *pxs;                                                   \
+    List(T) ys = xs->tail;                                               \
+    xs->tail = NULL;                                                     \
+    while (ys) {                                                         \
+      List(T) zs = ys->tail;                                             \
+      ys->tail = xs;                                                     \
+      xs = ys;                                                           \
+      ys = zs;                                                           \
+    }                                                                    \
+    *pxs = xs;                                                           \
   }                                                                      \
   static void FUNC_NAME(free, List(T))(List(T) xs) {                     \
     while (xs) {                                                         \
@@ -94,6 +98,12 @@
       *ys = (stList(T)){0};                                              \
       trait(Mem(stList(T))).free(ys);                                    \
     }                                                                    \
+  }                                                                      \
+  static List(T) FUNC_NAME(cons, List(T))(T x, List(T) xs) {             \
+    List(T) ys = trait(Mem(stList(T))).create(1);                        \
+    ys->head = x;                                                        \
+    ys->tail = xs;                                                       \
+    return ys;                                                           \
   }                                                                      \
   static List(T) FUNC_NAME(drop, List(T))(size_t n, List(T) xs) {        \
     while (xs && n) {                                                    \
@@ -111,17 +121,25 @@
   static List(T) FUNC_NAME(tail, List(T))(List(T) xs) {                  \
     return xs->tail;                                                     \
   }                                                                      \
+  static List(T) FUNC_NAME(from_array, List(T))(size_t n, T * a) {       \
+    List(T) xs = NULL;                                                   \
+    while (n) {                                                          \
+      xs = FUNC_NAME(cons, List(T))(a[--n], xs);                         \
+    }                                                                    \
+    return xs;                                                           \
+  }                                                                      \
   ListT(T) Trait(List(T)) {                                              \
     return (ListT(T)){                                                   \
         .empty = NULL,                                                   \
         .null = FUNC_NAME(null, List(T)),                                \
         .length = FUNC_NAME(length, List(T)),                            \
-        .cons = FUNC_NAME(cons, List(T)),                                \
-        .from_array = FUNC_NAME(from_array, List(T)),                    \
+        .reverse = FUNC_NAME(reverse, List(T)),                          \
         .free = FUNC_NAME(free, List(T)),                                \
+        .cons = FUNC_NAME(cons, List(T)),                                \
         .drop = FUNC_NAME(drop, List(T)),                                \
         .head = FUNC_NAME(head, List(T)),                                \
         .tail = FUNC_NAME(tail, List(T)),                                \
+        .from_array = FUNC_NAME(from_array, List(T)),                    \
     };                                                                   \
   }                                                                      \
   /* ---- instance Eq(List(T)) */                                        \

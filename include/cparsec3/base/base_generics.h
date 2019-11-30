@@ -9,86 +9,54 @@
 #define APPLY_TYPESET(CONTAINER) APPLY(CONTAINER, TYPESET_COMPONENT)
 
 // clang-format off ------------------------------------------------------
-#define GENERIC_EQ(x)                           \
-  GENERIC(x, SND, CREATE_TRAIT,                 \
-          BIND(Eq, TYPESET(PRIMITIVE),          \
-               APPLY_TYPESET(Array),            \
-               APPLY_TYPESET(List),             \
-               APPLY_TYPESET(Maybe)))
+#define GENERIC_EQ(x)                                                    \
+  GENERIC(x, SND, CREATE_TRAIT,                                          \
+          BIND(Eq, TYPESET(PRIMITIVE), APPLY_TYPESET(Array),             \
+               APPLY_TYPESET(List), APPLY_TYPESET(Maybe)))
 
-#define GENERIC_ORD(x)                          \
-  GENERIC(x, SND, CREATE_TRAIT,                 \
-          BIND(Ord, TYPESET(PRIMITIVE),         \
-               APPLY_TYPESET(Array),            \
-               APPLY_TYPESET(List),             \
-               APPLY_TYPESET(Maybe)))
+#define GENERIC_ORD(x)                                                   \
+  GENERIC(x, SND, CREATE_TRAIT,                                          \
+          BIND(Ord, TYPESET(PRIMITIVE), APPLY_TYPESET(Array),            \
+               APPLY_TYPESET(List), APPLY_TYPESET(Maybe)))
 
-#define GENERIC_ARRAY(x)                        \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
-          BIND_TYPESET(Array))
+#define GENERIC_ARRAY(x)                                                 \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(Array))
 
-#define GENERIC_LIST(x)                         \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
+#define GENERIC_LIST(x)                                                  \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(List))
+
+#define GENERIC_SLICE(x)                                                 \
+  GENERIC(x, SND, CREATE_TRAIT,                                          \
+          BIND(Slice, APPLY_TYPESET(Array), APPLY_TYPESET(List)))
+
+#define GENERIC_CONTAINER(x)                                             \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(Array),               \
+          BIND_TYPESET(List), BIND_TYPESET(Maybe),                       \
+          BIND(Slice, APPLY_TYPESET(Array), APPLY_TYPESET(List)),        \
+          BIND(Itr, APPLY_TYPESET(Array), APPLY_TYPESET(List),           \
+               APPLY(Slice, APPLY_TYPESET(Array), APPLY_TYPESET(List))))
+
+#define GENERIC_BOXED_CONTAINER(x)                                       \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(Array),               \
           BIND_TYPESET(List))
 
-#define GENERIC_SLICE(x)                        \
-  GENERIC(x, SND, CREATE_TRAIT,                 \
-          BIND(Slice,                           \
-               APPLY_TYPESET(Array),            \
-               APPLY_TYPESET(List)))
+#define GENERIC_FINITE_SEQUENCE(x)                                       \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(Array),               \
+          BIND_TYPESET(List), BIND_TYPESET(Maybe),                       \
+          BIND(Slice, APPLY_TYPESET(Array), APPLY_TYPESET(List)))
 
-#define GENERIC_CONTAINER(x)                    \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
-          BIND_TYPESET(Array),                  \
-          BIND_TYPESET(List),                   \
-          BIND_TYPESET(Maybe),                  \
-          BIND(Slice,                           \
-               APPLY_TYPESET(Array),            \
-               APPLY_TYPESET(List)),            \
-          BIND(Itr,                             \
-               APPLY_TYPESET(Array),            \
-               APPLY_TYPESET(List),             \
-               APPLY(Slice,                     \
-                     APPLY_TYPESET(Array),      \
-                     APPLY_TYPESET(List))))
-
-#define GENERIC_BOXED_CONTAINER(x)              \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
-          BIND_TYPESET(Array),                  \
-          BIND_TYPESET(List))
-
-#define GENERIC_FINITE_SEQUENCE(x)              \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
-          BIND_TYPESET(Array),                  \
-          BIND_TYPESET(List),                   \
-          BIND_TYPESET(Maybe),                  \
-          BIND(Slice,                           \
-               APPLY_TYPESET(Array),            \
-               APPLY_TYPESET(List)))
-
-#define GENERIC_ITERABLE(x)                         \
-  GENERIC(x, SND, CREATE_TRAIT,                     \
-          BIND(Itr,                                 \
-               APPLY_TYPESET(Array),                \
-               APPLY_TYPESET(List),                 \
-               APPLY(Slice,                         \
-                     APPLY_TYPESET(Array),          \
-                     APPLY_TYPESET(List)),          \
-               APPLY(Itr,                           \
-                     APPLY_TYPESET(Array),          \
-                     APPLY_TYPESET(List),           \
-                     APPLY(Slice,                   \
-                           APPLY_TYPESET(Array),    \
+#define GENERIC_ITERABLE(x)                                              \
+  GENERIC(x, SND, CREATE_TRAIT,                                          \
+          BIND(Itr, APPLY_TYPESET(Array), APPLY_TYPESET(List),           \
+               APPLY(Slice, APPLY_TYPESET(Array), APPLY_TYPESET(List)),  \
+               APPLY(Itr, APPLY_TYPESET(Array), APPLY_TYPESET(List),     \
+                     APPLY(Slice, APPLY_TYPESET(Array),                  \
                            APPLY_TYPESET(List)))))
 
-#define GENERIC_ITR(x)                          \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT,           \
-          BIND(Itr,                             \
-               APPLY_TYPESET(Array),            \
-               APPLY_TYPESET(List),             \
-               APPLY(Slice,                     \
-                     APPLY_TYPESET(Array),      \
-                     APPLY_TYPESET(List))))
+#define GENERIC_ITR(x)                                                   \
+  GENERIC(x, TYPE_NAME, CREATE_TRAIT,                                    \
+          BIND(Itr, APPLY_TYPESET(Array), APPLY_TYPESET(List),           \
+               APPLY(Slice, APPLY_TYPESET(Array), APPLY_TYPESET(List))))
 // clang-format on -------------------------------------------------------
 
 #define g_eq(a, b) GENERIC_EQ(a).eq(a, b)
@@ -103,8 +71,10 @@
 #define g_cmp(a, b) GENERIC_ORD(a).cmp(a, b)
 #define g_compare(a, b) GENERIC_ORD(a).cmp(a, b)
 
-#define g_length(x) GENERIC_FINITE_SEQUENCE(x).length(x)
 #define g_null(x) GENERIC_CONTAINER(x).null(x)
+
+#define g_length(x) GENERIC_FINITE_SEQUENCE(x).length(x)
+#define g_reverse(x) GENERIC_FINITE_SEQUENCE(x).reverse(&(x))
 
 #define g_free(x) GENERIC_BOXED_CONTAINER(x).free(x)
 
@@ -122,6 +92,14 @@
 #define g_head(xs) GENERIC_LIST(xs).head(xs)
 #define g_tail(xs) GENERIC_LIST(xs).tail(xs)
 #define g_drop(n, xs) GENERIC_LIST(xs).drop(n, xs)
+
+#define g_array(T, ...)                                                  \
+  trait(Array(T)).from_array(VARIADIC_SIZE(__VA_ARGS__),                 \
+                             (T[]){__VA_ARGS__})
+
+#define g_list(T, ...)                                                   \
+  trait(List(T)).from_array(VARIADIC_SIZE(__VA_ARGS__),                  \
+                            (T[]){__VA_ARGS__})
 
 #define g_slice(c, ...)                                                  \
   CAT(g_slice, VARIADIC_SIZE(__VA_ARGS__))(c, __VA_ARGS__)
@@ -141,11 +119,3 @@
   for (__auto_type it = g_itr(c); !g_null(it); it = g_skip(step, it))
 
 #endif
-
-#define g_array(T, ...)                                                  \
-  trait(Array(T)).from_array(VARIADIC_SIZE(__VA_ARGS__),                 \
-                             (T[]){__VA_ARGS__})
-
-#define g_list(T, ...)                                                   \
-  trait(List(T)).from_array(VARIADIC_SIZE(__VA_ARGS__),                  \
-                            (T[]){__VA_ARGS__})

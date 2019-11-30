@@ -29,11 +29,12 @@
     Array(T) empty;                                                      \
     bool (*null)(Array(T) a);                                            \
     size_t (*length)(Array(T) a);                                        \
-    Array(T) (*from_array)(size_t n, T * a);                             \
-    Array(T) (*create)(size_t n);                                        \
+    void (*reverse)(Array(T) * pa);                                      \
     void (*free)(Array(T) a);                                            \
+    Array(T) (*create)(size_t n);                                        \
     T* (*begin)(Array(T) a);                                             \
     T* (*end)(Array(T) a);                                               \
+    Array(T) (*from_array)(size_t n, T * a);                             \
   };                                                                     \
   ArrayT(T) Trait(Array(T));                                             \
   /* ---- instance Eq(Array(T)) */                                       \
@@ -63,8 +64,30 @@
   static size_t FUNC_NAME(length, Array(T))(Array(T) a) {                \
     return a.length;                                                     \
   }                                                                      \
+  static void FUNC_NAME(reverse, Array(T))(Array(T) * pa) {              \
+    assert(pa);                                                          \
+    if (pa->length <= 1) {                                               \
+      return;                                                            \
+    }                                                                    \
+    T* p = pa->data;                                                     \
+    T* q = p + pa->length - 1;                                           \
+    while (p < q) {                                                      \
+      T x = *p;                                                          \
+      *p++ = *q;                                                         \
+      *q-- = x;                                                          \
+    }                                                                    \
+  }                                                                      \
+  static void FUNC_NAME(free, Array(T))(Array(T) a) {                    \
+    trait(Mem(T)).free(a.data);                                          \
+  }                                                                      \
   static Array(T) FUNC_NAME(create, Array(T))(size_t n) {                \
     return (Array(T)){.length = n, .data = trait(Mem(T)).create(n)};     \
+  }                                                                      \
+  static T* FUNC_NAME(begin, Array(T))(Array(T) a) {                     \
+    return a.data;                                                       \
+  }                                                                      \
+  static T* FUNC_NAME(end, Array(T))(Array(T) a) {                       \
+    return a.data + a.length;                                            \
   }                                                                      \
   static Array(T) FUNC_NAME(from_array, Array(T))(size_t n, T * a) {     \
     Array(T) x = FUNC_NAME(create, Array(T))(n);                         \
@@ -73,25 +96,17 @@
     }                                                                    \
     return x;                                                            \
   }                                                                      \
-  static void FUNC_NAME(free, Array(T))(Array(T) a) {                    \
-    trait(Mem(T)).free(a.data);                                          \
-  }                                                                      \
-  static T* FUNC_NAME(begin, Array(T))(Array(T) a) {                     \
-    return a.data;                                                       \
-  }                                                                      \
-  static T* FUNC_NAME(end, Array(T))(Array(T) a) {                       \
-    return a.data + a.length;                                            \
-  }                                                                      \
   ArrayT(T) Trait(Array(T)) {                                            \
     return (ArrayT(T)){                                                  \
         .empty = {0},                                                    \
         .null = FUNC_NAME(null, Array(T)),                               \
         .length = FUNC_NAME(length, Array(T)),                           \
-        .create = FUNC_NAME(create, Array(T)),                           \
-        .from_array = FUNC_NAME(from_array, Array(T)),                   \
+        .reverse = FUNC_NAME(reverse, Array(T)),                         \
         .free = FUNC_NAME(free, Array(T)),                               \
+        .create = FUNC_NAME(create, Array(T)),                           \
         .begin = FUNC_NAME(begin, Array(T)),                             \
         .end = FUNC_NAME(end, Array(T)),                                 \
+        .from_array = FUNC_NAME(from_array, Array(T)),                   \
     };                                                                   \
   }                                                                      \
   /* ---- instance Eq(Array(T)) */                                       \

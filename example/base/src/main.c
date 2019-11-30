@@ -418,6 +418,66 @@ void test_List11(void) {
   g_free(xs);
 }
 
+void test_Array12(void) {
+  printf("a = g_array(int, 1, 2, 3, 4, 5)\n");
+  Array(int) a = g_array(int, 1, 2, 3, 4, 5);
+  printf("g_reverse(a)\n");
+  g_reverse(a);
+  printf("a == ");
+  for (Itr(Array(int)) it = g_itr(a); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(a);
+}
+
+void test_List12(void) {
+  printf("xs = g_list(int, 1, 2, 3, 4, 5)\n");
+  List(int) xs = g_list(int, 1, 2, 3, 4, 5);
+  printf("g_reverse(xs)\n");
+  g_reverse(xs);
+  printf("xs == ");
+  for (Itr(List(int)) it = g_itr(xs); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(xs);
+}
+
+void test_Array13(void) {
+  printf("a = g_array(int, 1, 2, 3, 4, 5)\n");
+  Array(int) a = g_array(int, 1, 2, 3, 4, 5);
+  printf("s = g_slice(a, 1, -1)\n");
+  Slice(Array(int)) s = g_slice(a, 1, -1);
+  printf("g_reverse(s)\n");
+  g_reverse(s);
+  printf("a == ");
+  for (Itr(Array(int)) it = g_itr(a); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(a);
+}
+
+void test_List13(void) {
+  printf("xs = g_list(int, 1, 2, 3, 4, 5)\n");
+  List(int) xs = g_list(int, 1, 2, 3, 4, 5);
+  printf("s = g_slice(xs, 1, -1)\n");
+  Slice(List(int)) s = g_slice(xs, 1, -1);
+  printf("g_reverse(s)\n");
+  g_reverse(s);
+  printf("xs == ");
+  for (Itr(List(int)) it = g_itr(xs); !g_null(it); it = g_next(it)) {
+    printf("%d ", g_get(it));
+  }
+  printf("\n");
+
+  g_free(xs);
+}
+
 int main(void) {
   test_Eq();
   test_Ord();
@@ -443,5 +503,9 @@ int main(void) {
   test_List10();
   test_Array11();
   test_List11();
+  test_Array12();
+  test_List12();
+  test_Array13();
+  test_List13();
   return 0;
 }

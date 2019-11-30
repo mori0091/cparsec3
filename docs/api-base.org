@@ -222,6 +222,9 @@ An ~ArrayT(T)~ trait provides the following member variables/functions :
 - T* end(Array(T) a) ::
      Returns the out of bounds address over the last item of the array ~a~.\\
      i.e. returns ~a.data + a.length~.
+- void reverse(Array(T)* ptr) ::
+     Reverses the order of items in the array that the pointer ~ptr~ points to.
+     Note that the ~ptr~ must not be ~NULL~.
 
 ** ListT(T) - trait for List(T) container.
 
@@ -264,6 +267,9 @@ An ~ListT(T)~ trait provides the following member variables/functions :
 - List(T) tail(List(T) xs) ::
      Returns the tail list of the list ~xs~.\\
      i.e. returns ~xs->tail~.
+- void reverse(List(T)* ptr) ::
+     Reverses the order of items in the list that the pointer ~ptr~ points to.
+     Note that the ~ptr~ must not be ~NULL~.
 
 ** MaybeT(T) - trait for Maybe(T) container.
 
@@ -419,6 +425,10 @@ An ~SliceT(C)~ trait provides the following member variables/functions :
   - ~f(x)~ \equal 0 if ~x~ + ~length(c)~ \lt 0
   - note that always 0 \le ~length(c)~
 
+- void reverse(Slice(C)* ptr) ::
+     Reverses the order of items in the range of contaner refered by the slice
+     that the pointer ~ptr~ points to. Note that the ~ptr~ must not be ~NULL~.
+
 
 ** Show(T) - trait to represent a value as a string
 
@@ -536,6 +546,13 @@ The below sections show *Generic Macros* provided by /CPARSEC3/ *Base* library.
 - g_length(c)     ::
      Returns length of the container ~c~.\\
      ~c~ shall be an ~Array(T)~, ~List(T)~, ~Maybe(T)~, ~Slice(Array(T))~, or
+     ~Slice(List(T))~.
+
+** Reverse order
+- g_reverse(c)    ::
+     Reverses the order of items in the ~c~. Note that the ~c~ must be a
+     lvalue.\\
+     ~c~ shall be an ~Array(T)~, ~List(T)~, ~Slice(Array(T))~, or
      ~Slice(List(T))~.
 
 ** Iterator
