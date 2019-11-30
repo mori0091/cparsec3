@@ -33,6 +33,7 @@ static inline size_t adjust_index(int idx, size_t len) {
     Slice(C) empty;                                                      \
     bool (*null)(Slice(C) s);                                            \
     size_t (*length)(Slice(C) s);                                        \
+    void (*reverse)(Slice(C) * ps);                                      \
     Slice(C) (*slice)(C c, int start, int stop);                         \
   };                                                                     \
   SliceT(C) Trait(Slice(C));                                             \
@@ -60,6 +61,25 @@ static inline size_t adjust_index(int idx, size_t len) {
     assert(s.start <= s.stop);                                           \
     return (s.stop - s.start);                                           \
   }                                                                      \
+  static void FUNC_NAME(reverse, Slice(C))(Slice(C) * ps) {              \
+    assert(ps);                                                          \
+    assert(ps->start <= ps->stop);                                       \
+    size_t len = ps->stop - ps->start;                                   \
+    if (len <= 1) {                                                      \
+      return;                                                            \
+    }                                                                    \
+    Item(C)* p = malloc(sizeof(Item(C)) * len);                          \
+    assert(p);                                                           \
+    ItrT(Slice(C)) I = trait(Itr(Slice(C)));                             \
+    Itr(Slice(C)) beg = I.itr(*ps);                                      \
+    for (Itr(Slice(C)) it = beg; !I.null(it); it = I.next(it)) {         \
+      p[--len] = I.get(it);                                              \
+    }                                                                    \
+    for (Itr(Slice(C)) it = beg; !I.null(it); it = I.next(it)) {         \
+      I.set(p[len++], it);                                               \
+    }                                                                    \
+    free(p);                                                             \
+  }                                                                      \
   static Slice(C) FUNC_NAME(slice, Slice(C))(C c, int start, int stop) { \
     if (trait(C).null(c)) {                                              \
       return (Slice(C)){0};                                              \
@@ -77,6 +97,7 @@ static inline size_t adjust_index(int idx, size_t len) {
         .empty = {0},                                                    \
         .null = FUNC_NAME(null, Slice(C)),                               \
         .length = FUNC_NAME(length, Slice(C)),                           \
+        .reverse = FUNC_NAME(reverse, Slice(C)),                         \
         .slice = FUNC_NAME(slice, Slice(C)),                             \
     };                                                                   \
   }                                                                      \
