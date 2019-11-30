@@ -148,7 +148,7 @@ so on.
 #+end_src
 
 *Usecase 2a.* Use ~__auto_type~ and ~g_for(it, c)~ GCC extension to construct
- and iterata a *list*.
+ and iterat a *list*.
 #+begin_src c
   // GCC only
   #ifdef __GNUC__
