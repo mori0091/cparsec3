@@ -54,7 +54,20 @@
   };                                                                     \
   trait_Itr(List(T));                                                    \
   /* ---- instance Slice(List(T)) */                                     \
+  typedef struct Slice(List(T)) Slice(List(T));                          \
+  struct Slice(List(T)) {                                                \
+    size_t length;                                                       \
+    List(T) c;                                                           \
+  };                                                                     \
   trait_Slice(List(T));                                                  \
+  /* ---- instance Itr(Slice(List(T))) */                                \
+  typedef T Item(Slice(List(T)));                                        \
+  typedef struct Itr(Slice(List(T))) Itr(Slice(List(T)));                \
+  struct Itr(Slice(List(T))) {                                           \
+    size_t rest;                                                         \
+    Itr(List(T)) it;                                                     \
+  };                                                                     \
+  trait_Itr(Slice(List(T)));                                             \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -196,7 +209,86 @@
                FUNC_NAME(ptr, Itr(List(T))),                             \
                FUNC_NAME(next, Itr(List(T))));                           \
   /* ---- instance Slice(List(T)) */                                     \
-  instance_Slice(List(T));                                               \
+  static bool FUNC_NAME(null, Slice(List(T)))(Slice(List(T)) s) {        \
+    return !s.length;                                                    \
+  }                                                                      \
+  static size_t FUNC_NAME(length, Slice(List(T)))(Slice(List(T)) s) {    \
+    return s.length;                                                     \
+  }                                                                      \
+  static void FUNC_NAME(reverse, Slice(List(T)))(Slice(List(T)) * ps) {  \
+    assert(ps);                                                          \
+    size_t len = ps->length;                                             \
+    if (len <= 1) {                                                      \
+      return;                                                            \
+    }                                                                    \
+    if (len == 2) {                                                      \
+      T x = ps->c->head;                                                 \
+      ps->c->head = ps->c->tail->head;                                   \
+      ps->c->tail->head = x;                                             \
+      return;                                                            \
+    }                                                                    \
+    List(T) xs = ps->c;                                                  \
+    List(T) ys = xs;                                                     \
+    for (size_t i = 0; i < len - 2; i++) {                               \
+      ys = ys->tail;                                                     \
+    }                                                                    \
+    List(T) zs = ys->tail;                                               \
+    ys->tail = NULL;                                                     \
+    ys = xs->tail;                                                       \
+    FUNC_NAME(reverse, List(T))(&xs->tail);                              \
+    ys->tail = zs;                                                       \
+    T x = xs->head;                                                      \
+    xs->head = zs->head;                                                 \
+    zs->head = x;                                                        \
+    ps->c = xs;                                                          \
+  }                                                                      \
+  static Slice(List(T))                                                  \
+      FUNC_NAME(slice, Slice(List(T)))(List(T) c, int start, int stop) { \
+    if (!c) {                                                            \
+      return (Slice(List(T))){0};                                        \
+    }                                                                    \
+    size_t len = FUNC_NAME(length, List(T))(c);                          \
+    size_t s1 = adjust_index(start, len);                                \
+    size_t s2 = adjust_index(stop, len);                                 \
+    if (s1 >= s2) {                                                      \
+      return (Slice(List(T))){0};                                        \
+    }                                                                    \
+    for (size_t i = 0; i < s1; i++) {                                    \
+      c = c->tail;                                                       \
+    }                                                                    \
+    return (Slice(List(T))){.length = s2 - s1, .c = c};                  \
+  }                                                                      \
+  SliceT(List(T)) Trait(Slice(List(T))) {                                \
+    return (SliceT(List(T))){                                            \
+        .empty = {0},                                                    \
+        .null = FUNC_NAME(null, Slice(List(T))),                         \
+        .length = FUNC_NAME(length, Slice(List(T))),                     \
+        .reverse = FUNC_NAME(reverse, Slice(List(T))),                   \
+        .slice = FUNC_NAME(slice, Slice(List(T))),                       \
+    };                                                                   \
+  }                                                                      \
+  /* ---- instance Itr(Slice(List(T)))*/                                 \
+  static Itr(Slice(List(T)))                                             \
+      FUNC_NAME(itr, Itr(Slice(List(T))))(Slice(List(T)) s) {            \
+    return (Itr(Slice(List(T)))){                                        \
+        .rest = s.length,                                                \
+        .it = FUNC_NAME(itr, Itr(List(T)))(s.c),                         \
+    };                                                                   \
+  }                                                                      \
+  static T* FUNC_NAME(ptr,                                               \
+                      Itr(Slice(List(T))))(Itr(Slice(List(T))) it) {     \
+    return (it.rest ? FUNC_NAME(ptr, Itr(List(T)))(it.it) : 0);          \
+  }                                                                      \
+  static Itr(Slice(List(T)))                                             \
+      FUNC_NAME(next, Itr(Slice(List(T))))(Itr(Slice(List(T))) it) {     \
+    assert(it.rest && !FUNC_NAME(null, Itr(List(T)))(it.it));            \
+    it.rest--;                                                           \
+    it.it = FUNC_NAME(next, Itr(List(T)))(it.it);                        \
+    return it;                                                           \
+  }                                                                      \
+  instance_Itr(Slice(List(T)), FUNC_NAME(itr, Itr(Slice(List(T)))),      \
+               FUNC_NAME(ptr, Itr(Slice(List(T)))),                      \
+               FUNC_NAME(next, Itr(Slice(List(T)))));                    \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
