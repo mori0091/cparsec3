@@ -54,7 +54,21 @@
   };                                                                     \
   trait_Itr(List(T));                                                    \
   /* ---- instance Slice(List(T)) */                                     \
+  typedef struct Slice(List(T)) Slice(List(T));                          \
+  struct Slice(List(T)) {                                                \
+    size_t start;                                                        \
+    size_t stop;                                                         \
+    List(T) c;                                                           \
+  };                                                                     \
   trait_Slice(List(T));                                                  \
+  /* ---- instance Itr(Slice(List(T))) */                                \
+  typedef T Item(Slice(List(T)));                                        \
+  typedef struct Itr(Slice(List(T))) Itr(Slice(List(T)));                \
+  struct Itr(Slice(List(T))) {                                           \
+    size_t rest;                                                         \
+    Itr(List(T)) it;                                                     \
+  };                                                                     \
+  trait_Itr(Slice(List(T)));                                             \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -196,7 +210,80 @@
                FUNC_NAME(ptr, Itr(List(T))),                             \
                FUNC_NAME(next, Itr(List(T))));                           \
   /* ---- instance Slice(List(T)) */                                     \
-  instance_Slice(List(T));                                               \
+  static bool FUNC_NAME(null, Slice(List(T)))(Slice(List(T)) s) {        \
+    assert(s.start <= s.stop);                                           \
+    return (s.start == s.stop);                                          \
+  }                                                                      \
+  static size_t FUNC_NAME(length, Slice(List(T)))(Slice(List(T)) s) {    \
+    assert(s.start <= s.stop);                                           \
+    return (s.stop - s.start);                                           \
+  }                                                                      \
+  static void FUNC_NAME(reverse, Slice(List(T)))(Slice(List(T)) * ps) {  \
+    assert(ps);                                                          \
+    assert(ps->start <= ps->stop);                                       \
+    size_t len = ps->stop - ps->start;                                   \
+    if (len <= 1) {                                                      \
+      return;                                                            \
+    }                                                                    \
+    T* p = malloc(sizeof(T) * len);                                      \
+    assert(p);                                                           \
+    ItrT(Slice(List(T))) I = trait(Itr(Slice(List(T))));                 \
+    Itr(Slice(List(T))) beg = I.itr(*ps);                                \
+    for (Itr(Slice(List(T))) it = beg; !I.null(it); it = I.next(it)) {   \
+      p[--len] = I.get(it);                                              \
+    }                                                                    \
+    for (Itr(Slice(List(T))) it = beg; !I.null(it); it = I.next(it)) {   \
+      I.set(p[len++], it);                                               \
+    }                                                                    \
+    free(p);                                                             \
+  }                                                                      \
+  static Slice(List(T))                                                  \
+      FUNC_NAME(slice, Slice(List(T)))(List(T) c, int start, int stop) { \
+    if (!c) {                                                            \
+      return (Slice(List(T))){0};                                        \
+    }                                                                    \
+    size_t len = trait(List(T)).length(c);                               \
+    size_t s1 = adjust_index(start, len);                                \
+    size_t s2 = adjust_index(stop, len);                                 \
+    if (s1 >= s2) {                                                      \
+      return (Slice(List(T))){0};                                        \
+    }                                                                    \
+    return (Slice(List(T))){.start = s1, .stop = s2, .c = c};            \
+  }                                                                      \
+  SliceT(List(T)) Trait(Slice(List(T))) {                                \
+    return (SliceT(List(T))){                                            \
+        .empty = {0},                                                    \
+        .null = FUNC_NAME(null, Slice(List(T))),                         \
+        .length = FUNC_NAME(length, Slice(List(T))),                     \
+        .reverse = FUNC_NAME(reverse, Slice(List(T))),                   \
+        .slice = FUNC_NAME(slice, Slice(List(T))),                       \
+    };                                                                   \
+  }                                                                      \
+  /* ---- instance Itr(Slice(List(T)))*/                                 \
+  static Itr(Slice(List(T)))                                             \
+      FUNC_NAME(itr, Itr(Slice(List(T))))(Slice(List(T)) s) {            \
+    ItrT(List(T)) I = trait(Itr(List(T)));                               \
+    Itr(List(T)) it = I.skip(s.start, I.itr(s.c));                       \
+    return (Itr(Slice(List(T)))){                                        \
+        .rest = FUNC_NAME(length, Slice(List(T)))(s),                    \
+        .it = it,                                                        \
+    };                                                                   \
+  }                                                                      \
+  static T* FUNC_NAME(ptr,                                               \
+                      Itr(Slice(List(T))))(Itr(Slice(List(T))) it) {     \
+    return (it.rest ? trait(Itr(List(T))).ptr(it.it) : 0);               \
+  }                                                                      \
+  static Itr(Slice(List(T)))                                             \
+      FUNC_NAME(next, Itr(Slice(List(T))))(Itr(Slice(List(T))) it) {     \
+    ItrT(List(T)) I = trait(Itr(List(T)));                               \
+    assert(it.rest && !I.null(it.it));                                   \
+    it.rest--;                                                           \
+    it.it = I.next(it.it);                                               \
+    return it;                                                           \
+  }                                                                      \
+  instance_Itr(Slice(List(T)), FUNC_NAME(itr, Itr(Slice(List(T)))),      \
+               FUNC_NAME(ptr, Itr(Slice(List(T)))),                      \
+               FUNC_NAME(next, Itr(Slice(List(T)))));                    \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS

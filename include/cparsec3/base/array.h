@@ -49,7 +49,18 @@
   };                                                                     \
   trait_Itr(Array(T));                                                   \
   /* ---- instance Slice(Array(T)) */                                    \
+  typedef struct Slice(Array(T)) Slice(Array(T));                        \
+  struct Slice(Array(T)) {                                               \
+    Array(T) a;                                                          \
+  };                                                                     \
   trait_Slice(Array(T));                                                 \
+  /* ---- instance Itr(Slice(Array(T))) */                               \
+  typedef T Item(Slice(Array(T)));                                       \
+  typedef struct Itr(Slice(Array(T))) Itr(Slice(Array(T)));              \
+  struct Itr(Slice(Array(T))) {                                          \
+    Itr(Array(T)) it;                                                    \
+  };                                                                     \
+  trait_Itr(Slice(Array(T)));                                            \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -161,7 +172,58 @@
                FUNC_NAME(ptr, Itr(Array(T))),                            \
                FUNC_NAME(next, Itr(Array(T))));                          \
   /* ---- instance Slice(Array(T)) */                                    \
-  instance_Slice(Array(T));                                              \
+  static bool FUNC_NAME(null, Slice(Array(T)))(Slice(Array(T)) s) {      \
+    return FUNC_NAME(null, Array(T))(s.a);                               \
+  }                                                                      \
+  static size_t FUNC_NAME(length, Slice(Array(T)))(Slice(Array(T)) s) {  \
+    return FUNC_NAME(length, Array(T))(s.a);                             \
+  }                                                                      \
+  static void FUNC_NAME(reverse,                                         \
+                        Slice(Array(T)))(Slice(Array(T)) * ps) {         \
+    assert(ps);                                                          \
+    FUNC_NAME(reverse, Array(T))(&(ps->a));                              \
+  }                                                                      \
+  static Slice(Array(T)) FUNC_NAME(slice, Slice(Array(T)))(              \
+      Array(T) a, int start, int stop) {                                 \
+    size_t len = a.length;                                               \
+    size_t s1 = adjust_index(start, len);                                \
+    size_t s2 = adjust_index(stop, len);                                 \
+    if (s1 >= s2) {                                                      \
+      return (Slice(Array(T))){.a = {0}};                                \
+    }                                                                    \
+    return (Slice(Array(T))){                                            \
+        .a.length = s2 - s1,                                             \
+        .a.data = a.data + s1,                                           \
+    };                                                                   \
+  }                                                                      \
+  SliceT(Array(T)) Trait(Slice(Array(T))) {                              \
+    return (SliceT(Array(T))){                                           \
+        .empty = {.a = {0}},                                             \
+        .null = FUNC_NAME(null, Slice(Array(T))),                        \
+        .length = FUNC_NAME(length, Slice(Array(T))),                    \
+        .reverse = FUNC_NAME(reverse, Slice(Array(T))),                  \
+        .slice = FUNC_NAME(slice, Slice(Array(T))),                      \
+    };                                                                   \
+  }                                                                      \
+  /* ---- instance Itr(Slice(Array(T))) */                               \
+  static Itr(Slice(Array(T)))                                            \
+      FUNC_NAME(itr, Itr(Slice(Array(T))))(Slice(Array(T)) s) {          \
+    return (Itr(Slice(Array(T)))){                                       \
+        .it = FUNC_NAME(itr, Itr(Array(T)))(s.a),                        \
+    };                                                                   \
+  }                                                                      \
+  static T* FUNC_NAME(ptr,                                               \
+                      Itr(Slice(Array(T))))(Itr(Slice(Array(T))) it) {   \
+    return FUNC_NAME(ptr, Itr(Array(T)))(it.it);                         \
+  }                                                                      \
+  static Itr(Slice(Array(T)))                                            \
+      FUNC_NAME(next, Itr(Slice(Array(T))))(Itr(Slice(Array(T))) it) {   \
+    it.it = FUNC_NAME(next, Itr(Array(T)))(it.it);                       \
+    return it;                                                           \
+  }                                                                      \
+  instance_Itr(Slice(Array(T)), FUNC_NAME(itr, Itr(Slice(Array(T)))),    \
+               FUNC_NAME(ptr, Itr(Slice(Array(T)))),                     \
+               FUNC_NAME(next, Itr(Slice(Array(T)))));                   \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
