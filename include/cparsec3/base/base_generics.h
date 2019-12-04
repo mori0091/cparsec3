@@ -118,4 +118,26 @@
   assert(step && "g_for(it, c, step): step == 0 not permitted.");        \
   for (__auto_type it = g_itr(c); !g_null(it); it = g_skip(step, it))
 
+#define g_bind(x, t) g_bind_I(t, DISCLOSE(x))
+#define g_bind_I(t, ...)                                                 \
+  FOREACH(EXPAND, SQUASH(APPLY(g_bind0, (TMPID, t),                      \
+                               CAT(g_bind, VARIADIC_SIZE(__VA_ARGS__))(  \
+                                   TMPID, __VA_ARGS__))))
+#define g_bind0(var_, val_) IF(IS_NULL(var_))(, __auto_type var_ = val_)
+// clang-format off
+#define g_bind1(t, _1)                                                   \
+  (_1, t.e1)
+#define g_bind2(t, _1, _2)                                               \
+  (_1, t.e1), (_2, t.e2)
+#define g_bind3(t, _1, _2, _3)                                           \
+  (_1, t.e1), (_2, t.e2), (_3, t.e3)
+#define g_bind4(t, _1, _2, _3, _4)                                       \
+  (_1, t.e1), (_2, t.e2), (_3, t.e3), (_4, t.e4)
+#define g_bind5(t, _1, _2, _3, _4, _5)                                   \
+  (_1, t.e1), (_2, t.e2), (_3, t.e3), (_4, t.e4), (_5, t.e5)
+#define g_bind6(t, _1, _2, _3, _4, _5, _6)                               \
+  (_1, t.e1), (_2, t.e2), (_3, t.e3), (_4, t.e4), (_5, t.e5), (_6, t.e6)
+// clang-format on
+
+#define TMPID CAT(tmpid__, __LINE__)
 #endif
