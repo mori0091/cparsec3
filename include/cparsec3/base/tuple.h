@@ -129,37 +129,21 @@
  */
 #define tie(x, t) tie_I(t, DISCLOSE(x))
 #define tie_I(t, ...)                                                    \
-  CAT(tie, VARIADIC_SIZE(__VA_ARGS__))                                   \
-  (t, __VA_ARGS__)
+  FOREACH(EXPAND,                                                        \
+          SQUASH(APPLY(tie0, CAT(tie, VARIADIC_SIZE(__VA_ARGS__))(       \
+                                 t, __VA_ARGS__))))
+#define tie0(var_, val_) IF(IS_NULL(var_))(, var_ = val_)
 // clang-format off
-#define tie1(t, _1)                             \
-  tie0((_1, _1 = t.e1))
-#define tie2(t, _1, _2)                         \
-  tie0((_1, _1 = t.e1),                         \
-       (_2, _2 = t.e2))
-#define tie3(t, _1, _2, _3)                     \
-  tie0((_1, _1 = t.e1),                         \
-       (_2, _2 = t.e2),                         \
-       (_3, _3 = t.e3))
-#define tie4(t, _1, _2, _3, _4)                 \
-  tie0((_1, _1 = t.e1),                         \
-       (_2, _2 = t.e2),                         \
-       (_3, _3 = t.e3),                         \
-       (_4, _4 = t.e4))
-#define tie5(t, _1, _2, _3, _4, _5)             \
-  tie0((_1, _1 = t.e1),                         \
-       (_2, _2 = t.e2),                         \
-       (_3, _3 = t.e3),                         \
-       (_4, _4 = t.e4),                         \
-       (_5, _5 = t.e5))
-#define tie6(t, _1, _2, _3, _4, _5, _6)         \
-  tie0((_1, _1 = t.e1),                         \
-       (_2, _2 = t.e2),                         \
-       (_3, _3 = t.e3),                         \
-       (_4, _4 = t.e4),                         \
-       (_5, _5 = t.e5),                         \
-       (_6, _6 = t.e6))
+#define tie1(t, _1)                                                      \
+  (_1, t.e1)
+#define tie2(t, _1, _2)                                                  \
+  (_1, t.e1), (_2, t.e2)
+#define tie3(t, _1, _2, _3)                                              \
+  (_1, t.e1), (_2, t.e2), (_3, t.e3)
+#define tie4(t, _1, _2, _3, _4)                                          \
+  (_1, t.e1), (_2, t.e2), (_3, t.e3), (_4, t.e4)
+#define tie5(t, _1, _2, _3, _4, _5)                                      \
+  (_1, t.e1), (_2, t.e2), (_3, t.e3), (_4, t.e4), (_5, t.e5)
+#define tie6(t, _1, _2, _3, _4, _5, _6)                                  \
+  (_1, t.e1), (_2, t.e2), (_3, t.e3), (_4, t.e4), (_5, t.e5), (_6, t.e6)
 // clang-format on
-#define tie0(...) FOREACH(tie0_id, SQUASH(APPLY(tie0_f, __VA_ARGS__)))
-#define tie0_f(x, y) IF(IS_NULL(x))(, y)
-#define tie0_id(x) x
