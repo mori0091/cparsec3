@@ -600,3 +600,32 @@ The below sections show *Generic Macros* provided by /CPARSEC3/ *Base* library.
      ~it~ is the name of variable to be used as an iterator, ~c~ shall be an
      ~Array(T)~, ~List(T)~, ~Slice(Array(T))~, or ~Slice(List(T))~.
   - *NOTE* : Available if and only if ~__GNUC__~ was defined.
+
+
+** Structured bindings (multiple assignment) /(GCC only)/
+- g_bind((a,b,...), t) ::
+     Expanded to ~__auto_type a = t.e1; __auto_type b = t.e2; ...~.\\
+     ~(a,b,...)~ is a list of the name of variables to be defined. ~t~ is a
+     tuple. For each item in the tuple ~t~, the item is assigned to the variable
+     in the given list in order. If a variable in the list was not specified,
+     the corresponding assignment is omitted.
+  - *NOTE* : Available if and only if ~__GNUC__~ was defined.
+
+#+begin_src c
+{
+  g_bind((a,b,c), (Tuple(int, char, String)){1, 'X', "hello"});
+  // -> __auto_type a = 1; __auto_type b = 'X'; __auto_type c = "hello";
+}
+{
+  g_bind((a,b), (Tuple(int, char, String)){1, 'X', "hello"});
+  // -> __auto_type a = 1; __auto_type b = 'X';
+}
+{
+  g_bind(a, (Tuple(int, char, String)){1, 'X', "hello"});
+  // -> __auto_type a = 1;
+}
+{
+  g_bind((a,,c), (Tuple(int, char, String)){1, 'X', "hello"});
+  // -> __auto_type a = 1; __auto_type c = "hello";
+}
+#+end_src
