@@ -592,11 +592,11 @@ The below sections show *Generic Macros* provided by /CPARSEC3/ *Base* library.
 - g_for(it, c)    ::
      Expanded to ~for (__auto_type it = g_itr(c); !g_null(it); it = g_next(it))~.\\
      ~it~ is the name of variable to be used as an iterator, ~c~ shall be an
-     ~Array(T)~, ~List(T)~, ~Slice(Array(T))~, or ~Slice(List(T))~..
+     ~Array(T)~, ~List(T)~, ~Slice(Array(T))~, or ~Slice(List(T))~.
   - *NOTE* : Available if and only if ~__GNUC__~ was defined.
 
 - g_for(it, c, step) ::
      Expanded to ~for (__auto_type it = g_itr(c); !g_null(it); it = g_skip(step, it))~.\\
      ~it~ is the name of variable to be used as an iterator, ~c~ shall be an
-     ~Array(T)~, ~List(T)~, ~Slice(Array(T))~, or ~Slice(List(T))~..
+     ~Array(T)~, ~List(T)~, ~Slice(Array(T))~, or ~Slice(List(T))~.
   - *NOTE* : Available if and only if ~__GNUC__~ was defined.
