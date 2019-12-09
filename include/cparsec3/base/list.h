@@ -34,7 +34,7 @@
     bool (*null)(List(T) xs);                                            \
     size_t (*length)(List(T) xs);                                        \
     void (*reverse)(List(T) * pxs);                                      \
-    void (*free)(List(T) xs);                                            \
+    void (*free)(List(T) * pxs);                                         \
     List(T) (*cons)(T x, List(T) xs);                                    \
     List(T) (*drop)(size_t n, List(T) xs);                               \
     T (*head)(List(T) xs);                                               \
@@ -104,12 +104,16 @@
     }                                                                    \
     *pxs = xs;                                                           \
   }                                                                      \
-  static void FUNC_NAME(free, List(T))(List(T) xs) {                     \
-    while (xs) {                                                         \
-      List(T) ys = xs;                                                   \
-      xs = xs->tail;                                                     \
-      *ys = (stList(T)){0};                                              \
-      trait(Mem(stList(T))).free(ys);                                    \
+  void FUNC_NAME(free, List(T))(List(T) * pxs) {                         \
+    if (pxs) {                                                           \
+      List(T) xs = *pxs;                                                 \
+      while (xs) {                                                       \
+        List(T) ys = xs;                                                 \
+        xs = xs->tail;                                                   \
+        *ys = (stList(T)){0};                                            \
+        trait(Mem(stList(T))).free(ys);                                  \
+      }                                                                  \
+      *pxs = (List(T)){0};                                               \
     }                                                                    \
   }                                                                      \
   static List(T) FUNC_NAME(cons, List(T))(T x, List(T) xs) {             \

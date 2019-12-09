@@ -76,7 +76,7 @@
 #define g_length(x) GENERIC_FINITE_SEQUENCE(x).length(x)
 #define g_reverse(x) GENERIC_FINITE_SEQUENCE(x).reverse(&(x))
 
-#define g_free(x) GENERIC_BOXED_CONTAINER(x).free(x)
+#define g_free(x) GENERIC_BOXED_CONTAINER(x).free(&(x))
 
 #define g_itr(x) GENERIC_ITERABLE(x).itr(x)
 
@@ -118,6 +118,7 @@
   assert(step && "g_for(it, c, step): step == 0 not permitted.");        \
   for (__auto_type it = g_itr(c); !g_null(it); it = g_skip(step, it))
 
+// ---- Structured bindings
 #define g_bind(x, t) g_bind_I(t, DISCLOSE(x))
 #define g_bind_I(t, ...)                                                 \
   FOREACH(EXPAND, SQUASH(APPLY(g_bind0, (TMPID, t),                      \
@@ -140,4 +141,10 @@
 // clang-format on
 
 #define TMPID CAT(tmpid__, __LINE__)
+
+// ---- RAII
+#define g_scoped(C)                                                      \
+  extern void FUNC_NAME(free, C)(C*);                                    \
+  __attribute__((cleanup(FUNC_NAME(free, C)))) C
+
 #endif

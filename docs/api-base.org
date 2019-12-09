@@ -190,7 +190,7 @@ An ~MemT(T)~ trait provides the following member functions :
   for (int* it = m.begin(a); it != m.end(a); it++) {
     printf("%d ", *it); /* -> 5 4 3 2 1 */
   }
-  m.free(a);
+  m.free(&a);
 #+end_src
 
 - ArrayT(T)       ::
@@ -213,9 +213,9 @@ An ~ArrayT(T)~ trait provides the following member variables/functions :
      i.e. returns ~a.length~.
 - Array(T) create(size_t n) ::
      Constructs an array of length ~n~.
-- void free(Array(T) a) ::
-     Destructs the array ~a~.\\
-     i.e. ~free(a.data)~.
+- void free(Array(T)* pa) ::
+     Destructs the array that the ~pa~ points to.\\
+     i.e. ~free(pa->data)~.
 - T* begin(Array(T) a) ::
      Returns the address of the 1st item of the array ~a~.\\
      i.e. returns ~a.data~.
@@ -234,7 +234,7 @@ An ~ArrayT(T)~ trait provides the following member variables/functions :
   for (List(int) ys = xs; !m.null(ys); ys = m.tail(ys)) {
     printf("%d ", m.head(ys));    /* -> 1 2 3 */
   }
-  m.free(xs);
+  m.free(&xs);
 #+end_src
 
 - ListT(T)       ::
@@ -256,8 +256,8 @@ An ~ListT(T)~ trait provides the following member variables/functions :
      Returns the length of the list ~xs~.
 - List(T) cons(T x, List(T) xs) ::
      Constructs a linked-list (cons-cell).
-- void free(List(T) xs) ::
-     Destructs all cells of the list ~xs~.
+- void free(List(T)* pxs) ::
+     Destructs the list that the ~pxs~ points to.
 - List(T) drop(size_t n, List(T) xs) ::
      Destructs leading at most ~n~ cells of the list ~xs~, and returns
      remaining list.
@@ -321,7 +321,7 @@ A ~MaybeT(T)~ trait provides the following member variables/functions :
   for (Itr(List(int)) it = I.itr(xs); !I.null(it); it = I.next(it)) {
     printf("%d ", I.get(it));    /* -> 1 2 3 */
   }
-  m.free(xs);
+  m.free(&xs);
 #+end_src
 
 - ItrT(C)         ::
@@ -391,7 +391,7 @@ An ~ItrT(C)~ trait provides the following member variables/functions :
   for (Itr(Slice(List(int))) it = I.itr(xs); !I.null(it); it = I.next(it)) {
     printf("%d ", I.get(it));    /* -> 1 2 3 */
   }
-  m.free(xs);
+  m.free(&xs);
 #+end_src
 
 - SliceT(C)       ::
@@ -518,7 +518,7 @@ The below sections show *Generic Macros* provided by /CPARSEC3/ *Base* library.
      list.
 
 - g_free(xs)      ::
-     Destructs all cells of the list ~xs~.
+     Destructs the list ~xs~.
 
 ** Slice Constructors
 - g_slice(c, start, stop) ::
@@ -628,4 +628,19 @@ The below sections show *Generic Macros* provided by /CPARSEC3/ *Base* library.
   g_bind((a,,c), (Tuple(int, char, String)){1, 'X', "hello"});
   // -> __auto_type a = 1; __auto_type c = "hello";
 }
+#+end_src
+
+
+** RAII (Resource Acquisition Is Initialization) /GCC only/
+- g_scoped(C) c = ...;     ::
+     Declares/defines a variable ~c~ of type ~C~ as a *RAII* object that will be
+     automatically deallocated when leave the current scope.\\
+     ~C~ shall be ~Array(T)~ or ~List(T)~.
+  - *NOTE* : Available if and only if ~__GNUC__~ was defined.
+
+#+begin_src c
+  void foo(void) {
+    g_scoped(Array(int)) a = g_array(int, 1, 2, 3, 4, 5);
+    // do something...
+  } // at here, g_free(a) is automatically called before leaving the function.
 #+end_src
