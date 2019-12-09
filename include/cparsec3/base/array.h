@@ -30,7 +30,7 @@
     bool (*null)(Array(T) a);                                            \
     size_t (*length)(Array(T) a);                                        \
     void (*reverse)(Array(T) * pa);                                      \
-    void (*free)(Array(T) a);                                            \
+    void (*free)(Array(T) * pa);                                         \
     Array(T) (*create)(size_t n);                                        \
     T* (*begin)(Array(T) a);                                             \
     T* (*end)(Array(T) a);                                               \
@@ -88,8 +88,11 @@
       *q-- = x;                                                          \
     }                                                                    \
   }                                                                      \
-  static void FUNC_NAME(free, Array(T))(Array(T) a) {                    \
-    trait(Mem(T)).free(a.data);                                          \
+  void FUNC_NAME(free, Array(T))(Array(T) * pa) {                        \
+    if (pa && pa->data) {                                                \
+      trait(Mem(T)).free(pa->data);                                      \
+      *pa = (Array(T)){0};                                               \
+    }                                                                    \
   }                                                                      \
   static Array(T) FUNC_NAME(create, Array(T))(size_t n) {                \
     return (Array(T)){.length = n, .data = trait(Mem(T)).create(n)};     \

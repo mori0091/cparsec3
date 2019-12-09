@@ -74,7 +74,7 @@ The parameter ~M~ is the name of the resulting concrete trait type (e.g.
   for (int* it = m.begin(a); it != m.end(a); it++) {
     printf("%d ", *it); /* -> 5 4 3 2 1 */
   }
-  m.free(a);
+  m.free(&a);
 #+end_src
 
 *Usecase 3.* Use ~ItrT(Array(int))~ trait to iterate each items in ~Array(int)~
@@ -91,7 +91,7 @@ container.
   for (Itr(Array(int)) it = I.itr(a); !I.null(it); it = I.next(it)) {
     printf("%d ", I.get(it)); /* -> 5 4 3 2 1 */
   }
-  m.free(a);
+  m.free(&a);
 #+end_src
 
 
@@ -158,5 +158,39 @@ so on.
     printf("%d ", g_get(it)); /* -> 5 4 3 2 1 */
   }
   g_free(a);
+  #endif
+#+end_src
+
+-----
+
+*Usecase 3a.* Use ~g_scoped(T)~ GCC extension to deallocate an *array*
+ automatically when leaving the current scope ; /RAII (Resource Acquisition Is
+ Initialization)/.
+#+begin_src c
+  // GCC only
+  #ifdef __GNUC__
+  {
+    g_scoped(Array(int)) a = g_array(int, 5, 4, 3, 2, 1);
+    g_for(it, a) {
+      printf("%d ", g_get(it)); /* -> 5 4 3 2 1 */
+    }
+    // No need to call `g_free(a)`
+  }
+  #endif
+#+end_src
+
+*Usecase 3a.* Use ~g_scoped(T)~ GCC extension to deallocate a *list*
+ automatically when leaving the current scope ; /RAII (Resource Acquisition Is
+ Initialization)/.
+#+begin_src c
+  // GCC only
+  #ifdef __GNUC__
+  {
+    g_scoped(List(int)) xs = g_list(int, 5, 4, 3, 2, 1);
+    g_for(it, xs) {
+      printf("%d ", g_get(it)); /* -> 5 4 3 2 1 */
+    }
+    // No need to call `g_free(xs)`
+  }
   #endif
 #+end_src
