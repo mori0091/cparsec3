@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "trait.h"
-#include "typeset.h"
 
 #define Ord(T) TYPE_NAME(Ord, T)
 // -----------------------------------------------------------------------

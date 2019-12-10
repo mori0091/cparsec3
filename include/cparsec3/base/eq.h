@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "trait.h"
-#include "typeset.h"
 
 #define Eq(T) TYPE_NAME(Eq, T)
 // -----------------------------------------------------------------------
