@@ -15,7 +15,6 @@
   /* ---- trait Itr(C) */                                                \
   typedef struct ItrT(C) ItrT(C);                                        \
   struct ItrT(C) {                                                       \
-    Itr(C) (*itr)(C c);                                                  \
     Item(C) * (*ptr)(Itr(C) it);                                         \
     Itr(C) (*next)(Itr(C) it);                                           \
     Itr(C) (*skip)(size_t n, Itr(C) it);                                 \
@@ -24,40 +23,12 @@
     void (*set)(Item(C) x, Itr(C) it);                                   \
   };                                                                     \
   ItrT(C) Trait(Itr(C));                                                 \
-  /* ---- instance Itr(Itr(C)) ... i.e. Itr(C) is also iterable */       \
-  typedef Item(C) Item(Itr(C));                                          \
-  typedef Itr(C) Itr(Itr(C));                                            \
-  typedef struct ItrT(Itr(C)) ItrT(Itr(C));                              \
-  struct ItrT(Itr(C)) {                                                  \
-    Itr(C) (*itr)(Itr(C) it);                                            \
-    Item(C) * (*ptr)(Itr(C) it);                                         \
-    Itr(C) (*next)(Itr(C) it);                                           \
-    Itr(C) (*skip)(size_t n, Itr(C) it);                                 \
-    bool (*null)(Itr(C) it);                                             \
-    Item(C) (*get)(Itr(C) it);                                           \
-    void (*set)(Item(C) x, Itr(C) it);                                   \
-  };                                                                     \
-  static inline Itr(C) FUNC_NAME(itr, Itr(Itr(C)))(Itr(C) it) {          \
-    return it;                                                           \
-  }                                                                      \
-  static inline ItrT(Itr(C)) Trait(Itr(Itr(C))) {                        \
-    ItrT(C) I = trait(Itr(C));                                           \
-    return (ItrT(Itr(C))){                                               \
-        .itr = FUNC_NAME(itr, Itr(Itr(C))),                              \
-        .ptr = I.ptr,                                                    \
-        .next = I.next,                                                  \
-        .skip = I.skip,                                                  \
-        .null = I.null,                                                  \
-        .get = I.get,                                                    \
-        .set = I.set,                                                    \
-    };                                                                   \
-  }                                                                      \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-#define instance_Itr(C, _itr_, _ptr_, _next_)                            \
+#define instance_Itr(C, _ptr_, _next_)                                   \
   C_API_BEGIN                                                            \
   /* ---- trait Itr(C) */                                                \
   static Itr(C) FUNC_NAME(skip, Itr(C))(size_t n, Itr(C) it) {           \
@@ -81,7 +52,6 @@
   }                                                                      \
   ItrT(C) Trait(Itr(C)) {                                                \
     return (ItrT(C)){                                                    \
-        .itr = _itr_,                                                    \
         .ptr = _ptr_,                                                    \
         .next = _next_,                                                  \
         .skip = FUNC_NAME(skip, Itr(C)),                                 \
