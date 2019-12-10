@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "trait.h"
-#include "typeset.h"
 
 #include "eq.h"
 #include "ord.h"

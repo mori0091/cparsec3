@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "trait.h"
-#include "typeset.h"
 
 #define Mem(T) TYPE_NAME(Mem, T)
 #define MemT(T) TYPE_NAME(MemT, T)

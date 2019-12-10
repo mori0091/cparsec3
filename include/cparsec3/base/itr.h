@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "trait.h"
-#include "typeset.h"
 
 #define Item(C) TYPE_NAME(Item, C)
 #define Itr(C) TYPE_NAME(Itr, C)
