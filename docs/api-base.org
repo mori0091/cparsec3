@@ -315,10 +315,11 @@ A ~MaybeT(T)~ trait provides the following member variables/functions :
 ** ItrT(C) - trait to construct and manipulate an iterator
 
 #+begin_src c
+  Iterable(List(int)) J = trait(Iterable(List(int)));
   ItrT(List(int)) I = trait(Itr(List(int)));
   ListT(int) m = trait(List(int));
   List(int) xs = m.cons(1, m.cons(2, m.cons(3, m.empty)));
-  for (Itr(List(int)) it = I.itr(xs); !I.null(it); it = I.next(it)) {
+  for (Itr(List(int)) it = J.itr(xs); !I.null(it); it = I.next(it)) {
     printf("%d ", I.get(it));    /* -> 1 2 3 */
   }
   m.free(&xs);
@@ -384,11 +385,12 @@ An ~ItrT(C)~ trait provides the following member variables/functions :
 #+begin_src c
   ListT(int) L = trait(List(int));
   SliceT(List(int)) S = trait(Slice(List(int)));
+  Iterable(Slice(List(int))) J = trait(Iterable(Slice(List(int))));
   ItrT(Slice(List(int))) I = trait(Itr(Slice(List(int))));
 
   List(int) xs = L.cons(1, L.cons(2, L.cons(3, L.cons(4, L.cons(5, L.empty)))));
   Slice(List(int)) s = S.slice(xs, 0, 3);
-  for (Itr(Slice(List(int))) it = I.itr(xs); !I.null(it); it = I.next(it)) {
+  for (Itr(Slice(List(int))) it = J.itr(xs); !I.null(it); it = I.next(it)) {
     printf("%d ", I.get(it));    /* -> 1 2 3 */
   }
   m.free(&xs);
