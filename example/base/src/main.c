@@ -67,12 +67,13 @@ void test_Array3(void) {
   printf("a = g_array(int, 1, 2, 3, 4, 5)\n");
   Array(int) a = g_array(int, 1, 2, 3, 4, 5);
   printf("for each x in a, x = 2 * x\n");
-  ItrT(Array(int)) A = trait(Itr(Array(int)));
-  for (Itr(Array(int)) it = A.itr(a); !A.null(it); it = A.next(it)) {
-    A.set(2 * A.get(it), it);
+  Iterable(Array(int)) J = trait(Iterable(Array(int)));
+  ItrT(Array(int)) I = trait(Itr(Array(int)));
+  for (Itr(Array(int)) it = J.itr(a); !I.null(it); it = I.next(it)) {
+    I.set(2 * I.get(it), it);
   }
-  for (Itr(Array(int)) it = A.itr(a); !A.null(it); it = A.next(it)) {
-    printf("%d ", A.get(it));
+  for (Itr(Array(int)) it = J.itr(a); !I.null(it); it = I.next(it)) {
+    printf("%d ", I.get(it));
   }
   printf("\n");
   g_free(a);
@@ -82,11 +83,12 @@ void test_List3(void) {
   printf("xs = g_list(int, 1, 2, 3, 4, 5)\n");
   List(int) xs = g_list(int, 1, 2, 3, 4, 5);
   printf("for each x in xs, x = 2 * x\n");
+  Iterable(List(int)) J = trait(Iterable(List(int)));
   ItrT(List(int)) I = trait(Itr(List(int)));
-  for (Itr(List(int)) it = I.itr(xs); !I.null(it); it = I.next(it)) {
+  for (Itr(List(int)) it = J.itr(xs); !I.null(it); it = I.next(it)) {
     I.set(2 * I.get(it), it);
   }
-  for (Itr(List(int)) it = I.itr(xs); !I.null(it); it = I.next(it)) {
+  for (Itr(List(int)) it = J.itr(xs); !I.null(it); it = I.next(it)) {
     printf("%d ", I.get(it));
   }
   printf("\n");
