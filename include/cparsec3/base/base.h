@@ -12,6 +12,7 @@
 
 #include "mem.h"
 
+#include "iterable.h"
 #include "itr.h"
 
 #include "array.h"

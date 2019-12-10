@@ -47,7 +47,7 @@
 
 #define GENERIC_ITERABLE(x)                                              \
   GENERIC(x, SND, CREATE_TRAIT,                                          \
-          BIND(Itr, APPLY_TYPESET(Array), APPLY_TYPESET(List),           \
+          BIND(Iterable, APPLY_TYPESET(Array), APPLY_TYPESET(List),      \
                APPLY(Slice, APPLY_TYPESET(Array), APPLY_TYPESET(List)),  \
                APPLY(Itr, APPLY_TYPESET(Array), APPLY_TYPESET(List),     \
                      APPLY(Slice, APPLY_TYPESET(Array),                  \

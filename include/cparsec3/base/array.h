@@ -7,6 +7,7 @@
 #include "eq.h"
 #include "ord.h"
 
+#include "iterable.h"
 #include "itr.h"
 #include "slice.h"
 
@@ -47,6 +48,8 @@
     Array(T) a;                                                          \
   };                                                                     \
   trait_Itr(Array(T));                                                   \
+  /* ---- instance Iterable(Array(T)) */                                 \
+  trait_Iterable(Array(T));                                              \
   /* ---- instance Slice(Array(T)) */                                    \
   typedef struct Slice(Array(T)) Slice(Array(T));                        \
   struct Slice(Array(T)) {                                               \
@@ -60,6 +63,8 @@
     Itr(Array(T)) it;                                                    \
   };                                                                     \
   trait_Itr(Slice(Array(T)));                                            \
+  /* ---- instance Iterable(Slice(Array(T))) */                          \
+  trait_Iterable(Slice(Array(T)));                                       \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -154,9 +159,6 @@
   }                                                                      \
   instance_Ord(Array(T), FUNC_NAME(cmp, Ord(Array(T))));                 \
   /* ---- instance Itr(Array(T))*/                                       \
-  static Itr(Array(T)) FUNC_NAME(itr, Itr(Array(T)))(Array(T) a) {       \
-    return (Itr(Array(T))){.a = a};                                      \
-  }                                                                      \
   static T* FUNC_NAME(ptr, Itr(Array(T)))(Itr(Array(T)) it) {            \
     return it.a.data;                                                    \
   }                                                                      \
@@ -170,9 +172,13 @@
     }                                                                    \
     return it;                                                           \
   }                                                                      \
-  instance_Itr(Array(T), FUNC_NAME(itr, Itr(Array(T))),                  \
-               FUNC_NAME(ptr, Itr(Array(T))),                            \
+  instance_Itr(Array(T), FUNC_NAME(ptr, Itr(Array(T))),                  \
                FUNC_NAME(next, Itr(Array(T))));                          \
+  /* ---- instance Iterable(Array(T))*/                                  \
+  static Itr(Array(T)) FUNC_NAME(itr, Iterable(Array(T)))(Array(T) a) {  \
+    return (Itr(Array(T))){.a = a};                                      \
+  }                                                                      \
+  instance_Iterable(Array(T), FUNC_NAME(itr, Iterable(Array(T))));       \
   /* ---- instance Slice(Array(T)) */                                    \
   static bool FUNC_NAME(null, Slice(Array(T)))(Slice(Array(T)) s) {      \
     return FUNC_NAME(null, Array(T))(s.a);                               \
@@ -208,12 +214,6 @@
     };                                                                   \
   }                                                                      \
   /* ---- instance Itr(Slice(Array(T))) */                               \
-  static Itr(Slice(Array(T)))                                            \
-      FUNC_NAME(itr, Itr(Slice(Array(T))))(Slice(Array(T)) s) {          \
-    return (Itr(Slice(Array(T)))){                                       \
-        .it = FUNC_NAME(itr, Itr(Array(T)))(s.a),                        \
-    };                                                                   \
-  }                                                                      \
   static T* FUNC_NAME(ptr,                                               \
                       Itr(Slice(Array(T))))(Itr(Slice(Array(T))) it) {   \
     return FUNC_NAME(ptr, Itr(Array(T)))(it.it);                         \
@@ -223,9 +223,17 @@
     it.it = FUNC_NAME(next, Itr(Array(T)))(it.it);                       \
     return it;                                                           \
   }                                                                      \
-  instance_Itr(Slice(Array(T)), FUNC_NAME(itr, Itr(Slice(Array(T)))),    \
-               FUNC_NAME(ptr, Itr(Slice(Array(T)))),                     \
+  instance_Itr(Slice(Array(T)), FUNC_NAME(ptr, Itr(Slice(Array(T)))),    \
                FUNC_NAME(next, Itr(Slice(Array(T)))));                   \
+  /* ---- instance Iterable(Slice(Array(T))) */                          \
+  static Itr(Slice(Array(T)))                                            \
+      FUNC_NAME(itr, Iterable(Slice(Array(T))))(Slice(Array(T)) s) {     \
+    return (Itr(Slice(Array(T)))){                                       \
+        .it = FUNC_NAME(itr, Iterable(Array(T)))(s.a),                   \
+    };                                                                   \
+  }                                                                      \
+  instance_Iterable(Slice(Array(T)),                                     \
+                    FUNC_NAME(itr, Iterable(Slice(Array(T)))));          \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS

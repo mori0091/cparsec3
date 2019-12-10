@@ -81,14 +81,15 @@ The parameter ~M~ is the name of the resulting concrete trait type (e.g.
 container.
 #+begin_src c
   /* ItrT(C) is a trait type to iterate each items in container C */
+  Iterable(Array(int)) J = trait(Iterable(Array(int)));
   ItrT(Array(int)) I = trait(Itr(Array(int)));
   ArrayT(int) m = trait(Array(int));
   Array(int) a = m.create(5);
   size_t n = m.length(a); /* -> n = 5 */
-  for (Itr(Array(int)) it = I.itr(a); !I.null(it); it = I.next(it)) {
+  for (Itr(Array(int)) it = J.itr(a); !I.null(it); it = I.next(it)) {
     I.set(n--, it);
   }
-  for (Itr(Array(int)) it = I.itr(a); !I.null(it); it = I.next(it)) {
+  for (Itr(Array(int)) it = J.itr(a); !I.null(it); it = I.next(it)) {
     printf("%d ", I.get(it)); /* -> 5 4 3 2 1 */
   }
   m.free(&a);
