@@ -31,6 +31,3 @@
   }                                                                      \
   C_API_END                                                              \
   END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-FOREACH(trait_Eq, TYPESET(ALL));
