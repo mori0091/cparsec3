@@ -107,8 +107,8 @@ enum eGuard { ANY, UNARY, BINARY };
 
 #define define_token(S, T)                                               \
   define_parsec(S, T, token, Match(Token(S), T), Hints(S)) {             \
-    Match(Token(S), T) match = arg->_1;                                  \
-    Hints(S) expecting = arg->_2;                                        \
+    Match(Token(S), T) match = arg->e1;                                  \
+    Hints(S) expecting = arg->e2;                                        \
     Stream(S) stream = trait(Stream(S));                                 \
     Maybe(Tuple(Token(S), S)) r0 = stream.take1(state.input);            \
     if (r0.none) {                                                       \
