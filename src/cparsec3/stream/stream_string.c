@@ -4,6 +4,26 @@
 
 #include <string.h>
 
+Eq(Token(String)) Trait(Eq(Token(String))) {
+  Eq(char) t = trait(Eq(char));
+  return *(Eq(Token(String))*)&t;
+}
+
+Ord(Token(String)) Trait(Ord(Token(String))) {
+  Ord(char) t = trait(Ord(char));
+  return *(Ord(Token(String))*)&t;
+}
+
+ListT(Token(String)) Trait(List(Token(String))) {
+  ListT(char) t = trait(List(char));
+  return *(ListT(Token(String))*)&t;
+}
+
+ArrayT(Token(String)) Trait(Array(Token(String))) {
+  ArrayT(char) t = trait(Array(char));
+  return *(ArrayT(Token(String))*)&t;
+}
+
 /**
  * Tests whether the stream was empty or not.
  * \param s    a stream
