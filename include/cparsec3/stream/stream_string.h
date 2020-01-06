@@ -39,5 +39,12 @@ struct Tokens(String) {
 /** S : A stream */
 trait_Stream(String);
 
+trait_Eq(Token(String));
+trait_Ord(Token(String));
+trait_Maybe(Token(String));
+typedef Token(String) Item(List(Token(String)));
+trait_List(Token(String));
+trait_Array(Token(String));
+
 // -------------------------------------------------------------
 C_API_END
