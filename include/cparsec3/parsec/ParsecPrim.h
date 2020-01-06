@@ -1,5 +1,5 @@
 /* -*- coding: utf-8-unix -*- */
-#include <cparsec3/base/base_generics.h>
+#include "../base/base_generics.h"
 
 #include "parsec.h"
 
@@ -58,7 +58,7 @@
         .lookAhead = 0,                                                  \
         .notFollowedBy = 0,                                              \
         .eof = 0,                                                        \
-        .token = FUNC_NAME(token_, S, T),                                \
+        .token = FUNC_NAME(token, S, T),                                 \
         .tokens = 0,                                                     \
         .takeWhileP = 0,                                                 \
         .takeWhile1P = 0,                                                \
@@ -151,7 +151,7 @@
     return fn_apply(cok, maybe2.value, s, NULL);                         \
   }                                                                      \
                                                                          \
-  static Parsec(S, T) FUNC_NAME(token_, S, T)(                           \
+  static Parsec(S, T) FUNC_NAME(token, S, T)(                            \
       Fn(Token(S), Maybe(T)) testToken, Hints(Token(S)) expecting) {     \
     __auto_type f = FUNC_NAME(tokenImpl, S, T)();                        \
     return (Parsec(S, T)){                                               \

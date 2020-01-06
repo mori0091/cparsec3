@@ -1,5 +1,5 @@
 /* -*- coding: utf-8-unix -*- */
-#include <cparsec3/base/base_generics.h>
+#include "../base/base_generics.h"
 
 #include "parsec.h"
 

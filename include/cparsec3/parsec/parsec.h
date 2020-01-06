@@ -1,11 +1,11 @@
 /* -*- coding: utf-8-unix -*- */
-#include <cparsec3/base/base.h>
+#include "../base/base.h"
 
-#include <cparsec3/core/parseerror.h>
-#include <cparsec3/core/parsestate.h>
-#include <cparsec3/core/posstate.h>
-#include <cparsec3/core/sourcepos.h>
-#include <cparsec3/core/stream.h>
+#include "parseerror.h"
+#include "parsestate.h"
+#include "posstate.h"
+#include "sourcepos.h"
+#include "stream.h"
 
 // -----------------------------------------------------------------------
 #define ParseReply(...) TYPE_NAME(ParseReply, __VA_ARGS__)

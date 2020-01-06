@@ -21,7 +21,7 @@
  */
 #pragma once
 
-#include "../core/core.h"
+#include "../parsec/parsec.h"
 
 C_API_BEGIN
 // -------------------------------------------------------------

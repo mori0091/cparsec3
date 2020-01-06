@@ -1,7 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include "core.h"
+#include "../base/base.h"
 
 #define Stream(S) TYPE_NAME(Stream, S)
 #define Token(S) TYPE_NAME(Token, S)

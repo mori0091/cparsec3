@@ -2,11 +2,11 @@
 // #include <cparsec3/base/base.h>
 #include <cparsec3/base/base_generics.h>
 
-#include "ParsecBase.h"
-#include "ParsecRunner.h"
-#include "ParsecPrim.h"
-#include "ParsecFailure.h"
-#include "ParsecDeriv.h"
+#include <cparsec3/parsec/ParsecBase.h>
+#include <cparsec3/parsec/ParsecRunner.h>
+#include <cparsec3/parsec/ParsecPrim.h>
+#include <cparsec3/parsec/ParsecFailure.h>
+#include <cparsec3/parsec/ParsecDeriv.h>
 
 // -----------------------------------------------------------------------
 #include "cparsec3/stream/stream_string.h"
