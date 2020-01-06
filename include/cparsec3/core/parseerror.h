@@ -3,11 +3,11 @@
 
 #include "../base/base.h"
 
-#define ErrorItem(S) TYPE_NAME(ErrorItem, S)
-#define typedef_ErrorItem(S)                                             \
+#define ErrorItem(T) TYPE_NAME(ErrorItem, T)
+#define typedef_ErrorItem(T)                                             \
   C_API_BEGIN                                                            \
-  typedef struct ErrorItem(S) ErrorItem(S);                              \
-  struct ErrorItem(S) {                                                  \
+  typedef struct ErrorItem(T) ErrorItem(T);                              \
+  struct ErrorItem(T) {                                                  \
     enum {                                                               \
       LABEL,                                                             \
       TOKENS,                                                            \
@@ -15,31 +15,32 @@
     } type;                                                              \
     union {                                                              \
       String label;                                                      \
-      List(Token(S)) tokens;                                             \
+      List(T) tokens;                                                    \
     };                                                                   \
   };                                                                     \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
-#define trait_ErrorItem(S)                                               \
+#define trait_ErrorItem(T)                                               \
   C_API_BEGIN                                                            \
-  typedef_ErrorItem(S);                                                  \
-  trait_Eq(ErrorItem(S));                                                \
-  trait_Ord(ErrorItem(S));                                               \
+  typedef_ErrorItem(T);                                                  \
+  trait_Eq(ErrorItem(T));                                                \
+  trait_Ord(ErrorItem(T));                                               \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
 #define ParseError(S) TYPE_NAME(ParseError, S)
 #define typedef_ParseError(S)                                            \
   C_API_BEGIN                                                            \
-  trait_ErrorItem(S);                                                    \
-  trait_Maybe(ErrorItem(S));                                             \
-  trait_List(ErrorItem(S));                                              \
+  trait_ErrorItem(Token(S));                                             \
+  trait_Maybe(ErrorItem(Token(S)));                                      \
+  typedef ErrorItem(Token(S)) Item(List(ErrorItem(Token(S))));           \
+  trait_List(ErrorItem(Token(S)));                                       \
   typedef struct ParseError(S) ParseError(S);                            \
   struct ParseError(S) {                                                 \
     Offset offset;                                                       \
-    Maybe(ErrorItem(S)) unexpected;                                      \
-    List(ErrorItem(S)) expecting;                                        \
+    Maybe(ErrorItem(Token(S))) unexpected;                               \
+    List(ErrorItem(Token(S))) expecting;                                 \
   };                                                                     \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -54,13 +55,13 @@
 
 #define impl_ParseError(S)                                               \
   C_API_BEGIN                                                            \
-  impl_Maybe(ErrorItem(S));                                              \
-  impl_List(ErrorItem(S));                                               \
+  impl_Maybe(ErrorItem(Token(S)));                                       \
+  impl_List(ErrorItem(Token(S)));                                        \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
 // type alias for expecting items
-#define Hints(S) List(ErrorItem(S))
+#define Hints(T) List(ErrorItem(T))
 
 #define ParseErrorBundle(S) TYPE_NAME(ParseErrorBundle, S)
 #define typedef_ParseErrorBundle(S)                                      \
