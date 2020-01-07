@@ -15,7 +15,7 @@
     ParseReply(S, T) (*runParsec)(Parsec(S, T) p, ParseState(S) state);  \
     Result(T, ParseError(S)) (*runParser)(Parsec(S, T) p, String name,   \
                                           S input);                      \
-    bool (*parseTest)(Parsec(S, T) p, String name, S input);             \
+    bool (*parseTest)(Parsec(S, T) p, S input);                          \
   };                                                                     \
   ParsecRunner(S, T) Trait(ParsecRunner(S, T));                          \
   /* ---- */                                                             \
@@ -92,10 +92,9 @@
 
 // -----------------------------------------------------------------------
 #define impl_parseTest(S, T)                                             \
-  /* ---- parseTest(p, name, input) */                                   \
-  static bool FUNC_NAME(parseTest, S, T)(Parsec(S, T) p, String name,    \
-                                         S input) {                      \
-    __auto_type result = FUNC_NAME(runParser, S, T)(p, name, input);     \
+  /* ---- parseTest(p, input) */                                         \
+  static bool FUNC_NAME(parseTest, S, T)(Parsec(S, T) p, S input) {      \
+    __auto_type result = FUNC_NAME(runParser, S, T)(p, "", input);       \
     if (!result.success) {                                               \
       printf("error: ...\n");                                            \
       return false;                                                      \
