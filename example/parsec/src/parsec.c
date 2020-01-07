@@ -37,22 +37,22 @@ int main(void) {
   __auto_type D = trait(ParsecDeriv(S));
 
   __auto_type p1 = P.parseError((ParseError(S)){0});
-  R.parseTest(p1, "", "");
-  R.parseTest(p1, "", "foo");
-  R.parseTest(p1, "", "bar");
+  R.parseTest(p1, "");
+  R.parseTest(p1, "foo");
+  R.parseTest(p1, "bar");
 
   __auto_type p2 = D.single('f');
-  R.parseTest(p2, "", "");
-  R.parseTest(p2, "", "foo");
-  R.parseTest(p2, "", "bar");
+  R.parseTest(p2, "");
+  R.parseTest(p2, "foo");
+  R.parseTest(p2, "bar");
 
   __auto_type p3 = D.anySingle();
-  R.parseTest(p3, "", "");
-  R.parseTest(p3, "", "foo");
-  R.parseTest(p3, "", "bar");
+  R.parseTest(p3, "");
+  R.parseTest(p3, "foo");
+  R.parseTest(p3, "bar");
 
   __auto_type p4 = D.anySingleBut('f');
-  R.parseTest(p4, "", "");
-  R.parseTest(p4, "", "foo");
-  R.parseTest(p4, "", "bar");
+  R.parseTest(p4, "");
+  R.parseTest(p4, "foo");
+  R.parseTest(p4, "bar");
 }
