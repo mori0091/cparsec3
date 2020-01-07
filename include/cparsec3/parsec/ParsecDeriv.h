@@ -69,7 +69,7 @@
   static Parsec(S, Token(S)) FUNC_NAME(single, S)(Token(S) t) {          \
     __auto_type f = FUNC_NAME(singleTestToken, S)();                     \
     return trait(ParsecPrim(S, Token(S)))                                \
-        .token(fn_apply(f, t), (Hints(Token(S))){0});                    \
+        .token(fn_apply(f, t), FUNC_NAME(toHints, Token(S))(t));         \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS

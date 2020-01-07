@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <inttypes.h>
+
 #include "metac2.h"
 
 #define UNUSED(x) ((void)x)
