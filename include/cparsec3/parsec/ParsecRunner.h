@@ -96,7 +96,7 @@
   static bool FUNC_NAME(parseTest, S, T)(Parsec(S, T) p, S input) {      \
     __auto_type result = FUNC_NAME(runParser, S, T)(p, "", input);       \
     if (!result.success) {                                               \
-      printf("error: ...\n");                                            \
+      FUNC_NAME(print, ParseError(S))(result.err);                       \
       return false;                                                      \
     }                                                                    \
     printf("'%c'\n", result.ok); /* TODO implement Show(T) */            \

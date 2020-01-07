@@ -9,7 +9,7 @@
                                                                          \
   typedef_PosState(S);                                                   \
   typedef_ParseState(S);                                                 \
-  typedef_ParseError(S);                                                 \
+  trait_ParseError(S);                                                   \
                                                                          \
   typedef_Parsec(S, None);                                               \
   typedef_Parsec(S, Token(S));                                           \
@@ -21,6 +21,8 @@
 // -----------------------------------------------------------------------
 #define impl_ParsecBase(S)                                               \
   C_API_BEGIN                                                            \
+                                                                         \
+  impl_ParseError(S);                                                    \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS
