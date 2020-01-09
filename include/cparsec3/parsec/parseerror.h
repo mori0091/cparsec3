@@ -90,24 +90,25 @@
       printf("%s", e.label);                                             \
       break;                                                             \
     case TOKENS:;                                                        \
+      Show(T) S = trait(Show(T));                                        \
       ListT(T) L = trait(List(T));                                       \
       List(T) xs = e.tokens;                                             \
       if (!xs) {                                                         \
         break;                                                           \
       }                                                                  \
-      printf("'%c'", L.head(xs));                                        \
+      printf("%s", S.show(L.head(xs)));                                  \
       xs = L.tail(xs);                                                   \
       if (!xs) {                                                         \
         break;                                                           \
       }                                                                  \
       if (!L.tail(xs)) {                                                 \
-        printf(" or '%c'", L.head(xs));                                  \
+        printf(" or %s", S.show(L.head(xs)));                            \
         break;                                                           \
       }                                                                  \
       for (; L.tail(xs); xs = L.tail(xs)) {                              \
-        printf(", '%c'", L.head(xs));                                    \
+        printf(", %s", S.show(L.head(xs)));                              \
       }                                                                  \
-      printf(" or '%c'", L.head(xs));                                    \
+      printf(", or %s", S.show(L.head(xs)));                             \
       break;                                                             \
     case END_OF_INPUT:                                                   \
       printf("end of input");                                            \
@@ -161,7 +162,7 @@
             !e.expecting);                                               \
   }                                                                      \
   static inline void FUNC_NAME(print, ParseError(S))(ParseError(S) e) {  \
-    printf("error:%" PRIuMAX ":\n", e.offset);                           \
+    printf("error:%" PRIdMAX ":\n", e.offset);                           \
     if (FUNC_NAME(isUnknown, ParseError(S))(e)) {                        \
       printf("  unknown error\n");                                       \
       return;                                                            \
