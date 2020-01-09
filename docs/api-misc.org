@@ -11,9 +11,9 @@ These macros are used to declare/define various *Generic Data Types*, *Traits*,
 and *Generic Macros* in the library implementation.
 
 - TYPESET(ALL)       ::
-     ~int~, ~TYPESET(PRIMITIVE)~
+     ~int~, ~size_t~, ~TYPESET(PRIMITIVE)~
 - TYPESET(PRIMITIVE) ::
-     ~None~, ~char~, ~String~, ~TYPESET(STD_INT)~
+     ~None~, ~bool~, ~char~, ~String~, ~TYPESET(STD_INT)~
 - TYPESET(STD_INT)   ::
      ~int8_t~, ~int16_t~, ~int32_t~, ~int64_t~, 
      ~uint8_t~, ~uint16_t~, ~uint32_t~, ~uint64_t~
@@ -31,6 +31,9 @@ and *Generic Macros* in the library implementation.
   - isNONE(x)       ::
        macro that returns ~true~ if ~x~ was a ~None~ value.
 
+- bool            ::
+     a boolean (~true~ or ~false~)
+
 - char            ::
      a 8-bit character
 
@@ -40,6 +43,11 @@ and *Generic Macros* in the library implementation.
 - int             ::
      an integer.
   - *NOTE* : ~int~ is not a member of ~TYPESET(PRIMITIVE)~ nor ~TYPESET(STD_INT)~,
+     since it may be a type alias to other standard integer type.
+
+- size_t          ::
+     an unsigned integer, which is used to represent size of an object.
+  - *NOTE* : ~size_t~ is not a member of ~TYPESET(PRIMITIVE)~ nor ~TYPESET(STD_INT)~,
      since it may be a type alias to other standard integer type.
 
 - int8_t   :: an 8-bit integer
