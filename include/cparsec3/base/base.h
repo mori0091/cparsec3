@@ -9,6 +9,7 @@
 
 #include "eq.h"
 #include "ord.h"
+#include "show.h"
 
 #include "mem.h"
 
@@ -26,6 +27,7 @@
 
 FOREACH(trait_Eq, TYPESET(ALL));
 FOREACH(trait_Ord, TYPESET(ALL));
+FOREACH(trait_Show, TYPESET(ALL));
 
 FOREACH(trait_Mem, TYPESET(ALL));
 FOREACH(trait_Array, TYPESET(ALL));
