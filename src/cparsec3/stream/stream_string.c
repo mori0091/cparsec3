@@ -14,6 +14,11 @@ Ord(Token(String)) Trait(Ord(Token(String))) {
   return *(Ord(Token(String))*)&t;
 }
 
+Show(Token(String)) Trait(Show(Token(String))) {
+  Show(char) t = trait(Show(char));
+  return *(Show(Token(String))*)&t;
+}
+
 ListT(Token(String)) Trait(List(Token(String))) {
   ListT(char) t = trait(List(char));
   return *(ListT(Token(String))*)&t;

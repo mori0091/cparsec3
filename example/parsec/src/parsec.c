@@ -3,10 +3,10 @@
 #include <cparsec3/base/base_generics.h>
 
 #include <cparsec3/parsec/ParsecBase.h>
-#include <cparsec3/parsec/ParsecRunner.h>
-#include <cparsec3/parsec/ParsecPrim.h>
-#include <cparsec3/parsec/ParsecFailure.h>
 #include <cparsec3/parsec/ParsecDeriv.h>
+#include <cparsec3/parsec/ParsecFailure.h>
+#include <cparsec3/parsec/ParsecPrim.h>
+#include <cparsec3/parsec/ParsecRunner.h>
 
 // -----------------------------------------------------------------------
 #include "cparsec3/stream/stream_string.h"
@@ -32,27 +32,40 @@ impl_ParsecRunner(S, Token(S));
 // impl_ParsecRunner(S, Tokens(S));
 
 int main(void) {
+  for (int x = 0; x < 256; ++x) {
+    String s = trait(Show(char)).show((char)x);
+    printf("%-6s ", s);
+    mem_free((void*)s);
+    if (x % 8 == 7)
+      printf("\n");
+  }
+  printf("\n");
+
   __auto_type R = trait(ParsecRunner(S, Token(S)));
   __auto_type P = trait(ParsecPrim(S, Token(S)));
   __auto_type D = trait(ParsecDeriv(S));
-
-  __auto_type p1 = P.parseError((ParseError(S)){0});
-  R.parseTest(p1, "");
-  R.parseTest(p1, "foo");
-  R.parseTest(p1, "bar");
-
-  __auto_type p2 = D.single('f');
-  R.parseTest(p2, "");
-  R.parseTest(p2, "foo");
-  R.parseTest(p2, "bar");
-
-  __auto_type p3 = D.anySingle();
-  R.parseTest(p3, "");
-  R.parseTest(p3, "foo");
-  R.parseTest(p3, "bar");
-
-  __auto_type p4 = D.anySingleBut('f');
-  R.parseTest(p4, "");
-  R.parseTest(p4, "foo");
-  R.parseTest(p4, "bar");
+  {
+    __auto_type p = P.parseError((ParseError(S)){0});
+    R.parseTest(p, "");
+    R.parseTest(p, "foo");
+    R.parseTest(p, "bar");
+  }
+  {
+    __auto_type p = D.single('f');
+    R.parseTest(p, "");
+    R.parseTest(p, "foo");
+    R.parseTest(p, "bar");
+  }
+  {
+    __auto_type p = D.anySingle();
+    R.parseTest(p, "");
+    R.parseTest(p, "foo");
+    R.parseTest(p, "bar");
+  }
+  {
+    __auto_type p = D.anySingleBut('f');
+    R.parseTest(p, "");
+    R.parseTest(p, "foo");
+    R.parseTest(p, "bar");
+  }
 }
