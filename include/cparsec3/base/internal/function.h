@@ -2,6 +2,7 @@
 #pragma once
 
 #include "../common.h"
+#include "../mem.h"
 
 // -----------------------------------------------------------------------
 #undef Fn
@@ -186,7 +187,7 @@
   /* ---- */                                                             \
   static Fn(T1, R) name(void) {                                          \
     return (Fn(T1, R)){                                                  \
-        .args = malloc(sizeof(FnEnv(name, T1))),                         \
+        .args = mem_malloc(sizeof(FnEnv(name, T1))),                     \
         .apply = FUNC_NAME(name, apply1),                                \
     };                                                                   \
   }                                                                      \
@@ -213,7 +214,7 @@
   /* ---- */                                                             \
   static Fn(T2, T1, R) name(void) {                                      \
     return (Fn(T2, T1, R)){                                              \
-        .args = malloc(sizeof(FnEnv(name, T2, T1))),                     \
+        .args = mem_malloc(sizeof(FnEnv(name, T2, T1))),                 \
         .apply = FUNC_NAME(name, apply2),                                \
     };                                                                   \
   }                                                                      \
@@ -249,7 +250,7 @@
   /* ---- */                                                             \
   static Fn(T3, T2, T1, R) name(void) {                                  \
     return (Fn(T3, T2, T1, R)){                                          \
-        .args = malloc(sizeof(FnEnv(name, T3, T2, T1))),                 \
+        .args = mem_malloc(sizeof(FnEnv(name, T3, T2, T1))),             \
         .apply = FUNC_NAME(name, apply3),                                \
     };                                                                   \
   }                                                                      \
@@ -294,7 +295,7 @@
   /* ---- */                                                             \
   static Fn(T4, T3, T2, T1, R) name(void) {                              \
     return (Fn(T4, T3, T2, T1, R)){                                      \
-        .args = malloc(sizeof(FnEnv(name, T4, T3, T2, T1))),             \
+        .args = mem_malloc(sizeof(FnEnv(name, T4, T3, T2, T1))),         \
         .apply = FUNC_NAME(name, apply4),                                \
     };                                                                   \
   }                                                                      \
@@ -350,7 +351,7 @@
   /* ---- */                                                             \
   static Fn(T5, T4, T3, T2, T1, R) name(void) {                          \
     return (Fn(T5, T4, T3, T2, T1, R)){                                  \
-        .args = malloc(sizeof(FnEnv(name, T5, T4, T3, T2, T1))),         \
+        .args = mem_malloc(sizeof(FnEnv(name, T5, T4, T3, T2, T1))),     \
         .apply = FUNC_NAME(name, apply5),                                \
     };                                                                   \
   }                                                                      \
@@ -417,7 +418,7 @@
   /* ---- */                                                             \
   static Fn(T6, T5, T4, T3, T2, T1, R) name(void) {                      \
     return (Fn(T6, T5, T4, T3, T2, T1, R)){                              \
-        .args = malloc(sizeof(FnEnv(name, T6, T5, T4, T3, T2, T1))),     \
+        .args = mem_malloc(sizeof(FnEnv(name, T6, T5, T4, T3, T2, T1))), \
         .apply = FUNC_NAME(name, apply6),                                \
     };                                                                   \
   }                                                                      \
@@ -496,7 +497,8 @@
   /* ---- */                                                             \
   static Fn(T7, T6, T5, T4, T3, T2, T1, R) name(void) {                  \
     return (Fn(T7, T6, T5, T4, T3, T2, T1, R)){                          \
-        .args = malloc(sizeof(FnEnv(name, T7, T6, T5, T4, T3, T2, T1))), \
+        .args =                                                          \
+            mem_malloc(sizeof(FnEnv(name, T7, T6, T5, T4, T3, T2, T1))), \
         .apply = FUNC_NAME(name, apply7),                                \
     };                                                                   \
   }                                                                      \
@@ -586,8 +588,8 @@
   /* ---- */                                                             \
   static Fn(T8, T7, T6, T5, T4, T3, T2, T1, R) name(void) {              \
     return (Fn(T8, T7, T6, T5, T4, T3, T2, T1, R)){                      \
-        .args =                                                          \
-            malloc(sizeof(FnEnv(name, T8, T7, T6, T5, T4, T3, T2, T1))), \
+        .args = mem_malloc(                                              \
+            sizeof(FnEnv(name, T8, T7, T6, T5, T4, T3, T2, T1))),        \
         .apply = FUNC_NAME(name, apply8),                                \
     };                                                                   \
   }                                                                      \
@@ -688,7 +690,7 @@
   /* ---- */                                                             \
   static Fn(T9, T8, T7, T6, T5, T4, T3, T2, T1, R) name(void) {          \
     return (Fn(T9, T8, T7, T6, T5, T4, T3, T2, T1, R)){                  \
-        .args = malloc(                                                  \
+        .args = mem_malloc(                                              \
             sizeof(FnEnv(name, T9, T8, T7, T6, T5, T4, T3, T2, T1))),    \
         .apply = FUNC_NAME(name, apply9),                                \
     };                                                                   \
