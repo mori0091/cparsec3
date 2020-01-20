@@ -14,14 +14,16 @@ static bool null(String s) {
   return !s[0];
 }
 
-static List(Token(String)) chunkToTokens(Tokens(String) chk) {
-  assert(chk && "Null pointer");
-  return trait(List(Token(String))).from_array(strlen(chk), (char*)chk);
-}
-
 static int chunkLength(Tokens(String) chk) {
   assert(chk && "Null pointer");
-  return strlen(chk);
+  size_t n = strnlen(chk, SIZE_MAX / 2);
+  return (int)n;
+}
+
+static List(Token(String)) chunkToTokens(Tokens(String) chk) {
+  assert(chk && "Null pointer");
+  return trait(List(Token(String)))
+      .from_array(chunkLength(chk), (char*)chk);
 }
 
 /**
@@ -74,7 +76,9 @@ static Maybe(Tuple(Tokens(String), String)) takeN(int n, String s) {
     int m = strnlen(s, n);
     char* chk = mem_malloc(m + 1);
     assert(chk && "no memory");
-    strncpy(chk, s, m);
+    if (0 < m) {
+      memcpy(chk, s, m);
+    }
     chk[m] = '\0';
     return (R){.value = {{chk}, {s + m}}};
   }
