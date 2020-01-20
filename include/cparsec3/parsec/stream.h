@@ -17,7 +17,9 @@
   /* ---- */                                                             \
   typedef struct Stream(S) Stream(S);                                    \
   struct Stream(S) {                                                     \
-    bool (*empty)(S s);                                                  \
+    bool (*null)(S s);                                                   \
+    List(Token(S)) (*chunkToTokens)(Tokens(S) chk);                      \
+    int (*chunkLength)(Tokens(S) chk);                                   \
     Maybe(Tuple(Token(S), S)) (*take1)(S s);                             \
     Maybe(Tuple(Tokens(S), S)) (*takeN)(int n, S s);                     \
   };                                                                     \
