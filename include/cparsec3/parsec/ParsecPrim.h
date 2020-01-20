@@ -11,10 +11,6 @@
   C_API_BEGIN                                                            \
   /* testToken (for `token` parser) */                                   \
   typedef_Fn_r(Token(S), Maybe(T));                                      \
-  /* tokensMatcher (for `tokens` parser) */                              \
-  typedef_Fn_r(Tokens(String), Tokens(String), bool);                    \
-  /* tokenPredicate (for `takeWhileP`, `takeWhile1P` parsers) */         \
-  typedef_Fn_r(Token(String), bool);                                     \
                                                                          \
   typedef struct ParsecPrim(S, T) ParsecPrim(S, T);                      \
   struct ParsecPrim(S, T) {                                              \
@@ -27,13 +23,6 @@
     Parsec(S, None) (*eof)(void);                                        \
     Parsec(S, T) (*token)(Fn(Token(S), Maybe(T)) testToken,              \
                           Hints(Token(S)) expecting);                    \
-    Parsec(S, Tokens(S)) (*tokens)(Fn(Tokens(S), Tokens(S), bool),       \
-                                   Tokens(S));                           \
-    Parsec(S, Tokens(S)) (*takeWhileP)(Maybe(String) name,               \
-                                       Fn(Token(S), bool) pred);         \
-    Parsec(S, Tokens(S)) (*takeWhile1P)(Maybe(String) name,              \
-                                        Fn(Token(S), bool) pred);        \
-    Parsec(S, Tokens(S)) (*takeP)(Maybe(String) name, int n);            \
   };                                                                     \
                                                                          \
   ParsecPrim(S, T) Trait(ParsecPrim(S, T));                              \
@@ -59,10 +48,6 @@
         .notFollowedBy = 0,                                              \
         .eof = 0,                                                        \
         .token = FUNC_NAME(token, S, T),                                 \
-        .tokens = 0,                                                     \
-        .takeWhileP = 0,                                                 \
-        .takeWhile1P = 0,                                                \
-        .takeP = 0,                                                      \
     };                                                                   \
   }                                                                      \
                                                                          \

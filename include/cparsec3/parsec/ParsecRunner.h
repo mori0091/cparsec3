@@ -99,7 +99,7 @@
       FUNC_NAME(print, ParseError(S))(result.err);                       \
       return false;                                                      \
     }                                                                    \
-    printf("'%c'\n", result.ok); /* TODO implement Show(T) */            \
+    printf("%s\n", trait(Show(T)).show(result.ok));                      \
     return true;                                                         \
   }                                                                      \
   END_OF_STATEMENTS

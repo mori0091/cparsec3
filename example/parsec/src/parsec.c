@@ -20,7 +20,7 @@ trait_ParsecDeriv(S);
 
 // trait_ParsecRunner(S, None);
 trait_ParsecRunner(S, Token(S));
-// trait_ParsecRunner(S, Tokens(S));
+trait_ParsecRunner(S, Tokens(S));
 
 impl_ParsecBase(S);
 impl_ParsecPrim(S, Token(S));
@@ -29,7 +29,7 @@ impl_ParsecDeriv(S);
 
 // impl_ParsecRunner(S, None);
 impl_ParsecRunner(S, Token(S));
-// impl_ParsecRunner(S, Tokens(S));
+impl_ParsecRunner(S, Tokens(S));
 
 int main(void) {
   for (int x = 0; x < 256; ++x) {
@@ -64,6 +64,13 @@ int main(void) {
   }
   {
     __auto_type p = D.anySingleBut('f');
+    R.parseTest(p, "");
+    R.parseTest(p, "foo");
+    R.parseTest(p, "bar");
+  }
+  {
+    __auto_type R = trait(ParsecRunner(S, Tokens(S)));
+    __auto_type p = D.chunk("foo");
     R.parseTest(p, "");
     R.parseTest(p, "foo");
     R.parseTest(p, "bar");
