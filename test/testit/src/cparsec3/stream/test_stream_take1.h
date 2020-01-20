@@ -22,12 +22,12 @@ static inline bool tok_eq(Tok a, Tok b) {
   return eq(a_token, b_token) && eq(a_rest, b_rest);
 }
 
-test("if !empty(input) := true, then "
+test("if !null(input) := true, then "
      "take1(input) returns the 1st token and the rest of 'input'.",
      .generator = T_GENERATOR) {
   struct data* x = testit_current_test_data();
   S input = x->input;
-  if (!stream.empty(input)) {
+  if (!stream.null(input)) {
     Tok expect = x->expect;
     Tok actual = stream.take1(input);
     c_assert(!expect.none);
@@ -36,12 +36,12 @@ test("if !empty(input) := true, then "
   }
 }
 
-test("if empty(input) := true, then "
+test("if null(input) := true, then "
      "take1(input) returns nothing.",
      .generator = T_GENERATOR) {
   struct data* x = testit_current_test_data();
   S input = x->input;
-  if (stream.empty(input)) {
+  if (stream.null(input)) {
     Tok expect = x->expect;
     Tok actual = stream.take1(input);
     c_assert(expect.none);

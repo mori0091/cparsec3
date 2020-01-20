@@ -17,11 +17,7 @@ static inline bool toks_eq(Toks a, Toks b) {
   if (b.none) {
     return a.none;
   }
-  tie((Tokens(S) a_chunk, S a_rest), a.value);
-  tie((Tokens(S) b_chunk, S b_rest), b.value);
-  return eq(a_chunk.length, b_chunk.length) &&
-         !strncmp(a_chunk.value, b_chunk.value, a_chunk.length) &&
-         eq(a_rest, b_rest);
+  return eq(a.value.e1, b.value.e1) && eq(a.value.e2, b.value.e2);
 }
 
 test("if (n <= 0) := true, then "
@@ -39,26 +35,26 @@ test("if (n <= 0) := true, then "
   }
 }
 
-test("if (n > 0) && empty(input) := true, then "
+test("if (n > 0) && null(input) := true, then "
      "takeN(n, input) returns nothing. (i.e. end of input)",
      .generator = T_GENERATOR) {
   struct data* x = testit_current_test_data();
   int n = x->n;
   S input = x->input;
-  if (n > 0 && stream.empty(input)) {
+  if (n > 0 && stream.null(input)) {
     Toks actual = stream.takeN(n, input);
     c_assert(actual.none);
   }
 }
 
-test("if (n > 0) && !empty(input) := true, then "
+test("if (n > 0) && !null(input) := true, then "
      "takeN(n, input) returns a chunk whose length is n at most "
      "and the rest of `input`.",
      .generator = T_GENERATOR) {
   struct data* x = testit_current_test_data();
   int n = x->n;
   S input = x->input;
-  if (n > 0 && !stream.empty(input)) {
+  if (n > 0 && !stream.null(input)) {
     Toks expect = x->expect;
     Toks actual = stream.takeN(n, input);
     c_assert(!expect.none);
