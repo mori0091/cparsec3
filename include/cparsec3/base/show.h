@@ -15,6 +15,7 @@
                                                                          \
   typedef struct Show(T) Show(T);                                        \
   struct Show(T) {                                                       \
+    void (*toString)(CharBuff * b, T x);                                 \
     String (*show)(T x);                                                 \
   };                                                                     \
                                                                          \
@@ -27,24 +28,29 @@
 #define impl_Show(T, fmt)                                                \
   C_API_BEGIN                                                            \
                                                                          \
-  static inline String FUNC_NAME(show, Show(T))(T x) {                   \
-    char* s;                                                             \
-    assert(0 <= mem_asprintf(&s, fmt, x));                               \
-    return s;                                                            \
+  static inline void FUNC_NAME(toString, Show(T))(CharBuff * b, T x) {   \
+    assert(0 <= mem_printf(b, fmt, x));                                  \
   }                                                                      \
                                                                          \
-  instance_Show(T, FUNC_NAME(show, Show(T)));                            \
+  instance_Show(T, FUNC_NAME(toString, Show(T)));                        \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-#define instance_Show(T, _show_)                                         \
+#define instance_Show(T, _toString_)                                     \
   C_API_BEGIN                                                            \
+                                                                         \
+  static inline String FUNC_NAME(show, Show(T))(T x) {                   \
+    CharBuff b = {0};                                                    \
+    _toString_(&b, x);                                                   \
+    return b.data;                                                       \
+  }                                                                      \
                                                                          \
   Show(T) Trait(Show(T)) {                                               \
     return (Show(T)){                                                    \
-        .show = _show_,                                                  \
+        .toString = _toString_,                                          \
+        .show = FUNC_NAME(show, Show(T)),                                \
     };                                                                   \
   }                                                                      \
                                                                          \

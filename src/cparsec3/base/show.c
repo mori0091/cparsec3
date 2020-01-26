@@ -5,6 +5,7 @@
 #include <cparsec3/base/base.h>
 
 // -----------------------------------------------------------------------
+#define TOSTRING(T) FUNC_NAME(toString, Show(T))
 #define SHOW(T) FUNC_NAME(show, Show(T))
 
 // -----------------------------------------------------------------------
@@ -24,69 +25,76 @@ impl_Show(uint32_t, "%" PRIu32);
 impl_Show(uint64_t, "%" PRIu64);
 
 // -----------------------------------------------------------------------
-static inline String SHOW(None)(None x) {
+static inline void TOSTRING(None)(CharBuff* b, None x) {
   UNUSED(x);
-  char* s;
-  assert(0 <= mem_asprintf(&s, "%s", "NONE"));
-  return s;
+  assert(0 <= mem_printf(b, "%s", "NONE"));
 }
 
-instance_Show(None, SHOW(None));
+instance_Show(None, TOSTRING(None));
 
 // -----------------------------------------------------------------------
 #include <ctype.h>
 
-static inline String SHOW(char)(char x) {
-  char* s = NULL;
+static inline void TOSTRING(char)(CharBuff* b, char x) {
   switch (x) {
   case '\'':
-    assert(0 <= mem_asprintf(&s, "'%s'", "\\\'"));
-    return s;
+    assert(0 <= mem_printf(b, "%s", "\\\'"));
+    return;
   case '\"':
-    assert(0 <= mem_asprintf(&s, "'%s'", "\\\""));
-    return s;
+    assert(0 <= mem_printf(b, "%s", "\\\""));
+    return;
   case '\\':
-    assert(0 <= mem_asprintf(&s, "'%s'", "\\\\"));
-    return s;
+    assert(0 <= mem_printf(b, "%s", "\\\\"));
+    return;
   case '\a':
-    assert(0 <= mem_asprintf(&s, "'%s'", "\\a"));
-    return s;
+    assert(0 <= mem_printf(b, "%s", "\\a"));
+    return;
   case '\b':
-    assert(0 <= mem_asprintf(&s, "'%s'", "\\b"));
-    return s;
+    assert(0 <= mem_printf(b, "%s", "\\b"));
+    return;
   case '\f':
-    assert(0 <= mem_asprintf(&s, "'%s'", "\\f"));
-    return s;
+    assert(0 <= mem_printf(b, "%s", "\\f"));
+    return;
   case '\n':
-    assert(0 <= mem_asprintf(&s, "'%s'", "\\n"));
-    return s;
+    assert(0 <= mem_printf(b, "%s", "\\n"));
+    return;
   case '\r':
-    assert(0 <= mem_asprintf(&s, "'%s'", "\\r"));
-    return s;
+    assert(0 <= mem_printf(b, "%s", "\\r"));
+    return;
   case '\t':
-    assert(0 <= mem_asprintf(&s, "'%s'", "\\t"));
-    return s;
+    assert(0 <= mem_printf(b, "%s", "\\t"));
+    return;
   case '\v':
-    assert(0 <= mem_asprintf(&s, "'%s'", "\\v"));
-    return s;
+    assert(0 <= mem_printf(b, "%s", "\\v"));
+    return;
   default:
-    break;
+    if (iscntrl(x) || !isprint(x)) {
+      assert(0 <= mem_printf(b, "\\%o", (int)(uint8_t)x));
+    } else {
+      assert(0 <= mem_printf(b, "%c", x));
+    }
+    return;
   }
-  if (iscntrl(x) || !isprint(x)) {
-    assert(0 <= mem_asprintf(&s, "'\\%o'", (int)(uint8_t)x));
-    return s;
-  }
-  assert(0 <= mem_asprintf(&s, "'%c'", x));
-  return s;
 }
 
-instance_Show(char, SHOW(char));
+static inline String SHOW(char)(char x) {
+  CharBuff b = {0};
+  assert(0 <= mem_printf(&b, "'"));
+  TOSTRING(char)(&b, x);
+  assert(0 <= mem_printf(&b, "'"));
+  return b.data;
+}
+
+Show(char) Trait(Show(char)) {
+  return (Show(char)){
+      .toString = TOSTRING(char),
+      .show = SHOW(char),
+  };
+}
 
 // -----------------------------------------------------------------------
-static inline String SHOW(bool)(bool x) {
-  char* s;
-  assert(0 <= mem_asprintf(&s, "%s", (x ? "true" : "false")));
-  return s;
+static inline void TOSTRING(bool)(CharBuff* b, bool x) {
+  assert(0 <= mem_printf(b, "%s", (x ? "true" : "false")));
 }
 
-instance_Show(bool, SHOW(bool));
+instance_Show(bool, TOSTRING(bool));

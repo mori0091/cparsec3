@@ -112,4 +112,13 @@ void mem_free(void* p);
 int mem_asprintf(char** strp, const char* fmt, ...);
 int mem_vasprintf(char** strp, const char* fmt, va_list ap);
 
+typedef struct CharBuff CharBuff;
+struct CharBuff {
+  size_t length;
+  char* data;
+};
+
+int mem_printf(CharBuff* b, const char* fmt, ...);
+int mem_vprintf(CharBuff* b, const char* fmt, va_list ap);
+
 C_API_END
