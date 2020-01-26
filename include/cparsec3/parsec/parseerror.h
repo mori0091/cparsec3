@@ -90,25 +90,20 @@
       printf("%s", e.label);                                             \
       break;                                                             \
     case TOKENS:;                                                        \
-      Show(T) S = trait(Show(T));                                        \
+      Show(T) Sh = trait(Show(T));                                       \
       ListT(T) L = trait(List(T));                                       \
-      List(T) xs = e.tokens;                                             \
-      if (!xs) {                                                         \
-        break;                                                           \
+      if (!L.tail(e.tokens)) {                                           \
+        String s = Sh.show(L.head(e.tokens));                            \
+        printf("%s", s);                                                 \
+        mem_free((void*)s);                                              \
+      } else {                                                           \
+        CharBuff b = {0};                                                \
+        for (List(T) xs = e.tokens; xs; xs = L.tail(xs)) {               \
+          Sh.toString(&b, L.head(xs));                                   \
+        }                                                                \
+        printf("\"%s\"", b.data);                                        \
+        mem_free(b.data);                                                \
       }                                                                  \
-      printf("%s", S.show(L.head(xs)));                                  \
-      xs = L.tail(xs);                                                   \
-      if (!xs) {                                                         \
-        break;                                                           \
-      }                                                                  \
-      if (!L.tail(xs)) {                                                 \
-        printf(" or %s", S.show(L.head(xs)));                            \
-        break;                                                           \
-      }                                                                  \
-      for (; L.tail(xs); xs = L.tail(xs)) {                              \
-        printf(", %s", S.show(L.head(xs)));                              \
-      }                                                                  \
-      printf(", or %s", S.show(L.head(xs)));                             \
       break;                                                             \
     case END_OF_INPUT:                                                   \
       printf("end of input");                                            \
@@ -167,18 +162,39 @@
       printf("  unknown error\n");                                       \
       return;                                                            \
     }                                                                    \
+    void (*printErrorItem)(ErrorItem(Token(S)) t) =                      \
+        FUNC_NAME(print, ErrorItem(Token(S)));                           \
     if (!e.unexpected.none) {                                            \
       printf("  unexpected ");                                           \
-      FUNC_NAME(print, ErrorItem(Token(S)))(e.unexpected.value);         \
+      printErrorItem(e.unexpected.value);                                \
       printf("\n");                                                      \
     }                                                                    \
     if (e.expecting) {                                                   \
       printf("  expecting ");                                            \
       ListT(ErrorItem(Token(S))) L = trait(List(ErrorItem(Token(S))));   \
       List(ErrorItem(Token(S))) xs = e.expecting;                        \
-      for (; xs; xs = L.tail(xs)) {                                      \
-        FUNC_NAME(print, ErrorItem(Token(S)))(L.head(xs));               \
+      if (!xs) {                                                         \
+        printf("\n");                                                    \
+        return;                                                          \
       }                                                                  \
+      printErrorItem(L.head(xs));                                        \
+      xs = L.tail(xs);                                                   \
+      if (!xs) {                                                         \
+        printf("\n");                                                    \
+        return;                                                          \
+      }                                                                  \
+      if (!L.tail(xs)) {                                                 \
+        printf(" or ");                                                  \
+        printErrorItem(L.head(xs));                                      \
+        printf("\n");                                                    \
+        return;                                                          \
+      }                                                                  \
+      for (; L.tail(xs); xs = L.tail(xs)) {                              \
+        printf(", ");                                                    \
+        printErrorItem(L.head(xs));                                      \
+      }                                                                  \
+      printf(", or ");                                                   \
+      printErrorItem(L.head(xs));                                        \
       printf("\n");                                                      \
     }                                                                    \
   }                                                                      \
