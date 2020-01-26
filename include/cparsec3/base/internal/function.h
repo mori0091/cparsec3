@@ -79,9 +79,8 @@
   typedef_FnN(T9, T8, T7, T6, T5, T4, T3, T2, T1, R)
 
 // -----------------------------------------------------------------------
-#define FnEnv(tag, ...) FnEnv0(tag, __LINE__, __VA_ARGS__)
-#define FnEnv0(tag, line, ...)                                           \
-  TYPE_NAME(FnEnv_##line##_##tag, __VA_ARGS__)
+#define FnEnv(tag, ...) FnEnv0(tag, __VA_ARGS__)
+#define FnEnv0(tag, ...) TYPE_NAME(FnEnv_##tag, __VA_ARGS__)
 
 #define typedef_FnEnv(tag, ...) typedef_FnEnv0(tag, __VA_ARGS__)
 
