@@ -209,3 +209,52 @@ int mem_vasprintf(char** strp, const char* fmt, va_list ap) {
   *strp = buf;
   return len;
 }
+
+int mem_printf(CharBuff* b, const char* fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  int ret = mem_vprintf(b, fmt, ap);
+  va_end(ap);
+  return ret;
+}
+
+int mem_vprintf(CharBuff* b, const char* fmt, va_list ap) {
+  assert(b && "Null pointer");
+  assert(fmt && "Null pointer");
+
+  va_list ap2;
+
+  va_copy(ap2, ap);
+  int len = vsnprintf(NULL, 0, fmt, ap2);
+  va_end(ap2);
+  if (len < 0) {
+    return -1;
+  }
+
+  char* buf;
+  if (!b->data) {
+    buf = mem_malloc(len + 1);
+    if (!buf) {
+      return -1;
+    }
+    b->data = buf;
+    b->length = len;
+  } else {
+    buf = mem_realloc(b->data, b->length + len + 1);
+    if (!buf) {
+      return -1;
+    }
+    b->data = buf;
+    buf += b->length;
+    b->length += len;
+  }
+
+  va_copy(ap2, ap);
+  int l = vsnprintf(buf, len + 1, fmt, ap2);
+  va_end(ap2);
+  if (l != len) {
+    return -1;
+  }
+
+  return len;
+}
