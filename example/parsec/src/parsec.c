@@ -80,6 +80,7 @@ int main(void) {
   printf("\n");
 
   __auto_type P = trait(ParsecPrim(S, Token(S)));
+  __auto_type Q = trait(ParsecPrim(S, Tokens(S)));
   __auto_type D = trait(ParsecDeriv(S));
   {
     __auto_type p = P.parseError((ParseError(S)){0});
@@ -110,5 +111,6 @@ int main(void) {
     g_parseTest(p, "");
     g_parseTest(p, "foo");
     g_parseTest(p, "bar");
+    g_parseTest(Q.label("foo", p), "bar");
   }
 }
