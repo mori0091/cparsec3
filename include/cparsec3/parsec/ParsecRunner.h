@@ -9,6 +9,7 @@
 // -----------------------------------------------------------------------
 #define trait_ParsecRunner(S, T)                                         \
   C_API_BEGIN                                                            \
+  typedef_Parsec(S, T);                                                  \
   /* ---- trait ParsecRunner(S, T) */                                    \
   typedef struct ParsecRunner(S, T) ParsecRunner(S, T);                  \
   struct ParsecRunner(S, T) {                                            \
