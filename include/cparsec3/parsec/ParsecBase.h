@@ -11,10 +11,6 @@
   typedef_ParseState(S);                                                 \
   trait_ParseError(S);                                                   \
                                                                          \
-  typedef_Parsec(S, None);                                               \
-  typedef_Parsec(S, Token(S));                                           \
-  typedef_Parsec(S, Tokens(S));                                          \
-                                                                         \
   C_API_END                                                              \
   END_OF_STATEMENTS
 

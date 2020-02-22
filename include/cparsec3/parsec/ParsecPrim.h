@@ -20,7 +20,7 @@
     Parsec(S, T) (*tryp)(Parsec(S, T) p);                                \
     Parsec(S, T) (*lookAhead)(Parsec(S, T) p);                           \
     Parsec(S, None) (*notFollowedBy)(Parsec(S, T) p);                    \
-    Parsec(S, None) (*eof)(void);                                        \
+                                                                         \
     Parsec(S, T) (*token)(Fn(Token(S), Maybe(T)) testToken,              \
                           Hints(Token(S)) expecting);                    \
   };                                                                     \
@@ -34,6 +34,7 @@
 #define impl_ParsecPrim(S, T)                                            \
   C_API_BEGIN                                                            \
                                                                          \
+  typedef_Fn(Parsec(S, T), UnParser(S, T));                              \
   impl_parseError(S, T);                                                 \
   impl_tryp(S, T);                                                       \
   impl_token(S, T);                                                      \
@@ -46,7 +47,7 @@
         .tryp = FUNC_NAME(tryp, S, T),                                   \
         .lookAhead = 0,                                                  \
         .notFollowedBy = 0,                                              \
-        .eof = 0,                                                        \
+                                                                         \
         .token = FUNC_NAME(token, S, T),                                 \
     };                                                                   \
   }                                                                      \
@@ -84,7 +85,6 @@
     return fn_apply(f, e, s);                                            \
   }                                                                      \
                                                                          \
-  typedef_Fn_r(Parsec(S, T), UnParser(S, T));                            \
   fn(FUNC_NAME(trypImpl, S, T), /* name */                               \
      Parsec(S, T),              /* p : underlying parser */              \
      UnParserArgs(S,                                                     \
