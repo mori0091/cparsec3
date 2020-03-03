@@ -13,6 +13,10 @@
 
 #include <cparsec3/parsec/ParsecDeriv.h>
 
+#include <cparsec3/parsec/ParsecChoice.h>
+
+#include <cparsec3/parsec/ParsecChar.h>
+
 // -----------------------------------------------------------------------
 #include "cparsec3/stream/stream_string.h"
 
@@ -39,6 +43,11 @@
                                                                          \
   trait_ParsecDeriv(S);                                                  \
                                                                          \
+  trait_ParsecChoice(S, Token(S));                                       \
+  trait_ParsecChoice(S, Tokens(S));                                      \
+                                                                         \
+  trait_ParsecChar(S);                                                   \
+                                                                         \
   END_OF_STATEMENTS
 
 #define impl_ParsecLibrary(S)                                            \
@@ -57,6 +66,11 @@
   impl_ParsecFailure(S, Tokens(S));                                      \
                                                                          \
   impl_ParsecDeriv(S);                                                   \
+                                                                         \
+  impl_ParsecChoice(S, Token(S));                                        \
+  impl_ParsecChoice(S, Tokens(S));                                       \
+                                                                         \
+  impl_ParsecChar(S);                                                    \
                                                                          \
   END_OF_STATEMENTS
 
@@ -112,5 +126,42 @@ int main(void) {
     g_parseTest(p, "foo");
     g_parseTest(p, "bar");
     g_parseTest(Q.label("foo", p), "bar");
+  }
+  {
+    __auto_type C = trait(ParsecChar(S));
+    __auto_type p = C.digit();
+    g_parseTest(p, "");
+    g_parseTest(p, "foo");
+    g_parseTest(p, "bar");
+    g_parseTest(p, "9");
+  }
+  {
+    __auto_type C = trait(ParsecChoice(S, Token(S)));
+    __auto_type a = D.single('a');
+    __auto_type b = D.single('b');
+    __auto_type p = C.either(a, b);
+    g_parseTest(p, "");
+    g_parseTest(p, "foo");
+    g_parseTest(p, "bar");
+  }
+  {
+    __auto_type C = trait(ParsecChoice(S, Token(S)));
+    __auto_type a = D.single('a');
+    __auto_type b = D.single('b');
+    __auto_type p = C.either(P.tryp(a), b);
+    g_parseTest(p, "");
+    g_parseTest(p, "foo");
+    g_parseTest(p, "bar");
+  }
+  {
+    __auto_type C = trait(ParsecChoice(S, Token(S)));
+    __auto_type a = D.single('a');
+    __auto_type b = D.single('b');
+    __auto_type c = D.single('c');
+    __auto_type p =
+        C.choice(g_array(Parsec(S, Token(S)), P.tryp(a), P.tryp(b), c));
+    g_parseTest(p, "");
+    g_parseTest(p, "foo");
+    g_parseTest(p, "bar");
   }
 }
