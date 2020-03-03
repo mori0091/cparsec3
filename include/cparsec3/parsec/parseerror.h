@@ -208,6 +208,52 @@
     return trait(List(ErrorItem(Token(S)))).cons(item, NULL);            \
   }                                                                      \
                                                                          \
+  static inline Hints(Token(S)) FUNC_NAME(merge, Hints(Token(S)))(       \
+      Hints(Token(S)) hs1, Hints(Token(S)) hs2) {                        \
+    ListT(ErrorItem(Token(S))) L = trait(List(ErrorItem(Token(S))));     \
+    if (L.null(hs1)) {                                                   \
+      return hs2;                                                        \
+    }                                                                    \
+    if (L.null(hs2)) {                                                   \
+      return hs1;                                                        \
+    }                                                                    \
+    List(ErrorItem(Token(S))) x = NULL;                                  \
+    while (!L.null(hs1)) {                                               \
+      x = L.cons(L.head(hs1), x);                                        \
+      hs1 = L.tail(hs1);                                                 \
+    }                                                                    \
+    while (!L.null(hs2)) {                                               \
+      x = L.cons(L.head(hs2), x);                                        \
+      hs2 = L.tail(hs2);                                                 \
+    }                                                                    \
+    L.reverse(&x);                                                       \
+    return x;                                                            \
+  }                                                                      \
+                                                                         \
+  static inline ParseError(S) FUNC_NAME(merge, ParseError(S))(           \
+      ParseError(S) e1, ParseError(S) e2) {                              \
+    if (e1.offset < e2.offset) {                                         \
+      return e2;                                                         \
+    }                                                                    \
+    if (e1.offset > e2.offset) {                                         \
+      return e1;                                                         \
+    }                                                                    \
+    ParseError(S) e;                                                     \
+    e.offset = e1.offset;                                                \
+    if (!e1.unexpected.none && !e2.unexpected.none) {                    \
+      e.unexpected = e2.unexpected; /* TODO */                           \
+    } else {                                                             \
+      if (e1.unexpected.none) {                                          \
+        e.unexpected = e2.unexpected;                                    \
+      } else {                                                           \
+        e.unexpected = e1.unexpected;                                    \
+      }                                                                  \
+    }                                                                    \
+    e.expecting =                                                        \
+        FUNC_NAME(merge, Hints(Token(S)))(e1.expecting, e2.expecting);   \
+    return e;                                                            \
+  }                                                                      \
+                                                                         \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
