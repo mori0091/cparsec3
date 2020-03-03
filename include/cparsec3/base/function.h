@@ -99,7 +99,7 @@
  * typedef_Fn_r(size_t, char, String);
  *
  * fn(repeat, size_t, char, String) {
- *   uint32_t n = args->e1;  // assign the 1st argument to variable `n`
+ *   size_t n = args->e1;    // assign the 1st argument to variable `n`
  *   char c = args->e2;      // assign the 2nd argument to variable `c`
  *   String s = malloc(n+1);
  *   if (n) {

@@ -24,6 +24,7 @@
 #include "tuple.h"
 
 #include "function.h"
+#include "funcptr.h"
 
 FOREACH(trait_Eq, TYPESET(ALL));
 FOREACH(trait_Ord, TYPESET(ALL));
