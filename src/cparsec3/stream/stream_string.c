@@ -26,6 +26,23 @@ static List(Token(String)) chunkToTokens(Tokens(String) chk) {
       .from_array(chunkLength(chk), (char*)chk);
 }
 
+static String showTokens(List(Token(String)) ts) {
+  ListT(Token(String)) L = trait(List(Token(String)));
+  assert(!L.null(ts));
+  CharBuff b = {0};
+  if (L.null(L.tail(ts))) {
+    trait(Show(Token(String))).toString(&b, L.head(ts));
+    return b.data;
+  }
+  mem_printf(&b, "\"");
+  while (!L.null(ts)) {
+    quote_char(&b, L.head(ts));
+    ts = L.tail(ts);
+  }
+  mem_printf(&b, "\"");
+  return b.data;
+}
+
 /**
  * Takes a token from the stream.
  *
@@ -92,6 +109,7 @@ Stream(String) Trait(Stream(String)) {
       .null = null,
       .chunkToTokens = chunkToTokens,
       .chunkLength = chunkLength,
+      .showTokens = showTokens,
       .take1 = take1,
       .takeN = takeN,
   };
