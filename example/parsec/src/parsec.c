@@ -80,7 +80,7 @@ impl_ParsecLibrary(String);
 // -----------------------------------------------------------------------
 #define S String
 
-#define g_parseTest(p, input)                                            \
+#define parseTest(p, input)                                              \
   GENERIC_PARSECRUNNER(String, p).parseTest(p, input)
 
 int main(void) {
@@ -98,60 +98,60 @@ int main(void) {
   __auto_type D = trait(ParsecDeriv(S));
   {
     __auto_type p = P.parseError((ParseError(S)){0});
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
   {
     __auto_type p = D.single('f');
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
   {
     __auto_type p = D.anySingle();
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
   {
     __auto_type p = D.anySingleBut('f');
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
   {
     __auto_type p = D.chunk("foo");
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
-    g_parseTest(Q.label("foo", p), "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
+    parseTest(Q.label("foo", p), "bar");
   }
   {
     __auto_type C = trait(ParsecChar(S));
     __auto_type p = C.digit();
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
-    g_parseTest(p, "9");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
+    parseTest(p, "9");
   }
   {
     __auto_type C = trait(ParsecChoice(S, Token(S)));
     __auto_type a = D.single('a');
     __auto_type b = D.single('b');
     __auto_type p = C.either(a, b);
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
   {
     __auto_type C = trait(ParsecChoice(S, Token(S)));
     __auto_type a = D.single('a');
     __auto_type b = D.single('b');
     __auto_type p = C.either(P.tryp(a), b);
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
   {
     __auto_type C = trait(ParsecChoice(S, Token(S)));
@@ -160,8 +160,8 @@ int main(void) {
     __auto_type c = D.single('c');
     __auto_type p =
         C.choice(g_array(Parsec(S, Token(S)), P.tryp(a), P.tryp(b), c));
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
 }
