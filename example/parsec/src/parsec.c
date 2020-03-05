@@ -96,6 +96,9 @@ impl_ParsecLibrary(String);
 #define parseTest(p, input)                                              \
   GENERIC_PARSECRUNNER(String, p).parseTest(p, input)
 
+#define parse(p, state)                                                  \
+  GENERIC_PARSECRUNNER(String, p).runParsec(p, state)
+
 int main(void) {
   for (int x = 0; x < 256; ++x) {
     String s = trait(Show(char)).show((char)x);
