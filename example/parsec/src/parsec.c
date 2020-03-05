@@ -99,6 +99,29 @@ impl_ParsecLibrary(String);
 #define parse(p, state)                                                  \
   GENERIC_PARSECRUNNER(String, p).runParsec(p, state)
 
+// -----------------------------------------------------------------------
+#define DO()                                                             \
+  g_bind((_s0_, _cok_, _cerr_, _eok_, _eerr_), *args);                   \
+  __auto_type _s_ = _s0_;
+
+#define SCAN(...) CAT(SCAN, VARIADIC_SIZE(__VA_ARGS__))(__VA_ARGS__)
+#define SCAN1(_p_)                                                       \
+  __auto_type TMPID = parse(_p_, _s_);                                   \
+  if (!TMPID.result.success) {                                           \
+    __auto_type _err_ = (TMPID.consumed ? _cerr_ : _eerr_);              \
+    return fn_apply(_err_, TMPID.result.err, TMPID.state);               \
+  }                                                                      \
+  _s_ = TMPID.state;
+#define SCAN2(_p_, _x_)                                                  \
+  SCAN1(_p_);                                                            \
+  __auto_type _x_ = TMPID.result.ok;
+
+#define RETURN(_x_)                                                      \
+  do {                                                                   \
+    __auto_type _ok_ = (_s0_.offset < _s_.offset ? _cok_ : _eok_);       \
+    return fn_apply(_ok_, _x_, _s_, (Hints(Token(S))){0});               \
+  } while (0)
+
 int main(void) {
   for (int x = 0; x < 256; ++x) {
     String s = trait(Show(char)).show((char)x);
