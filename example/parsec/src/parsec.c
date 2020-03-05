@@ -138,7 +138,7 @@ fn(identifierImpl, UnParserArgs(S, String)) {
     size_t len = 1 + xs.length;
     char* cs = mem_malloc(len + 1);
     cs[0] = x;
-    memcpy(cs + 1, xs.data, xs.length);
+    memmove(cs + 1, xs.data, xs.length);
     cs[len] = 0;
     g_free(xs);
     RETURN(cs);
