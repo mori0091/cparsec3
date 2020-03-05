@@ -35,6 +35,11 @@ FOREACH(trait_Array, TYPESET(ALL));
 FOREACH(trait_List, TYPESET(ALL));
 FOREACH(trait_Maybe, TYPESET(ALL));
 
+trait_Show(Array(char));
+trait_Show(Array(String));
+trait_Show(List(char));
+trait_Show(List(String));
+
 #if !defined(CPARSEC_ENABLE_NESTED_CONTAINER)
 #define TYPESET_COMPONENT TYPESET(ALL)
 #else
