@@ -17,10 +17,13 @@
 
 #include <cparsec3/parsec/ParsecChar.h>
 
+#include <cparsec3/parsec/ParsecRepeat.h>
+
 // -----------------------------------------------------------------------
 #include "cparsec3/stream/stream_string.h"
 
-#define PARSER_RETURN_TYPES(S) Token(S), Tokens(S), None
+#define PARSER_RETURN_TYPES(S)                                           \
+  None, Token(S), Tokens(S), Array(Token(S)), Array(Tokens(S))
 
 #define TRAIT_PARSECRUNNER(S, T) trait(ParsecRunner(S, T))
 #define GENERIC_PARSECRUNNER(S, p)                                       \
@@ -29,9 +32,11 @@
 #define trait_ParsecLibrary(S)                                           \
   trait_ParsecBase(S);                                                   \
                                                                          \
+  trait_ParsecRunner(S, None);                                           \
   trait_ParsecRunner(S, Token(S));                                       \
   trait_ParsecRunner(S, Tokens(S));                                      \
-  trait_ParsecRunner(S, None);                                           \
+  trait_ParsecRunner(S, Array(Token(S)));                                \
+  trait_ParsecRunner(S, Array(Tokens(S)));                               \
                                                                          \
   trait_ParsecPrim1(S);                                                  \
   trait_ParsecPrim(S, Token(S));                                         \
@@ -46,6 +51,9 @@
   trait_ParsecChoice(S, Token(S));                                       \
   trait_ParsecChoice(S, Tokens(S));                                      \
                                                                          \
+  trait_ParsecRepeat(S, Token(S));                                       \
+  trait_ParsecRepeat(S, Tokens(S));                                      \
+                                                                         \
   trait_ParsecChar(S);                                                   \
                                                                          \
   END_OF_STATEMENTS
@@ -53,9 +61,11 @@
 #define impl_ParsecLibrary(S)                                            \
   impl_ParsecBase(S);                                                    \
                                                                          \
+  impl_ParsecRunner(S, None);                                            \
   impl_ParsecRunner(S, Token(S));                                        \
   impl_ParsecRunner(S, Tokens(S));                                       \
-  impl_ParsecRunner(S, None);                                            \
+  impl_ParsecRunner(S, Array(Token(S)));                                 \
+  impl_ParsecRunner(S, Array(Tokens(S)));                                \
                                                                          \
   impl_ParsecPrim1(S);                                                   \
   impl_ParsecPrim(S, Token(S));                                          \
@@ -69,6 +79,9 @@
                                                                          \
   impl_ParsecChoice(S, Token(S));                                        \
   impl_ParsecChoice(S, Tokens(S));                                       \
+                                                                         \
+  impl_ParsecRepeat(S, Token(S));                                        \
+  impl_ParsecRepeat(S, Tokens(S));                                       \
                                                                          \
   impl_ParsecChar(S);                                                    \
                                                                          \
@@ -160,6 +173,14 @@ int main(void) {
     __auto_type c = D.single('c');
     __auto_type p =
         C.choice(g_array(Parsec(S, Token(S)), P.tryp(a), P.tryp(b), c));
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
+  }
+  {
+    __auto_type C = trait(ParsecChar(S));
+    __auto_type R = trait(ParsecRepeat(S, Token(S)));
+    __auto_type p = R.many(C.letter());
     parseTest(p, "");
     parseTest(p, "foo");
     parseTest(p, "bar");
