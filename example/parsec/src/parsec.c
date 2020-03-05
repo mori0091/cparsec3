@@ -122,6 +122,36 @@ impl_ParsecLibrary(String);
     return fn_apply(_ok_, _x_, _s_, (Hints(Token(S))){0});               \
   } while (0)
 
+// -----------------------------------------------------------------------
+fn(identifierImpl, UnParserArgs(S, String)) {
+  __auto_type c = trait(ParsecChar(S));
+  __auto_type C = trait(ParsecChoice(S, char));
+  __auto_type m = trait(ParsecRepeat(S, char));
+  __auto_type identStart = C.either(c.char1('_'), c.letter());
+  __auto_type identLetter = m.many(C.either(c.char1('_'), c.alphaNum()));
+  __auto_type spaces = m.many(c.whitespace());
+
+  DO() {
+    SCAN(identStart, x);
+    SCAN(identLetter, xs);
+    SCAN(spaces);
+    size_t len = 1 + xs.length;
+    char* cs = mem_malloc(len + 1);
+    cs[0] = x;
+    memcpy(cs + 1, xs.data, xs.length);
+    cs[len] = 0;
+    g_free(xs);
+    RETURN(cs);
+  }
+}
+
+Parsec(S, String) identifier(void) {
+  __auto_type P = trait(ParsecPrim(S, String));
+  Parsec(S, String) p = {identifierImpl()};
+  return P.label("identifier", p);
+}
+
+// -----------------------------------------------------------------------
 int main(void) {
   for (int x = 0; x < 256; ++x) {
     String s = trait(Show(char)).show((char)x);
@@ -210,5 +240,13 @@ int main(void) {
     parseTest(p, "");
     parseTest(p, "foo");
     parseTest(p, "bar");
+  }
+  {
+    __auto_type p = identifier();
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
+    parseTest(p, "9bar");
+    parseTest(p, "bar9");
   }
 }
