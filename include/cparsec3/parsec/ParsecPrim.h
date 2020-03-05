@@ -145,7 +145,7 @@
   typedef_Fn_r(Fn(Token(S), Maybe(T)), Hints(Token(S)), UnParser(S, T)); \
   fn(FUNC_NAME(tokenImpl, S, T), Fn(Token(S), Maybe(T)),                 \
      Hints(Token(S)), UnParserArgs(S, T)) {                              \
-    g_bind((testToken, expect, s, cok, cerr, , eerr), *args);            \
+    g_bind((testToken, expect, s, cok, , , eerr), *args);                \
     __auto_type maybe = trait(Stream(S)).take1(s.input);                 \
     if (maybe.none) {                                                    \
       ParseError(S) e = {                                                \
@@ -155,10 +155,6 @@
       };                                                                 \
       return fn_apply(eerr, e, s);                                       \
     }                                                                    \
-                                                                         \
-    /* update state */                                                   \
-    s.input = maybe.value.e2;                                            \
-    s.offset++;                                                          \
                                                                          \
     Token(S) a = maybe.value.e1;                                         \
     __auto_type maybe2 = fn_apply(testToken, a);                         \
@@ -170,8 +166,12 @@
               trait(List(Token(S))).cons(a, NULL),                       \
           .expecting = expect,                                           \
       };                                                                 \
-      return fn_apply(cerr, e, s);                                       \
+      return fn_apply(eerr, e, s);                                       \
     }                                                                    \
+                                                                         \
+    /* update state */                                                   \
+    s.input = maybe.value.e2;                                            \
+    s.offset++;                                                          \
     return fn_apply(cok, maybe2.value, s, NULL);                         \
   }                                                                      \
                                                                          \
