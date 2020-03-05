@@ -6,6 +6,10 @@
 
 #include "mem.h"
 
+C_API_BEGIN
+void quote_char(CharBuff* b, char x);
+C_API_END
+
 // -----------------------------------------------------------------------
 #define Show(T) TYPE_NAME(Show, T)
 
@@ -53,6 +57,37 @@
         .show = FUNC_NAME(show, Show(T)),                                \
     };                                                                   \
   }                                                                      \
+                                                                         \
+  C_API_END                                                              \
+  END_OF_STATEMENTS
+
+// -----------------------------------------------------------------------
+#define impl_ShowSeq(C, T)                                               \
+  C_API_BEGIN                                                            \
+                                                                         \
+  static inline void FUNC_NAME(toString, Show(C(T)))(CharBuff * b,       \
+                                                     C(T) c) {           \
+    if (trait(C(T)).null(c)) {                                           \
+      mem_printf(b, "[]");                                               \
+      return;                                                            \
+    }                                                                    \
+                                                                         \
+    Show(T) s = trait(Show(T));                                          \
+    ItrT(C(T)) I = trait(Itr(C(T)));                                     \
+                                                                         \
+    Itr(C(T)) it = trait(Iterable(C(T))).itr(c);                         \
+    mem_printf(b, "[");                                                  \
+    s.toString(b, I.get(it));                                            \
+    it = I.next(it);                                                     \
+    while (!I.null(it)) {                                                \
+      mem_printf(b, ", ");                                               \
+      s.toString(b, I.get(it));                                          \
+      it = I.next(it);                                                   \
+    }                                                                    \
+    mem_printf(b, "]");                                                  \
+  }                                                                      \
+                                                                         \
+  instance_Show(C(T), FUNC_NAME(toString, Show(C(T))));                  \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS

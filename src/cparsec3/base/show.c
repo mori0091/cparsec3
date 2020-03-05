@@ -35,7 +35,7 @@ instance_Show(None, TOSTRING(None));
 // -----------------------------------------------------------------------
 #include <ctype.h>
 
-static inline void TOSTRING(char)(CharBuff* b, char x) {
+void quote_char(CharBuff* b, char x) {
   switch (x) {
   case '\'':
     assert(0 <= mem_printf(b, "%s", "\\\'"));
@@ -77,11 +77,15 @@ static inline void TOSTRING(char)(CharBuff* b, char x) {
   }
 }
 
+static inline void TOSTRING(char)(CharBuff* b, char x) {
+  mem_printf(b, "'");
+  quote_char(b, x);
+  mem_printf(b, "'");
+}
+
 static inline String SHOW(char)(char x) {
   CharBuff b = {0};
-  assert(0 <= mem_printf(&b, "'"));
   TOSTRING(char)(&b, x);
-  assert(0 <= mem_printf(&b, "'"));
   return b.data;
 }
 
@@ -98,3 +102,9 @@ static inline void TOSTRING(bool)(CharBuff* b, bool x) {
 }
 
 instance_Show(bool, TOSTRING(bool));
+
+// -----------------------------------------------------------------------
+impl_ShowSeq(Array, char);
+impl_ShowSeq(List, char);
+impl_ShowSeq(Array, String);
+impl_ShowSeq(List, String);
