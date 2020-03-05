@@ -17,10 +17,13 @@
 
 #include <cparsec3/parsec/ParsecChar.h>
 
+#include <cparsec3/parsec/ParsecRepeat.h>
+
 // -----------------------------------------------------------------------
 #include "cparsec3/stream/stream_string.h"
 
-#define PARSER_RETURN_TYPES(S) Token(S), Tokens(S), None
+#define PARSER_RETURN_TYPES(S)                                           \
+  None, Token(S), Tokens(S), Array(Token(S)), Array(Tokens(S))
 
 #define TRAIT_PARSECRUNNER(S, T) trait(ParsecRunner(S, T))
 #define GENERIC_PARSECRUNNER(S, p)                                       \
@@ -29,9 +32,11 @@
 #define trait_ParsecLibrary(S)                                           \
   trait_ParsecBase(S);                                                   \
                                                                          \
+  trait_ParsecRunner(S, None);                                           \
   trait_ParsecRunner(S, Token(S));                                       \
   trait_ParsecRunner(S, Tokens(S));                                      \
-  trait_ParsecRunner(S, None);                                           \
+  trait_ParsecRunner(S, Array(Token(S)));                                \
+  trait_ParsecRunner(S, Array(Tokens(S)));                               \
                                                                          \
   trait_ParsecPrim1(S);                                                  \
   trait_ParsecPrim(S, Token(S));                                         \
@@ -46,6 +51,9 @@
   trait_ParsecChoice(S, Token(S));                                       \
   trait_ParsecChoice(S, Tokens(S));                                      \
                                                                          \
+  trait_ParsecRepeat(S, Token(S));                                       \
+  trait_ParsecRepeat(S, Tokens(S));                                      \
+                                                                         \
   trait_ParsecChar(S);                                                   \
                                                                          \
   END_OF_STATEMENTS
@@ -53,9 +61,11 @@
 #define impl_ParsecLibrary(S)                                            \
   impl_ParsecBase(S);                                                    \
                                                                          \
+  impl_ParsecRunner(S, None);                                            \
   impl_ParsecRunner(S, Token(S));                                        \
   impl_ParsecRunner(S, Tokens(S));                                       \
-  impl_ParsecRunner(S, None);                                            \
+  impl_ParsecRunner(S, Array(Token(S)));                                 \
+  impl_ParsecRunner(S, Array(Tokens(S)));                                \
                                                                          \
   impl_ParsecPrim1(S);                                                   \
   impl_ParsecPrim(S, Token(S));                                          \
@@ -70,6 +80,9 @@
   impl_ParsecChoice(S, Token(S));                                        \
   impl_ParsecChoice(S, Tokens(S));                                       \
                                                                          \
+  impl_ParsecRepeat(S, Token(S));                                        \
+  impl_ParsecRepeat(S, Tokens(S));                                       \
+                                                                         \
   impl_ParsecChar(S);                                                    \
                                                                          \
   END_OF_STATEMENTS
@@ -80,7 +93,7 @@ impl_ParsecLibrary(String);
 // -----------------------------------------------------------------------
 #define S String
 
-#define g_parseTest(p, input)                                            \
+#define parseTest(p, input)                                              \
   GENERIC_PARSECRUNNER(String, p).parseTest(p, input)
 
 int main(void) {
@@ -98,60 +111,60 @@ int main(void) {
   __auto_type D = trait(ParsecDeriv(S));
   {
     __auto_type p = P.parseError((ParseError(S)){0});
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
   {
     __auto_type p = D.single('f');
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
   {
     __auto_type p = D.anySingle();
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
   {
     __auto_type p = D.anySingleBut('f');
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
   {
     __auto_type p = D.chunk("foo");
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
-    g_parseTest(Q.label("foo", p), "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
+    parseTest(Q.label("foo", p), "bar");
   }
   {
     __auto_type C = trait(ParsecChar(S));
     __auto_type p = C.digit();
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
-    g_parseTest(p, "9");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
+    parseTest(p, "9");
   }
   {
     __auto_type C = trait(ParsecChoice(S, Token(S)));
     __auto_type a = D.single('a');
     __auto_type b = D.single('b');
     __auto_type p = C.either(a, b);
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
   {
     __auto_type C = trait(ParsecChoice(S, Token(S)));
     __auto_type a = D.single('a');
     __auto_type b = D.single('b');
     __auto_type p = C.either(P.tryp(a), b);
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
   {
     __auto_type C = trait(ParsecChoice(S, Token(S)));
@@ -160,8 +173,16 @@ int main(void) {
     __auto_type c = D.single('c');
     __auto_type p =
         C.choice(g_array(Parsec(S, Token(S)), P.tryp(a), P.tryp(b), c));
-    g_parseTest(p, "");
-    g_parseTest(p, "foo");
-    g_parseTest(p, "bar");
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
+  }
+  {
+    __auto_type C = trait(ParsecChar(S));
+    __auto_type R = trait(ParsecRepeat(S, Token(S)));
+    __auto_type p = R.many(C.letter());
+    parseTest(p, "");
+    parseTest(p, "foo");
+    parseTest(p, "bar");
   }
 }
