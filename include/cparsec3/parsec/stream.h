@@ -20,6 +20,7 @@
     bool (*null)(S s);                                                   \
     List(Token(S)) (*chunkToTokens)(Tokens(S) chk);                      \
     int (*chunkLength)(Tokens(S) chk);                                   \
+    String (*showTokens)(List(Token(S)) tokens);                         \
     Maybe(Tuple(Token(S), S)) (*take1)(S s);                             \
     Maybe(Tuple(Tokens(S), S)) (*takeN)(int n, S s);                     \
   };                                                                     \

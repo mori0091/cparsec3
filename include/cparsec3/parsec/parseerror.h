@@ -84,35 +84,6 @@
     }                                                                    \
   }                                                                      \
                                                                          \
-  static inline void FUNC_NAME(print, ErrorItem(T))(ErrorItem(T) e) {    \
-    switch (e.type) {                                                    \
-    case LABEL:                                                          \
-      printf("%s", e.label);                                             \
-      break;                                                             \
-    case TOKENS:;                                                        \
-      Show(T) Sh = trait(Show(T));                                       \
-      ListT(T) L = trait(List(T));                                       \
-      if (!L.tail(e.tokens)) {                                           \
-        String s = Sh.show(L.head(e.tokens));                            \
-        printf("%s", s);                                                 \
-        mem_free((void*)s);                                              \
-      } else {                                                           \
-        CharBuff b = {0};                                                \
-        for (List(T) xs = e.tokens; xs; xs = L.tail(xs)) {               \
-          Sh.toString(&b, L.head(xs));                                   \
-        }                                                                \
-        printf("\"%s\"", b.data);                                        \
-        mem_free(b.data);                                                \
-      }                                                                  \
-      break;                                                             \
-    case END_OF_INPUT:                                                   \
-      printf("end of input");                                            \
-      break;                                                             \
-    default:                                                             \
-      break;                                                             \
-    }                                                                    \
-  }                                                                      \
-                                                                         \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
@@ -155,6 +126,25 @@
              FUNC_NAME(isUnknown,                                        \
                        ErrorItem(Token(S)))(e.unexpected.value)) &&      \
             !e.expecting);                                               \
+  }                                                                      \
+                                                                         \
+  static inline void FUNC_NAME(print, ErrorItem(Token(S)))(              \
+      ErrorItem(Token(S)) e) {                                           \
+    switch (e.type) {                                                    \
+    case LABEL:                                                          \
+      printf("%s", e.label);                                             \
+      break;                                                             \
+    case TOKENS:;                                                        \
+      String s = trait(Stream(S)).showTokens(e.tokens);                  \
+      printf("%s", s);                                                   \
+      mem_free((void*)s);                                                \
+      break;                                                             \
+    case END_OF_INPUT:                                                   \
+      printf("end of input");                                            \
+      break;                                                             \
+    default:                                                             \
+      break;                                                             \
+    }                                                                    \
   }                                                                      \
   static inline void FUNC_NAME(print, ParseError(S))(ParseError(S) e) {  \
     printf("error:%" PRIdMAX ":\n", e.offset);                           \
