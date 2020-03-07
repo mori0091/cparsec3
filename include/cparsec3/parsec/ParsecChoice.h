@@ -107,27 +107,28 @@
   }                                                                      \
                                                                          \
   typedef_Fn(ParseError(S), /* e1 : an error caused by the 1st parser */ \
-             ParseState(S), /* s1 : state after the e1 occurred */       \
+             S,             /* s1 : state after the e1 occurred */       \
              ContErr(S, T)  /* error -> state -> reply */                \
   );                                                                     \
   typedef_Fn(ContErr(S, T), /* err : underlying error continuation */    \
              ParseError(S), /* e1 : an error caused by the 1st parser */ \
-             ParseState(S), /* s1 : state after the e1 occurred */       \
+             S,             /* s1 : state after the e1 occurred */       \
              ContErr(S, T)  /* error -> state -> reply */                \
   );                                                                     \
   fn(FUNC_NAME(eitherErr, S, T),                                         \
      ContErr(S, T),    /* err : underlying error continuation */         \
      ParseError(S),    /* e1 : an error caused by the 1st parser */      \
-     ParseState(S),    /* s1 : state after the e1 occurred */            \
+     S,                /* s1 : state after the e1 occurred */            \
      ContErrArgs(S, T) /* error -> state -> reply */                     \
   ) {                                                                    \
     g_bind((err, e1, s1, e2, s2), *args);                                \
     ParseError(S) e = FUNC_NAME(merge, ParseError(S))(e1, e2);           \
-    ParseState(S) s = (s1.offset > s2.offset ? s1 : s2);                 \
+    Stream(S) SS = trait(Stream(S));                                     \
+    S s = (SS.offsetOf(s1) > SS.offsetOf(s2) ? s1 : s2);                 \
     return fn_apply(err, e, s);                                          \
   }                                                                      \
                                                                          \
-  typedef_Fn_r(ParseState(S), /* s    : input state */                   \
+  typedef_Fn_r(S,             /* s    : input state */                   \
                ContOk(S, T),  /* cok  : consumed ok */                   \
                ContErr(S, T), /* cerr : consumed error */                \
                ContOk(S, T),  /* eok  : empty ok */                      \
@@ -135,14 +136,13 @@
                Parsec(S, T),  /* p2   : the 2nd parser */                \
                ContErr(S, T)  /* error -> state -> reply */              \
   );                                                                     \
-  fn(FUNC_NAME(eitherImpl2, S, T),                                       \
-     ParseState(S),    /* s    : input state */                          \
-     ContOk(S, T),     /* cok  : consumed ok */                          \
-     ContErr(S, T),    /* cerr : consumed error */                       \
-     ContOk(S, T),     /* eok  : empty ok */                             \
-     ContErr(S, T),    /* eerr : empty error */                          \
-     Parsec(S, T),     /* p2   : the 2nd parser */                       \
-     ContErrArgs(S, T) /* error -> state -> reply */                     \
+  fn(FUNC_NAME(eitherImpl2, S, T), S, /* s    : input state */           \
+     ContOk(S, T),                    /* cok  : consumed ok */           \
+     ContErr(S, T),                   /* cerr : consumed error */        \
+     ContOk(S, T),                    /* eok  : empty ok */              \
+     ContErr(S, T),                   /* eerr : empty error */           \
+     Parsec(S, T),                    /* p2   : the 2nd parser */        \
+     ContErrArgs(S, T)                /* error -> state -> reply */      \
   ) {                                                                    \
     g_bind((s, cok, cerr, eok, eerr, p2, e1, s1), *args);                \
     __auto_type f1 = FUNC_NAME(eitherErr, S, T)();                       \

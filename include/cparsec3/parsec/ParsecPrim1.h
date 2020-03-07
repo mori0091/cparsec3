@@ -67,10 +67,10 @@
     g_bind((test, pattern, s, cok, , eok, eerr), *args);                 \
     Stream(S) IS = trait(Stream(S));                                     \
     int n = IS.chunkLength(pattern);                                     \
-    __auto_type maybe = IS.takeN(n, s.input);                            \
+    __auto_type maybe = IS.takeN(n, s);                                  \
     if (maybe.none) {                                                    \
       ParseError(S) e = {                                                \
-          .offset = s.offset,                                            \
+          .offset = IS.offsetOf(s),                                      \
           .unexpected.value.type = END_OF_INPUT,                         \
           .expecting = NULL,                                             \
       };                                                                 \
@@ -79,7 +79,7 @@
     Tokens(S) actual = maybe.value.e1;                                   \
     if (!fn_apply(test, pattern, actual)) {                              \
       ParseError(S) e = {                                                \
-          .offset = s.offset,                                            \
+          .offset = IS.offsetOf(s),                                      \
           .unexpected.value = {.type = TOKENS,                           \
                                .tokens = IS.chunkToTokens(actual)},      \
           .expecting = NULL,                                             \
@@ -87,8 +87,7 @@
       return fn_apply(eerr, e, s);                                       \
     }                                                                    \
     int m = IS.chunkLength(actual);                                      \
-    s.input = maybe.value.e2;                                            \
-    s.offset += m;                                                       \
+    s = maybe.value.e2;                                                  \
     if (!m) {                                                            \
       return fn_apply(eok, actual, s, NULL);                             \
     }                                                                    \

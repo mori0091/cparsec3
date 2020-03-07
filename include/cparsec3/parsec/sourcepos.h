@@ -5,7 +5,6 @@
 
 typedef struct SourcePos SourcePos;
 struct SourcePos {
-  String name;
   int line;
   int column;
 };
