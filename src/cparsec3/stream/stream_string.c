@@ -137,13 +137,13 @@ static String reachOffset(Offset o, PosState(String) * pst) {
   for (const char* c = beg; *c && *c != '\n'; c++) {
     if (*c == '\t') {
       int n = tabWidth - (col % tabWidth);
-      while (n--) {
-        mem_printf(&b, " ");
-      }
       col += n;
+      if (0 < n) {
+        mem_printf(&b, "%*s", n, "");
+      }
     } else {
-      mem_printf(&b, "%c", *c);
       col++;
+      mem_printf(&b, "%c", *c);
     }
   }
   if (!b.data || !*b.data) {
