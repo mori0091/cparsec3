@@ -2,7 +2,6 @@
 // #include <cparsec3/base/base.h>
 #include <cparsec3/base/base_generics.h>
 
-#include <cparsec3/parsec/state.h>
 #include <cparsec3/parsec/stream.h>
 
 #include <cparsec3/parsec/ParsecBase.h>

@@ -1,6 +1,5 @@
 /* -*- coding: utf-8-unix -*- */
 
-#include <cparsec3/parsec/State.h>
 #include <cparsec3/parsec/stream.h>
 
 #include <string.h>
