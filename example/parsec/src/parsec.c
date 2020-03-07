@@ -2,6 +2,7 @@
 // #include <cparsec3/base/base.h>
 #include <cparsec3/base/base_generics.h>
 
+#include <cparsec3/parsec/state.h>
 #include <cparsec3/parsec/stream.h>
 
 #include <cparsec3/parsec/ParsecBase.h>
@@ -22,8 +23,17 @@
 #include <cparsec3/parsec/ParsecRepeat.h>
 
 // -----------------------------------------------------------------------
+#if 0
+#define CPARSEC_STREAM_TYPE String
+#define STREAM(input) input
+#else
+#define CPARSEC_STREAM_TYPE State(String)
+#define STREAM(input) trait(State(String)).create(input)
+#endif
+
 #if !defined(CPARSEC_STREAM_TYPE)
 #define CPARSEC_STREAM_TYPE String
+#define STREAM(input) input
 #endif
 
 // -----------------------------------------------------------------------
@@ -132,11 +142,11 @@
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-trait_ParsecLibrary(String);
-impl_ParsecLibrary(String);
+trait_ParsecLibrary(CPARSEC_STREAM_TYPE);
+impl_ParsecLibrary(CPARSEC_STREAM_TYPE);
 
 // -----------------------------------------------------------------------
-#define S String
+#define S CPARSEC_STREAM_TYPE
 
 // -----------------------------------------------------------------------
 fn(abcFn, UnParserArgs(S, Array(char))) {
@@ -216,60 +226,60 @@ int main(void) {
   __auto_type D = trait(ParsecDeriv(S));
   {
     __auto_type p = P.parseError((ParseError(S)){0});
-    parseTest(p, "");
-    parseTest(p, "foo");
-    parseTest(p, "bar");
+    parseTest(p, STREAM(""));
+    parseTest(p, STREAM("foo"));
+    parseTest(p, STREAM("bar"));
   }
   {
     __auto_type p = D.single('f');
-    parseTest(p, "");
-    parseTest(p, "foo");
-    parseTest(p, "bar");
+    parseTest(p, STREAM(""));
+    parseTest(p, STREAM("foo"));
+    parseTest(p, STREAM("bar"));
   }
   {
     __auto_type p = D.anySingle();
-    parseTest(p, "");
-    parseTest(p, "foo");
-    parseTest(p, "bar");
+    parseTest(p, STREAM(""));
+    parseTest(p, STREAM("foo"));
+    parseTest(p, STREAM("bar"));
   }
   {
     __auto_type p = D.anySingleBut('f');
-    parseTest(p, "");
-    parseTest(p, "foo");
-    parseTest(p, "bar");
+    parseTest(p, STREAM(""));
+    parseTest(p, STREAM("foo"));
+    parseTest(p, STREAM("bar"));
   }
   {
     __auto_type p = D.chunk("foo");
-    parseTest(p, "");
-    parseTest(p, "foo");
-    parseTest(p, "bar");
-    parseTest(Q.label("foo", p), "bar");
+    parseTest(p, STREAM(""));
+    parseTest(p, STREAM("foo"));
+    parseTest(p, STREAM("bar"));
+    parseTest(Q.label("foo", p), STREAM("bar"));
   }
   {
     __auto_type C = trait(ParsecChar(S));
     __auto_type p = C.digit();
-    parseTest(p, "");
-    parseTest(p, "foo");
-    parseTest(p, "bar");
-    parseTest(p, "9");
+    parseTest(p, STREAM(""));
+    parseTest(p, STREAM("foo"));
+    parseTest(p, STREAM("bar"));
+    parseTest(p, STREAM("9"));
   }
   {
     __auto_type C = trait(ParsecChoice(S, Token(S)));
     __auto_type a = D.single('a');
     __auto_type b = D.single('b');
     __auto_type p = C.either(a, b);
-    parseTest(p, "");
-    parseTest(p, "foo");
-    parseTest(p, "bar");
+    parseTest(p, STREAM(""));
+    parseTest(p, STREAM("foo"));
+    parseTest(p, STREAM("bar"));
   }
   {
     __auto_type C = trait(ParsecChoice(S, Token(S)));
     __auto_type a = D.single('a');
     __auto_type b = D.single('b');
     __auto_type p = C.either(P.tryp(a), b);
-    parseTest(p, "");
-    parseTest(p, "foo");
-    parseTest(p, "bar");
+    parseTest(p, STREAM(""));
+    parseTest(p, STREAM("foo"));
+    parseTest(p, STREAM("bar"));
   }
   {
     __auto_type C = trait(ParsecChoice(S, Token(S)));
@@ -278,49 +288,49 @@ int main(void) {
     __auto_type c = D.single('c');
     __auto_type p =
         C.choice(g_array(Parsec(S, Token(S)), P.tryp(a), P.tryp(b), c));
-    parseTest(p, "");
-    parseTest(p, "foo");
-    parseTest(p, "bar");
+    parseTest(p, STREAM(""));
+    parseTest(p, STREAM("foo"));
+    parseTest(p, STREAM("bar"));
   }
   {
     __auto_type C = trait(ParsecChar(S));
     __auto_type R = trait(ParsecRepeat(S, Token(S)));
     __auto_type p = R.many(C.letter());
-    parseTest(p, "");
-    parseTest(p, "foo");
-    parseTest(p, "bar");
+    parseTest(p, STREAM(""));
+    parseTest(p, STREAM("foo"));
+    parseTest(p, STREAM("bar"));
   }
   {
     __auto_type p = abc();
-    parseTest(p, "abc");
-    parseTest(p, "bcd");
-    parseTest(p, "aBc");
+    parseTest(p, STREAM("abc"));
+    parseTest(p, STREAM("bcd"));
+    parseTest(p, STREAM("aBc"));
   }
   {
     __auto_type p = identifier();
-    parseTest(p, "");
-    parseTest(p, "foo");
-    parseTest(p, "bar");
-    parseTest(p, "9bar");
-    parseTest(p, "bar9");
+    parseTest(p, STREAM(""));
+    parseTest(p, STREAM("foo"));
+    parseTest(p, STREAM("bar"));
+    parseTest(p, STREAM("9bar"));
+    parseTest(p, STREAM("bar9"));
   }
   {
     __auto_type p = fail_on('X');
-    parseTest(p, "0123456789abcdef\n"
-                 "0123456789abcdef\n"
-                 "0123456789aXcdef\n");
+    parseTest(p, STREAM("0123456789abcdef\n"
+                        "0123456789abcdef\n"
+                        "0123456789aXcdef\n"));
     // -> shall be an error at line 3, column 12
-    parseTest(p, "0123456789abcdef\n"
-                 "0123456789abcdef\n"
-                 "\t89aXcdef\n");
+    parseTest(p, STREAM("0123456789abcdef\n"
+                        "0123456789abcdef\n"
+                        "\t89aXcdef\n"));
     // -> shall be an error at line 3, column 12
-    parseTest(p, "0123456789abcdef\n"
-                 "0123456789abcdef\n"
-                 "01\t89aXcdef\n");
+    parseTest(p, STREAM("0123456789abcdef\n"
+                        "0123456789abcdef\n"
+                        "01\t89aXcdef\n"));
     // -> shall be an error at line 3, column 12
-    parseTest(p, "0123456789abcdef\n"
-                 "0123456789abcdef\n"
-                 "0123456789abcdef\n");
+    parseTest(p, STREAM("0123456789abcdef\n"
+                        "0123456789abcdef\n"
+                        "0123456789abcdef\n"));
     // -> shall be an error at line 4, column 1 : unexpected end of input
   }
 }

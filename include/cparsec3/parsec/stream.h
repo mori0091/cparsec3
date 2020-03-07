@@ -2,8 +2,10 @@
 #pragma once
 
 #include "../base/base.h"
-#include "posstate.h"
+#include "state.h"
+
 #include "parsestate.h"
+#include "posstate.h"
 
 #define Stream(S) TYPE_NAME(Stream, S)
 #define Token(S) TYPE_NAME(Token, S)
@@ -29,7 +31,7 @@
     Maybe(Tuple(Token(S), S)) (*take1)(S s);                             \
     Maybe(Tuple(Tokens(S), S)) (*takeN)(int n, S s);                     \
                                                                          \
-    void (*printState)(ParseState(S) s);                                 \
+    void (*printState)(S s);                                             \
   };                                                                     \
                                                                          \
   Stream(S) Trait(Stream(S));                                            \
@@ -54,6 +56,12 @@ C_API_BEGIN
  * Stream(String) trait.
  */
 trait_Stream(String);
+
+// -------------------------------------------------------------
+
+#define pToken_pState_String char
+#define pTokens_pState_String String
+trait_Stream(State(String));
 
 // -------------------------------------------------------------
 C_API_END

@@ -97,7 +97,7 @@
     ParseState(S) s = trait(ParseState(S)).create(input);                \
     ParseReply(S, T) r = FUNC_NAME(runParsec, S, T)(p, s);               \
     if (!r.result.success) {                                             \
-      trait(Stream(S)).printState(r.state);                              \
+      trait(Stream(S)).printState(r.state.input);                        \
       FUNC_NAME(print, ParseError(S))(r.result.err);                     \
       printf("\n");                                                      \
       return false;                                                      \
