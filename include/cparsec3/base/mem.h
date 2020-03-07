@@ -109,8 +109,6 @@ void mem_free(void* p);
 
 // -----------------------------------------------------------------------
 #include <stdarg.h>
-int mem_asprintf(char** strp, const char* fmt, ...);
-int mem_vasprintf(char** strp, const char* fmt, va_list ap);
 
 typedef struct CharBuff CharBuff;
 struct CharBuff {
