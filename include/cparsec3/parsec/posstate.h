@@ -11,8 +11,9 @@
 #define typedef_PosState(S)                                              \
   typedef struct PosState(S) PosState(S);                                \
   struct PosState(S) {                                                   \
-    S input; /* a Stream */                                              \
-    Offset offset;                                                       \
+    S input;           /**< rest of the unprocessed token-stream */      \
+    Offset offset;     /**< offset of the current position */            \
+    Offset lineOffset; /**< offset of the current line */                \
     SourcePos sourcePos;                                                 \
     size_t tabWidth;                                                     \
     String linePrefix;                                                   \
@@ -39,6 +40,7 @@
     return (PosState(S)){                                                \
         .input = input,                                                  \
         .offset = 0,                                                     \
+        .lineOffset = 0,                                                 \
         .sourcePos.name = name,                                          \
         .sourcePos.line = 1,                                             \
         .sourcePos.column = 1,                                           \

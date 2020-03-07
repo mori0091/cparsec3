@@ -100,9 +100,9 @@
     if (!result.success) {                                               \
       PosStateT(S) PS = trait(PosState(S));                              \
       PosState(S) pst = PS.create("", input);                            \
-      String lineText =                                                  \
-          trait(Stream(S)).reachOffset(result.err.offset, &pst);         \
-      PS.print(lineText, pst);                                           \
+      Stream(S) SS = trait(Stream(S));                                   \
+      pst = SS.advanceTo(result.err.offset, pst);                        \
+      PS.print(SS.lineTextOf(pst), pst);                                 \
       FUNC_NAME(print, ParseError(S))(result.err);                       \
       printf("\n");                                                      \
       return false;                                                      \
