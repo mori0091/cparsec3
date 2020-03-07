@@ -86,8 +86,8 @@
   /* ---- runParser(p, name, input) */                                   \
   static Result(T, ParseError(S))                                        \
       FUNC_NAME(runParser, S, T)(Parsec(S, T) p, String name, S input) { \
-    return FUNC_NAME(runParsec, S, T)(p, initialParseState(name, input)) \
-        .result;                                                         \
+    ParseState(S) s = trait(ParseState(S)).create(name, input);          \
+    return FUNC_NAME(runParsec, S, T)(p, s).result;                      \
   }                                                                      \
   END_OF_STATEMENTS
 
@@ -95,9 +95,16 @@
 #define impl_parseTest(S, T)                                             \
   /* ---- parseTest(p, input) */                                         \
   static bool FUNC_NAME(parseTest, S, T)(Parsec(S, T) p, S input) {      \
-    __auto_type result = FUNC_NAME(runParser, S, T)(p, "", input);       \
+    Result(T, ParseError(S)) result =                                    \
+        FUNC_NAME(runParser, S, T)(p, "", input);                        \
     if (!result.success) {                                               \
+      PosStateT(S) PS = trait(PosState(S));                              \
+      PosState(S) pst = PS.create("", input);                            \
+      String lineText =                                                  \
+          trait(Stream(S)).reachOffset(result.err.offset, &pst);         \
+      PS.print(lineText, pst);                                           \
       FUNC_NAME(print, ParseError(S))(result.err);                       \
+      printf("\n");                                                      \
       return false;                                                      \
     }                                                                    \
     printf("%s\n", trait(Show(T)).show(result.ok));                      \
