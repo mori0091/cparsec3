@@ -140,7 +140,19 @@ impl_ParsecLibrary(String);
 #define S String
 
 // -----------------------------------------------------------------------
+fn(abcFn, UnParserArgs(S, Array(char))) {
+  __auto_type char1 = trait(ParsecChar(S)).char1;
+  DO() {
+    SCAN(char1('a'), a);
+    SCAN(char1('b'), b);
+    SCAN(char1('c'), c);
+    RETURN(g_array(char, a, b, c));
+  }
+}
 
+Parsec(S, Array(char)) abc(void) {
+  return (Parsec(S, Array(char))){abcFn()};
+}
 
 // -----------------------------------------------------------------------
 fn(identifierImpl, UnParserArgs(S, String)) {
@@ -260,6 +272,12 @@ int main(void) {
     parseTest(p, "");
     parseTest(p, "foo");
     parseTest(p, "bar");
+  }
+  {
+    __auto_type p = abc();
+    parseTest(p, "abc");
+    parseTest(p, "bcd");
+    parseTest(p, "aBc");
   }
   {
     __auto_type p = identifier();
