@@ -103,20 +103,20 @@ static Maybe(Tuple(Tokens(String), String)) takeN(int n, String s) {
   }
 }
 
-static String reachOffset(Offset o, PosState(String) * pst) {
-  // update the PosState
-  size_t tabWidth = pst->tabWidth;
-  int line = pst->sourcePos.line;
-  int column = pst->sourcePos.column;
-  const char* beg = pst->input;
-  const char* c = beg;
-  for (Offset p = pst->offset; p < o; p++, c++) {
+static PosState(String) advanceTo(Offset o, PosState(String) pst) {
+  assert(pst.offset <= o && "cannot advance to backward position");
+  size_t tabWidth = pst.tabWidth;
+  int line = pst.sourcePos.line;
+  int column = pst.sourcePos.column;
+  Offset lineOffset = pst.lineOffset;
+  const char* c = pst.input;
+  for (Offset p = pst.offset; p < o; p++, c++) {
     assert(*c && "unexpected end of input");
     switch ((int)(uint8_t)*c) {
     case '\n':
       line++;
       column = 1;
-      beg = c + 1;
+      lineOffset = p + 1;
       break;
     case '\t':
       column = ((column - 1) / tabWidth + 1) * tabWidth + 1;
@@ -126,14 +126,20 @@ static String reachOffset(Offset o, PosState(String) * pst) {
       break;
     }
   }
-  pst->input = c;
-  pst->offset = o;
-  pst->sourcePos.line = line;
-  pst->sourcePos.column = column;
+  pst.input = c;
+  pst.offset = o;
+  pst.lineOffset = lineOffset;
+  pst.sourcePos.line = line;
+  pst.sourcePos.column = column;
+  return pst;
+}
 
-  // constructs the current-line-text
+static String lineTextOf(PosState(String) pst) {
+  assert(pst.lineOffset <= pst.offset);
+  size_t tabWidth = pst.tabWidth;
   CharBuff b = {0};
   int col = 0;
+  const char* beg = pst.input + pst.lineOffset - pst.offset;
   for (const char* c = beg; *c && *c != '\n'; c++) {
     if (*c == '\t') {
       int n = tabWidth - (col % tabWidth);
@@ -164,6 +170,7 @@ Stream(String) Trait(Stream(String)) {
       .showTokens = showTokens,
       .take1 = take1,
       .takeN = takeN,
-      .reachOffset = reachOffset,
+      .advanceTo = advanceTo,
+      .lineTextOf = lineTextOf,
   };
 }
