@@ -6,20 +6,71 @@
 #include "sourcepos.h"
 
 #define PosState(S) TYPE_NAME(PosState, S)
+#define PosStateT(S) TYPE_NAME(PosStateT, S)
+
 #define typedef_PosState(S)                                              \
   typedef struct PosState(S) PosState(S);                                \
   struct PosState(S) {                                                   \
     S input; /* a Stream */                                              \
     Offset offset;                                                       \
-    SourcePos pos;                                                       \
+    SourcePos sourcePos;                                                 \
     size_t tabWidth;                                                     \
     String linePrefix;                                                   \
   };                                                                     \
-  static inline PosState(S) initialPosState(String name, S input) {      \
-    return (PosState(S)){.input = input,                                 \
-                         .offset = 0,                                    \
-                         .pos = initialSourcePos(name),                  \
-                         .tabWidth = 8,                                  \
-                         .linePrefix = ""};                              \
+                                                                         \
+  END_OF_STATEMENTS
+
+#define trait_PosState(S)                                                \
+  typedef_PosState(S);                                                   \
+                                                                         \
+  typedef struct PosStateT(S) PosStateT(S);                              \
+  struct PosStateT(S) {                                                  \
+    PosState(S) (*create)(String name, S input);                         \
+    void (*print)(String lineText, PosState(S) s);                       \
+  };                                                                     \
+                                                                         \
+  PosStateT(S) Trait(PosState(S));                                       \
+                                                                         \
+  END_OF_STATEMENTS
+
+#define impl_PosState(S)                                                 \
+  static inline PosState(S)                                              \
+      FUNC_NAME(create, PosState(S))(String name, S input) {             \
+    return (PosState(S)){                                                \
+        .input = input,                                                  \
+        .offset = 0,                                                     \
+        .sourcePos.name = name,                                          \
+        .sourcePos.line = 1,                                             \
+        .sourcePos.column = 1,                                           \
+        .tabWidth = 8,                                                   \
+        .linePrefix = " | ",                                             \
+    };                                                                   \
   }                                                                      \
+                                                                         \
+  static inline void FUNC_NAME(print, PosState(S))(String lineText,      \
+                                                   PosState(S) s) {      \
+    String name = s.sourcePos.name;                                      \
+    int line = s.sourcePos.line;                                         \
+    int column = s.sourcePos.column;                                     \
+    String linePrefix = s.linePrefix;                                    \
+    assert(1 <= line);                                                   \
+    assert(1 <= column);                                                 \
+    int n = snprintf(0, 0, "%d", line);                                  \
+    assert(1 <= n);                                                      \
+    if (name && *name) {                                                 \
+      printf("%s:", name);                                               \
+    }                                                                    \
+    printf("%d:%d:\n", line, column);                                    \
+    printf("%*s%s\n", n, "", linePrefix);                                \
+    printf("%*d%s%s\n", n, line, linePrefix, lineText);                  \
+    printf("%*s%s%*s^\n", n, "", linePrefix, column - 1, "");            \
+  }                                                                      \
+                                                                         \
+  PosStateT(S) Trait(PosState(S)) {                                      \
+    return (PosStateT(S)){                                               \
+        .create = FUNC_NAME(create, PosState(S)),                        \
+        .print = FUNC_NAME(print, PosState(S)),                          \
+    };                                                                   \
+  }                                                                      \
+                                                                         \
   END_OF_STATEMENTS

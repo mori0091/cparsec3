@@ -22,13 +22,58 @@
 // -----------------------------------------------------------------------
 #include "cparsec3/stream/stream_string.h"
 
+// -----------------------------------------------------------------------
+#if !defined(CPARSEC_STREAM_TYPE)
+#define CPARSEC_STREAM_TYPE String
+#endif
+
+// -----------------------------------------------------------------------
 #define PARSER_RETURN_TYPES(S)                                           \
   None, Token(S), Tokens(S), Array(Token(S)), Array(Tokens(S))
 
 #define TRAIT_PARSECRUNNER(S, T) trait(ParsecRunner(S, T))
+
 #define GENERIC_PARSECRUNNER(S, p)                                       \
   GENERIC(p, Parsec, TRAIT_PARSECRUNNER, BIND(S, PARSER_RETURN_TYPES(S)))
 
+// -----------------------------------------------------------------------
+#define parseTest(p, input)                                              \
+  GENERIC_PARSECRUNNER(CPARSEC_STREAM_TYPE, p).parseTest(p, input)
+
+#define parse(p, state)                                                  \
+  GENERIC_PARSECRUNNER(CPARSEC_STREAM_TYPE, p).runParsec(p, state)
+
+// -----------------------------------------------------------------------
+#define DO()                                                             \
+  g_bind((_s0_, _cok_, _cerr_, _eok_, _eerr_), *args);                   \
+  __auto_type _s_ = _s0_;
+
+#define DO_WITH(...)                                                     \
+  g_bind((__VA_ARGS__, _s0_, _cok_, _cerr_, _eok_, _eerr_), *args);      \
+  __auto_type _s_ = _s0_;
+
+#define SCAN(...) CAT(SCAN, VARIADIC_SIZE(__VA_ARGS__))(__VA_ARGS__)
+
+#define SCAN1(_p_)                                                       \
+  __auto_type TMPID = parse(_p_, _s_);                                   \
+  if (!TMPID.result.success) {                                           \
+    __auto_type _err_ = (TMPID.consumed ? _cerr_ : _eerr_);              \
+    return fn_apply(_err_, TMPID.result.err, TMPID.state);               \
+  }                                                                      \
+  _s_ = TMPID.state;
+
+#define SCAN2(_p_, _x_)                                                  \
+  SCAN1(_p_);                                                            \
+  __auto_type _x_ = TMPID.result.ok;
+
+#define RETURN(_x_)                                                      \
+  do {                                                                   \
+    __auto_type _ok_ = (_s0_.offset < _s_.offset ? _cok_ : _eok_);       \
+    Hints(Token(CPARSEC_STREAM_TYPE)) empty_hints = {0};                 \
+    return fn_apply(_ok_, _x_, _s_, empty_hints);                        \
+  } while (0)
+
+// -----------------------------------------------------------------------
 #define trait_ParsecLibrary(S)                                           \
   trait_ParsecBase(S);                                                   \
                                                                          \
@@ -87,40 +132,27 @@
                                                                          \
   END_OF_STATEMENTS
 
+// -----------------------------------------------------------------------
 trait_ParsecLibrary(String);
 impl_ParsecLibrary(String);
 
 // -----------------------------------------------------------------------
 #define S String
 
-#define parseTest(p, input)                                              \
-  GENERIC_PARSECRUNNER(String, p).parseTest(p, input)
-
-#define parse(p, state)                                                  \
-  GENERIC_PARSECRUNNER(String, p).runParsec(p, state)
-
 // -----------------------------------------------------------------------
-#define DO()                                                             \
-  g_bind((_s0_, _cok_, _cerr_, _eok_, _eerr_), *args);                   \
-  __auto_type _s_ = _s0_;
+fn(abcFn, UnParserArgs(S, Array(char))) {
+  __auto_type char1 = trait(ParsecChar(S)).char1;
+  DO() {
+    SCAN(char1('a'), a);
+    SCAN(char1('b'), b);
+    SCAN(char1('c'), c);
+    RETURN(g_array(char, a, b, c));
+  }
+}
 
-#define SCAN(...) CAT(SCAN, VARIADIC_SIZE(__VA_ARGS__))(__VA_ARGS__)
-#define SCAN1(_p_)                                                       \
-  __auto_type TMPID = parse(_p_, _s_);                                   \
-  if (!TMPID.result.success) {                                           \
-    __auto_type _err_ = (TMPID.consumed ? _cerr_ : _eerr_);              \
-    return fn_apply(_err_, TMPID.result.err, TMPID.state);               \
-  }                                                                      \
-  _s_ = TMPID.state;
-#define SCAN2(_p_, _x_)                                                  \
-  SCAN1(_p_);                                                            \
-  __auto_type _x_ = TMPID.result.ok;
-
-#define RETURN(_x_)                                                      \
-  do {                                                                   \
-    __auto_type _ok_ = (_s0_.offset < _s_.offset ? _cok_ : _eok_);       \
-    return fn_apply(_ok_, _x_, _s_, (Hints(Token(S))){0});               \
-  } while (0)
+Parsec(S, Array(char)) abc(void) {
+  return (Parsec(S, Array(char))){abcFn()};
+}
 
 // -----------------------------------------------------------------------
 fn(identifierImpl, UnParserArgs(S, String)) {
@@ -149,6 +181,24 @@ Parsec(S, String) identifier(void) {
   __auto_type P = trait(ParsecPrim(S, String));
   Parsec(S, String) p = {identifierImpl()};
   return P.label("identifier", p);
+}
+
+// -----------------------------------------------------------------------
+typedef_Fn(Token(S), UnParser(S, None));
+fn(fail_on_Fn, Token(S), UnParserArgs(S, None)) {
+  DO_WITH(c) {
+    __auto_type p = trait(ParsecDeriv(S)).anySingleBut(c);
+    for (;;) {
+      SCAN(p);
+    }
+    RETURN((None){0});
+  }
+}
+
+Parsec(S, None) fail_on(Token(S) c) {
+  __auto_type f = fail_on_Fn();
+  Parsec(S, None) p = {fn_apply(f, c)};
+  return p;
 }
 
 // -----------------------------------------------------------------------
@@ -242,11 +292,36 @@ int main(void) {
     parseTest(p, "bar");
   }
   {
+    __auto_type p = abc();
+    parseTest(p, "abc");
+    parseTest(p, "bcd");
+    parseTest(p, "aBc");
+  }
+  {
     __auto_type p = identifier();
     parseTest(p, "");
     parseTest(p, "foo");
     parseTest(p, "bar");
     parseTest(p, "9bar");
     parseTest(p, "bar9");
+  }
+  {
+    __auto_type p = fail_on('X');
+    parseTest(p, "0123456789abcdef\n"
+                 "0123456789abcdef\n"
+                 "0123456789aXcdef\n");
+    // -> shall be an error at line 3, column 12
+    parseTest(p, "0123456789abcdef\n"
+                 "0123456789abcdef\n"
+                 "\t89aXcdef\n");
+    // -> shall be an error at line 3, column 12
+    parseTest(p, "0123456789abcdef\n"
+                 "0123456789abcdef\n"
+                 "01\t89aXcdef\n");
+    // -> shall be an error at line 3, column 12
+    parseTest(p, "0123456789abcdef\n"
+                 "0123456789abcdef\n"
+                 "0123456789abcdef\n");
+    // -> shall be an error at line 4, column 1 : unexpected end of input
   }
 }

@@ -1,5 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 
+#include <cparsec3/base/base.h>
+#include <cparsec3/parsec/posstate.h>
 #include <cparsec3/stream/stream_string.h>
 
 #include <string.h>
@@ -101,6 +103,56 @@ static Maybe(Tuple(Tokens(String), String)) takeN(int n, String s) {
   }
 }
 
+static String reachOffset(Offset o, PosState(String) * pst) {
+  // update the PosState
+  size_t tabWidth = pst->tabWidth;
+  int line = pst->sourcePos.line;
+  int column = pst->sourcePos.column;
+  const char* beg = pst->input;
+  const char* c = beg;
+  for (Offset p = pst->offset; p < o; p++, c++) {
+    assert(*c && "unexpected end of input");
+    switch ((int)(uint8_t)*c) {
+    case '\n':
+      line++;
+      column = 1;
+      beg = c + 1;
+      break;
+    case '\t':
+      column = ((column - 1) / tabWidth + 1) * tabWidth + 1;
+      break;
+    default:
+      column++;
+      break;
+    }
+  }
+  pst->input = c;
+  pst->offset = o;
+  pst->sourcePos.line = line;
+  pst->sourcePos.column = column;
+
+  // constructs the current-line-text
+  CharBuff b = {0};
+  int col = 0;
+  for (const char* c = beg; *c && *c != '\n'; c++) {
+    if (*c == '\t') {
+      int n = tabWidth - (col % tabWidth);
+      col += n;
+      if (0 < n) {
+        mem_printf(&b, "%*s", n, "");
+      }
+    } else {
+      col++;
+      mem_printf(&b, "%c", *c);
+    }
+  }
+  if (!b.data || !*b.data) {
+    mem_printf(&b, "<empty line>");
+  }
+
+  return b.data;
+}
+
 /**
  * Returns a set of Stream API functions.
  */
@@ -112,5 +164,6 @@ Stream(String) Trait(Stream(String)) {
       .showTokens = showTokens,
       .take1 = take1,
       .takeN = takeN,
+      .reachOffset = reachOffset,
   };
 }

@@ -147,20 +147,20 @@
     }                                                                    \
   }                                                                      \
   static inline void FUNC_NAME(print, ParseError(S))(ParseError(S) e) {  \
-    printf("error:%" PRIdMAX ":\n", e.offset);                           \
+    /* printf("error:%" PRIdMAX ":\n", e.offset); */                     \
     if (FUNC_NAME(isUnknown, ParseError(S))(e)) {                        \
-      printf("  unknown error\n");                                       \
+      printf("unknown error\n");                                         \
       return;                                                            \
     }                                                                    \
     void (*printErrorItem)(ErrorItem(Token(S)) t) =                      \
         FUNC_NAME(print, ErrorItem(Token(S)));                           \
     if (!e.unexpected.none) {                                            \
-      printf("  unexpected ");                                           \
+      printf("unexpected ");                                             \
       printErrorItem(e.unexpected.value);                                \
       printf("\n");                                                      \
     }                                                                    \
     if (e.expecting) {                                                   \
-      printf("  expecting ");                                            \
+      printf("expecting ");                                              \
       ListT(ErrorItem(Token(S))) L = trait(List(ErrorItem(Token(S))));   \
       List(ErrorItem(Token(S))) xs = e.expecting;                        \
       if (!xs) {                                                         \
@@ -250,31 +250,3 @@
 // -----------------------------------------------------------------------
 // type alias for expecting items
 #define Hints(T) List(ErrorItem(T))
-
-// -----------------------------------------------------------------------
-#define ParseErrorBundle(S) TYPE_NAME(ParseErrorBundle, S)
-
-// -----------------------------------------------------------------------
-#define trait_ParseErrorBundle(S)                                        \
-  C_API_BEGIN                                                            \
-                                                                         \
-  trait_ParseError(S);                                                   \
-  trait_List(ParseError(S));                                             \
-                                                                         \
-  typedef struct ParseErrorBundle(S) ParseErrorBundle(S);                \
-  struct ParseErrorBundle(S) {                                           \
-    List(ParseError(S)) errors;                                          \
-    PosState(S) posState;                                                \
-  };                                                                     \
-                                                                         \
-  C_API_END                                                              \
-  END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-#define impl_ParseErrorBundle(S)                                         \
-  C_API_BEGIN                                                            \
-                                                                         \
-  impl_List(ParseError(S));                                              \
-                                                                         \
-  C_API_END                                                              \
-  END_OF_STATEMENTS
