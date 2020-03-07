@@ -169,47 +169,6 @@ void mem_free(void* p) {
 }
 
 // -----------------------------------------------------------------------
-int mem_asprintf(char** strp, const char* fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  int ret = mem_vasprintf(strp, fmt, ap);
-  va_end(ap);
-  return ret;
-}
-
-int mem_vasprintf(char** strp, const char* fmt, va_list ap) {
-  assert(strp && "Null pointer");
-  assert(fmt && "Null pointer");
-
-  va_list ap2;
-
-  va_copy(ap2, ap);
-  int len = vsnprintf(NULL, 0, fmt, ap2);
-  va_end(ap2);
-  if (len < 0) {
-    *strp = NULL;
-    return -1;
-  }
-
-  char* buf = mem_malloc(len + 1);
-  if (!buf) {
-    *strp = NULL;
-    return -1;
-  }
-
-  va_copy(ap2, ap);
-  int l = vsnprintf(buf, len + 1, fmt, ap2);
-  va_end(ap2);
-  if (l != len) {
-    mem_free(buf);
-    *strp = NULL;
-    return -1;
-  }
-
-  *strp = buf;
-  return len;
-}
-
 int mem_printf(CharBuff* b, const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
