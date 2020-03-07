@@ -14,8 +14,7 @@
   typedef struct ParsecRunner(S, T) ParsecRunner(S, T);                  \
   struct ParsecRunner(S, T) {                                            \
     ParseReply(S, T) (*runParsec)(Parsec(S, T) p, ParseState(S) state);  \
-    Result(T, ParseError(S)) (*runParser)(Parsec(S, T) p, String name,   \
-                                          S input);                      \
+    Result(T, ParseError(S)) (*runParser)(Parsec(S, T) p, S input);      \
     bool (*parseTest)(Parsec(S, T) p, S input);                          \
   };                                                                     \
   ParsecRunner(S, T) Trait(ParsecRunner(S, T));                          \
@@ -85,8 +84,8 @@
 #define impl_runParser(S, T)                                             \
   /* ---- runParser(p, name, input) */                                   \
   static Result(T, ParseError(S))                                        \
-      FUNC_NAME(runParser, S, T)(Parsec(S, T) p, String name, S input) { \
-    ParseState(S) s = trait(ParseState(S)).create(name, input);          \
+      FUNC_NAME(runParser, S, T)(Parsec(S, T) p, S input) {              \
+    ParseState(S) s = trait(ParseState(S)).create(input);                \
     return FUNC_NAME(runParsec, S, T)(p, s).result;                      \
   }                                                                      \
   END_OF_STATEMENTS
@@ -96,10 +95,10 @@
   /* ---- parseTest(p, input) */                                         \
   static bool FUNC_NAME(parseTest, S, T)(Parsec(S, T) p, S input) {      \
     Result(T, ParseError(S)) result =                                    \
-        FUNC_NAME(runParser, S, T)(p, "", input);                        \
+        FUNC_NAME(runParser, S, T)(p, input);                            \
     if (!result.success) {                                               \
       PosStateT(S) PS = trait(PosState(S));                              \
-      PosState(S) pst = PS.create("", input);                            \
+      PosState(S) pst = PS.create(input);                                \
       Stream(S) SS = trait(Stream(S));                                   \
       pst = SS.advanceTo(result.err.offset, pst);                        \
       PS.print(SS.lineTextOf(pst), pst);                                 \

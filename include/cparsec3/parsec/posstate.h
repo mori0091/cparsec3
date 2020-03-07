@@ -26,7 +26,7 @@
                                                                          \
   typedef struct PosStateT(S) PosStateT(S);                              \
   struct PosStateT(S) {                                                  \
-    PosState(S) (*create)(String name, S input);                         \
+    PosState(S) (*create)(S input);                                      \
     void (*print)(String lineText, PosState(S) s);                       \
   };                                                                     \
                                                                          \
@@ -35,13 +35,11 @@
   END_OF_STATEMENTS
 
 #define impl_PosState(S)                                                 \
-  static inline PosState(S)                                              \
-      FUNC_NAME(create, PosState(S))(String name, S input) {             \
+  static inline PosState(S) FUNC_NAME(create, PosState(S))(S input) {    \
     return (PosState(S)){                                                \
         .input = input,                                                  \
         .offset = 0,                                                     \
         .lineOffset = 0,                                                 \
-        .sourcePos.name = name,                                          \
         .sourcePos.line = 1,                                             \
         .sourcePos.column = 1,                                           \
         .tabWidth = 8,                                                   \
@@ -51,7 +49,6 @@
                                                                          \
   static inline void FUNC_NAME(print, PosState(S))(String lineText,      \
                                                    PosState(S) s) {      \
-    String name = s.sourcePos.name;                                      \
     int line = s.sourcePos.line;                                         \
     int column = s.sourcePos.column;                                     \
     String linePrefix = s.linePrefix;                                    \
@@ -59,9 +56,6 @@
     assert(1 <= column);                                                 \
     int n = snprintf(0, 0, "%d", line);                                  \
     assert(1 <= n);                                                      \
-    if (name && *name) {                                                 \
-      printf("%s:", name);                                               \
-    }                                                                    \
     printf("%d:%d:\n", line, column);                                    \
     printf("%*s%s\n", n, "", linePrefix);                                \
     printf("%*d%s%s\n", n, line, linePrefix, lineText);                  \

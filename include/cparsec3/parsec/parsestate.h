@@ -26,7 +26,7 @@
                                                                          \
   typedef struct ParseStateT(S) ParseStateT(S);                          \
   struct ParseStateT(S) {                                                \
-    ParseState(S) (*create)(String name, S input);                       \
+    ParseState(S) (*create)(S input);                                    \
   };                                                                     \
                                                                          \
   ParseStateT(S) Trait(ParseState(S));                                   \
@@ -35,11 +35,11 @@
 
 #define impl_ParseState(S)                                               \
   static inline ParseState(S)                                            \
-      FUNC_NAME(create, ParseState(S))(String name, S input) {           \
+      FUNC_NAME(create, ParseState(S))(S input) {                        \
     return (ParseState(S)){                                              \
         .input = input,                                                  \
         .offset = 0,                                                     \
-        .posState = trait(PosState(S)).create(name, input),              \
+        .posState = trait(PosState(S)).create(input),                    \
     };                                                                   \
   }                                                                      \
                                                                          \
