@@ -184,6 +184,24 @@ Parsec(S, String) identifier(void) {
 }
 
 // -----------------------------------------------------------------------
+typedef_Fn(Token(S), UnParser(S, None));
+fn(fail_on_Fn, Token(S), UnParserArgs(S, None)) {
+  DO_WITH(c) {
+    __auto_type p = trait(ParsecDeriv(S)).anySingleBut(c);
+    for (;;) {
+      SCAN(p);
+    }
+    RETURN((None){0});
+  }
+}
+
+Parsec(S, None) fail_on(Token(S) c) {
+  __auto_type f = fail_on_Fn();
+  Parsec(S, None) p = {fn_apply(f, c)};
+  return p;
+}
+
+// -----------------------------------------------------------------------
 int main(void) {
   for (int x = 0; x < 256; ++x) {
     String s = trait(Show(char)).show((char)x);
@@ -286,5 +304,24 @@ int main(void) {
     parseTest(p, "bar");
     parseTest(p, "9bar");
     parseTest(p, "bar9");
+  }
+  {
+    __auto_type p = fail_on('X');
+    parseTest(p, "0123456789abcdef\n"
+                 "0123456789abcdef\n"
+                 "0123456789aXcdef\n");
+    // -> shall be an error at line 3, column 12
+    parseTest(p, "0123456789abcdef\n"
+                 "0123456789abcdef\n"
+                 "\t89aXcdef\n");
+    // -> shall be an error at line 3, column 12
+    parseTest(p, "0123456789abcdef\n"
+                 "0123456789abcdef\n"
+                 "01\t89aXcdef\n");
+    // -> shall be an error at line 3, column 12
+    parseTest(p, "0123456789abcdef\n"
+                 "0123456789abcdef\n"
+                 "0123456789abcdef\n");
+    // -> shall be an error at line 4, column 1 : unexpected end of input
   }
 }
