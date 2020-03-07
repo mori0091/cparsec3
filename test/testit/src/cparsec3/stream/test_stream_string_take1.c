@@ -1,5 +1,5 @@
 /* -*- coding: utf-8-unix -*- */
-#include <cparsec3/stream/stream_string.h>
+#include <cparsec3/parsec/stream.h>
 
 #define S String
 #define T_GENERATOR FUNC_NAME(S, generator)

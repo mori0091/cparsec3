@@ -1,10 +1,6 @@
 /* -*- coding: utf-8-unix -*- */
 
-#include <cparsec3/base/base.h>
-#include <cparsec3/stream/stream_string.h>
-
-#include <cparsec3/parsec/parsestate.h>
-#include <cparsec3/parsec/posstate.h>
+#include <cparsec3/parsec/stream.h>
 
 #include <string.h>
 

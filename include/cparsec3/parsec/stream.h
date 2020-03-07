@@ -3,6 +3,7 @@
 
 #include "../base/base.h"
 #include "posstate.h"
+#include "parsestate.h"
 
 #define Stream(S) TYPE_NAME(Stream, S)
 #define Token(S) TYPE_NAME(Token, S)
@@ -35,3 +36,24 @@
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS
+
+C_API_BEGIN
+// -------------------------------------------------------------
+
+/**
+ * Token(String) : Type of token taken from stream of String type.
+ * \note `Token(String)` is alias of `char`.
+ */
+#define pToken_String char
+/**
+ * Tokens(String) : Type of chunk tokens taken from stream of String type.
+ * \note `Tokens(String)` is alias of `String`.
+ */
+#define pTokens_String String
+/**
+ * Stream(String) trait.
+ */
+trait_Stream(String);
+
+// -------------------------------------------------------------
+C_API_END
