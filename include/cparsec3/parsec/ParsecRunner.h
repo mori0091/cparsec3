@@ -13,7 +13,7 @@
   /* ---- trait ParsecRunner(S, T) */                                    \
   typedef struct ParsecRunner(S, T) ParsecRunner(S, T);                  \
   struct ParsecRunner(S, T) {                                            \
-    ParseReply(S, T) (*runParsec)(Parsec(S, T) p, ParseState(S) state);  \
+    ParseReply(S, T) (*runParsec)(Parsec(S, T) p, S state);              \
     Result(T, ParseError(S)) (*runParser)(Parsec(S, T) p, S input);      \
     bool (*parseTest)(Parsec(S, T) p, S input);                          \
   };                                                                     \
@@ -65,7 +65,7 @@
                                                                          \
   /* ---- runParsec(p, state) */                                         \
   static ParseReply(S, T)                                                \
-      FUNC_NAME(runParsec, S, T)(Parsec(S, T) p, ParseState(S) state) {  \
+      FUNC_NAME(runParsec, S, T)(Parsec(S, T) p, S state) {              \
     __auto_type cok = FUNC_NAME(replyOk, S, T)();                        \
     __auto_type cerr = FUNC_NAME(replyErr, S, T)();                      \
     __auto_type eok = FUNC_NAME(replyOk, S, T)();                        \
@@ -85,8 +85,7 @@
   /* ---- runParser(p, name, input) */                                   \
   static Result(T, ParseError(S))                                        \
       FUNC_NAME(runParser, S, T)(Parsec(S, T) p, S input) {              \
-    ParseState(S) s = trait(ParseState(S)).create(input);                \
-    return FUNC_NAME(runParsec, S, T)(p, s).result;                      \
+    return FUNC_NAME(runParsec, S, T)(p, input).result;                  \
   }                                                                      \
   END_OF_STATEMENTS
 
@@ -94,10 +93,9 @@
 #define impl_parseTest(S, T)                                             \
   /* ---- parseTest(p, input) */                                         \
   static bool FUNC_NAME(parseTest, S, T)(Parsec(S, T) p, S input) {      \
-    ParseState(S) s = trait(ParseState(S)).create(input);                \
-    ParseReply(S, T) r = FUNC_NAME(runParsec, S, T)(p, s);               \
+    ParseReply(S, T) r = FUNC_NAME(runParsec, S, T)(p, input);           \
     if (!r.result.success) {                                             \
-      trait(Stream(S)).printState(r.state.input);                        \
+      trait(Stream(S)).printState(r.state);                              \
       FUNC_NAME(print, ParseError(S))(r.result.err);                     \
       printf("\n");                                                      \
       return false;                                                      \

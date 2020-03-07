@@ -2,10 +2,7 @@
 #pragma once
 
 #include "../base/base.h"
-#include "state.h"
-
-#include "parsestate.h"
-#include "posstate.h"
+#include "State.h"
 
 #define Stream(S) TYPE_NAME(Stream, S)
 #define Token(S) TYPE_NAME(Token, S)
@@ -19,9 +16,6 @@
   trait_Maybe(Tuple(Token(S), S));                                       \
   trait_Maybe(Tuple(Tokens(S), S));                                      \
                                                                          \
-  trait_PosState(S);                                                     \
-  trait_ParseState(S);                                                   \
-                                                                         \
   typedef struct Stream(S) Stream(S);                                    \
   struct Stream(S) {                                                     \
     bool (*null)(S s);                                                   \
@@ -31,6 +25,7 @@
     Maybe(Tuple(Token(S), S)) (*take1)(S s);                             \
     Maybe(Tuple(Tokens(S), S)) (*takeN)(int n, S s);                     \
                                                                          \
+    Offset (*offsetOf)(S s);                                             \
     void (*printState)(S s);                                             \
   };                                                                     \
                                                                          \

@@ -77,7 +77,9 @@
 
 #define RETURN(_x_)                                                      \
   do {                                                                   \
-    __auto_type _ok_ = (_s0_.offset < _s_.offset ? _cok_ : _eok_);       \
+    Stream(CPARSEC_STREAM_TYPE) SS = trait(Stream(CPARSEC_STREAM_TYPE)); \
+    __auto_type _ok_ =                                                   \
+        (SS.offsetOf(_s0_) < SS.offsetOf(_s_) ? _cok_ : _eok_);          \
     Hints(Token(CPARSEC_STREAM_TYPE)) empty_hints = {0};                 \
     return fn_apply(_ok_, _x_, _s_, empty_hints);                        \
   } while (0)

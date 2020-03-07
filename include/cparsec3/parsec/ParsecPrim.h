@@ -111,10 +111,10 @@
 // -----------------------------------------------------------------------
 /* tryp(p) */
 #define impl_tryp(S, T)                                                  \
-  typedef_Fn_r(ContErr(S, T), ParseState(S), ContErr(S, T));             \
+  typedef_Fn_r(ContErr(S, T), S, ContErr(S, T));                         \
   fn(FUNC_NAME(contErrBackTrack, S, T), /* name */                       \
      ContErr(S, T),    /* f : underlying continuation */                 \
-     ParseState(S),    /* s : state that overrides the given state */    \
+     S,                /* s : state that overrides the given state */    \
      ContErrArgs(S, T) /* error -> state -> reply */                     \
   ) {                                                                    \
     g_bind((f, s, e), *args);                                            \
@@ -146,10 +146,11 @@
   fn(FUNC_NAME(tokenImpl, S, T), Fn(Token(S), Maybe(T)),                 \
      Hints(Token(S)), UnParserArgs(S, T)) {                              \
     g_bind((testToken, expect, s, cok, , , eerr), *args);                \
-    __auto_type maybe = trait(Stream(S)).take1(s.input);                 \
+    Stream(S) SS = trait(Stream(S));                                     \
+    __auto_type maybe = SS.take1(s);                                     \
     if (maybe.none) {                                                    \
       ParseError(S) e = {                                                \
-          .offset = s.offset,                                            \
+          .offset = SS.offsetOf(s),                                      \
           .unexpected.value.type = END_OF_INPUT,                         \
           .expecting = expect,                                           \
       };                                                                 \
@@ -160,7 +161,7 @@
     __auto_type maybe2 = fn_apply(testToken, a);                         \
     if (maybe2.none) {                                                   \
       ParseError(S) e = {                                                \
-          .offset = s.offset,                                            \
+          .offset = SS.offsetOf(s),                                      \
           .unexpected.value.type = TOKENS,                               \
           .unexpected.value.tokens =                                     \
               trait(List(Token(S))).cons(a, NULL),                       \
@@ -169,10 +170,7 @@
       return fn_apply(eerr, e, s);                                       \
     }                                                                    \
                                                                          \
-    /* update state */                                                   \
-    s.input = maybe.value.e2;                                            \
-    s.offset++;                                                          \
-    return fn_apply(cok, maybe2.value, s, NULL);                         \
+    return fn_apply(cok, maybe2.value, maybe.value.e2, NULL);            \
   }                                                                      \
                                                                          \
   static Parsec(S, T) FUNC_NAME(token, S, T)(                            \

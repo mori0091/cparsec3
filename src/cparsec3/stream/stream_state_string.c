@@ -7,10 +7,6 @@
 
 impl_State(String);
 
-// temporalily
-impl_PosState(State(String));
-impl_ParseState(State(String));
-
 #define ST State(String)
 
 static bool null(ST s) {
@@ -92,6 +88,10 @@ static String lineTextOf(ST st) {
   return b.data;
 }
 
+static Offset offsetOf(ST s) {
+  return s.offset;
+}
+
 static void printState(ST s) {
   String lineText = lineTextOf(s);
   int line = s.sourcePos.line;
@@ -117,6 +117,7 @@ Stream(ST) Trait(Stream(ST)) {
       .take1 = take1,
       .takeN = takeN,
 
+      .offsetOf = offsetOf,
       .printState = printState,
   };
 }

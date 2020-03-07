@@ -4,9 +4,6 @@
 
 #include <string.h>
 
-impl_PosState(String);
-impl_ParseState(String);
-
 /**
  * Tests whether the stream was empty or not.
  * \param s    a stream
@@ -104,6 +101,10 @@ static Maybe(Tuple(Tokens(String), String)) takeN(int n, String s) {
   }
 }
 
+static Offset offsetOf(String s) {
+  return (Offset)(intptr_t)s;
+}
+
 static void printState(String s) {
   printf("address = %p\n", (void*)s);
 }
@@ -120,6 +121,7 @@ Stream(String) Trait(Stream(String)) {
       .take1 = take1,
       .takeN = takeN,
 
+      .offsetOf = offsetOf,
       .printState = printState,
   };
 }
