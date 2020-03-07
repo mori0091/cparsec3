@@ -94,19 +94,15 @@
 #define impl_parseTest(S, T)                                             \
   /* ---- parseTest(p, input) */                                         \
   static bool FUNC_NAME(parseTest, S, T)(Parsec(S, T) p, S input) {      \
-    Result(T, ParseError(S)) result =                                    \
-        FUNC_NAME(runParser, S, T)(p, input);                            \
-    if (!result.success) {                                               \
-      PosStateT(S) PS = trait(PosState(S));                              \
-      PosState(S) pst = PS.create(input);                                \
-      Stream(S) SS = trait(Stream(S));                                   \
-      pst = SS.advanceTo(result.err.offset, pst);                        \
-      PS.print(SS.lineTextOf(pst), pst);                                 \
-      FUNC_NAME(print, ParseError(S))(result.err);                       \
+    ParseState(S) s = trait(ParseState(S)).create(input);                \
+    ParseReply(S, T) r = FUNC_NAME(runParsec, S, T)(p, s);               \
+    if (!r.result.success) {                                             \
+      trait(Stream(S)).printState(r.state);                              \
+      FUNC_NAME(print, ParseError(S))(r.result.err);                     \
       printf("\n");                                                      \
       return false;                                                      \
     }                                                                    \
-    printf("%s\n", trait(Show(T)).show(result.ok));                      \
+    printf("%s\n", trait(Show(T)).show(r.result.ok));                    \
     return true;                                                         \
   }                                                                      \
   END_OF_STATEMENTS

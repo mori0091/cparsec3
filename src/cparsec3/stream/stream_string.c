@@ -1,10 +1,15 @@
 /* -*- coding: utf-8-unix -*- */
 
 #include <cparsec3/base/base.h>
-#include <cparsec3/parsec/posstate.h>
 #include <cparsec3/stream/stream_string.h>
 
+#include <cparsec3/parsec/parsestate.h>
+#include <cparsec3/parsec/posstate.h>
+
 #include <string.h>
+
+impl_PosState(String);
+impl_ParseState(String);
 
 /**
  * Tests whether the stream was empty or not.
@@ -159,6 +164,11 @@ static String lineTextOf(PosState(String) pst) {
   return b.data;
 }
 
+static void printState(ParseState(String) s) {
+  PosState(String) pst = advanceTo(s.offset, s.posState);
+  trait(PosState(String)).print(lineTextOf(pst), pst);
+}
+
 /**
  * Returns a set of Stream API functions.
  */
@@ -170,7 +180,7 @@ Stream(String) Trait(Stream(String)) {
       .showTokens = showTokens,
       .take1 = take1,
       .takeN = takeN,
-      .advanceTo = advanceTo,
-      .lineTextOf = lineTextOf,
+
+      .printState = printState,
   };
 }
