@@ -3,9 +3,9 @@
 
 #include <cparsec3/base/base_generics.h>
 
+#include <cparsec3/parsec/parsec.h>
 #include <cparsec3/parsec/stream.h>
 
-#include <cparsec3/parsec/ParsecBase.h>
 #include <cparsec3/parsec/ParsecRunner.h>
 
 #include <cparsec3/parsec/ParsecFailure.h>
@@ -24,7 +24,10 @@
 
 // -----------------------------------------------------------------------
 #define trait_ParsecLibrary(S)                                           \
-  trait_ParsecBase(S);                                                   \
+  trait_Maybe(Array(Token(S)));                                          \
+  trait_Maybe(Array(Tokens(S)));                                         \
+                                                                         \
+  trait_ParseError(S);                                                   \
                                                                          \
   trait_ParsecRunner(S, None);                                           \
   trait_ParsecRunner(S, Token(S));                                       \
@@ -60,7 +63,10 @@
   END_OF_STATEMENTS
 
 #define impl_ParsecLibrary(S)                                            \
-  impl_ParsecBase(S);                                                    \
+  /* impl_Maybe(Array(Token(S))); */                                     \
+  /* impl_Maybe(Array(Tokens(S))); */                                    \
+                                                                         \
+  impl_ParseError(S);                                                    \
                                                                          \
   impl_ParsecRunner(S, None);                                            \
   impl_ParsecRunner(S, Token(S));                                        \
