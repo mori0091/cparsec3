@@ -6,7 +6,7 @@
 #include "parsec.h"
 #include "stream.h"
 
-#include "ParsecRunner.h"
+#include "base/ParsecRunner.h"
 
 #include "parser/ParsecFailure.h"
 #include "parser/ParsecFailure1.h"

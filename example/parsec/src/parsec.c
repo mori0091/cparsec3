@@ -1,7 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 #include <cparsec3/parsec/setup.h>
 
-#include <cparsec3/parsec/runner.h>
+#include <cparsec3/parsec/base/runner.h>
 #include <cparsec3/parsec/types.h>
 
 #include <cparsec3/parsec/parser/char.h>
