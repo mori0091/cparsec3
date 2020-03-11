@@ -1,7 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include "../../base/base.h"
+#include "../base/base.h"
 #include "state.h"
 
 #define Stream(S) TYPE_NAME(Stream, S)

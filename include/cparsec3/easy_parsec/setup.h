@@ -3,24 +3,24 @@
 
 #include "../base/base_generics.h"
 
-#include "base/parsec.h"
-#include "base/stream.h"
+#include "../parsec/parsec.h"
+#include "../parsec/stream.h"
 
-#include "base/ParsecRunner.h"
+#include "../parsec/ParsecRunner.h"
 
-#include "parser/ParsecFailure.h"
-#include "parser/ParsecFailure1.h"
+#include "../parsec/parser/ParsecFailure.h"
+#include "../parsec/parser/ParsecFailure1.h"
 
-#include "parser/ParsecPrim.h"
-#include "parser/ParsecPrim1.h"
+#include "../parsec/parser/ParsecPrim.h"
+#include "../parsec/parser/ParsecPrim1.h"
 
-#include "parser/ParsecDeriv.h"
+#include "../parsec/parser/ParsecDeriv.h"
 
-#include "parser/ParsecChoice.h"
+#include "../parsec/parser/ParsecChoice.h"
 
-#include "parser/ParsecChar.h"
+#include "../parsec/parser/ParsecChar.h"
 
-#include "parser/ParsecRepeat.h"
+#include "../parsec/parser/ParsecRepeat.h"
 
 // -----------------------------------------------------------------------
 #define trait_ParsecLibrary(S)                                           \

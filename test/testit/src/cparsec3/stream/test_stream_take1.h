@@ -1,7 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include <cparsec3/parsec/base/parsec.h>
+#include <cparsec3/parsec/parsec.h>
 
 // #define _DISABLE_TESTIT_OPERATORS
 #define TestSuite Stream(S)

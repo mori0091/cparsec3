@@ -1,13 +1,13 @@
 /* -*- coding: utf-8-unix -*- */
-#include <cparsec3/parsec/setup.h>
-#include <cparsec3/parsec/types.h>
+#include <cparsec3/easy_parsec/setup.h>
+#include <cparsec3/easy_parsec/types.h>
 
-#include <cparsec3/parsec/base/runner.h>
-#include <cparsec3/parsec/parser/char.h>
-#include <cparsec3/parsec/parser/choice.h>
-#include <cparsec3/parsec/parser/combinator.h>
-#include <cparsec3/parsec/parser/repeat.h>
-#include <cparsec3/parsec/parser/token.h>
+#include <cparsec3/easy_parsec/runner.h>
+#include <cparsec3/easy_parsec/parser/char.h>
+#include <cparsec3/easy_parsec/parser/choice.h>
+#include <cparsec3/easy_parsec/parser/combinator.h>
+#include <cparsec3/easy_parsec/parser/repeat.h>
+#include <cparsec3/easy_parsec/parser/token.h>
 
 // -----------------------------------------------------------------------
 #define S CPARSEC_STREAM_TYPE
