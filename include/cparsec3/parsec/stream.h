@@ -2,7 +2,7 @@
 #pragma once
 
 #include "../base/base.h"
-#include "State.h"
+#include "state.h"
 
 #define Stream(S) TYPE_NAME(Stream, S)
 #define Token(S) TYPE_NAME(Token, S)

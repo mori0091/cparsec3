@@ -1,5 +1,5 @@
 /* -*- coding: utf-8-unix -*- */
-#include "../base/base_generics.h"
+#pragma once
 
 #include "ParsecPrim.h"
 
