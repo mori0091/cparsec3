@@ -2,8 +2,6 @@
 #include "../base/base.h"
 
 #include "parseerror.h"
-#include "sourcepos.h"
-#include "stream.h"
 
 // -----------------------------------------------------------------------
 #define ParseReply(...) TYPE_NAME(ParseReply, __VA_ARGS__)
