@@ -1,26 +1,26 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include <cparsec3/base/base_generics.h>
+#include "../base/base_generics.h"
 
-#include <cparsec3/parsec/parsec.h>
-#include <cparsec3/parsec/stream.h>
+#include "parsec.h"
+#include "stream.h"
 
-#include <cparsec3/parsec/ParsecRunner.h>
+#include "ParsecRunner.h"
 
-#include <cparsec3/parsec/ParsecFailure.h>
-#include <cparsec3/parsec/ParsecFailure1.h>
+#include "parser/ParsecFailure.h"
+#include "parser/ParsecFailure1.h"
 
-#include <cparsec3/parsec/ParsecPrim.h>
-#include <cparsec3/parsec/ParsecPrim1.h>
+#include "parser/ParsecPrim.h"
+#include "parser/ParsecPrim1.h"
 
-#include <cparsec3/parsec/ParsecDeriv.h>
+#include "parser/ParsecDeriv.h"
 
-#include <cparsec3/parsec/ParsecChoice.h>
+#include "parser/ParsecChoice.h"
 
-#include <cparsec3/parsec/ParsecChar.h>
+#include "parser/ParsecChar.h"
 
-#include <cparsec3/parsec/ParsecRepeat.h>
+#include "parser/ParsecRepeat.h"
 
 // -----------------------------------------------------------------------
 #define trait_ParsecLibrary(S)                                           \

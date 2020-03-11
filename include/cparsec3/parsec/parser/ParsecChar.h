@@ -1,9 +1,9 @@
 /* -*- coding: utf-8-unix -*- */
-#include "../base/base_generics.h"
+#pragma once
 
 #include "ParsecDeriv.h"
 
-#include "predicate.h"
+#include "../predicate.h"
 
 // -----------------------------------------------------------------------
 #define ParsecChar(...) TYPE_NAME(ParsecChar, __VA_ARGS__)
