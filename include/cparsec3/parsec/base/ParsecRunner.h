@@ -1,7 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 #include "../../base/base_generics.h"
 
-#include "../parsec.h"
+#include "parsec.h"
 
 // -----------------------------------------------------------------------
 #define ParsecRunner(...) TYPE_NAME(ParsecRunner, __VA_ARGS__)

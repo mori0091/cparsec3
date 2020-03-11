@@ -1,5 +1,5 @@
 /* -*- coding: utf-8-unix -*- */
-#include "../base/base.h"
+#include "../../base/base.h"
 
 #include "parseerror.h"
 

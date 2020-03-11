@@ -3,7 +3,7 @@
 
 #include "../base/base_generics.h"
 
-#include "parsec.h"
+#include "base/parsec.h"
 #include "base/stream.h"
 
 #include "base/ParsecRunner.h"

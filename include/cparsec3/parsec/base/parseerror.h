@@ -1,7 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include "../base/base.h"
+#include "../../base/base.h"
 
 // -----------------------------------------------------------------------
 #define ErrorItem(T) TYPE_NAME(ErrorItem, T)

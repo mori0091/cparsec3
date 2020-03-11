@@ -3,7 +3,7 @@
 
 #include "../../base/base_generics.h"
 
-#include "../parsec.h"
+#include "../base/parsec.h"
 
 // -----------------------------------------------------------------------
 #define ParsecPrim1(...) TYPE_NAME(ParsecPrim, __VA_ARGS__)
