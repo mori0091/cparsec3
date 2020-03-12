@@ -5,17 +5,25 @@
 
 // -----------------------------------------------------------------------
 #define ParseReply(...) TYPE_NAME(ParseReply, __VA_ARGS__)
+#define ParseResult(...) TYPE_NAME(ParseResult, __VA_ARGS__)
 #define Parsec(...) TYPE_NAME(Parsec, __VA_ARGS__)
 
 // -----------------------------------------------------------------------
 #define typedef_Parsec(S, T)                                             \
-  typedef_Result(T, ParseError(S));                                      \
+  typedef struct ParseResult(S, T) ParseResult(S, T);                    \
+  struct ParseResult(S, T) {                                             \
+    S state; /* the rest of stream */                                    \
+    bool success;                                                        \
+    union {                                                              \
+      T ok;              /* output value */                              \
+      ParseError(S) err; /* error */                                     \
+    };                                                                   \
+  };                                                                     \
                                                                          \
   typedef struct ParseReply(S, T) ParseReply(S, T);                      \
   struct ParseReply(S, T) {                                              \
-    S state;                                                             \
     bool consumed;                                                       \
-    Result(T, ParseError(S)) result;                                     \
+    ParseResult(S, T) result;                                            \
   };                                                                     \
                                                                          \
   typedef_ContOk(S, T);                                                  \
