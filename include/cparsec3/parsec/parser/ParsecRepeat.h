@@ -58,18 +58,18 @@
       return fn_apply(eok, A.empty, s, (Hints(Token(S))){0});            \
     }                                                                    \
     if (!r.result.success) {                                             \
-      return fn_apply(cerr, r.result.err, r.state);                      \
+      return fn_apply(cerr, r.result.err, r.result.state);               \
     }                                                                    \
     Array(T) a = A.create(1);                                            \
     a.data[0] = r.result.ok;                                             \
     for (;;) {                                                           \
-      s = r.state;                                                       \
+      s = r.result.state;                                                \
       r = R.runParsec(p, s);                                             \
       if (!r.consumed) {                                                 \
-        return fn_apply(cok, a, r.state, (Hints(Token(S))){0});          \
+        return fn_apply(cok, a, r.result.state, (Hints(Token(S))){0});   \
       }                                                                  \
       if (!r.result.success) {                                           \
-        return fn_apply(cerr, r.result.err, r.state);                    \
+        return fn_apply(cerr, r.result.err, r.result.state);             \
       }                                                                  \
       a.data = trait(Mem(T)).recreate(a.data, a.length + 1);             \
       a.data[a.length] = r.result.ok;                                    \

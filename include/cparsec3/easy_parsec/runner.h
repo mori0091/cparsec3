@@ -31,9 +31,9 @@
   __auto_type TMPID = runParsec(_p_, _s_);                               \
   if (!TMPID.result.success) {                                           \
     __auto_type _err_ = (TMPID.consumed ? _cerr_ : _eerr_);              \
-    return fn_apply(_err_, TMPID.result.err, TMPID.state);               \
+    return fn_apply(_err_, TMPID.result.err, TMPID.result.state);        \
   }                                                                      \
-  _s_ = TMPID.state;
+  _s_ = TMPID.result.state;
 
 #define SCAN2(_p_, _x_)                                                  \
   SCAN1(_p_);                                                            \

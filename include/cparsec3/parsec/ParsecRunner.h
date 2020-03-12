@@ -14,7 +14,7 @@
   typedef struct ParsecRunner(S, T) ParsecRunner(S, T);                  \
   struct ParsecRunner(S, T) {                                            \
     ParseReply(S, T) (*runParsec)(Parsec(S, T) p, S state);              \
-    Result(T, ParseError(S)) (*runParser)(Parsec(S, T) p, S input);      \
+    ParseResult(S, T) (*runParser)(Parsec(S, T) p, S input);             \
     bool (*parseTest)(Parsec(S, T) p, S input);                          \
   };                                                                     \
   ParsecRunner(S, T) Trait(ParsecRunner(S, T));                          \
@@ -47,9 +47,10 @@
   fn(FUNC_NAME(replyOk, S, T), bool, ContOkArgs(S, T)) {                 \
     g_bind((consumed, a, state), *args);                                 \
     return (ParseReply(S, T)){                                           \
-        .state = state,                                                  \
         .consumed = consumed,                                            \
-        .result = {.success = true, .ok = a},                            \
+        .result.state = state,                                           \
+        .result.success = true,                                          \
+        .result.ok = a,                                                  \
     };                                                                   \
   }                                                                      \
                                                                          \
@@ -57,9 +58,10 @@
   fn(FUNC_NAME(replyErr, S, T), bool, ContErrArgs(S, T)) {               \
     g_bind((consumed, err, state), *args);                               \
     return (ParseReply(S, T)){                                           \
-        .state = state,                                                  \
         .consumed = consumed,                                            \
-        .result = {.err = err},                                          \
+        .result.state = state,                                           \
+        .result.success = false,                                         \
+        .result.err = err,                                               \
     };                                                                   \
   }                                                                      \
                                                                          \
@@ -83,7 +85,7 @@
 // -----------------------------------------------------------------------
 #define impl_runParser(S, T)                                             \
   /* ---- runParser(p, name, input) */                                   \
-  static Result(T, ParseError(S))                                        \
+  static ParseResult(S, T)                                               \
       FUNC_NAME(runParser, S, T)(Parsec(S, T) p, S input) {              \
     return FUNC_NAME(runParsec, S, T)(p, input).result;                  \
   }                                                                      \
@@ -93,14 +95,14 @@
 #define impl_parseTest(S, T)                                             \
   /* ---- parseTest(p, input) */                                         \
   static bool FUNC_NAME(parseTest, S, T)(Parsec(S, T) p, S input) {      \
-    ParseReply(S, T) r = FUNC_NAME(runParsec, S, T)(p, input);           \
-    if (!r.result.success) {                                             \
-      trait(Stream(S)).printState(r.state);                              \
-      FUNC_NAME(print, ParseError(S))(r.result.err);                     \
+    ParseResult(S, T) result = FUNC_NAME(runParser, S, T)(p, input);     \
+    if (!result.success) {                                               \
+      trait(Stream(S)).printState(result.state);                         \
+      FUNC_NAME(print, ParseError(S))(result.err);                       \
       printf("\n");                                                      \
       return false;                                                      \
     }                                                                    \
-    printf("%s\n", trait(Show(T)).show(r.result.ok));                    \
+    printf("%s\n", trait(Show(T)).show(result.ok));                      \
     return true;                                                         \
   }                                                                      \
   END_OF_STATEMENTS
