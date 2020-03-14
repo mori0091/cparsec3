@@ -1,7 +1,6 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include "ParsecDeriv.h"
 #include "ParsecFailure.h"
 
 // -----------------------------------------------------------------------

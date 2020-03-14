@@ -1,9 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include "../../base/base_generics.h"
-
-#include "../parsec.h"
+#include "ParsecToken1.h"
 
 // -----------------------------------------------------------------------
 #define ParsecPrim1(...) TYPE_NAME(ParsecPrim, __VA_ARGS__)
@@ -14,8 +12,6 @@
                                                                          \
   /* tokensMatcher (for `tokens` parser) */                              \
   typedef_Fn_r(Tokens(S), Tokens(S), bool);                              \
-  /* tokenPredicate (for `takeWhileP`, `takeWhile1P` parsers) */         \
-  typedef_Fn_r(Token(S), bool);                                          \
                                                                          \
   typedef struct ParsecPrim1(S) ParsecPrim1(S);                          \
   struct ParsecPrim1(S) {                                                \

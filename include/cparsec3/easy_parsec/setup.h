@@ -11,11 +11,10 @@
 #include "../parsec/parser/ParsecFailure.h"
 
 #include "../parsec/parser/ParsecToken.h"
+#include "../parsec/parser/ParsecToken1.h"
 
 #include "../parsec/parser/ParsecCombinator.h"
 #include "../parsec/parser/ParsecPrim1.h"
-
-#include "../parsec/parser/ParsecDeriv.h"
 
 #include "../parsec/parser/ParsecChoice.h"
 
@@ -36,6 +35,7 @@
   trait_ParsecRunner(S, Array(Token(S)));                                \
   trait_ParsecRunner(S, Array(Tokens(S)));                               \
                                                                          \
+  trait_ParsecToken1(S);                                                 \
   trait_ParsecToken(S, None);                                            \
   trait_ParsecToken(S, Token(S));                                        \
   trait_ParsecToken(S, Tokens(S));                                       \
@@ -55,8 +55,6 @@
   trait_ParsecFailure(S, Tokens(S));                                     \
   trait_ParsecFailure(S, Array(Token(S)));                               \
   trait_ParsecFailure(S, Array(Tokens(S)));                              \
-                                                                         \
-  trait_ParsecDeriv(S);                                                  \
                                                                          \
   trait_ParsecChoice(S, None);                                           \
   trait_ParsecChoice(S, Token(S));                                       \
@@ -83,6 +81,7 @@
   impl_ParsecRunner(S, Array(Token(S)));                                 \
   impl_ParsecRunner(S, Array(Tokens(S)));                                \
                                                                          \
+  impl_ParsecToken1(S);                                                  \
   impl_ParsecToken(S, None);                                             \
   impl_ParsecToken(S, Token(S));                                         \
   impl_ParsecToken(S, Tokens(S));                                        \
@@ -102,8 +101,6 @@
   impl_ParsecFailure(S, Tokens(S));                                      \
   impl_ParsecFailure(S, Array(Token(S)));                                \
   impl_ParsecFailure(S, Array(Tokens(S)));                               \
-                                                                         \
-  impl_ParsecDeriv(S);                                                   \
                                                                          \
   impl_ParsecChoice(S, None);                                            \
   impl_ParsecChoice(S, Token(S));                                        \

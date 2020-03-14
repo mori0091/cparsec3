@@ -2,17 +2,18 @@
 #pragma once
 
 #include "ParsecToken.h"
-#include "ParsecPrim1.h"
 
 // -----------------------------------------------------------------------
-#define ParsecDeriv(S) TYPE_NAME(ParsecDeriv, S)
+#define ParsecToken1(S) TYPE_NAME(ParsecToken1, S)
 
 // -----------------------------------------------------------------------
-#define trait_ParsecDeriv(S)                                             \
+#define trait_ParsecToken1(S)                                            \
   C_API_BEGIN                                                            \
                                                                          \
-  typedef struct ParsecDeriv(S) ParsecDeriv(S);                          \
-  struct ParsecDeriv(S) {                                                \
+  typedef_Fn_r(Token(S), bool);                                          \
+                                                                         \
+  typedef struct ParsecToken1(S) ParsecToken1(S);                        \
+  struct ParsecToken1(S) {                                               \
     Parsec(S, Token(S)) (*single)(Token(S) t);                           \
     Parsec(S, Token(S)) (*satisfy)(Fn(Token(S), bool) pred);             \
     Parsec(S, Token(S)) (*anySingle)(void);                              \
@@ -23,13 +24,13 @@
     Parsec(S, Tokens(S)) (*takeRest)(void);                              \
   };                                                                     \
                                                                          \
-  ParsecDeriv(S) Trait(ParsecDeriv(S));                                  \
+  ParsecToken1(S) Trait(ParsecToken1(S));                                \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-#define impl_ParsecDeriv(S)                                              \
+#define impl_ParsecToken1(S)                                             \
   C_API_BEGIN                                                            \
                                                                          \
   impl_single(S);                                                        \
@@ -39,8 +40,8 @@
                                                                          \
   impl_chunk(S);                                                         \
                                                                          \
-  ParsecDeriv(S) Trait(ParsecDeriv(S)) {                                 \
-    return (ParsecDeriv(S)){                                             \
+  ParsecToken1(S) Trait(ParsecToken1(S)) {                               \
+    return (ParsecToken1(S)){                                            \
         .single = FUNC_NAME(single, S),                                  \
         .satisfy = FUNC_NAME(satisfy, S),                                \
         .anySingle = FUNC_NAME(anySingle, S),                            \
