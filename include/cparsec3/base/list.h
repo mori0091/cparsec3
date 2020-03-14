@@ -42,10 +42,6 @@
     List(T) (*from_array)(size_t n, T * a);                              \
   };                                                                     \
   ListT(T) Trait(List(T));                                               \
-  /* ---- instance Eq(List(T)) */                                        \
-  trait_Eq(List(T));                                                     \
-  /* ---- instance Ord(List(T)) */                                       \
-  trait_Ord(List(T));                                                    \
   /* ---- instance Itr(List(T)) */                                       \
   typedef T Item(List(T));                                               \
   typedef struct Itr(List(T)) Itr(List(T));                              \
@@ -163,44 +159,6 @@
         .from_array = FUNC_NAME(from_array, List(T)),                    \
     };                                                                   \
   }                                                                      \
-  /* ---- instance Eq(List(T)) */                                        \
-  static bool FUNC_NAME(eq, Eq(List(T)))(List(T) a, List(T) b) {         \
-    for (;;) {                                                           \
-      if (a == b) {                                                      \
-        return true;                                                     \
-      }                                                                  \
-      if (!a || !b) {                                                    \
-        return false;                                                    \
-      }                                                                  \
-      if (trait(Eq(T)).neq(a->head, b->head)) {                          \
-        return false;                                                    \
-      }                                                                  \
-      a = a->tail;                                                       \
-      b = b->tail;                                                       \
-    }                                                                    \
-  }                                                                      \
-  instance_Eq(List(T), FUNC_NAME(eq, Eq(List(T))));                      \
-  /* ---- instance Ord(List(T)) */                                       \
-  static int FUNC_NAME(cmp, Ord(List(T)))(List(T) a, List(T) b) {        \
-    for (;;) {                                                           \
-      if (a == b) {                                                      \
-        return 0;                                                        \
-      }                                                                  \
-      if (!a) {                                                          \
-        return -1;                                                       \
-      }                                                                  \
-      if (!b) {                                                          \
-        return 1;                                                        \
-      }                                                                  \
-      int o = trait(Ord(T)).cmp(a->head, b->head);                       \
-      if (o) {                                                           \
-        return o;                                                        \
-      }                                                                  \
-      a = a->tail;                                                       \
-      b = b->tail;                                                       \
-    }                                                                    \
-  }                                                                      \
-  instance_Ord(List(T), FUNC_NAME(cmp, Ord(List(T))));                   \
   /* ---- instance Itr(List(T))*/                                        \
   static T* FUNC_NAME(ptr, Itr(List(T)))(Itr(List(T)) it) {              \
     return (it.xs ? &(it.xs->head) : 0);                                 \

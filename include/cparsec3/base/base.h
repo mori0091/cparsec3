@@ -35,10 +35,17 @@ FOREACH(trait_Array, TYPESET(ALL));
 FOREACH(trait_List, TYPESET(ALL));
 FOREACH(trait_Maybe, TYPESET(ALL));
 
-trait_Show(Array(char));
-trait_Show(Array(String));
-trait_Show(List(char));
-trait_Show(List(String));
+FOREACH(trait_Eq, APPLY(Array, TYPESET(ALL)));
+FOREACH(trait_Eq, APPLY(List, TYPESET(ALL)));
+FOREACH(trait_Eq, APPLY(Maybe, TYPESET(ALL)));
+
+FOREACH(trait_Ord, APPLY(Array, TYPESET(ALL)));
+FOREACH(trait_Ord, APPLY(List, TYPESET(ALL)));
+FOREACH(trait_Ord, APPLY(Maybe, TYPESET(ALL)));
+
+FOREACH(trait_Show, APPLY(Array, TYPESET(ALL)));
+FOREACH(trait_Show, APPLY(List, TYPESET(ALL)));
+FOREACH(trait_Show, APPLY(Maybe, TYPESET(ALL)));
 
 #if !defined(CPARSEC_ENABLE_NESTED_CONTAINER)
 #define TYPESET_COMPONENT TYPESET(ALL)
@@ -52,4 +59,17 @@ FOREACH(trait_Mem, TYPESET_CONTAINER);
 FOREACH(trait_Array, TYPESET_CONTAINER);
 FOREACH(trait_List, TYPESET_CONTAINER);
 FOREACH(trait_Maybe, TYPESET_CONTAINER);
+
+FOREACH(trait_Eq, APPLY(Array, TYPESET_CONTAINER));
+FOREACH(trait_Eq, APPLY(List, TYPESET_CONTAINER));
+FOREACH(trait_Eq, APPLY(Maybe, TYPESET_CONTAINER));
+
+FOREACH(trait_Ord, APPLY(Array, TYPESET_CONTAINER));
+FOREACH(trait_Ord, APPLY(List, TYPESET_CONTAINER));
+FOREACH(trait_Ord, APPLY(Maybe, TYPESET_CONTAINER));
+
+FOREACH(trait_Show, APPLY(Array, TYPESET_CONTAINER));
+FOREACH(trait_Show, APPLY(List, TYPESET_CONTAINER));
+FOREACH(trait_Show, APPLY(Maybe, TYPESET_CONTAINER));
+
 #endif

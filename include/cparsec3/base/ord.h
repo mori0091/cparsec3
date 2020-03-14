@@ -107,3 +107,62 @@
     };                                                                   \
   }                                                                      \
   END_OF_STATEMENTS
+
+// -----------------------------------------------------------------------
+#define impl_Ord_Maybe(T)                                                \
+  static int FUNC_NAME(cmp, Ord(Maybe(T)))(Maybe(T) a, Maybe(T) b) {     \
+    if (a.none && b.none) {                                              \
+      return 0;                                                          \
+    }                                                                    \
+    if (a.none) {                                                        \
+      return -1;                                                         \
+    }                                                                    \
+    if (b.none) {                                                        \
+      return 1;                                                          \
+    }                                                                    \
+    return trait(Ord(T)).cmp(a.value, b.value);                          \
+  }                                                                      \
+  instance_Ord(Maybe(T), FUNC_NAME(cmp, Ord(Maybe(T))));                 \
+  END_OF_STATEMENTS
+
+// -----------------------------------------------------------------------
+#define impl_Ord_Array(T)                                                \
+  static int FUNC_NAME(cmp, Ord(Array(T)))(Array(T) a, Array(T) b) {     \
+    if (a.data == b.data) {                                              \
+      return trait(Ord(size_t)).cmp(a.length, b.length);                 \
+    }                                                                    \
+    size_t n = (a.length <= b.length ? a.length : b.length);             \
+    for (size_t i = 0; i < n; ++i) {                                     \
+      int o = trait(Ord(T)).cmp(a.data[i], b.data[i]);                   \
+      if (o) {                                                           \
+        return o;                                                        \
+      }                                                                  \
+    }                                                                    \
+    return (a.length < b.length ? -1 : 1);                               \
+  }                                                                      \
+  instance_Ord(Array(T), FUNC_NAME(cmp, Ord(Array(T))));                 \
+  END_OF_STATEMENTS
+
+// -----------------------------------------------------------------------
+#define impl_Ord_List(T)                                                 \
+  static int FUNC_NAME(cmp, Ord(List(T)))(List(T) a, List(T) b) {        \
+    for (;;) {                                                           \
+      if (a == b) {                                                      \
+        return 0;                                                        \
+      }                                                                  \
+      if (!a) {                                                          \
+        return -1;                                                       \
+      }                                                                  \
+      if (!b) {                                                          \
+        return 1;                                                        \
+      }                                                                  \
+      int o = trait(Ord(T)).cmp(a->head, b->head);                       \
+      if (o) {                                                           \
+        return o;                                                        \
+      }                                                                  \
+      a = a->tail;                                                       \
+      b = b->tail;                                                       \
+    }                                                                    \
+  }                                                                      \
+  instance_Ord(List(T), FUNC_NAME(cmp, Ord(List(T))));                   \
+  END_OF_STATEMENTS

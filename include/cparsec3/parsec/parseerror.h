@@ -23,52 +23,11 @@
     };                                                                   \
   };                                                                     \
                                                                          \
-  trait_Eq(ErrorItem(T));                                                \
-  trait_Ord(ErrorItem(T));                                               \
-                                                                         \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
 #define impl_ErrorItem(T)                                                \
   C_API_BEGIN                                                            \
-                                                                         \
-  static bool FUNC_NAME(eq, Eq(ErrorItem(T)))(ErrorItem(T) a,            \
-                                              ErrorItem(T) b) {          \
-    if (a.type != b.type) {                                              \
-      return false;                                                      \
-    }                                                                    \
-    switch (a.type) {                                                    \
-    case LABEL:                                                          \
-      return trait(Eq(String)).eq(a.label, b.label);                     \
-    case TOKENS:                                                         \
-      return trait(Eq(List(T))).eq(a.tokens, b.tokens);                  \
-    case END_OF_INPUT:                                                   \
-      return true;                                                       \
-    default:                                                             \
-      return false;                                                      \
-    }                                                                    \
-  }                                                                      \
-                                                                         \
-  instance_Eq(ErrorItem(T), FUNC_NAME(eq, Eq(ErrorItem(T))));            \
-                                                                         \
-  static int FUNC_NAME(cmp, Ord(ErrorItem(T)))(ErrorItem(T) a,           \
-                                               ErrorItem(T) b) {         \
-    int x = trait(Ord(int)).cmp(a.type, b.type);                         \
-    if (x) {                                                             \
-      return x;                                                          \
-    }                                                                    \
-    switch (a.type) {                                                    \
-    case LABEL:                                                          \
-      return trait(Ord(String)).cmp(a.label, b.label);                   \
-    case TOKENS:                                                         \
-      return trait(Ord(List(T))).cmp(a.tokens, b.tokens);                \
-    case END_OF_INPUT:                                                   \
-    default:                                                             \
-      return 0;                                                          \
-    }                                                                    \
-  }                                                                      \
-                                                                         \
-  instance_Ord(ErrorItem(T), FUNC_NAME(cmp, Ord(ErrorItem(T))));         \
                                                                          \
   static inline bool FUNC_NAME(isUnknown,                                \
                                ErrorItem(T))(ErrorItem(T) e) {           \
@@ -105,9 +64,6 @@
     Maybe(ErrorItem(Token(S))) unexpected;                               \
     List(ErrorItem(Token(S))) expecting;                                 \
   };                                                                     \
-                                                                         \
-  trait_Eq(ParseError(S));                                               \
-  trait_Ord(ParseError(S));                                              \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS

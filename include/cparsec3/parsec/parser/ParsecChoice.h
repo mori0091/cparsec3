@@ -10,8 +10,6 @@
 #define trait_ParsecChoice(S, T)                                         \
   C_API_BEGIN                                                            \
                                                                          \
-  trait_Eq(Parsec(S, T));                                                \
-  trait_Ord(Parsec(S, T));                                               \
   trait_Mem(Parsec(S, T));                                               \
   trait_Array(Parsec(S, T));                                             \
                                                                          \
@@ -31,20 +29,6 @@
 #define impl_ParsecChoice(S, T)                                          \
   C_API_BEGIN                                                            \
                                                                          \
-  static bool FUNC_NAME(eq, Eq(Parsec(S, T)))(Parsec(S, T) p1,           \
-                                              Parsec(S, T) p2) {         \
-    UNUSED(p1);                                                          \
-    UNUSED(p2);                                                          \
-    return true;                                                         \
-  }                                                                      \
-  static int FUNC_NAME(cmp, Ord(Parsec(S, T)))(Parsec(S, T) p1,          \
-                                               Parsec(S, T) p2) {        \
-    UNUSED(p1);                                                          \
-    UNUSED(p2);                                                          \
-    return 0;                                                            \
-  }                                                                      \
-  instance_Eq(Parsec(S, T), FUNC_NAME(eq, Eq(Parsec(S, T))));            \
-  instance_Ord(Parsec(S, T), FUNC_NAME(cmp, Ord(Parsec(S, T))));         \
   impl_Mem(Parsec(S, T));                                                \
   impl_Array(Parsec(S, T));                                              \
                                                                          \

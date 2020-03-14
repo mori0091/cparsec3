@@ -62,3 +62,13 @@ static int CMP(String)(String a, String b) {
   return (x <= 0 ? (x == 0 ? 0 : -1) : 1);
 }
 instance_Ord(String, CMP(String));
+
+FOREACH(impl_Ord_Array, TYPESET(ALL));
+FOREACH(impl_Ord_List, TYPESET(ALL));
+FOREACH(impl_Ord_Maybe, TYPESET(ALL));
+
+#if defined(TYPESET_CONTAINER)
+FOREACH(impl_Ord_Array, TYPESET_CONTAINER);
+FOREACH(impl_Ord_List, TYPESET_CONTAINER);
+FOREACH(impl_Ord_Maybe, TYPESET_CONTAINER);
+#endif
