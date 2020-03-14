@@ -9,7 +9,6 @@
 #include "../parsec/ParsecRunner.h"
 
 #include "../parsec/parser/ParsecFailure.h"
-#include "../parsec/parser/ParsecFailure1.h"
 
 #include "../parsec/parser/ParsecPrim.h"
 #include "../parsec/parser/ParsecPrim1.h"
@@ -43,7 +42,6 @@
   trait_ParsecPrim(S, Array(Token(S)));                                  \
   trait_ParsecPrim(S, Array(Tokens(S)));                                 \
                                                                          \
-  trait_ParsecFailure1(S);                                               \
   trait_ParsecFailure(S, Token(S));                                      \
   trait_ParsecFailure(S, Tokens(S));                                     \
                                                                          \
@@ -82,7 +80,6 @@
   impl_ParsecPrim(S, Array(Token(S)));                                   \
   impl_ParsecPrim(S, Array(Tokens(S)));                                  \
                                                                          \
-  impl_ParsecFailure1(S);                                                \
   impl_ParsecFailure(S, Token(S));                                       \
   impl_ParsecFailure(S, Tokens(S));                                      \
                                                                          \
