@@ -2,6 +2,7 @@
 #pragma once
 
 #include "ParsecDeriv.h"
+#include "ParsecFailure.h"
 
 // -----------------------------------------------------------------------
 #define ParsecChoice(...) TYPE_NAME(ParsecChoice, __VA_ARGS__)
@@ -66,7 +67,7 @@
 // -----------------------------------------------------------------------
 #define impl_empty(S, T)                                                 \
   static Parsec(S, T) FUNC_NAME(empty, S, T)(void) {                     \
-    return trait(ParsecPrim(S, T)).parseError((ParseError(S)){0});       \
+    return trait(ParsecFailure(S, T)).parseError((ParseError(S)){0});    \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS

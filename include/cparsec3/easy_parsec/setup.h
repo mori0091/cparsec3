@@ -42,8 +42,11 @@
   trait_ParsecPrim(S, Array(Token(S)));                                  \
   trait_ParsecPrim(S, Array(Tokens(S)));                                 \
                                                                          \
+  trait_ParsecFailure(S, None);                                          \
   trait_ParsecFailure(S, Token(S));                                      \
   trait_ParsecFailure(S, Tokens(S));                                     \
+  trait_ParsecFailure(S, Array(Token(S)));                               \
+  trait_ParsecFailure(S, Array(Tokens(S)));                              \
                                                                          \
   trait_ParsecDeriv(S);                                                  \
                                                                          \
@@ -80,8 +83,11 @@
   impl_ParsecPrim(S, Array(Token(S)));                                   \
   impl_ParsecPrim(S, Array(Tokens(S)));                                  \
                                                                          \
+  impl_ParsecFailure(S, None);                                           \
   impl_ParsecFailure(S, Token(S));                                       \
   impl_ParsecFailure(S, Tokens(S));                                      \
+  impl_ParsecFailure(S, Array(Token(S)));                                \
+  impl_ParsecFailure(S, Array(Tokens(S)));                               \
                                                                          \
   impl_ParsecDeriv(S);                                                   \
                                                                          \

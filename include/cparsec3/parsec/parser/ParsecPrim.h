@@ -16,7 +16,6 @@
                                                                          \
   typedef struct ParsecPrim(S, T) ParsecPrim(S, T);                      \
   struct ParsecPrim(S, T) {                                              \
-    Parsec(S, T) (*parseError)(ParseError(S) e);                         \
     Parsec(S, T) (*label)(String l, Parsec(S, T) p);                     \
     Parsec(S, T) (*hidden)(Parsec(S, T) p);                              \
     Parsec(S, T) (*tryp)(Parsec(S, T) p);                                \
@@ -39,14 +38,12 @@
   typedef_Fn(Parsec(S, T), UnParser(S, T));                              \
   typedef_Fn(String, Parsec(S, T), UnParser(S, T));                      \
                                                                          \
-  impl_parseError(S, T);                                                 \
   impl_label(S, T);                                                      \
   impl_tryp(S, T);                                                       \
   impl_token(S, T);                                                      \
                                                                          \
   ParsecPrim(S, T) Trait(ParsecPrim(S, T)) {                             \
     return (ParsecPrim(S, T)){                                           \
-        .parseError = FUNC_NAME(parseError, S, T),                       \
         .label = FUNC_NAME(label, S, T),                                 \
         .hidden = 0,                                                     \
         .tryp = FUNC_NAME(tryp, S, T),                                   \
@@ -58,23 +55,6 @@
   }                                                                      \
                                                                          \
   C_API_END                                                              \
-  END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-/* parseError(e) */
-#define impl_parseError(S, T)                                            \
-  typedef_Fn_r(ParseError(S), UnParser(S, T));                           \
-  fn(FUNC_NAME(parseErrorImpl, S, T), ParseError(S),                     \
-     UnParserArgs(S, T)) {                                               \
-    g_bind((e, s, , , , eerr), *args);                                   \
-    return fn_apply(eerr, e, s);                                         \
-  }                                                                      \
-                                                                         \
-  static Parsec(S, T) FUNC_NAME(parseError, S, T)(ParseError(S) e) {     \
-    __auto_type f = FUNC_NAME(parseErrorImpl, S, T)();                   \
-    return (Parsec(S, T)){.unParser = fn_apply(f, e)};                   \
-  }                                                                      \
-                                                                         \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------

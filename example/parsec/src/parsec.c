@@ -81,8 +81,8 @@ int main(void) {
   printf("\n");
 
   {
-    __auto_type P = trait(ParsecPrim(S, Token(S)));
-    __auto_type p = P.parseError((ParseError(S)){0});
+    __auto_type F = trait(ParsecFailure(S, Token(S)));
+    __auto_type p = F.parseError((ParseError(S)){0});
     parseTest(p, "");
     parseTest(p, "foo");
     parseTest(p, "bar");
