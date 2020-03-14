@@ -37,10 +37,6 @@
     Array(T) (*from_array)(size_t n, T * a);                             \
   };                                                                     \
   ArrayT(T) Trait(Array(T));                                             \
-  /* ---- instance Eq(Array(T)) */                                       \
-  trait_Eq(Array(T));                                                    \
-  /* ---- instance Ord(Array(T)) */                                      \
-  trait_Ord(Array(T));                                                   \
   /* ---- instance Itr(Array(T)) */                                      \
   typedef T Item(Array(T));                                              \
   typedef struct Itr(Array(T)) Itr(Array(T));                            \
@@ -127,37 +123,6 @@
         .from_array = FUNC_NAME(from_array, Array(T)),                   \
     };                                                                   \
   }                                                                      \
-  /* ---- instance Eq(Array(T)) */                                       \
-  static bool FUNC_NAME(eq, Eq(Array(T)))(Array(T) a, Array(T) b) {      \
-    if (a.length != b.length) {                                          \
-      return false;                                                      \
-    }                                                                    \
-    if (a.data == b.data) {                                              \
-      return true;                                                       \
-    }                                                                    \
-    for (size_t i = 0; i < a.length; ++i) {                              \
-      if (trait(Eq(T)).neq(a.data[i], b.data[i])) {                      \
-        return false;                                                    \
-      }                                                                  \
-    }                                                                    \
-    return true;                                                         \
-  }                                                                      \
-  instance_Eq(Array(T), FUNC_NAME(eq, Eq(Array(T))));                    \
-  /* ---- instance Ord(Array(T)) */                                      \
-  static int FUNC_NAME(cmp, Ord(Array(T)))(Array(T) a, Array(T) b) {     \
-    if (a.data == b.data) {                                              \
-      return trait(Ord(uint64_t)).cmp(a.length, b.length);               \
-    }                                                                    \
-    size_t n = (a.length <= b.length ? a.length : b.length);             \
-    for (size_t i = 0; i < n; ++i) {                                     \
-      int o = trait(Ord(T)).cmp(a.data[i], b.data[i]);                   \
-      if (o) {                                                           \
-        return o;                                                        \
-      }                                                                  \
-    }                                                                    \
-    return (a.length < b.length ? -1 : 1);                               \
-  }                                                                      \
-  instance_Ord(Array(T), FUNC_NAME(cmp, Ord(Array(T))));                 \
   /* ---- instance Itr(Array(T))*/                                       \
   static T* FUNC_NAME(ptr, Itr(Array(T)))(Itr(Array(T)) it) {            \
     return it.a.data;                                                    \

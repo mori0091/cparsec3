@@ -34,3 +34,13 @@ static bool EQ(String)(String a, String b) {
   return !strcmp(a, b);
 }
 instance_Eq(String, EQ(String));
+
+FOREACH(impl_Eq_Array, TYPESET(ALL));
+FOREACH(impl_Eq_List, TYPESET(ALL));
+FOREACH(impl_Eq_Maybe, TYPESET(ALL));
+
+#if defined(TYPESET_CONTAINER)
+FOREACH(impl_Eq_Array, TYPESET_CONTAINER);
+FOREACH(impl_Eq_List, TYPESET_CONTAINER);
+FOREACH(impl_Eq_Maybe, TYPESET_CONTAINER);
+#endif

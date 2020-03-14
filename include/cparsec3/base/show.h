@@ -91,3 +91,23 @@ C_API_END
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS
+
+#define impl_Show_Array(T) impl_ShowSeq(Array, T)
+#define impl_Show_List(T) impl_ShowSeq(List, T)
+
+#define impl_Show_Maybe(T)                                               \
+  C_API_BEGIN                                                            \
+  static inline void FUNC_NAME(toString, Show(Maybe(T)))(CharBuff * b,   \
+                                                         Maybe(T) m) {   \
+    if (m.none) {                                                        \
+      mem_printf(b, "Nothing");                                          \
+    } else {                                                             \
+      mem_printf(b, "Just ");                                            \
+      trait(Show(T)).toString(b, m.value);                               \
+    }                                                                    \
+  }                                                                      \
+                                                                         \
+  instance_Show(Maybe(T), FUNC_NAME(toString, Show(Maybe(T))));          \
+                                                                         \
+  C_API_END                                                              \
+  END_OF_STATEMENTS

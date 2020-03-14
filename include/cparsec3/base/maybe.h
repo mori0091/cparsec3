@@ -28,10 +28,6 @@
     Maybe(T) (*just)(T value);                                           \
   };                                                                     \
   MaybeT(T) Trait(Maybe(T));                                             \
-  /* ---- instance Eq(Maybe(T)) */                                       \
-  trait_Eq(Maybe(T));                                                    \
-  /* ---- instance Ord(Maybe(T)) */                                      \
-  trait_Ord(Maybe(T));                                                   \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -57,29 +53,6 @@
         .just = FUNC_NAME(just, Maybe(T)),                               \
     };                                                                   \
   }                                                                      \
-  /* ---- instance Eq(Maybe(T)) */                                       \
-  static bool FUNC_NAME(eq, Eq(Maybe(T)))(Maybe(T) a, Maybe(T) b) {      \
-    if (a.none && b.none) {                                              \
-      return true;                                                       \
-    }                                                                    \
-    if (a.none != b.none) {                                              \
-      return false;                                                      \
-    }                                                                    \
-    return trait(Eq(T)).eq(a.value, b.value);                            \
-  }                                                                      \
-  instance_Eq(Maybe(T), FUNC_NAME(eq, Eq(Maybe(T))));                    \
-  /* ---- instance Ord(Maybe(T)) */                                      \
-  static bool FUNC_NAME(le, Ord(Maybe(T)))(Maybe(T) a, Maybe(T) b) {     \
-    if (a.none) {                                                        \
-      return true;                                                       \
-    }                                                                    \
-    if (b.none) {                                                        \
-      return false;                                                      \
-    }                                                                    \
-    return trait(Ord(T)).le(a.value, b.value);                           \
-  }                                                                      \
-  instance_Ord(Maybe(T), FUNC_NAME(le, Ord(Maybe(T))),                   \
-               FUNC_NAME(eq, Eq(Maybe(T))));                             \
   /* ---- */                                                             \
   C_API_END                                                              \
   END_OF_STATEMENTS
