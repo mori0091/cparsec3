@@ -1,7 +1,9 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include "ParsecPrim.h"
+#include "../../base/base_generics.h"
+
+#include "../parsec.h"
 
 // -----------------------------------------------------------------------
 #define ParsecFailure(...) TYPE_NAME(ParsecFailure, __VA_ARGS__)

@@ -12,7 +12,7 @@
 
 #include "../parsec/parser/ParsecToken.h"
 
-#include "../parsec/parser/ParsecPrim.h"
+#include "../parsec/parser/ParsecCombinator.h"
 #include "../parsec/parser/ParsecPrim1.h"
 
 #include "../parsec/parser/ParsecDeriv.h"
@@ -44,11 +44,11 @@
                                                                          \
   trait_ParsecPrim1(S);                                                  \
                                                                          \
-  trait_ParsecPrim(S, None);                                             \
-  trait_ParsecPrim(S, Token(S));                                         \
-  trait_ParsecPrim(S, Tokens(S));                                        \
-  trait_ParsecPrim(S, Array(Token(S)));                                  \
-  trait_ParsecPrim(S, Array(Tokens(S)));                                 \
+  trait_ParsecCombinator(S, None);                                       \
+  trait_ParsecCombinator(S, Token(S));                                   \
+  trait_ParsecCombinator(S, Tokens(S));                                  \
+  trait_ParsecCombinator(S, Array(Token(S)));                            \
+  trait_ParsecCombinator(S, Array(Tokens(S)));                           \
                                                                          \
   trait_ParsecFailure(S, None);                                          \
   trait_ParsecFailure(S, Token(S));                                      \
@@ -91,11 +91,11 @@
                                                                          \
   impl_ParsecPrim1(S);                                                   \
                                                                          \
-  impl_ParsecPrim(S, None);                                              \
-  impl_ParsecPrim(S, Token(S));                                          \
-  impl_ParsecPrim(S, Tokens(S));                                         \
-  impl_ParsecPrim(S, Array(Token(S)));                                   \
-  impl_ParsecPrim(S, Array(Tokens(S)));                                  \
+  impl_ParsecCombinator(S, None);                                        \
+  impl_ParsecCombinator(S, Token(S));                                    \
+  impl_ParsecCombinator(S, Tokens(S));                                   \
+  impl_ParsecCombinator(S, Array(Token(S)));                             \
+  impl_ParsecCombinator(S, Array(Tokens(S)));                            \
                                                                          \
   impl_ParsecFailure(S, None);                                           \
   impl_ParsecFailure(S, Token(S));                                       \

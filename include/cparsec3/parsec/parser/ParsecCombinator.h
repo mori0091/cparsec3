@@ -6,14 +6,14 @@
 #include "../parsec.h"
 
 // -----------------------------------------------------------------------
-#define ParsecPrim(...) TYPE_NAME(ParsecPrim, __VA_ARGS__)
+#define ParsecCombinator(...) TYPE_NAME(ParsecCombinator, __VA_ARGS__)
 
 // -----------------------------------------------------------------------
-#define trait_ParsecPrim(S, T)                                           \
+#define trait_ParsecCombinator(S, T)                                     \
   C_API_BEGIN                                                            \
                                                                          \
-  typedef struct ParsecPrim(S, T) ParsecPrim(S, T);                      \
-  struct ParsecPrim(S, T) {                                              \
+  typedef struct ParsecCombinator(S, T) ParsecCombinator(S, T);          \
+  struct ParsecCombinator(S, T) {                                        \
     Parsec(S, T) (*label)(String l, Parsec(S, T) p);                     \
     Parsec(S, T) (*hidden)(Parsec(S, T) p);                              \
     Parsec(S, T) (*tryp)(Parsec(S, T) p);                                \
@@ -21,13 +21,13 @@
     Parsec(S, None) (*notFollowedBy)(Parsec(S, T) p);                    \
   };                                                                     \
                                                                          \
-  ParsecPrim(S, T) Trait(ParsecPrim(S, T));                              \
+  ParsecCombinator(S, T) Trait(ParsecCombinator(S, T));                  \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-#define impl_ParsecPrim(S, T)                                            \
+#define impl_ParsecCombinator(S, T)                                      \
   C_API_BEGIN                                                            \
                                                                          \
   typedef_Fn(Parsec(S, T), UnParser(S, T));                              \
@@ -36,8 +36,8 @@
   impl_label(S, T);                                                      \
   impl_tryp(S, T);                                                       \
                                                                          \
-  ParsecPrim(S, T) Trait(ParsecPrim(S, T)) {                             \
-    return (ParsecPrim(S, T)){                                           \
+  ParsecCombinator(S, T) Trait(ParsecCombinator(S, T)) {                 \
+    return (ParsecCombinator(S, T)){                                     \
         .label = FUNC_NAME(label, S, T),                                 \
         .hidden = 0,                                                     \
         .tryp = FUNC_NAME(tryp, S, T),                                   \

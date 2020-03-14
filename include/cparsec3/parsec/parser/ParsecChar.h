@@ -63,9 +63,9 @@
   fp(make_pred, char, bool);                                             \
                                                                          \
   static Parsec(S, char) char_category(String l, Fp(char, bool) p) {     \
-    ParsecPrim(S, char) P = trait(ParsecPrim(S, char));                  \
+    ParsecCombinator(S, char) C = trait(ParsecCombinator(S, char));      \
     ParsecDeriv(S) D = trait(ParsecDeriv(S));                            \
-    return P.label(l, D.satisfy(make_pred(p)));                          \
+    return C.label(l, D.satisfy(make_pred(p)));                          \
   }                                                                      \
                                                                          \
   static Parsec(S, char) FUNC_NAME(control, S)(void) {                   \
