@@ -14,7 +14,6 @@
 #include "../parsec/parser/ParsecToken1.h"
 
 #include "../parsec/parser/ParsecCombinator.h"
-#include "../parsec/parser/ParsecPrim1.h"
 
 #include "../parsec/parser/ParsecChoice.h"
 
@@ -41,8 +40,6 @@
   trait_ParsecToken(S, Tokens(S));                                       \
   trait_ParsecToken(S, Array(Token(S)));                                 \
   trait_ParsecToken(S, Array(Tokens(S)));                                \
-                                                                         \
-  trait_ParsecPrim1(S);                                                  \
                                                                          \
   trait_ParsecCombinator(S, None);                                       \
   trait_ParsecCombinator(S, Token(S));                                   \
@@ -87,8 +84,6 @@
   impl_ParsecToken(S, Tokens(S));                                        \
   impl_ParsecToken(S, Array(Token(S)));                                  \
   impl_ParsecToken(S, Array(Tokens(S)));                                 \
-                                                                         \
-  impl_ParsecPrim1(S);                                                   \
                                                                          \
   impl_ParsecCombinator(S, None);                                        \
   impl_ParsecCombinator(S, Token(S));                                    \

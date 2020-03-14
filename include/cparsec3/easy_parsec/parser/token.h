@@ -2,18 +2,6 @@
 #pragma once
 
 // -----------------------------------------------------------------------
-// ParsecPrim1(S)
-#define eof() trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).eof()
-#define tokens(cmp, pat)                                                 \
-  trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).tokens(cmp, pat)
-#define takeWhileP(name_or_none, pred)                                   \
-  trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).takeWhileP(name_or_none, pred)
-#define takeWhile1P(name_or_none, pred)                                  \
-  trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).takeWhile1P(name_or_none, pred)
-#define takeP(name_or_none, n)                                           \
-  trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).takeP(name_or_none, n)
-
-// -----------------------------------------------------------------------
 // ParsecToken(S, T)
 #define TRAIT_PARSECTOKEN(S, T) trait(ParsecToken(S, T))
 #define satisfyMap(tmap, expect)                                         \
@@ -23,6 +11,16 @@
 
 // -----------------------------------------------------------------------
 // ParsecToken1(S)
+#define tokens(cmp, pat)                                                 \
+  trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).tokens(cmp, pat)
+#define takeWhileP(name_or_none, pred)                                   \
+  trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).takeWhileP(name_or_none, pred)
+#define takeWhile1P(name_or_none, pred)                                  \
+  trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).takeWhile1P(name_or_none, pred)
+#define takeP(name_or_none, n)                                           \
+  trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).takeP(name_or_none, n)
+#define eof() trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).eof()
+
 #define single(t) trait(ParsecToken1(CPARSEC_STREAM_TYPE)).single(t)
 #define satisfy(pred)                                                    \
   trait(ParsecToken1(CPARSEC_STREAM_TYPE)).satisfy(pred)
