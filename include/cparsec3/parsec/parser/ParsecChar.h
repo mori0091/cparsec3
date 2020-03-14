@@ -1,7 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include "ParsecDeriv.h"
+#include "ParsecToken1.h"
 
 // -----------------------------------------------------------------------
 #define ParsecChar(...) TYPE_NAME(ParsecChar, __VA_ARGS__)
@@ -63,9 +63,9 @@
   fp(make_pred, char, bool);                                             \
                                                                          \
   static Parsec(S, char) char_category(String l, Fp(char, bool) p) {     \
-    ParsecPrim(S, char) P = trait(ParsecPrim(S, char));                  \
-    ParsecDeriv(S) D = trait(ParsecDeriv(S));                            \
-    return P.label(l, D.satisfy(make_pred(p)));                          \
+    ParsecCombinator(S, char) C = trait(ParsecCombinator(S, char));      \
+    ParsecToken1(S) D = trait(ParsecToken1(S));                          \
+    return C.label(l, D.satisfy(make_pred(p)));                          \
   }                                                                      \
                                                                          \
   static Parsec(S, char) FUNC_NAME(control, S)(void) {                   \
@@ -123,8 +123,8 @@
         .octDigit = FUNC_NAME(octDigit, S),                              \
         .hexDigit = FUNC_NAME(hexDigit, S),                              \
                                                                          \
-        .char1 = trait(ParsecDeriv(S)).single,                           \
-        .string1 = trait(ParsecDeriv(S)).chunk,                          \
+        .char1 = trait(ParsecToken1(S)).single,                          \
+        .string1 = trait(ParsecToken1(S)).chunk,                         \
     };                                                                   \
   }                                                                      \
                                                                          \

@@ -1,7 +1,9 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include "ParsecDeriv.h"
+#include "../../base/base_generics.h"
+
+#include "../parsec.h"
 
 // -----------------------------------------------------------------------
 #define ParsecRepeat(...) TYPE_NAME(ParsecRepeat, __VA_ARGS__)

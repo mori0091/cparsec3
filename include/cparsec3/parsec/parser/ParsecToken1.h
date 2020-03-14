@@ -1,18 +1,29 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include "ParsecPrim.h"
-#include "ParsecPrim1.h"
+#include "ParsecToken.h"
 
 // -----------------------------------------------------------------------
-#define ParsecDeriv(S) TYPE_NAME(ParsecDeriv, S)
+#define ParsecToken1(S) TYPE_NAME(ParsecToken1, S)
 
 // -----------------------------------------------------------------------
-#define trait_ParsecDeriv(S)                                             \
+#define trait_ParsecToken1(S)                                            \
   C_API_BEGIN                                                            \
                                                                          \
-  typedef struct ParsecDeriv(S) ParsecDeriv(S);                          \
-  struct ParsecDeriv(S) {                                                \
+  typedef_Fn_r(Token(S), bool);                                          \
+  typedef_Fn_r(Tokens(S), Tokens(S), bool);                              \
+                                                                         \
+  typedef struct ParsecToken1(S) ParsecToken1(S);                        \
+  struct ParsecToken1(S) {                                               \
+    Parsec(S, Tokens(S)) (*tokens)(Fn(Tokens(S), Tokens(S), bool) test,  \
+                                   Tokens(S) pattern);                   \
+    Parsec(S, Tokens(S)) (*takeWhileP)(Maybe(String) name,               \
+                                       Fn(Token(S), bool) pred);         \
+    Parsec(S, Tokens(S)) (*takeWhile1P)(Maybe(String) name,              \
+                                        Fn(Token(S), bool) pred);        \
+    Parsec(S, Tokens(S)) (*takeP)(Maybe(String) name, int n);            \
+    Parsec(S, None) (*eof)(void);                                        \
+                                                                         \
     Parsec(S, Token(S)) (*single)(Token(S) t);                           \
     Parsec(S, Token(S)) (*satisfy)(Fn(Token(S), bool) pred);             \
     Parsec(S, Token(S)) (*anySingle)(void);                              \
@@ -23,14 +34,16 @@
     Parsec(S, Tokens(S)) (*takeRest)(void);                              \
   };                                                                     \
                                                                          \
-  ParsecDeriv(S) Trait(ParsecDeriv(S));                                  \
+  ParsecToken1(S) Trait(ParsecToken1(S));                                \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-#define impl_ParsecDeriv(S)                                              \
+#define impl_ParsecToken1(S)                                             \
   C_API_BEGIN                                                            \
+                                                                         \
+  impl_tokens(S);                                                        \
                                                                          \
   impl_single(S);                                                        \
   impl_satisfy(S);                                                       \
@@ -39,8 +52,14 @@
                                                                          \
   impl_chunk(S);                                                         \
                                                                          \
-  ParsecDeriv(S) Trait(ParsecDeriv(S)) {                                 \
-    return (ParsecDeriv(S)){                                             \
+  ParsecToken1(S) Trait(ParsecToken1(S)) {                               \
+    return (ParsecToken1(S)){                                            \
+        .tokens = FUNC_NAME(tokens, S),                                  \
+        .takeWhileP = 0,                                                 \
+        .takeWhile1P = 0,                                                \
+        .takeP = 0,                                                      \
+        .eof = 0,                                                        \
+                                                                         \
         .single = FUNC_NAME(single, S),                                  \
         .satisfy = FUNC_NAME(satisfy, S),                                \
         .anySingle = FUNC_NAME(anySingle, S),                            \
@@ -53,6 +72,59 @@
   }                                                                      \
                                                                          \
   C_API_END                                                              \
+  END_OF_STATEMENTS
+
+// -----------------------------------------------------------------------
+/* tokens(test, pattern) */
+#define impl_tokens(S)                                                   \
+                                                                         \
+  typedef_Fn_r(Fn(Tokens(S), Tokens(S), bool), Tokens(S),                \
+               UnParser(S, Tokens(S)));                                  \
+                                                                         \
+  fn(FUNC_NAME(tokensImpl, S),                                           \
+     Fn(Tokens(S), Tokens(S), bool), /* test */                          \
+     Tokens(S),                      /* pattern */                       \
+     UnParserArgs(                                                       \
+         S, Tokens(S)) /* s -> cok -> cerr -> eok -> eerr -> reply*/     \
+  ) {                                                                    \
+    g_bind((test, pattern, s, cok, , eok, eerr), *args);                 \
+    Stream(S) IS = trait(Stream(S));                                     \
+    int n = IS.chunkLength(pattern);                                     \
+    __auto_type maybe = IS.takeN(n, s);                                  \
+    if (maybe.none) {                                                    \
+      ParseError(S) e = {                                                \
+          .offset = IS.offsetOf(s),                                      \
+          .unexpected.value.type = END_OF_INPUT,                         \
+          .expecting = NULL,                                             \
+      };                                                                 \
+      return fn_apply(eerr, e, s);                                       \
+    }                                                                    \
+    Tokens(S) actual = maybe.value.e1;                                   \
+    if (!fn_apply(test, pattern, actual)) {                              \
+      ParseError(S) e = {                                                \
+          .offset = IS.offsetOf(s),                                      \
+          .unexpected.value = {.type = TOKENS,                           \
+                               .tokens = IS.chunkToTokens(actual)},      \
+          .expecting = NULL,                                             \
+      };                                                                 \
+      return fn_apply(eerr, e, s);                                       \
+    }                                                                    \
+    int m = IS.chunkLength(actual);                                      \
+    s = maybe.value.e2;                                                  \
+    if (!m) {                                                            \
+      return fn_apply(eok, actual, s, NULL);                             \
+    }                                                                    \
+    return fn_apply(cok, actual, s, NULL);                               \
+  }                                                                      \
+                                                                         \
+  static Parsec(S, Tokens(S)) FUNC_NAME(tokens, S)(                      \
+      Fn(Tokens(S), Tokens(S), bool) test, Tokens(S) pattern) {          \
+    __auto_type f = FUNC_NAME(tokensImpl, S)();                          \
+    return (Parsec(S, Tokens(S))){                                       \
+        .unParser = fn_apply(f, test, pattern),                          \
+    };                                                                   \
+  }                                                                      \
+                                                                         \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
@@ -71,8 +143,8 @@
                                                                          \
   static Parsec(S, Token(S)) FUNC_NAME(single, S)(Token(S) t) {          \
     __auto_type f = FUNC_NAME(singleTestToken, S)();                     \
-    return trait(ParsecPrim(S, Token(S)))                                \
-        .token(fn_apply(f, t), FUNC_NAME(toHints, Token(S))(t));         \
+    return trait(ParsecToken(S, Token(S)))                               \
+        .satisfyMap(fn_apply(f, t), FUNC_NAME(toHints, Token(S))(t));    \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS
@@ -94,8 +166,8 @@
   static Parsec(S, Token(S))                                             \
       FUNC_NAME(satisfy, S)(Fn(Token(S), bool) pred) {                   \
     __auto_type f = FUNC_NAME(satisfyTestToken, S)();                    \
-    return trait(ParsecPrim(S, Token(S)))                                \
-        .token(fn_apply(f, pred), (Hints(Token(S))){0});                 \
+    return trait(ParsecToken(S, Token(S)))                               \
+        .satisfyMap(fn_apply(f, pred), (Hints(Token(S))){0});            \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS
@@ -143,7 +215,7 @@
                                                                          \
   static Parsec(S, Tokens(S)) FUNC_NAME(chunk, S)(Tokens(S) chk) {       \
     __auto_type f = FUNC_NAME(chunkTest, S)();                           \
-    return trait(ParsecPrim1(S)).tokens(f, chk);                         \
+    return FUNC_NAME(tokens, S)(f, chk);                                 \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS
