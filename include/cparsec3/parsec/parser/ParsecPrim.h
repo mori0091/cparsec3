@@ -11,8 +11,6 @@
 // -----------------------------------------------------------------------
 #define trait_ParsecPrim(S, T)                                           \
   C_API_BEGIN                                                            \
-  /* testToken (for `token` parser) */                                   \
-  typedef_Fn_r(Token(S), Maybe(T));                                      \
                                                                          \
   typedef struct ParsecPrim(S, T) ParsecPrim(S, T);                      \
   struct ParsecPrim(S, T) {                                              \
@@ -21,9 +19,6 @@
     Parsec(S, T) (*tryp)(Parsec(S, T) p);                                \
     Parsec(S, T) (*lookAhead)(Parsec(S, T) p);                           \
     Parsec(S, None) (*notFollowedBy)(Parsec(S, T) p);                    \
-                                                                         \
-    Parsec(S, T) (*token)(Fn(Token(S), Maybe(T)) testToken,              \
-                          Hints(Token(S)) expecting);                    \
   };                                                                     \
                                                                          \
   ParsecPrim(S, T) Trait(ParsecPrim(S, T));                              \
@@ -40,7 +35,6 @@
                                                                          \
   impl_label(S, T);                                                      \
   impl_tryp(S, T);                                                       \
-  impl_token(S, T);                                                      \
                                                                          \
   ParsecPrim(S, T) Trait(ParsecPrim(S, T)) {                             \
     return (ParsecPrim(S, T)){                                           \
@@ -49,8 +43,6 @@
         .tryp = FUNC_NAME(tryp, S, T),                                   \
         .lookAhead = 0,                                                  \
         .notFollowedBy = 0,                                              \
-                                                                         \
-        .token = FUNC_NAME(token, S, T),                                 \
     };                                                                   \
   }                                                                      \
                                                                          \
@@ -119,47 +111,4 @@
     return (Parsec(S, T)){.unParser = fn_apply(f, p)};                   \
   }                                                                      \
                                                                          \
-  END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-/* token(testToken, expecting) */
-#define impl_token(S, T)                                                 \
-  typedef_Fn_r(Fn(Token(S), Maybe(T)), Hints(Token(S)), UnParser(S, T)); \
-  fn(FUNC_NAME(tokenImpl, S, T), Fn(Token(S), Maybe(T)),                 \
-     Hints(Token(S)), UnParserArgs(S, T)) {                              \
-    g_bind((testToken, expect, s, cok, , , eerr), *args);                \
-    Stream(S) SS = trait(Stream(S));                                     \
-    __auto_type maybe = SS.take1(s);                                     \
-    if (maybe.none) {                                                    \
-      ParseError(S) e = {                                                \
-          .offset = SS.offsetOf(s),                                      \
-          .unexpected.value.type = END_OF_INPUT,                         \
-          .expecting = expect,                                           \
-      };                                                                 \
-      return fn_apply(eerr, e, s);                                       \
-    }                                                                    \
-                                                                         \
-    Token(S) a = maybe.value.e1;                                         \
-    __auto_type maybe2 = fn_apply(testToken, a);                         \
-    if (maybe2.none) {                                                   \
-      ParseError(S) e = {                                                \
-          .offset = SS.offsetOf(s),                                      \
-          .unexpected.value.type = TOKENS,                               \
-          .unexpected.value.tokens =                                     \
-              trait(List(Token(S))).cons(a, NULL),                       \
-          .expecting = expect,                                           \
-      };                                                                 \
-      return fn_apply(eerr, e, s);                                       \
-    }                                                                    \
-                                                                         \
-    return fn_apply(cok, maybe2.value, maybe.value.e2, NULL);            \
-  }                                                                      \
-                                                                         \
-  static Parsec(S, T) FUNC_NAME(token, S, T)(                            \
-      Fn(Token(S), Maybe(T)) testToken, Hints(Token(S)) expecting) {     \
-    __auto_type f = FUNC_NAME(tokenImpl, S, T)();                        \
-    return (Parsec(S, T)){                                               \
-        .unParser = fn_apply(f, testToken, expecting),                   \
-    };                                                                   \
-  }                                                                      \
   END_OF_STATEMENTS

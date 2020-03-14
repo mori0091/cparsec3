@@ -1,7 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include "ParsecPrim.h"
+#include "ParsecToken.h"
 #include "ParsecPrim1.h"
 
 // -----------------------------------------------------------------------
@@ -71,8 +71,8 @@
                                                                          \
   static Parsec(S, Token(S)) FUNC_NAME(single, S)(Token(S) t) {          \
     __auto_type f = FUNC_NAME(singleTestToken, S)();                     \
-    return trait(ParsecPrim(S, Token(S)))                                \
-        .token(fn_apply(f, t), FUNC_NAME(toHints, Token(S))(t));         \
+    return trait(ParsecToken(S, Token(S)))                               \
+        .satisfyMap(fn_apply(f, t), FUNC_NAME(toHints, Token(S))(t));    \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS
@@ -94,8 +94,8 @@
   static Parsec(S, Token(S))                                             \
       FUNC_NAME(satisfy, S)(Fn(Token(S), bool) pred) {                   \
     __auto_type f = FUNC_NAME(satisfyTestToken, S)();                    \
-    return trait(ParsecPrim(S, Token(S)))                                \
-        .token(fn_apply(f, pred), (Hints(Token(S))){0});                 \
+    return trait(ParsecToken(S, Token(S)))                               \
+        .satisfyMap(fn_apply(f, pred), (Hints(Token(S))){0});            \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS

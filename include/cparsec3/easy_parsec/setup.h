@@ -10,6 +10,8 @@
 
 #include "../parsec/parser/ParsecFailure.h"
 
+#include "../parsec/parser/ParsecToken.h"
+
 #include "../parsec/parser/ParsecPrim.h"
 #include "../parsec/parser/ParsecPrim1.h"
 
@@ -33,6 +35,12 @@
   trait_ParsecRunner(S, Tokens(S));                                      \
   trait_ParsecRunner(S, Array(Token(S)));                                \
   trait_ParsecRunner(S, Array(Tokens(S)));                               \
+                                                                         \
+  trait_ParsecToken(S, None);                                            \
+  trait_ParsecToken(S, Token(S));                                        \
+  trait_ParsecToken(S, Tokens(S));                                       \
+  trait_ParsecToken(S, Array(Token(S)));                                 \
+  trait_ParsecToken(S, Array(Tokens(S)));                                \
                                                                          \
   trait_ParsecPrim1(S);                                                  \
                                                                          \
@@ -74,6 +82,12 @@
   impl_ParsecRunner(S, Tokens(S));                                       \
   impl_ParsecRunner(S, Array(Token(S)));                                 \
   impl_ParsecRunner(S, Array(Tokens(S)));                                \
+                                                                         \
+  impl_ParsecToken(S, None);                                             \
+  impl_ParsecToken(S, Token(S));                                         \
+  impl_ParsecToken(S, Tokens(S));                                        \
+  impl_ParsecToken(S, Array(Token(S)));                                  \
+  impl_ParsecToken(S, Array(Tokens(S)));                                 \
                                                                          \
   impl_ParsecPrim1(S);                                                   \
                                                                          \
