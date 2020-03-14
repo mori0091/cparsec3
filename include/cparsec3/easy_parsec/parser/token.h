@@ -12,14 +12,14 @@
 // -----------------------------------------------------------------------
 // ParsecToken1(S)
 #define tokens(cmp, pat)                                                 \
-  trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).tokens(cmp, pat)
+  trait(ParsecToken1(CPARSEC_STREAM_TYPE)).tokens(cmp, pat)
 #define takeWhileP(name_or_none, pred)                                   \
-  trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).takeWhileP(name_or_none, pred)
+  trait(ParsecToken1(CPARSEC_STREAM_TYPE)).takeWhileP(name_or_none, pred)
 #define takeWhile1P(name_or_none, pred)                                  \
-  trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).takeWhile1P(name_or_none, pred)
+  trait(ParsecToken1(CPARSEC_STREAM_TYPE)).takeWhile1P(name_or_none, pred)
 #define takeP(name_or_none, n)                                           \
-  trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).takeP(name_or_none, n)
-#define eof() trait(ParsecPrim1(CPARSEC_STREAM_TYPE)).eof()
+  trait(ParsecToken1(CPARSEC_STREAM_TYPE)).takeP(name_or_none, n)
+#define eof() trait(ParsecToken1(CPARSEC_STREAM_TYPE)).eof()
 
 #define single(t) trait(ParsecToken1(CPARSEC_STREAM_TYPE)).single(t)
 #define satisfy(pred)                                                    \
