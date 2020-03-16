@@ -10,11 +10,11 @@
           BIND(S, PARSER_RETURN_TYPES(S)))
 
 #define label(l, p)                                                      \
-  GENERIC_PARSECCOMBINATOR(CPARSEC_STREAM_TYPE, p).label(l, p)
+  GENERIC_PARSECCOMBINATOR(CPARSEC_STREAM_TYPE, p).pLabel(l, p)
 #define hidden(p)                                                        \
-  GENERIC_PARSECCOMBINATOR(CPARSEC_STREAM_TYPE, p).hidden(p)
-#define tryp(p) GENERIC_PARSECCOMBINATOR(CPARSEC_STREAM_TYPE, p).tryp(p)
+  GENERIC_PARSECCOMBINATOR(CPARSEC_STREAM_TYPE, p).pHidden(p)
+#define tryp(p) GENERIC_PARSECCOMBINATOR(CPARSEC_STREAM_TYPE, p).pTryp(p)
 #define lookAhead(p)                                                     \
-  GENERIC_PARSECCOMBINATOR(CPARSEC_STREAM_TYPE, p).lookAhead(p)
+  GENERIC_PARSECCOMBINATOR(CPARSEC_STREAM_TYPE, p).pLookAhead(p)
 #define notFollowedBy(p)                                                 \
-  GENERIC_PARSECCOMBINATOR(CPARSEC_STREAM_TYPE, p).notFollowedBy(p)
+  GENERIC_PARSECCOMBINATOR(CPARSEC_STREAM_TYPE, p).pNotFollowedBy(p)

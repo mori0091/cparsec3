@@ -14,11 +14,11 @@
                                                                          \
   typedef struct ParsecCombinator(S, T) ParsecCombinator(S, T);          \
   struct ParsecCombinator(S, T) {                                        \
-    Parsec(S, T) (*label)(String l, Parsec(S, T) p);                     \
-    Parsec(S, T) (*hidden)(Parsec(S, T) p);                              \
-    Parsec(S, T) (*tryp)(Parsec(S, T) p);                                \
-    Parsec(S, T) (*lookAhead)(Parsec(S, T) p);                           \
-    Parsec(S, None) (*notFollowedBy)(Parsec(S, T) p);                    \
+    Parsec(S, T) (*pLabel)(String l, Parsec(S, T) p);                    \
+    Parsec(S, T) (*pHidden)(Parsec(S, T) p);                             \
+    Parsec(S, T) (*pTryp)(Parsec(S, T) p);                               \
+    Parsec(S, T) (*pLookAhead)(Parsec(S, T) p);                          \
+    Parsec(S, None) (*pNotFollowedBy)(Parsec(S, T) p);                   \
   };                                                                     \
                                                                          \
   ParsecCombinator(S, T) Trait(ParsecCombinator(S, T));                  \
@@ -38,11 +38,11 @@
                                                                          \
   ParsecCombinator(S, T) Trait(ParsecCombinator(S, T)) {                 \
     return (ParsecCombinator(S, T)){                                     \
-        .label = FUNC_NAME(label, S, T),                                 \
-        .hidden = 0,                                                     \
-        .tryp = FUNC_NAME(tryp, S, T),                                   \
-        .lookAhead = 0,                                                  \
-        .notFollowedBy = 0,                                              \
+        .pLabel = FUNC_NAME(label, S, T),                                \
+        .pHidden = 0,                                                    \
+        .pTryp = FUNC_NAME(tryp, S, T),                                  \
+        .pLookAhead = 0,                                                 \
+        .pNotFollowedBy = 0,                                             \
     };                                                                   \
   }                                                                      \
                                                                          \

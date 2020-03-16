@@ -14,10 +14,10 @@
                                                                          \
   typedef struct ParsecRepeat(S, T) ParsecRepeat(S, T);                  \
   struct ParsecRepeat(S, T) {                                            \
-    Parsec(S, Array(T)) (*many)(Parsec(S, T) p);                         \
-    Parsec(S, Array(T)) (*some)(Parsec(S, T) p);                         \
-    Parsec(S, Array(T)) (*count)(int n, Parsec(S, T) p);                 \
-    Parsec(S, Array(T)) (*count_min_max)(int m, int n, Parsec(S, T) p);  \
+    Parsec(S, Array(T)) (*pMany)(Parsec(S, T) p);                        \
+    Parsec(S, Array(T)) (*pSome)(Parsec(S, T) p);                        \
+    Parsec(S, Array(T)) (*pCount)(int n, Parsec(S, T) p);                \
+    Parsec(S, Array(T)) (*pCount_min_max)(int m, int n, Parsec(S, T) p); \
   };                                                                     \
                                                                          \
   ParsecRepeat(S, T) Trait(ParsecRepeat(S, T));                          \
@@ -38,10 +38,10 @@
                                                                          \
   ParsecRepeat(S, T) Trait(ParsecRepeat(S, T)) {                         \
     return (ParsecRepeat(S, T)){                                         \
-        .many = FUNC_NAME(many, S, T),                                   \
-        .some = FUNC_NAME(some, S, T),                                   \
-        .count = FUNC_NAME(count, S, T),                                 \
-        .count_min_max = FUNC_NAME(count_min_max, S, T),                 \
+        .pMany = FUNC_NAME(many, S, T),                                  \
+        .pSome = FUNC_NAME(some, S, T),                                  \
+        .pCount = FUNC_NAME(count, S, T),                                \
+        .pCount_min_max = FUNC_NAME(count_min_max, S, T),                \
     };                                                                   \
   }                                                                      \
                                                                          \
@@ -55,7 +55,7 @@
     g_bind((p, s, cok, cerr, eok), *args);                               \
     ParsecRunner(S, T) R = trait(ParsecRunner(S, T));                    \
     ArrayT(T) A = trait(Array(T));                                       \
-    ParseReply(S, T) r = R.runParsec(p, s);                              \
+    ParseReply(S, T) r = R.pRunParsec(p, s);                             \
     if (!r.consumed) {                                                   \
       return fn_apply(eok, A.empty, s, (Hints(Token(S))){0});            \
     }                                                                    \
@@ -66,7 +66,7 @@
     a.data[0] = r.result.ok;                                             \
     for (;;) {                                                           \
       s = r.result.state;                                                \
-      r = R.runParsec(p, s);                                             \
+      r = R.pRunParsec(p, s);                                            \
       if (!r.consumed) {                                                 \
         return fn_apply(cok, a, r.result.state, (Hints(Token(S))){0});   \
       }                                                                  \

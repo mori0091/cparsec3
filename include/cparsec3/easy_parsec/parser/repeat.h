@@ -10,9 +10,9 @@
   GENERIC(p, Parsec, TRAIT_PARSECREPEAT,                                 \
           BIND(S, PARSER_RETURN_TYPES_0(S)))
 
-#define many(p) GENERIC_PARSECREPEAT(CPARSEC_STREAM_TYPE, p).many(p)
-#define some(p) GENERIC_PARSECREPEAT(CPARSEC_STREAM_TYPE, p).some(p)
+#define many(p) GENERIC_PARSECREPEAT(CPARSEC_STREAM_TYPE, p).pMany(p)
+#define some(p) GENERIC_PARSECREPEAT(CPARSEC_STREAM_TYPE, p).pSome(p)
 #define count(n, p)                                                      \
-  GENERIC_PARSECREPEAT(CPARSEC_STREAM_TYPE, p).count(n, p)
+  GENERIC_PARSECREPEAT(CPARSEC_STREAM_TYPE, p).pCount(n, p)
 #define count_min_max(m, n, p)                                           \
-  GENERIC_PARSECREPEAT(CPARSEC_STREAM_TYPE, p).count_min_max(m, n, p)
+  GENERIC_PARSECREPEAT(CPARSEC_STREAM_TYPE, p).pCount_min_max(m, n, p)

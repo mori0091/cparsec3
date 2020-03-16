@@ -18,8 +18,8 @@
                                                                          \
   typedef struct ParsecToken(S, T) ParsecToken(S, T);                    \
   struct ParsecToken(S, T) {                                             \
-    Parsec(S, T) (*satisfyMap)(FnMapToken(S, T) testToken,               \
-                               Hints(Token(S)) expecting);               \
+    Parsec(S, T) (*pSatisfyMap)(FnMapToken(S, T) testToken,              \
+                                Hints(Token(S)) expecting);              \
   };                                                                     \
                                                                          \
   ParsecToken(S, T) Trait(ParsecToken(S, T));                            \
@@ -35,7 +35,7 @@
                                                                          \
   ParsecToken(S, T) Trait(ParsecToken(S, T)) {                           \
     return (ParsecToken(S, T)){                                          \
-        .satisfyMap = FUNC_NAME(satisfyMap, S, T),                       \
+        .pSatisfyMap = FUNC_NAME(satisfyMap, S, T),                      \
     };                                                                   \
   }                                                                      \
                                                                          \

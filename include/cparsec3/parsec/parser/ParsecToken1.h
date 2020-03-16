@@ -15,23 +15,23 @@
                                                                          \
   typedef struct ParsecToken1(S) ParsecToken1(S);                        \
   struct ParsecToken1(S) {                                               \
-    Parsec(S, Tokens(S)) (*tokens)(Fn(Tokens(S), Tokens(S), bool) test,  \
-                                   Tokens(S) pattern);                   \
-    Parsec(S, Tokens(S)) (*takeWhileP)(Maybe(String) name,               \
-                                       Fn(Token(S), bool) pred);         \
-    Parsec(S, Tokens(S)) (*takeWhile1P)(Maybe(String) name,              \
+    Parsec(S, Tokens(S)) (*pTokens)(Fn(Tokens(S), Tokens(S), bool) test, \
+                                    Tokens(S) pattern);                  \
+    Parsec(S, Tokens(S)) (*pTakeWhileP)(Maybe(String) name,              \
                                         Fn(Token(S), bool) pred);        \
-    Parsec(S, Tokens(S)) (*takeP)(Maybe(String) name, int n);            \
-    Parsec(S, None) (*eof)(void);                                        \
+    Parsec(S, Tokens(S)) (*pTakeWhile1P)(Maybe(String) name,             \
+                                         Fn(Token(S), bool) pred);       \
+    Parsec(S, Tokens(S)) (*pTakeP)(Maybe(String) name, int n);           \
+    Parsec(S, None) (*pEof)(void);                                       \
                                                                          \
-    Parsec(S, Token(S)) (*single)(Token(S) t);                           \
-    Parsec(S, Token(S)) (*satisfy)(Fn(Token(S), bool) pred);             \
-    Parsec(S, Token(S)) (*anySingle)(void);                              \
-    Parsec(S, Token(S)) (*anySingleBut)(Token(S) t);                     \
-    Parsec(S, Token(S)) (*oneOf)(Array(Token(S)) ts);                    \
-    Parsec(S, Token(S)) (*noneOf)(Array(Token(S)) ts);                   \
-    Parsec(S, Tokens(S)) (*chunk)(Tokens(S) chk);                        \
-    Parsec(S, Tokens(S)) (*takeRest)(void);                              \
+    Parsec(S, Token(S)) (*pSingle)(Token(S) t);                          \
+    Parsec(S, Token(S)) (*pSatisfy)(Fn(Token(S), bool) pred);            \
+    Parsec(S, Token(S)) (*pAnySingle)(void);                             \
+    Parsec(S, Token(S)) (*pAnySingleBut)(Token(S) t);                    \
+    Parsec(S, Token(S)) (*pOneOf)(Array(Token(S)) ts);                   \
+    Parsec(S, Token(S)) (*pNoneOf)(Array(Token(S)) ts);                  \
+    Parsec(S, Tokens(S)) (*pChunk)(Tokens(S) chk);                       \
+    Parsec(S, Tokens(S)) (*pTakeRest)(void);                             \
   };                                                                     \
                                                                          \
   ParsecToken1(S) Trait(ParsecToken1(S));                                \
@@ -54,20 +54,20 @@
                                                                          \
   ParsecToken1(S) Trait(ParsecToken1(S)) {                               \
     return (ParsecToken1(S)){                                            \
-        .tokens = FUNC_NAME(tokens, S),                                  \
-        .takeWhileP = 0,                                                 \
-        .takeWhile1P = 0,                                                \
-        .takeP = 0,                                                      \
-        .eof = 0,                                                        \
+        .pTokens = FUNC_NAME(tokens, S),                                 \
+        .pTakeWhileP = 0,                                                \
+        .pTakeWhile1P = 0,                                               \
+        .pTakeP = 0,                                                     \
+        .pEof = 0,                                                       \
                                                                          \
-        .single = FUNC_NAME(single, S),                                  \
-        .satisfy = FUNC_NAME(satisfy, S),                                \
-        .anySingle = FUNC_NAME(anySingle, S),                            \
-        .anySingleBut = FUNC_NAME(anySingleBut, S),                      \
-        .oneOf = 0,                                                      \
-        .noneOf = 0,                                                     \
-        .chunk = FUNC_NAME(chunk, S),                                    \
-        .takeRest = 0,                                                   \
+        .pSingle = FUNC_NAME(single, S),                                 \
+        .pSatisfy = FUNC_NAME(satisfy, S),                               \
+        .pAnySingle = FUNC_NAME(anySingle, S),                           \
+        .pAnySingleBut = FUNC_NAME(anySingleBut, S),                     \
+        .pOneOf = 0,                                                     \
+        .pNoneOf = 0,                                                    \
+        .pChunk = FUNC_NAME(chunk, S),                                   \
+        .pTakeRest = 0,                                                  \
     };                                                                   \
   }                                                                      \
                                                                          \
@@ -144,7 +144,7 @@
   static Parsec(S, Token(S)) FUNC_NAME(single, S)(Token(S) t) {          \
     __auto_type f = FUNC_NAME(singleTestToken, S)();                     \
     return trait(ParsecToken(S, Token(S)))                               \
-        .satisfyMap(fn_apply(f, t), FUNC_NAME(toHints, Token(S))(t));    \
+        .pSatisfyMap(fn_apply(f, t), FUNC_NAME(toHints, Token(S))(t));   \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS
@@ -167,7 +167,7 @@
       FUNC_NAME(satisfy, S)(Fn(Token(S), bool) pred) {                   \
     __auto_type f = FUNC_NAME(satisfyTestToken, S)();                    \
     return trait(ParsecToken(S, Token(S)))                               \
-        .satisfyMap(fn_apply(f, pred), (Hints(Token(S))){0});            \
+        .pSatisfyMap(fn_apply(f, pred), (Hints(Token(S))){0});           \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS

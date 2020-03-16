@@ -13,9 +13,9 @@
   /* ---- trait ParsecRunner(S, T) */                                    \
   typedef struct ParsecRunner(S, T) ParsecRunner(S, T);                  \
   struct ParsecRunner(S, T) {                                            \
-    ParseReply(S, T) (*runParsec)(Parsec(S, T) p, S state);              \
-    ParseResult(S, T) (*runParser)(Parsec(S, T) p, S input);             \
-    bool (*parseTest)(Parsec(S, T) p, S input);                          \
+    ParseReply(S, T) (*pRunParsec)(Parsec(S, T) p, S input);             \
+    ParseResult(S, T) (*pRunParser)(Parsec(S, T) p, S input);            \
+    bool (*pParseTest)(Parsec(S, T) p, S input);                         \
   };                                                                     \
   ParsecRunner(S, T) Trait(ParsecRunner(S, T));                          \
   /* ---- */                                                             \
@@ -32,9 +32,9 @@
                                                                          \
   ParsecRunner(S, T) Trait(ParsecRunner(S, T)) {                         \
     return (ParsecRunner(S, T)){                                         \
-        .runParsec = FUNC_NAME(runParsec, S, T),                         \
-        .runParser = FUNC_NAME(runParser, S, T),                         \
-        .parseTest = FUNC_NAME(parseTest, S, T),                         \
+        .pRunParsec = FUNC_NAME(runParsec, S, T),                        \
+        .pRunParser = FUNC_NAME(runParser, S, T),                        \
+        .pParseTest = FUNC_NAME(parseTest, S, T),                        \
     };                                                                   \
   }                                                                      \
                                                                          \
@@ -67,13 +67,13 @@
                                                                          \
   /* ---- runParsec(p, state) */                                         \
   static ParseReply(S, T)                                                \
-      FUNC_NAME(runParsec, S, T)(Parsec(S, T) p, S state) {              \
+      FUNC_NAME(runParsec, S, T)(Parsec(S, T) p, S input) {              \
     __auto_type cok = FUNC_NAME(replyOk, S, T)();                        \
     __auto_type cerr = FUNC_NAME(replyErr, S, T)();                      \
     __auto_type eok = FUNC_NAME(replyOk, S, T)();                        \
     __auto_type eerr = FUNC_NAME(replyErr, S, T)();                      \
     return fn_apply(                                                     \
-        p.unParser, state,                                               \
+        p.unParser, input,                                               \
         fn_apply(cok, true),  /* continuation 'consumed-ok' */           \
         fn_apply(cerr, true), /* continuation 'consumed-error' */        \
         fn_apply(eok, false), /* continuation 'empty-ok' */              \
