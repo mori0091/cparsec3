@@ -10,5 +10,5 @@
   GENERIC(p, Parsec, TRAIT_PARSECCHOICE, BIND(S, PARSER_RETURN_TYPES(S)))
 
 #define either(p1, p2)                                                   \
-  GENERIC_PARSECCHOICE(CPARSEC_STREAM_TYPE, p1).either(p1, p2)
+  GENERIC_PARSECCHOICE(CPARSEC_STREAM_TYPE, p1).pEither(p1, p2)
 #define choice(...) FOLDL(either, __VA_ARGS__)

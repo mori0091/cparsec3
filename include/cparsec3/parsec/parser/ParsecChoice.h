@@ -15,9 +15,9 @@
                                                                          \
   typedef struct ParsecChoice(S, T) ParsecChoice(S, T);                  \
   struct ParsecChoice(S, T) {                                            \
-    Parsec(S, T) (*empty)(void);                                         \
-    Parsec(S, T) (*choice)(Array(Parsec(S, T)) ps);                      \
-    Parsec(S, T) (*either)(Parsec(S, T) p1, Parsec(S, T) p2);            \
+    Parsec(S, T) (*pEmpty)(void);                                        \
+    Parsec(S, T) (*pChoice)(Array(Parsec(S, T)) ps);                     \
+    Parsec(S, T) (*pEither)(Parsec(S, T) p1, Parsec(S, T) p2);           \
   };                                                                     \
                                                                          \
   ParsecChoice(S, T) Trait(ParsecChoice(S, T));                          \
@@ -38,9 +38,9 @@
                                                                          \
   ParsecChoice(S, T) Trait(ParsecChoice(S, T)) {                         \
     return (ParsecChoice(S, T)){                                         \
-        .empty = FUNC_NAME(empty, S, T),                                 \
-        .choice = FUNC_NAME(choice, S, T),                               \
-        .either = FUNC_NAME(either, S, T),                               \
+        .pEmpty = FUNC_NAME(empty, S, T),                                \
+        .pChoice = FUNC_NAME(choice, S, T),                              \
+        .pEither = FUNC_NAME(either, S, T),                              \
     };                                                                   \
   }                                                                      \
                                                                          \
@@ -50,7 +50,7 @@
 // -----------------------------------------------------------------------
 #define impl_empty(S, T)                                                 \
   static Parsec(S, T) FUNC_NAME(empty, S, T)(void) {                     \
-    return trait(ParsecFailure(S, T)).parseError((ParseError(S)){0});    \
+    return trait(ParsecFailure(S, T)).pParseError((ParseError(S)){0});   \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS
@@ -61,12 +61,12 @@
     ParsecChoice(S, T) C = trait(ParsecChoice(S, T));                    \
     ArrayT(Parsec(S, T)) A = trait(Array(Parsec(S, T)));                 \
     if (A.null(ps)) {                                                    \
-      return C.empty();                                                  \
+      return C.pEmpty();                                                 \
     }                                                                    \
     Parsec(S, T)* p = A.end(ps);                                         \
     Parsec(S, T) x = *(--p);                                             \
     while (p != A.begin(ps)) {                                           \
-      x = C.either(*(--p), x);                                           \
+      x = C.pEither(*(--p), x);                                          \
     }                                                                    \
     return x;                                                            \
   }                                                                      \

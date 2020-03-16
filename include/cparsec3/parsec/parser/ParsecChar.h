@@ -12,27 +12,27 @@
                                                                          \
   typedef struct ParsecChar(S) ParsecChar(S);                            \
   struct ParsecChar(S) {                                                 \
-    Parsec(S, char) (*newline)(void);                                    \
-    Parsec(S, String) (*crlf)(void);                                     \
-    Parsec(S, String) (*eol)(void);                                      \
-    Parsec(S, char) (*tab)(void);                                        \
-    Parsec(S, None) (*space)(void);                                      \
-    Parsec(S, None) (*space1)(void);                                     \
+    Parsec(S, char) (*pNewline)(void);                                   \
+    Parsec(S, String) (*pCrlf)(void);                                    \
+    Parsec(S, String) (*pEol)(void);                                     \
+    Parsec(S, char) (*pTab)(void);                                       \
+    Parsec(S, None) (*pSpace)(void);                                     \
+    Parsec(S, None) (*pSpace1)(void);                                    \
                                                                          \
-    Parsec(S, char) (*control)(void);                                    \
-    Parsec(S, char) (*whitespace)(void);                                 \
-    Parsec(S, char) (*upper)(void);                                      \
-    Parsec(S, char) (*lower)(void);                                      \
-    Parsec(S, char) (*letter)(void);                                     \
-    Parsec(S, char) (*alphaNum)(void);                                   \
-    Parsec(S, char) (*printable)(void);                                  \
-    Parsec(S, char) (*digit)(void);                                      \
-    Parsec(S, char) (*binDigit)(void);                                   \
-    Parsec(S, char) (*octDigit)(void);                                   \
-    Parsec(S, char) (*hexDigit)(void);                                   \
+    Parsec(S, char) (*pControl)(void);                                   \
+    Parsec(S, char) (*pWhitespace)(void);                                \
+    Parsec(S, char) (*pUpper)(void);                                     \
+    Parsec(S, char) (*pLower)(void);                                     \
+    Parsec(S, char) (*pLetter)(void);                                    \
+    Parsec(S, char) (*pAlphaNum)(void);                                  \
+    Parsec(S, char) (*pPrintable)(void);                                 \
+    Parsec(S, char) (*pDigit)(void);                                     \
+    Parsec(S, char) (*pBinDigit)(void);                                  \
+    Parsec(S, char) (*pOctDigit)(void);                                  \
+    Parsec(S, char) (*pHexDigit)(void);                                  \
                                                                          \
-    Parsec(S, char) (*char1)(char c);                                    \
-    Parsec(S, String) (*string1)(String s);                              \
+    Parsec(S, char) (*pChar1)(char c);                                   \
+    Parsec(S, String) (*pString1)(String s);                             \
   };                                                                     \
                                                                          \
   ParsecChar(S) Trait(ParsecChar(S));                                    \
@@ -45,18 +45,18 @@
   C_API_BEGIN                                                            \
                                                                          \
   static Parsec(S, char) FUNC_NAME(newline, S)(void) {                   \
-    return trait(ParsecChar(S)).char1('\n');                             \
+    return trait(ParsecChar(S)).pChar1('\n');                            \
   }                                                                      \
   static Parsec(S, String) FUNC_NAME(crlf, S)(void) {                    \
-    return trait(ParsecChar(S)).string1("\r\n");                         \
+    return trait(ParsecChar(S)).pString1("\r\n");                        \
   }                                                                      \
   static Parsec(S, String) FUNC_NAME(eol, S)(void) {                     \
     ParsecChar(S) c = trait(ParsecChar(S));                              \
     ParsecChoice(S, String) C = trait(ParsecChoice(S, String));          \
-    return C.either(c.string1("\n"), c.crlf());                          \
+    return C.pEither(c.pString1("\n"), c.pCrlf());                       \
   }                                                                      \
   static Parsec(S, char) FUNC_NAME(tab, S)(void) {                       \
-    return trait(ParsecChar(S)).char1('\t');                             \
+    return trait(ParsecChar(S)).pChar1('\t');                            \
   }                                                                      \
                                                                          \
   /* Fn(char, bool) make_pred(bool (*f)(char)) */                        \
@@ -65,7 +65,7 @@
   static Parsec(S, char) char_category(String l, Fp(char, bool) p) {     \
     ParsecCombinator(S, char) C = trait(ParsecCombinator(S, char));      \
     ParsecToken1(S) D = trait(ParsecToken1(S));                          \
-    return C.label(l, D.satisfy(make_pred(p)));                          \
+    return C.pLabel(l, D.pSatisfy(make_pred(p)));                        \
   }                                                                      \
                                                                          \
   static Parsec(S, char) FUNC_NAME(control, S)(void) {                   \
@@ -104,27 +104,27 @@
                                                                          \
   ParsecChar(S) Trait(ParsecChar(S)) {                                   \
     return (ParsecChar(S)){                                              \
-        .newline = FUNC_NAME(newline, S),                                \
-        .crlf = FUNC_NAME(crlf, S),                                      \
-        .eol = FUNC_NAME(eol, S),                                        \
-        .tab = FUNC_NAME(tab, S),                                        \
-        .space = 0,                                                      \
-        .space1 = 0,                                                     \
+        .pNewline = FUNC_NAME(newline, S),                               \
+        .pCrlf = FUNC_NAME(crlf, S),                                     \
+        .pEol = FUNC_NAME(eol, S),                                       \
+        .pTab = FUNC_NAME(tab, S),                                       \
+        .pSpace = 0,                                                     \
+        .pSpace1 = 0,                                                    \
                                                                          \
-        .control = FUNC_NAME(control, S),                                \
-        .whitespace = FUNC_NAME(whitespace, S),                          \
-        .upper = FUNC_NAME(upper, S),                                    \
-        .lower = FUNC_NAME(lower, S),                                    \
-        .letter = FUNC_NAME(letter, S),                                  \
-        .alphaNum = FUNC_NAME(alphaNum, S),                              \
-        .printable = FUNC_NAME(printable, S),                            \
-        .digit = FUNC_NAME(digit, S),                                    \
-        .binDigit = FUNC_NAME(binDigit, S),                              \
-        .octDigit = FUNC_NAME(octDigit, S),                              \
-        .hexDigit = FUNC_NAME(hexDigit, S),                              \
+        .pControl = FUNC_NAME(control, S),                               \
+        .pWhitespace = FUNC_NAME(whitespace, S),                         \
+        .pUpper = FUNC_NAME(upper, S),                                   \
+        .pLower = FUNC_NAME(lower, S),                                   \
+        .pLetter = FUNC_NAME(letter, S),                                 \
+        .pAlphaNum = FUNC_NAME(alphaNum, S),                             \
+        .pPrintable = FUNC_NAME(printable, S),                           \
+        .pDigit = FUNC_NAME(digit, S),                                   \
+        .pBinDigit = FUNC_NAME(binDigit, S),                             \
+        .pOctDigit = FUNC_NAME(octDigit, S),                             \
+        .pHexDigit = FUNC_NAME(hexDigit, S),                             \
                                                                          \
-        .char1 = trait(ParsecToken1(S)).single,                          \
-        .string1 = trait(ParsecToken1(S)).chunk,                         \
+        .pChar1 = trait(ParsecToken1(S)).pSingle,                        \
+        .pString1 = trait(ParsecToken1(S)).pChunk,                       \
     };                                                                   \
   }                                                                      \
                                                                          \

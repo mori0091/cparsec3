@@ -9,12 +9,15 @@
 #define GENERIC_PARSECRUNNER(S, p)                                       \
   GENERIC(p, Parsec, TRAIT_PARSECRUNNER, BIND(S, PARSER_RETURN_TYPES(S)))
 
+#define runParsec(p, input)                                              \
+  GENERIC_PARSECRUNNER(CPARSEC_STREAM_TYPE, p).pRunParsec(p, input)
+
+#define runParser(p, input)                                              \
+  GENERIC_PARSECRUNNER(CPARSEC_STREAM_TYPE, p).pRunParser(p, input)
+
 #define parseTest(p, input)                                              \
   GENERIC_PARSECRUNNER(CPARSEC_STREAM_TYPE, p)                           \
-      .parseTest(p, CPARSEC_STREAM_NEW(input))
-
-#define runParsec(p, input)                                              \
-  GENERIC_PARSECRUNNER(CPARSEC_STREAM_TYPE, p).runParsec(p, input)
+      .pParseTest(p, CPARSEC_STREAM_NEW(input))
 
 // -----------------------------------------------------------------------
 #define DO()                                                             \

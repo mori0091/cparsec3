@@ -2,12 +2,13 @@
 #include <cparsec3/easy_parsec/setup.h>
 #include <cparsec3/easy_parsec/types.h>
 
-#include <cparsec3/easy_parsec/runner.h>
 #include <cparsec3/easy_parsec/parser/char.h>
 #include <cparsec3/easy_parsec/parser/choice.h>
 #include <cparsec3/easy_parsec/parser/combinator.h>
+#include <cparsec3/easy_parsec/parser/failure.h>
 #include <cparsec3/easy_parsec/parser/repeat.h>
 #include <cparsec3/easy_parsec/parser/token.h>
+#include <cparsec3/easy_parsec/runner.h>
 
 // -----------------------------------------------------------------------
 #define S CPARSEC_STREAM_TYPE
@@ -81,8 +82,7 @@ int main(void) {
   printf("\n");
 
   {
-    __auto_type F = trait(ParsecFailure(S, Token(S)));
-    __auto_type p = F.parseError((ParseError(S)){0});
+    __auto_type p = parseError(Token(S), (ParseError(S)){0});
     parseTest(p, "");
     parseTest(p, "foo");
     parseTest(p, "bar");
