@@ -3,60 +3,51 @@
 
 #include "base.h"
 
-#define CREATE_TRAIT(...) trait(TYPE_NAME(__VA_ARGS__))
+#define TYPESET_CONTAINER TYPESET_1
+#define TYPESET_ARRAY TYPESET_ARRAY_1
+#define TYPESET_LIST TYPESET_LIST_1
+#define TYPESET_SLICEABLE TYPESET_ARRAY, TYPESET_LIST
+#define TYPESET_ITERABLE                                                 \
+  TYPESET_SLICEABLE, APPLY(Slice, TYPESET_SLICEABLE)
 
-#define BIND_TYPESET(CONTAINER) BIND(CONTAINER, TYPESET_COMPONENT)
-#define APPLY_TYPESET(CONTAINER) APPLY(CONTAINER, TYPESET_COMPONENT)
+#define IDENTITY(...) __VA_ARGS__
 
 // clang-format off ------------------------------------------------------
+#define TRAIT_EQ(T) trait(Eq(T))
 #define GENERIC_EQ(x)                                                    \
-  GENERIC(x, SND, CREATE_TRAIT,                                          \
-          BIND(Eq, TYPESET(PRIMITIVE), APPLY_TYPESET(Array),             \
-               APPLY_TYPESET(List), APPLY_TYPESET(Maybe)))
+  GENERIC(x, IDENTITY, TRAIT_EQ, TYPESET(PRIMITIVE), TYPESET_CONTAINER)
 
+#define TRAIT_ORD(T) trait(Ord(T))
 #define GENERIC_ORD(x)                                                   \
-  GENERIC(x, SND, CREATE_TRAIT,                                          \
-          BIND(Ord, TYPESET(PRIMITIVE), APPLY_TYPESET(Array),            \
-               APPLY_TYPESET(List), APPLY_TYPESET(Maybe)))
+  GENERIC(x, IDENTITY, TRAIT_ORD, TYPESET(PRIMITIVE), TYPESET_CONTAINER)
 
-#define GENERIC_ARRAY(x)                                                 \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(Array))
+#define GENERIC_ARRAY(x) GENERIC(x, IDENTITY, trait, TYPESET_ARRAY)
 
-#define GENERIC_LIST(x)                                                  \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(List))
+#define GENERIC_LIST(x) GENERIC(x, IDENTITY, trait, TYPESET_LIST)
 
+#define TRAIT_SLICE(C) trait(Slice(C))
 #define GENERIC_SLICE(x)                                                 \
-  GENERIC(x, SND, CREATE_TRAIT,                                          \
-          BIND(Slice, APPLY_TYPESET(Array), APPLY_TYPESET(List)))
+  GENERIC(x, IDENTITY, TRAIT_SLICE, TYPESET_SLICEABLE)
 
 #define GENERIC_CONTAINER(x)                                             \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(Array),               \
-          BIND_TYPESET(List), BIND_TYPESET(Maybe),                       \
-          BIND(Slice, APPLY_TYPESET(Array), APPLY_TYPESET(List)),        \
-          BIND(Itr, APPLY_TYPESET(Array), APPLY_TYPESET(List),           \
-               APPLY(Slice, APPLY_TYPESET(Array), APPLY_TYPESET(List))))
+  GENERIC(x, IDENTITY, trait, TYPESET_CONTAINER,                         \
+          APPLY(Slice, TYPESET_SLICEABLE), APPLY(Itr, TYPESET_ITERABLE))
 
 #define GENERIC_BOXED_CONTAINER(x)                                       \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(Array),               \
-          BIND_TYPESET(List))
+  GENERIC(x, IDENTITY, trait, TYPESET_SLICEABLE)
 
 #define GENERIC_FINITE_SEQUENCE(x)                                       \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT, BIND_TYPESET(Array),               \
-          BIND_TYPESET(List), BIND_TYPESET(Maybe),                       \
-          BIND(Slice, APPLY_TYPESET(Array), APPLY_TYPESET(List)))
+  GENERIC(x, IDENTITY, trait, TYPESET_CONTAINER,                         \
+          APPLY(Slice, TYPESET_SLICEABLE))
 
+#define TRAIT_ITERABLE(C) trait(Iterable(C))
 #define GENERIC_ITERABLE(x)                                              \
-  GENERIC(x, SND, CREATE_TRAIT,                                          \
-          BIND(Iterable, APPLY_TYPESET(Array), APPLY_TYPESET(List),      \
-               APPLY(Slice, APPLY_TYPESET(Array), APPLY_TYPESET(List)),  \
-               APPLY(Itr, APPLY_TYPESET(Array), APPLY_TYPESET(List),     \
-                     APPLY(Slice, APPLY_TYPESET(Array),                  \
-                           APPLY_TYPESET(List)))))
+  GENERIC(x, IDENTITY, TRAIT_ITERABLE, TYPESET_ITERABLE,                 \
+          APPLY(Itr, TYPESET_ITERABLE))
 
 #define GENERIC_ITR(x)                                                   \
-  GENERIC(x, TYPE_NAME, CREATE_TRAIT,                                    \
-          BIND(Itr, APPLY_TYPESET(Array), APPLY_TYPESET(List),           \
-               APPLY(Slice, APPLY_TYPESET(Array), APPLY_TYPESET(List))))
+  GENERIC(x, IDENTITY, trait, APPLY(Itr, TYPESET_ITERABLE))
+
 // clang-format on -------------------------------------------------------
 
 #define g_eq(a, b) GENERIC_EQ(a).eq(a, b)

@@ -35,12 +35,12 @@ static bool EQ(String)(String a, String b) {
 }
 instance_Eq(String, EQ(String));
 
-FOREACH(impl_Eq_Array, TYPESET(ALL));
-FOREACH(impl_Eq_List, TYPESET(ALL));
-FOREACH(impl_Eq_Maybe, TYPESET(ALL));
+FOREACH(impl_Eq_Array, TYPESET_0);
+FOREACH(impl_Eq_List, TYPESET_0);
+FOREACH(impl_Eq_Maybe, TYPESET_0);
 
-#if defined(TYPESET_CONTAINER)
-FOREACH(impl_Eq_Array, TYPESET_CONTAINER);
-FOREACH(impl_Eq_List, TYPESET_CONTAINER);
-FOREACH(impl_Eq_Maybe, TYPESET_CONTAINER);
-#endif
+/* FOREACH(impl_Eq_Array, TYPESET_1); */
+/* FOREACH(impl_Eq_List, TYPESET_1); */
+/* FOREACH(impl_Eq_Maybe, TYPESET_1); */
+
+FOREACH(impl_Eq_Maybe, TYPESET_ARRAY_1);
