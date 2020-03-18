@@ -1,6 +1,10 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
+#include "../runner.h"
+
+#include "../../parsec/parser/ParsecRepeat.h"
+
 // -----------------------------------------------------------------------
 // ParsecRepeat(S, T)
 
@@ -16,3 +20,12 @@
   GENERIC_PARSECREPEAT(CPARSEC_STREAM_TYPE, p).pCount(n, p)
 #define count_min_max(m, n, p)                                           \
   GENERIC_PARSECREPEAT(CPARSEC_STREAM_TYPE, p).pCount_min_max(m, n, p)
+
+// -----------------------------------------------------------------------
+trait_ParsecRepeat(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
+trait_ParsecRepeat(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
+
+#ifdef CPARSEC_CONFIG_IMPLEMENT
+impl_ParsecRepeat(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
+impl_ParsecRepeat(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
+#endif

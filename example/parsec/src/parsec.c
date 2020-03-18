@@ -1,6 +1,9 @@
 /* -*- coding: utf-8-unix -*- */
-#include <cparsec3/easy_parsec/setup.h>
-#include <cparsec3/easy_parsec/types.h>
+
+// #define CPARSEC_CONFIG_DATA_SOURCE String
+// #define CPARSEC_CONFIG_POSITIONER Text
+// #define CPARSEC_CONFIG_POSITIONER
+#define CPARSEC_CONFIG_IMPLEMENT
 
 #include <cparsec3/easy_parsec/parser/char.h>
 #include <cparsec3/easy_parsec/parser/choice.h>
@@ -8,7 +11,6 @@
 #include <cparsec3/easy_parsec/parser/failure.h>
 #include <cparsec3/easy_parsec/parser/repeat.h>
 #include <cparsec3/easy_parsec/parser/token.h>
-#include <cparsec3/easy_parsec/runner.h>
 
 // -----------------------------------------------------------------------
 #define S CPARSEC_STREAM_TYPE

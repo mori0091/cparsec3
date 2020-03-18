@@ -1,6 +1,13 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
+#include "../runner.h"
+#include "choice.h"
+#include "combinator.h"
+#include "token.h"
+
+#include "../../parsec/parser/ParsecChar.h"
+
 // -----------------------------------------------------------------------
 // ParsecChar(S)
 #define newline() trait(ParsecChar(CPARSEC_STREAM_TYPE)).pNewline()
@@ -24,3 +31,10 @@
 
 #define char1(c) trait(ParsecChar(CPARSEC_STREAM_TYPE)).pChar1(c)
 #define string1(s) trait(ParsecChar(CPARSEC_STREAM_TYPE)).pString1(s)
+
+// -----------------------------------------------------------------------
+trait_ParsecChar(CPARSEC_STREAM_TYPE);
+
+#ifdef CPARSEC_CONFIG_IMPLEMENT
+impl_ParsecChar(CPARSEC_STREAM_TYPE);
+#endif

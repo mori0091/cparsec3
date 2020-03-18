@@ -1,6 +1,10 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
+#include "../runner.h"
+
+#include "../../parsec/parser/ParsecCombinator.h"
+
 // -----------------------------------------------------------------------
 // ParsecCombinator(S, T)
 #define TRAIT_PARSECCOMBINATOR(S, T) trait(ParsecCombinator(S, T))
@@ -18,3 +22,22 @@
   GENERIC_PARSECCOMBINATOR(CPARSEC_STREAM_TYPE, p).pLookAhead(p)
 #define notFollowedBy(p)                                                 \
   GENERIC_PARSECCOMBINATOR(CPARSEC_STREAM_TYPE, p).pNotFollowedBy(p)
+
+// -----------------------------------------------------------------------
+trait_ParsecCombinator(CPARSEC_STREAM_TYPE, None);
+trait_ParsecCombinator(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
+trait_ParsecCombinator(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
+trait_ParsecCombinator(CPARSEC_STREAM_TYPE,
+                       Array(Token(CPARSEC_STREAM_TYPE)));
+trait_ParsecCombinator(CPARSEC_STREAM_TYPE,
+                       Array(Tokens(CPARSEC_STREAM_TYPE)));
+
+#ifdef CPARSEC_CONFIG_IMPLEMENT
+impl_ParsecCombinator(CPARSEC_STREAM_TYPE, None);
+impl_ParsecCombinator(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
+impl_ParsecCombinator(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
+impl_ParsecCombinator(CPARSEC_STREAM_TYPE,
+                      Array(Token(CPARSEC_STREAM_TYPE)));
+impl_ParsecCombinator(CPARSEC_STREAM_TYPE,
+                      Array(Tokens(CPARSEC_STREAM_TYPE)));
+#endif
