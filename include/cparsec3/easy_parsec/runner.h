@@ -1,6 +1,16 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
+#include "../base/base_generics.h"
+
+#include "config.h"
+#include "types.h"
+
+#include "../parsec/parsec.h"
+#include "../parsec/stream.h"
+
+#include "../parsec/ParsecRunner.h"
+
 // -----------------------------------------------------------------------
 // ParsecRunner(S, T)
 
@@ -18,6 +28,23 @@
 #define parseTest(p, input)                                              \
   GENERIC_PARSECRUNNER(CPARSEC_STREAM_TYPE, p)                           \
       .pParseTest(p, CPARSEC_STREAM_NEW(input))
+
+// -----------------------------------------------------------------------
+trait_ParseError(CPARSEC_STREAM_TYPE);
+trait_ParsecRunner(CPARSEC_STREAM_TYPE, None);
+trait_ParsecRunner(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
+trait_ParsecRunner(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
+trait_ParsecRunner(CPARSEC_STREAM_TYPE, Array(Token(CPARSEC_STREAM_TYPE)));
+trait_ParsecRunner(CPARSEC_STREAM_TYPE, Array(Tokens(CPARSEC_STREAM_TYPE)));
+
+#ifdef CPARSEC_CONFIG_IMPLEMENT
+impl_ParseError(CPARSEC_STREAM_TYPE);
+impl_ParsecRunner(CPARSEC_STREAM_TYPE, None);
+impl_ParsecRunner(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
+impl_ParsecRunner(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
+impl_ParsecRunner(CPARSEC_STREAM_TYPE, Array(Token(CPARSEC_STREAM_TYPE)));
+impl_ParsecRunner(CPARSEC_STREAM_TYPE, Array(Tokens(CPARSEC_STREAM_TYPE)));
+#endif
 
 // -----------------------------------------------------------------------
 #define DO()                                                             \
