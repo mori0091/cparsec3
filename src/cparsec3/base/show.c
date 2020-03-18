@@ -104,12 +104,12 @@ static inline void TOSTRING(bool)(CharBuff* b, bool x) {
 instance_Show(bool, TOSTRING(bool));
 
 // -----------------------------------------------------------------------
-FOREACH(impl_Show_Array, TYPESET(ALL));
-FOREACH(impl_Show_List, TYPESET(ALL));
-FOREACH(impl_Show_Maybe, TYPESET(ALL));
+FOREACH(impl_Show_Array, TYPESET_0);
+FOREACH(impl_Show_List, TYPESET_0);
+FOREACH(impl_Show_Maybe, TYPESET_0);
 
-#if defined(TYPESET_CONTAINER)
-FOREACH(impl_Show_Array, TYPESET_CONTAINER);
-FOREACH(impl_Show_List, TYPESET_CONTAINER);
-FOREACH(impl_Show_Maybe, TYPESET_CONTAINER);
-#endif
+/* FOREACH(impl_Show_Array, TYPESET_1); */
+/* FOREACH(impl_Show_List, TYPESET_1); */
+/* FOREACH(impl_Show_Maybe, TYPESET_1); */
+
+FOREACH(impl_Show_Maybe, TYPESET_ARRAY_1);

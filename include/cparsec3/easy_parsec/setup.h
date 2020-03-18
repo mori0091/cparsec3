@@ -23,8 +23,6 @@
 
 // -----------------------------------------------------------------------
 #define trait_ParsecLibrary(S)                                           \
-  trait_Maybe(Array(Token(S)));                                          \
-  trait_Maybe(Array(Tokens(S)));                                         \
                                                                          \
   trait_ParseError(S);                                                   \
                                                                          \
@@ -67,8 +65,6 @@
   END_OF_STATEMENTS
 
 #define impl_ParsecLibrary(S)                                            \
-  /* impl_Maybe(Array(Token(S))); */                                     \
-  /* impl_Maybe(Array(Tokens(S))); */                                    \
                                                                          \
   impl_ParseError(S);                                                    \
                                                                          \

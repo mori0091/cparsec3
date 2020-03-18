@@ -63,12 +63,12 @@ static int CMP(String)(String a, String b) {
 }
 instance_Ord(String, CMP(String));
 
-FOREACH(impl_Ord_Array, TYPESET(ALL));
-FOREACH(impl_Ord_List, TYPESET(ALL));
-FOREACH(impl_Ord_Maybe, TYPESET(ALL));
+FOREACH(impl_Ord_Array, TYPESET_0);
+FOREACH(impl_Ord_List, TYPESET_0);
+FOREACH(impl_Ord_Maybe, TYPESET_0);
 
-#if defined(TYPESET_CONTAINER)
-FOREACH(impl_Ord_Array, TYPESET_CONTAINER);
-FOREACH(impl_Ord_List, TYPESET_CONTAINER);
-FOREACH(impl_Ord_Maybe, TYPESET_CONTAINER);
-#endif
+/* FOREACH(impl_Ord_Array, TYPESET_1); */
+/* FOREACH(impl_Ord_List, TYPESET_1); */
+/* FOREACH(impl_Ord_Maybe, TYPESET_1); */
+
+FOREACH(impl_Ord_Maybe, TYPESET_ARRAY_1);

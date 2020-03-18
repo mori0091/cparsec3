@@ -23,53 +23,50 @@
 #include "result.h"
 #include "tuple.h"
 
-#include "function.h"
 #include "funcptr.h"
+#include "function.h"
 
-FOREACH(trait_Eq, TYPESET(ALL));
-FOREACH(trait_Ord, TYPESET(ALL));
-FOREACH(trait_Show, TYPESET(ALL));
+// components
+#define TYPESET_0 TYPESET(ALL)
 
-FOREACH(trait_Mem, TYPESET(ALL));
-FOREACH(trait_Array, TYPESET(ALL));
-FOREACH(trait_List, TYPESET(ALL));
-FOREACH(trait_Maybe, TYPESET(ALL));
+FOREACH(trait_Eq, TYPESET_0);
+FOREACH(trait_Ord, TYPESET_0);
+FOREACH(trait_Show, TYPESET_0);
 
-FOREACH(trait_Eq, APPLY(Array, TYPESET(ALL)));
-FOREACH(trait_Eq, APPLY(List, TYPESET(ALL)));
-FOREACH(trait_Eq, APPLY(Maybe, TYPESET(ALL)));
+// containers (e.g. Array(T), List(T), etc.)
+#define TYPESET_1 TYPESET_ARRAY_1, TYPESET_LIST_1, TYPESET_MAYBE_1
+#define TYPESET_ARRAY_1 APPLY(Array, TYPESET_0)
+#define TYPESET_LIST_1 APPLY(List, TYPESET_0)
+#define TYPESET_MAYBE_1 APPLY(Maybe, TYPESET_0)
 
-FOREACH(trait_Ord, APPLY(Array, TYPESET(ALL)));
-FOREACH(trait_Ord, APPLY(List, TYPESET(ALL)));
-FOREACH(trait_Ord, APPLY(Maybe, TYPESET(ALL)));
+FOREACH(trait_Mem, TYPESET_0);
+FOREACH(trait_Array, TYPESET_0);
+FOREACH(trait_List, TYPESET_0);
+FOREACH(trait_Maybe, TYPESET_0);
 
-FOREACH(trait_Show, APPLY(Array, TYPESET(ALL)));
-FOREACH(trait_Show, APPLY(List, TYPESET(ALL)));
-FOREACH(trait_Show, APPLY(Maybe, TYPESET(ALL)));
+FOREACH(trait_Eq, TYPESET_1);
+FOREACH(trait_Ord, TYPESET_1);
+FOREACH(trait_Show, TYPESET_1);
 
-#if !defined(CPARSEC_ENABLE_NESTED_CONTAINER)
-#define TYPESET_COMPONENT TYPESET(ALL)
-#else
-#define TYPESET_COMPONENT TYPESET(ALL), TYPESET_CONTAINER
-#define TYPESET_CONTAINER                                                \
-  APPLY(Array, TYPESET(ALL)), APPLY(List, TYPESET(ALL)),                 \
-      APPLY(Maybe, TYPESET(ALL))
+// nested containers
+#define TYPESET_2 APPLY(Maybe, TYPESET_ARRAY_1)
 
-FOREACH(trait_Mem, TYPESET_CONTAINER);
-FOREACH(trait_Array, TYPESET_CONTAINER);
-FOREACH(trait_List, TYPESET_CONTAINER);
-FOREACH(trait_Maybe, TYPESET_CONTAINER);
+FOREACH(trait_Maybe, TYPESET_ARRAY_1);
 
-FOREACH(trait_Eq, APPLY(Array, TYPESET_CONTAINER));
-FOREACH(trait_Eq, APPLY(List, TYPESET_CONTAINER));
-FOREACH(trait_Eq, APPLY(Maybe, TYPESET_CONTAINER));
+FOREACH(trait_Eq, TYPESET_2);
+FOREACH(trait_Ord, TYPESET_2);
+FOREACH(trait_Show, TYPESET_2);
 
-FOREACH(trait_Ord, APPLY(Array, TYPESET_CONTAINER));
-FOREACH(trait_Ord, APPLY(List, TYPESET_CONTAINER));
-FOREACH(trait_Ord, APPLY(Maybe, TYPESET_CONTAINER));
+// #define TYPESET_2 TYPESET_ARRAY_2, TYPESET_LIST_2, TYPESET_MAYBE_2
+// #define TYPESET_ARRAY_2 APPLY(Array, TYPESET_1)
+// #define TYPESET_LIST_2 APPLY(List, TYPESET_1)
+// #define TYPESET_MAYBE_2 APPLY(Maybe, TYPESET_1)
 
-FOREACH(trait_Show, APPLY(Array, TYPESET_CONTAINER));
-FOREACH(trait_Show, APPLY(List, TYPESET_CONTAINER));
-FOREACH(trait_Show, APPLY(Maybe, TYPESET_CONTAINER));
+// FOREACH(trait_Mem, TYPESET_1);
+// FOREACH(trait_Array, TYPESET_1);
+// FOREACH(trait_List, TYPESET_1);
+// FOREACH(trait_Maybe, TYPESET_1);
 
-#endif
+// FOREACH(trait_Eq, TYPESET_2);
+// FOREACH(trait_Ord, TYPESET_2);
+// FOREACH(trait_Show, TYPESET_2);
