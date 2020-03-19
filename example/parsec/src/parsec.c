@@ -1,9 +1,10 @@
 /* -*- coding: utf-8-unix -*- */
 
 // #define CPARSEC_CONFIG_DATA_SOURCE String
-// #define CPARSEC_CONFIG_POSITIONER Text
-// #define CPARSEC_CONFIG_POSITIONER
-#define CPARSEC_CONFIG_IMPLEMENT
+// #define CPARSEC_CONFIG_POSITIONER Text  /* line/column */
+// #define CPARSEC_CONFIG_POSITIONER Index /* index */
+// #define CPARSEC_CONFIG_POSITIONER       /* memory address or else */
+#define CPARSEC_CONFIG_IMPLEMENT /* generate parsec code if defined */
 
 #include <cparsec3/easy_parsec/parser/char.h>
 #include <cparsec3/easy_parsec/parser/choice.h>

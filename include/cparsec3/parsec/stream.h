@@ -3,6 +3,7 @@
 
 #include "../base/base.h"
 #include "TextState.h"
+#include "IndexState.h"
 
 #define Stream(S) TYPE_NAME(Stream, S)
 #define Token(S) TYPE_NAME(Token, S)
@@ -57,6 +58,12 @@ trait_Stream(String);
 #define pToken_pTextState_String char
 #define pTokens_pTextState_String String
 trait_Stream(TextState(String));
+
+// -------------------------------------------------------------
+
+#define pToken_pIndexState_String char
+#define pTokens_pIndexState_String String
+trait_Stream(IndexState(String));
 
 // -------------------------------------------------------------
 C_API_END

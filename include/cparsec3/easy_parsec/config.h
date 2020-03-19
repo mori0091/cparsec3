@@ -46,3 +46,7 @@
 #define CPARSEC_STREAM_TYPE_DEFAULT__String_Text() JUST(TextState(String))
 #define CPARSEC_STREAM_CTOR_DEFAULT__String_Text()                       \
   JUST(trait(TextState(String)).create)
+#define CPARSEC_STREAM_TYPE_DEFAULT__String_Index()                      \
+  JUST(IndexState(String))
+#define CPARSEC_STREAM_CTOR_DEFAULT__String_Index()                      \
+  JUST(trait(IndexState(String)).create)
