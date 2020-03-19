@@ -4,110 +4,116 @@
 
 #include <string.h>
 
-impl_State(String);
+impl_TextState(String);
 
-#define ST State(String)
+#define S String
+#define ST TextState(S)
+
+typedef struct TextPosition TextPosition;
+struct TextPosition {
+  int line;
+  int column;
+};
 
 static bool null(ST s) {
-  return trait(Stream(String)).null(s.input);
+  return trait(Stream(S)).null(s.input);
 }
 
-static void updateState(char c, ST* s) {
-  switch ((int)(uint8_t)c) {
-  case '\0':
-    return;
-  case '\n':
-    s->sourcePos.line++;
-    s->sourcePos.column = 1;
-    s->lineOffset = s->offset + 1;
-    break;
-  case '\t':
-    s->sourcePos.column =
-        ((s->sourcePos.column - 1) / s->tabWidth + 1) * s->tabWidth + 1;
-    break;
-  default:
-    s->sourcePos.column++;
-    break;
-  }
-  s->offset++;
+static void update(Token(S) c, ST* s) {
+  assert(c);
   s->input++;
+  if (c == '\n') {
+    s->line++;
+    s->headOfLine = s->input;
+  }
 }
 
 static Maybe(Tuple(Token(ST), ST)) take1(ST s) {
-  Stream(String) SS = trait(Stream(String));
-  Maybe(Tuple(Token(String), String)) m = SS.take1(s.input);
+  Stream(S) SS = trait(Stream(S));
+  Maybe(Tuple(Token(S), S)) m = SS.take1(s.input);
   if (m.none) {
     return (Maybe(Tuple(Token(ST), ST))){
         .none = true,
     };
   }
-  updateState(m.value.e1, &s);
+  update(m.value.e1, &s);
   return (Maybe(Tuple(Token(ST), ST))){
       .value = {{m.value.e1}, {s}},
   };
 }
 
 static Maybe(Tuple(Tokens(ST), ST)) takeN(int n, ST s) {
-  Stream(String) SS = trait(Stream(String));
-  Maybe(Tuple(Tokens(String), String)) m = SS.takeN(n, s.input);
+  Stream(S) SS = trait(Stream(S));
+  Maybe(Tuple(Tokens(S), S)) m = SS.takeN(n, s.input);
   if (m.none) {
     return (Maybe(Tuple(Tokens(ST), ST))){.none = true};
   }
   const char* cs = m.value.e1;
   while (*cs) {
-    updateState(*cs++, &s);
+    update(*cs++, &s);
   }
   return (Maybe(Tuple(Tokens(ST), ST))){
       .value = {{m.value.e1}, {s}},
   };
 }
 
-static String lineTextOf(ST st) {
-  assert(st.lineOffset <= st.offset);
-  size_t tabWidth = st.tabWidth;
-  CharBuff b = {0};
+static TextPosition lineColumn(ST st, size_t tabWidth) {
+  assert(st.headOfLine <= st.input);
   int col = 0;
-  const char* beg = st.input + st.lineOffset - st.offset;
-  for (const char* c = beg; *c && *c != '\n'; c++) {
+  for (const Token(S)* c = st.headOfLine; c != st.input; c++) {
+    assert(*c && *c != '\n');
+    if (*c == '\t') {
+      int n = tabWidth - (col % tabWidth);
+      col += n;
+    } else {
+      col++;
+    }
+  }
+  return (TextPosition){.line = st.line, .column = col + 1};
+}
+
+static void printLineText(ST st, size_t tabWidth) {
+  assert(st.headOfLine <= st.input);
+  int col = 0;
+  for (const Token(S)* c = st.headOfLine; *c && *c != '\n'; c++) {
     if (*c == '\t') {
       int n = tabWidth - (col % tabWidth);
       col += n;
       if (0 < n) {
-        mem_printf(&b, "%*s", n, "");
+        printf("%*s", n, "");
       }
     } else {
       col++;
-      mem_printf(&b, "%c", *c);
+      printf("%c", *c);
     }
   }
-  if (!b.data || !*b.data) {
-    mem_printf(&b, "<empty line>");
+  if (!col) {
+    printf("<empty line>");
   }
-
-  return b.data;
+  printf("\n");
 }
 
 static Offset offsetOf(ST s) {
-  return s.offset;
+  return trait(Stream(S)).offsetOf(s.input);
 }
 
 static void printState(ST s) {
-  String lineText = lineTextOf(s);
-  int line = s.sourcePos.line;
-  int column = s.sourcePos.column;
-  String linePrefix = s.linePrefix;
-  assert(1 <= line);
-  assert(1 <= column);
-  int n = snprintf(0, 0, "%d", line);
+  size_t TAB_WIDTH = 8;
+  String LINE_PREFIX = " | ";
+  TextPosition pos = lineColumn(s, TAB_WIDTH);
+  assert(1 <= pos.line);
+  assert(1 <= pos.column);
+  int n = snprintf(0, 0, "%d", pos.line);
   assert(1 <= n);
-  printf("%d:%d:\n", line, column);
-  printf("%*s%s\n", n, "", linePrefix);
-  printf("%*d%s%s\n", n, line, linePrefix, lineText);
-  printf("%*s%s%*s^\n", n, "", linePrefix, column - 1, "");
+  printf("%d:%d:\n", pos.line, pos.column);
+  printf("%*s%s\n", n, "", LINE_PREFIX);
+  printf("%*d%s", n, pos.line, LINE_PREFIX);
+  printLineText(s, TAB_WIDTH);
+  printf("%*s%s%*s^\n", n, "", LINE_PREFIX, pos.column - 1, "");
 }
 
 Stream(ST) Trait(Stream(ST)) {
-  Stream(String) SS = trait(Stream(String));
+  Stream(S) SS = trait(Stream(S));
   return (Stream(ST)){
       .null = null,
       .chunkToTokens = SS.chunkToTokens,

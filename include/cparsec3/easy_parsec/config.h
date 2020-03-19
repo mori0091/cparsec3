@@ -43,6 +43,6 @@
 #define CPARSEC_IDENTITY(...) __VA_ARGS__
 #define CPARSEC_STREAM_TYPE_DEFAULT__String_() JUST(String)
 #define CPARSEC_STREAM_CTOR_DEFAULT__String_() JUST(CPARSEC_IDENTITY)
-#define CPARSEC_STREAM_TYPE_DEFAULT__String_Text() JUST(State(String))
+#define CPARSEC_STREAM_TYPE_DEFAULT__String_Text() JUST(TextState(String))
 #define CPARSEC_STREAM_CTOR_DEFAULT__String_Text()                       \
-  JUST(trait(State(String)).create)
+  JUST(trait(TextState(String)).create)

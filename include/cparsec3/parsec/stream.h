@@ -2,7 +2,7 @@
 #pragma once
 
 #include "../base/base.h"
-#include "state.h"
+#include "TextState.h"
 
 #define Stream(S) TYPE_NAME(Stream, S)
 #define Token(S) TYPE_NAME(Token, S)
@@ -54,9 +54,9 @@ trait_Stream(String);
 
 // -------------------------------------------------------------
 
-#define pToken_pState_String char
-#define pTokens_pState_String String
-trait_Stream(State(String));
+#define pToken_pTextState_String char
+#define pTokens_pTextState_String String
+trait_Stream(TextState(String));
 
 // -------------------------------------------------------------
 C_API_END
