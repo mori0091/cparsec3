@@ -106,7 +106,7 @@
      ContErrArgs(S, T) /* error -> state -> reply */                     \
   ) {                                                                    \
     g_bind((err, e1, s1, e2, s2), *args);                                \
-    ParseError(S) e = FUNC_NAME(merge, ParseError(S))(e1, e2);           \
+    ParseError(S) e = trait(ParseError(S)).merge(e1, e2);                \
     Stream(S) SS = trait(Stream(S));                                     \
     S s = (SS.offsetOf(s1) > SS.offsetOf(s2) ? s1 : s2);                 \
     return fn_apply(err, e, s);                                          \

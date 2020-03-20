@@ -92,21 +92,16 @@
     int n = IS.chunkLength(pattern);                                     \
     __auto_type maybe = IS.takeN(n, s);                                  \
     if (maybe.none) {                                                    \
-      ParseError(S) e = {                                                \
-          .offset = IS.offsetOf(s),                                      \
-          .unexpected.value.type = END_OF_INPUT,                         \
-          .expecting = NULL,                                             \
-      };                                                                 \
+      Offset o = IS.offsetOf(s);                                         \
+      ParseErrorT(S) E = trait(ParseError(S));                           \
+      ParseError(S) e = E.unexpected_end_of_input(o, NULL);              \
       return fn_apply(eerr, e, s);                                       \
     }                                                                    \
     Tokens(S) actual = maybe.value.e1;                                   \
     if (!fn_apply(test, pattern, actual)) {                              \
-      ParseError(S) e = {                                                \
-          .offset = IS.offsetOf(s),                                      \
-          .unexpected.value = {.type = TOKENS,                           \
-                               .tokens = IS.chunkToTokens(actual)},      \
-          .expecting = NULL,                                             \
-      };                                                                 \
+      Offset o = IS.offsetOf(s);                                         \
+      ParseErrorT(S) E = trait(ParseError(S));                           \
+      ParseError(S) e = E.unexpected_tokens(o, actual, NULL);            \
       return fn_apply(eerr, e, s);                                       \
     }                                                                    \
     int m = IS.chunkLength(actual);                                      \
