@@ -34,7 +34,7 @@
                                                                          \
   typedef struct ErrorItemT(S) ErrorItemT(S);                            \
   struct ErrorItemT(S) {                                                 \
-    bool (*isUnknown)(ErrorItem(S) e);                                   \
+    bool (*null)(ErrorItem(S) e);                                        \
     Hints(S) (*toHints)(Token(S) t);                                     \
     Hints(S) (*merge)(Hints(S) hs1, Hints(S) hs2);                       \
     void (*print)(ErrorItem(S) e);                                       \
@@ -51,8 +51,7 @@
   /* impl_Maybe(ErrorItem(S)); */                                        \
   impl_List(ErrorItem(S));                                               \
                                                                          \
-  static inline bool FUNC_NAME(isUnknown,                                \
-                               ErrorItem(S))(ErrorItem(S) e) {           \
+  static inline bool FUNC_NAME(null, ErrorItem(S))(ErrorItem(S) e) {     \
     switch (e.type) {                                                    \
     case LABEL:                                                          \
       return !e.label;                                                   \
@@ -115,7 +114,7 @@
                                                                          \
   ErrorItemT(S) Trait(ErrorItem(S)) {                                    \
     return (ErrorItemT(S)){                                              \
-        .isUnknown = FUNC_NAME(isUnknown, ErrorItem(S)),                 \
+        .null = FUNC_NAME(null, ErrorItem(S)),                           \
         .toHints = FUNC_NAME(toHints, Hints(S)),                         \
         .merge = FUNC_NAME(merge, Hints(S)),                             \
         .print = FUNC_NAME(print, ErrorItem(S)),                         \
@@ -144,7 +143,7 @@
                                                                          \
   typedef struct ParseErrorT(S) ParseErrorT(S);                          \
   struct ParseErrorT(S) {                                                \
-    bool (*isUnknown)(ParseError(S) e);                                  \
+    bool (*null)(ParseError(S) e);                                       \
     ParseError(S) (*merge)(ParseError(S) e1, ParseError(S) e2);          \
     void (*print)(ParseError(S) e);                                      \
   };                                                                     \
@@ -160,11 +159,10 @@
                                                                          \
   impl_ErrorItem(S);                                                     \
                                                                          \
-  static inline bool FUNC_NAME(isUnknown,                                \
-                               ParseError(S))(ParseError(S) e) {         \
+  static inline bool FUNC_NAME(null, ParseError(S))(ParseError(S) e) {   \
     ErrorItemT(S) EI = trait(ErrorItem(S));                              \
     ListT(ErrorItem(S)) L = trait(List(ErrorItem(S)));                   \
-    return ((e.unexpected.none || EI.isUnknown(e.unexpected.value)) &&   \
+    return ((e.unexpected.none || EI.null(e.unexpected.value)) &&        \
             L.null(e.expecting));                                        \
   }                                                                      \
                                                                          \
@@ -172,7 +170,7 @@
     ErrorItemT(S) EI = trait(ErrorItem(S));                              \
     ParseErrorT(S) E = trait(ParseError(S));                             \
     /* printf("error:%" PRIdMAX ":\n", e.offset); */                     \
-    if (E.isUnknown(e)) {                                                \
+    if (E.null(e)) {                                                     \
       printf("unknown error\n");                                         \
       return;                                                            \
     }                                                                    \
@@ -236,7 +234,7 @@
                                                                          \
   ParseErrorT(S) Trait(ParseError(S)) {                                  \
     return (ParseErrorT(S)){                                             \
-        .isUnknown = FUNC_NAME(isUnknown, ParseError(S)),                \
+        .null = FUNC_NAME(null, ParseError(S)),                          \
         .merge = FUNC_NAME(merge, ParseError(S)),                        \
         .print = FUNC_NAME(print, ParseError(S)),                        \
     };                                                                   \
