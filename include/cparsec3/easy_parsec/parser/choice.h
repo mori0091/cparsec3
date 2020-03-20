@@ -2,8 +2,8 @@
 #pragma once
 
 #include "../runner.h"
-#include "failure.h"
 #include "combinator.h"
+#include "failure.h"
 
 #include "../../parsec/parser/ParsecChoice.h"
 

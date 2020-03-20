@@ -11,9 +11,9 @@
 #define typedef_TextState(S)                                             \
   typedef struct TextState(S) TextState(S);                              \
   struct TextState(S) {                                                  \
-    S input;         /**< rest of the unprocessed token-stream */        \
-    S headOfLine;    /**< head of line */                                \
-    size_t line;     /**< line number */                                 \
+    S input;      /**< rest of the unprocessed token-stream */           \
+    S headOfLine; /**< head of line */                                   \
+    size_t line;  /**< line number */                                    \
   };                                                                     \
                                                                          \
   END_OF_STATEMENTS

@@ -30,7 +30,7 @@ impl_ParsecFailure(CPARSEC_STREAM_TYPE, None);
 impl_ParsecFailure(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
 impl_ParsecFailure(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
 impl_ParsecFailure(CPARSEC_STREAM_TYPE,
-                    Array(Token(CPARSEC_STREAM_TYPE)));
+                   Array(Token(CPARSEC_STREAM_TYPE)));
 impl_ParsecFailure(CPARSEC_STREAM_TYPE,
-                    Array(Tokens(CPARSEC_STREAM_TYPE)));
+                   Array(Tokens(CPARSEC_STREAM_TYPE)));
 #endif
