@@ -52,24 +52,18 @@
     Stream(S) SS = trait(Stream(S));                                     \
     __auto_type maybe = SS.take1(s);                                     \
     if (maybe.none) {                                                    \
-      ParseError(S) e = {                                                \
-          .offset = SS.offsetOf(s),                                      \
-          .unexpected.value.type = END_OF_INPUT,                         \
-          .expecting = expect,                                           \
-      };                                                                 \
+      Offset o = SS.offsetOf(s);                                         \
+      ParseErrorT(S) E = trait(ParseError(S));                           \
+      ParseError(S) e = E.unexpected_end_of_input(o, expect);            \
       return fn_apply(eerr, e, s);                                       \
     }                                                                    \
                                                                          \
     Token(S) a = maybe.value.e1;                                         \
     __auto_type maybe2 = fn_apply(testToken, a);                         \
     if (maybe2.none) {                                                   \
-      ParseError(S) e = {                                                \
-          .offset = SS.offsetOf(s),                                      \
-          .unexpected.value.type = TOKENS,                               \
-          .unexpected.value.tokens =                                     \
-              trait(List(Token(S))).cons(a, NULL),                       \
-          .expecting = expect,                                           \
-      };                                                                 \
+      Offset o = SS.offsetOf(s);                                         \
+      ParseErrorT(S) E = trait(ParseError(S));                           \
+      ParseError(S) e = E.unexpected_token(o, a, expect);                \
       return fn_apply(eerr, e, s);                                       \
     }                                                                    \
                                                                          \
