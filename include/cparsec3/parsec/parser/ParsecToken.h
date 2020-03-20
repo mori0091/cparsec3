@@ -19,7 +19,7 @@
   typedef struct ParsecToken(S, T) ParsecToken(S, T);                    \
   struct ParsecToken(S, T) {                                             \
     Parsec(S, T) (*pSatisfyMap)(FnMapToken(S, T) testToken,              \
-                                Hints(Token(S)) expecting);              \
+                                Hints(S) expecting);                     \
   };                                                                     \
                                                                          \
   ParsecToken(S, T) Trait(ParsecToken(S, T));                            \
@@ -45,9 +45,9 @@
 // -----------------------------------------------------------------------
 /* satisfyMap(testToken, expecting) */
 #define impl_satisfyMap(S, T)                                            \
-  typedef_Fn_r(Fn(Token(S), Maybe(T)), Hints(Token(S)), UnParser(S, T)); \
-  fn(FUNC_NAME(satisfyMapImpl, S, T), Fn(Token(S), Maybe(T)),            \
-     Hints(Token(S)), UnParserArgs(S, T)) {                              \
+  typedef_Fn_r(Fn(Token(S), Maybe(T)), Hints(S), UnParser(S, T));        \
+  fn(FUNC_NAME(satisfyMapImpl, S, T), Fn(Token(S), Maybe(T)), Hints(S),  \
+     UnParserArgs(S, T)) {                                               \
     g_bind((testToken, expect, s, cok, , , eerr), *args);                \
     Stream(S) SS = trait(Stream(S));                                     \
     __auto_type maybe = SS.take1(s);                                     \
@@ -77,7 +77,7 @@
   }                                                                      \
                                                                          \
   static Parsec(S, T) FUNC_NAME(satisfyMap, S, T)(                       \
-      FnMapToken(S, T) testToken, Hints(Token(S)) expecting) {           \
+      FnMapToken(S, T) testToken, Hints(S) expecting) {                  \
     __auto_type f = FUNC_NAME(satisfyMapImpl, S, T)();                   \
     return (Parsec(S, T)){                                               \
         .unParser = fn_apply(f, testToken, expecting),                   \

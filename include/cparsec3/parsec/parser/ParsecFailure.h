@@ -15,9 +15,9 @@
   typedef struct ParsecFailure(S, T) ParsecFailure(S, T);                \
   struct ParsecFailure(S, T) {                                           \
     Parsec(S, T) (*pParseError)(ParseError(S) e);                        \
-    Parsec(S, T) (*pFailure)(Maybe(ErrorItem(Token(S))) unexpected,      \
-                             List(ErrorItem(Token(S))) expected);        \
-    Parsec(S, T) (*pUnexpected)(ErrorItem(Token(S)) item);               \
+    Parsec(S, T) (*pFailure)(Maybe(ErrorItem(S)) unexpected,             \
+                             List(ErrorItem(S)) expected);               \
+    Parsec(S, T) (*pUnexpected)(ErrorItem(S) item);                      \
   };                                                                     \
                                                                          \
   ParsecFailure(S, T) Trait(ParsecFailure(S, T));                        \
