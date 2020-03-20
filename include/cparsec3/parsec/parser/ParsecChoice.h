@@ -86,7 +86,7 @@
      ContOkArgs(S, T) /* x -> state -> hint -> reply */                  \
   ) {                                                                    \
     g_bind((ok, e1, x, s, hs), *args);                                   \
-    hs = FUNC_NAME(merge, Hints(S))(e1.expecting, hs);                   \
+    hs = trait(ErrorItem(S)).merge(e1.expecting, hs);                    \
     return fn_apply(ok, x, s, hs);                                       \
   }                                                                      \
                                                                          \

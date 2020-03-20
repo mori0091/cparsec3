@@ -144,7 +144,7 @@
   static Parsec(S, Token(S)) FUNC_NAME(single, S)(Token(S) t) {          \
     __auto_type f = FUNC_NAME(singleTestToken, S)();                     \
     return trait(ParsecToken(S, Token(S)))                               \
-        .pSatisfyMap(fn_apply(f, t), FUNC_NAME(toHints, Token(S))(t));   \
+        .pSatisfyMap(fn_apply(f, t), trait(ErrorItem(S)).toHints(t));    \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS
