@@ -34,8 +34,10 @@ trait_ParseError(CPARSEC_STREAM_TYPE);
 trait_ParsecRunner(CPARSEC_STREAM_TYPE, None);
 trait_ParsecRunner(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
 trait_ParsecRunner(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
-trait_ParsecRunner(CPARSEC_STREAM_TYPE, Array(Token(CPARSEC_STREAM_TYPE)));
-trait_ParsecRunner(CPARSEC_STREAM_TYPE, Array(Tokens(CPARSEC_STREAM_TYPE)));
+trait_ParsecRunner(CPARSEC_STREAM_TYPE,
+                   Array(Token(CPARSEC_STREAM_TYPE)));
+trait_ParsecRunner(CPARSEC_STREAM_TYPE,
+                   Array(Tokens(CPARSEC_STREAM_TYPE)));
 
 #ifdef CPARSEC_CONFIG_IMPLEMENT
 impl_ParseError(CPARSEC_STREAM_TYPE);
@@ -43,7 +45,8 @@ impl_ParsecRunner(CPARSEC_STREAM_TYPE, None);
 impl_ParsecRunner(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
 impl_ParsecRunner(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
 impl_ParsecRunner(CPARSEC_STREAM_TYPE, Array(Token(CPARSEC_STREAM_TYPE)));
-impl_ParsecRunner(CPARSEC_STREAM_TYPE, Array(Tokens(CPARSEC_STREAM_TYPE)));
+impl_ParsecRunner(CPARSEC_STREAM_TYPE,
+                  Array(Tokens(CPARSEC_STREAM_TYPE)));
 #endif
 
 // -----------------------------------------------------------------------
@@ -74,6 +77,6 @@ impl_ParsecRunner(CPARSEC_STREAM_TYPE, Array(Tokens(CPARSEC_STREAM_TYPE)));
     Stream(CPARSEC_STREAM_TYPE) SS = trait(Stream(CPARSEC_STREAM_TYPE)); \
     __auto_type _ok_ =                                                   \
         (SS.offsetOf(_s0_) < SS.offsetOf(_s_) ? _cok_ : _eok_);          \
-    Hints(Token(CPARSEC_STREAM_TYPE)) empty_hints = {0};                 \
+    Hints(CPARSEC_STREAM_TYPE) empty_hints = {0};                        \
     return fn_apply(_ok_, _x_, _s_, empty_hints);                        \
   } while (0)

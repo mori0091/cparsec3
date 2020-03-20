@@ -59,8 +59,8 @@
      ContErrArgs(S, T)              /* error -> state -> reply */        \
   ) {                                                                    \
     g_bind((l, f, e, st), *args);                                        \
-    ErrorItem(Token(S)) item = {.type = LABEL, .label = l};              \
-    e.expecting = g_list(ErrorItem(Token(S)), item);                     \
+    ErrorItem(S) item = {.type = LABEL, .label = l};                     \
+    e.expecting = g_list(ErrorItem(S), item);                            \
     return fn_apply(f, e, st);                                           \
   }                                                                      \
                                                                          \

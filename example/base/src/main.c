@@ -169,35 +169,40 @@ void test_Array6(void) {
 
   printf("s = g_slice(a, 2) ... [0, 2)\n");
   s = g_slice(a, 2);
-  for (Itr(Slice(Array(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+  for (Itr(Slice(Array(int))) it = g_itr(s); !g_null(it);
+       it = g_next(it)) {
     printf("%d ", g_get(it));
   }
   printf("\n");
 
   printf("s = g_slice(a, -2) ... [0, N-2)\n");
   s = g_slice(a, -2);
-  for (Itr(Slice(Array(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+  for (Itr(Slice(Array(int))) it = g_itr(s); !g_null(it);
+       it = g_next(it)) {
     printf("%d ", g_get(it));
   }
   printf("\n");
 
   printf("s = g_slice(a, 1, 3) ... [1, 3)\n");
   s = g_slice(a, 1, 3);
-  for (Itr(Slice(Array(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+  for (Itr(Slice(Array(int))) it = g_itr(s); !g_null(it);
+       it = g_next(it)) {
     printf("%d ", g_get(it));
   }
   printf("\n");
 
   printf("s = g_slice(a, -3, -1) ... [N-3, N-1)\n");
   s = g_slice(a, -3, -1);
-  for (Itr(Slice(Array(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+  for (Itr(Slice(Array(int))) it = g_itr(s); !g_null(it);
+       it = g_next(it)) {
     printf("%d ", g_get(it));
   }
   printf("\n");
 
   printf("s = g_slice(a, 1, -1) ... [1, N-1)\n");
   s = g_slice(a, 1, -1);
-  for (Itr(Slice(Array(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+  for (Itr(Slice(Array(int))) it = g_itr(s); !g_null(it);
+       it = g_next(it)) {
     printf("%d ", g_get(it));
   }
   printf("\n");
@@ -212,35 +217,40 @@ void test_List6(void) {
 
   printf("s = g_slice(xs, 2) ... [0, 2)\n");
   s = g_slice(xs, 2);
-  for (Itr(Slice(List(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+  for (Itr(Slice(List(int))) it = g_itr(s); !g_null(it);
+       it = g_next(it)) {
     printf("%d ", g_get(it));
   }
   printf("\n");
 
   printf("s = g_slice(xs, -2) ... [0, N-2)\n");
   s = g_slice(xs, -2);
-  for (Itr(Slice(List(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+  for (Itr(Slice(List(int))) it = g_itr(s); !g_null(it);
+       it = g_next(it)) {
     printf("%d ", g_get(it));
   }
   printf("\n");
 
   printf("s = g_slice(xs, 1, 3) ... [1, 3)\n");
   s = g_slice(xs, 1, 3);
-  for (Itr(Slice(List(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+  for (Itr(Slice(List(int))) it = g_itr(s); !g_null(it);
+       it = g_next(it)) {
     printf("%d ", g_get(it));
   }
   printf("\n");
 
   printf("s = g_slice(xs, -3, -1) ... [N-3, N-1)\n");
   s = g_slice(xs, -3, -1);
-  for (Itr(Slice(List(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+  for (Itr(Slice(List(int))) it = g_itr(s); !g_null(it);
+       it = g_next(it)) {
     printf("%d ", g_get(it));
   }
   printf("\n");
 
   printf("s = g_slice(xs, 1, -1) ... [1, N-1)\n");
   s = g_slice(xs, 1, -1);
-  for (Itr(Slice(List(int))) it = g_itr(s); !g_null(it); it = g_next(it)) {
+  for (Itr(Slice(List(int))) it = g_itr(s); !g_null(it);
+       it = g_next(it)) {
     printf("%d ", g_get(it));
   }
   printf("\n");
@@ -397,7 +407,8 @@ void test_Array11(void) {
   Slice(Array(int)) s = g_slice(a, 1, -1);
   printf("iterator Itr(Slice(C)) is also an iterable\n");
   Itr(Slice(Array(int))) i = g_itr(s);
-  for (Itr(Slice(Array(int))) it = g_itr(i); !g_null(it); it = g_next(it)) {
+  for (Itr(Slice(Array(int))) it = g_itr(i); !g_null(it);
+       it = g_next(it)) {
     printf("%d ", g_get(it));
   }
   printf("\n");
@@ -412,7 +423,8 @@ void test_List11(void) {
   Slice(List(int)) s = g_slice(xs, 1, -1);
   printf("iterator Itr(Slice(C)) is also an iterable\n");
   Itr(Slice(List(int))) i = g_itr(s);
-  for (Itr(Slice(List(int))) it = g_itr(i); !g_null(it); it = g_next(it)) {
+  for (Itr(Slice(List(int))) it = g_itr(i); !g_null(it);
+       it = g_next(it)) {
     printf("%d ", g_get(it));
   }
   printf("\n");

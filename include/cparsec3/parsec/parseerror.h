@@ -4,14 +4,19 @@
 #include "../base/base.h"
 
 // -----------------------------------------------------------------------
-#define ErrorItem(T) TYPE_NAME(ErrorItem, T)
+#define ErrorItem(S) TYPE_NAME(ErrorItem, S)   // data type
+#define ErrorItemT(S) TYPE_NAME(ErrorItemT, S) // trait
 
 // -----------------------------------------------------------------------
-#define trait_ErrorItem(T)                                               \
+// type alias for expecting items
+#define Hints(S) List(ErrorItem(S)) // data type
+
+// -----------------------------------------------------------------------
+#define trait_ErrorItem(S)                                               \
   C_API_BEGIN                                                            \
                                                                          \
-  typedef struct ErrorItem(T) ErrorItem(T);                              \
-  struct ErrorItem(T) {                                                  \
+  typedef struct ErrorItem(S) ErrorItem(S);                              \
+  struct ErrorItem(S) {                                                  \
     enum {                                                               \
       LABEL,                                                             \
       TOKENS,                                                            \
@@ -19,18 +24,35 @@
     } type;                                                              \
     union {                                                              \
       String label;                                                      \
-      List(T) tokens;                                                    \
+      List(Token(S)) tokens;                                             \
     };                                                                   \
   };                                                                     \
+                                                                         \
+  trait_Maybe(ErrorItem(S));                                             \
+  typedef ErrorItem(S) Item(List(ErrorItem(S)));                         \
+  trait_List(ErrorItem(S));                                              \
+                                                                         \
+  typedef struct ErrorItemT(S) ErrorItemT(S);                            \
+  struct ErrorItemT(S) {                                                 \
+    bool (*isUnknown)(ErrorItem(S) e);                                   \
+    Hints(S) (*toHints)(Token(S) t);                                     \
+    Hints(S) (*merge)(Hints(S) hs1, Hints(S) hs2);                       \
+    void (*print)(ErrorItem(S) e);                                       \
+  };                                                                     \
+                                                                         \
+  ErrorItemT(S) Trait(ErrorItem(S));                                     \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
-#define impl_ErrorItem(T)                                                \
+#define impl_ErrorItem(S)                                                \
   C_API_BEGIN                                                            \
                                                                          \
+  /* impl_Maybe(ErrorItem(S)); */                                        \
+  impl_List(ErrorItem(S));                                               \
+                                                                         \
   static inline bool FUNC_NAME(isUnknown,                                \
-                               ErrorItem(T))(ErrorItem(T) e) {           \
+                               ErrorItem(S))(ErrorItem(S) e) {           \
     switch (e.type) {                                                    \
     case LABEL:                                                          \
       return !e.label;                                                   \
@@ -43,49 +65,7 @@
     }                                                                    \
   }                                                                      \
                                                                          \
-  C_API_END                                                              \
-  END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-#define ParseError(S) TYPE_NAME(ParseError, S)
-
-// -----------------------------------------------------------------------
-#define trait_ParseError(S)                                              \
-  C_API_BEGIN                                                            \
-                                                                         \
-  trait_ErrorItem(Token(S));                                             \
-  trait_Maybe(ErrorItem(Token(S)));                                      \
-  typedef ErrorItem(Token(S)) Item(List(ErrorItem(Token(S))));           \
-  trait_List(ErrorItem(Token(S)));                                       \
-                                                                         \
-  typedef struct ParseError(S) ParseError(S);                            \
-  struct ParseError(S) {                                                 \
-    Offset offset;                                                       \
-    Maybe(ErrorItem(Token(S))) unexpected;                               \
-    List(ErrorItem(Token(S))) expecting;                                 \
-  };                                                                     \
-                                                                         \
-  C_API_END                                                              \
-  END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-#define impl_ParseError(S)                                               \
-  C_API_BEGIN                                                            \
-                                                                         \
-  impl_ErrorItem(Token(S));                                              \
-  /* impl_Maybe(ErrorItem(Token(S))); */                                 \
-  impl_List(ErrorItem(Token(S)));                                        \
-                                                                         \
-  static inline bool FUNC_NAME(isUnknown,                                \
-                               ParseError(S))(ParseError(S) e) {         \
-    return ((e.unexpected.none ||                                        \
-             FUNC_NAME(isUnknown,                                        \
-                       ErrorItem(Token(S)))(e.unexpected.value)) &&      \
-            !e.expecting);                                               \
-  }                                                                      \
-                                                                         \
-  static inline void FUNC_NAME(print, ErrorItem(Token(S)))(              \
-      ErrorItem(Token(S)) e) {                                           \
+  static inline void FUNC_NAME(print, ErrorItem(S))(ErrorItem(S) e) {    \
     switch (e.type) {                                                    \
     case LABEL:                                                          \
       printf("%s", e.label);                                             \
@@ -102,68 +82,25 @@
       break;                                                             \
     }                                                                    \
   }                                                                      \
-  static inline void FUNC_NAME(print, ParseError(S))(ParseError(S) e) {  \
-    /* printf("error:%" PRIdMAX ":\n", e.offset); */                     \
-    if (FUNC_NAME(isUnknown, ParseError(S))(e)) {                        \
-      printf("unknown error\n");                                         \
-      return;                                                            \
-    }                                                                    \
-    void (*printErrorItem)(ErrorItem(Token(S)) t) =                      \
-        FUNC_NAME(print, ErrorItem(Token(S)));                           \
-    if (!e.unexpected.none) {                                            \
-      printf("unexpected ");                                             \
-      printErrorItem(e.unexpected.value);                                \
-      printf("\n");                                                      \
-    }                                                                    \
-    if (e.expecting) {                                                   \
-      printf("expecting ");                                              \
-      ListT(ErrorItem(Token(S))) L = trait(List(ErrorItem(Token(S))));   \
-      List(ErrorItem(Token(S))) xs = e.expecting;                        \
-      if (!xs) {                                                         \
-        printf("\n");                                                    \
-        return;                                                          \
-      }                                                                  \
-      printErrorItem(L.head(xs));                                        \
-      xs = L.tail(xs);                                                   \
-      if (!xs) {                                                         \
-        printf("\n");                                                    \
-        return;                                                          \
-      }                                                                  \
-      if (!L.tail(xs)) {                                                 \
-        printf(" or ");                                                  \
-        printErrorItem(L.head(xs));                                      \
-        printf("\n");                                                    \
-        return;                                                          \
-      }                                                                  \
-      for (; L.tail(xs); xs = L.tail(xs)) {                              \
-        printf(", ");                                                    \
-        printErrorItem(L.head(xs));                                      \
-      }                                                                  \
-      printf(", or ");                                                   \
-      printErrorItem(L.head(xs));                                        \
-      printf("\n");                                                      \
-    }                                                                    \
-  }                                                                      \
                                                                          \
-  static inline Hints(Token(S))                                          \
-      FUNC_NAME(toHints, Token(S))(Token(S) t) {                         \
-    ErrorItem(Token(S)) item = {                                         \
+  static inline Hints(S) FUNC_NAME(toHints, Hints(S))(Token(S) t) {      \
+    ErrorItem(S) item = {                                                \
         .type = TOKENS,                                                  \
         .tokens = trait(List(Token(S))).cons(t, NULL),                   \
     };                                                                   \
-    return trait(List(ErrorItem(Token(S)))).cons(item, NULL);            \
+    return trait(List(ErrorItem(S))).cons(item, NULL);                   \
   }                                                                      \
                                                                          \
-  static inline Hints(Token(S)) FUNC_NAME(merge, Hints(Token(S)))(       \
-      Hints(Token(S)) hs1, Hints(Token(S)) hs2) {                        \
-    ListT(ErrorItem(Token(S))) L = trait(List(ErrorItem(Token(S))));     \
+  static inline Hints(S)                                                 \
+      FUNC_NAME(merge, Hints(S))(Hints(S) hs1, Hints(S) hs2) {           \
+    ListT(ErrorItem(S)) L = trait(List(ErrorItem(S)));                   \
     if (L.null(hs1)) {                                                   \
       return hs2;                                                        \
     }                                                                    \
     if (L.null(hs2)) {                                                   \
       return hs1;                                                        \
     }                                                                    \
-    List(ErrorItem(Token(S))) x = NULL;                                  \
+    List(ErrorItem(S)) x = NULL;                                         \
     while (!L.null(hs1)) {                                               \
       x = L.cons(L.head(hs1), x);                                        \
       hs1 = L.tail(hs1);                                                 \
@@ -174,6 +111,104 @@
     }                                                                    \
     L.reverse(&x);                                                       \
     return x;                                                            \
+  }                                                                      \
+                                                                         \
+  ErrorItemT(S) Trait(ErrorItem(S)) {                                    \
+    return (ErrorItemT(S)){                                              \
+        .isUnknown = FUNC_NAME(isUnknown, ErrorItem(S)),                 \
+        .toHints = FUNC_NAME(toHints, Hints(S)),                         \
+        .merge = FUNC_NAME(merge, Hints(S)),                             \
+        .print = FUNC_NAME(print, ErrorItem(S)),                         \
+    };                                                                   \
+  }                                                                      \
+                                                                         \
+  C_API_END                                                              \
+  END_OF_STATEMENTS
+
+// -----------------------------------------------------------------------
+#define ParseError(S) TYPE_NAME(ParseError, S)
+#define ParseErrorT(S) TYPE_NAME(ParseErrorT, S)
+
+// -----------------------------------------------------------------------
+#define trait_ParseError(S)                                              \
+  C_API_BEGIN                                                            \
+                                                                         \
+  trait_ErrorItem(S);                                                    \
+                                                                         \
+  typedef struct ParseError(S) ParseError(S);                            \
+  struct ParseError(S) {                                                 \
+    Offset offset;                                                       \
+    Maybe(ErrorItem(S)) unexpected;                                      \
+    List(ErrorItem(S)) expecting;                                        \
+  };                                                                     \
+                                                                         \
+  typedef struct ParseErrorT(S) ParseErrorT(S);                          \
+  struct ParseErrorT(S) {                                                \
+    bool (*isUnknown)(ParseError(S) e);                                  \
+    ParseError(S) (*merge)(ParseError(S) e1, ParseError(S) e2);          \
+    void (*print)(ParseError(S) e);                                      \
+  };                                                                     \
+                                                                         \
+  ParseErrorT(S) Trait(ParseError(S));                                   \
+                                                                         \
+  C_API_END                                                              \
+  END_OF_STATEMENTS
+
+// -----------------------------------------------------------------------
+#define impl_ParseError(S)                                               \
+  C_API_BEGIN                                                            \
+                                                                         \
+  impl_ErrorItem(S);                                                     \
+                                                                         \
+  static inline bool FUNC_NAME(isUnknown,                                \
+                               ParseError(S))(ParseError(S) e) {         \
+    ErrorItemT(S) EI = trait(ErrorItem(S));                              \
+    ListT(ErrorItem(S)) L = trait(List(ErrorItem(S)));                   \
+    return ((e.unexpected.none || EI.isUnknown(e.unexpected.value)) &&   \
+            L.null(e.expecting));                                        \
+  }                                                                      \
+                                                                         \
+  static inline void FUNC_NAME(print, ParseError(S))(ParseError(S) e) {  \
+    ErrorItemT(S) EI = trait(ErrorItem(S));                              \
+    ParseErrorT(S) E = trait(ParseError(S));                             \
+    /* printf("error:%" PRIdMAX ":\n", e.offset); */                     \
+    if (E.isUnknown(e)) {                                                \
+      printf("unknown error\n");                                         \
+      return;                                                            \
+    }                                                                    \
+    if (!e.unexpected.none) {                                            \
+      printf("unexpected ");                                             \
+      EI.print(e.unexpected.value);                                      \
+      printf("\n");                                                      \
+    }                                                                    \
+    if (e.expecting) {                                                   \
+      printf("expecting ");                                              \
+      ListT(ErrorItem(S)) L = trait(List(ErrorItem(S)));                 \
+      List(ErrorItem(S)) xs = e.expecting;                               \
+      if (!xs) {                                                         \
+        printf("\n");                                                    \
+        return;                                                          \
+      }                                                                  \
+      EI.print(L.head(xs));                                              \
+      xs = L.tail(xs);                                                   \
+      if (!xs) {                                                         \
+        printf("\n");                                                    \
+        return;                                                          \
+      }                                                                  \
+      if (!L.tail(xs)) {                                                 \
+        printf(" or ");                                                  \
+        EI.print(L.head(xs));                                            \
+        printf("\n");                                                    \
+        return;                                                          \
+      }                                                                  \
+      for (; L.tail(xs); xs = L.tail(xs)) {                              \
+        printf(", ");                                                    \
+        EI.print(L.head(xs));                                            \
+      }                                                                  \
+      printf(", or ");                                                   \
+      EI.print(L.head(xs));                                              \
+      printf("\n");                                                      \
+    }                                                                    \
   }                                                                      \
                                                                          \
   static inline ParseError(S) FUNC_NAME(merge, ParseError(S))(           \
@@ -195,14 +230,17 @@
         e.unexpected = e1.unexpected;                                    \
       }                                                                  \
     }                                                                    \
-    e.expecting =                                                        \
-        FUNC_NAME(merge, Hints(Token(S)))(e1.expecting, e2.expecting);   \
+    e.expecting = trait(ErrorItem(S)).merge(e1.expecting, e2.expecting); \
     return e;                                                            \
+  }                                                                      \
+                                                                         \
+  ParseErrorT(S) Trait(ParseError(S)) {                                  \
+    return (ParseErrorT(S)){                                             \
+        .isUnknown = FUNC_NAME(isUnknown, ParseError(S)),                \
+        .merge = FUNC_NAME(merge, ParseError(S)),                        \
+        .print = FUNC_NAME(print, ParseError(S)),                        \
+    };                                                                   \
   }                                                                      \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-// type alias for expecting items
-#define Hints(T) List(ErrorItem(T))

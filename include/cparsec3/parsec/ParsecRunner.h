@@ -98,7 +98,7 @@
     ParseResult(S, T) result = FUNC_NAME(runParser, S, T)(p, input);     \
     if (!result.success) {                                               \
       trait(Stream(S)).printState(result.state);                         \
-      FUNC_NAME(print, ParseError(S))(result.err);                       \
+      trait(ParseError(S)).print(result.err);                            \
       printf("\n");                                                      \
       return false;                                                      \
     }                                                                    \

@@ -57,7 +57,7 @@
     ArrayT(T) A = trait(Array(T));                                       \
     ParseReply(S, T) r = R.pRunParsec(p, s);                             \
     if (!r.consumed) {                                                   \
-      return fn_apply(eok, A.empty, s, (Hints(Token(S))){0});            \
+      return fn_apply(eok, A.empty, s, (Hints(S)){0});                   \
     }                                                                    \
     if (!r.result.success) {                                             \
       return fn_apply(cerr, r.result.err, r.result.state);               \
@@ -68,7 +68,7 @@
       s = r.result.state;                                                \
       r = R.pRunParsec(p, s);                                            \
       if (!r.consumed) {                                                 \
-        return fn_apply(cok, a, r.result.state, (Hints(Token(S))){0});   \
+        return fn_apply(cok, a, r.result.state, (Hints(S)){0});          \
       }                                                                  \
       if (!r.result.success) {                                           \
         return fn_apply(cerr, r.result.err, r.result.state);             \

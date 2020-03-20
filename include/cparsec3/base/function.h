@@ -6,12 +6,12 @@
  *
  * For example:
  *
- * - `Fn(T1, R)`                                 :: 
+ * - `Fn(T1, R)`                                 ::
  *   type-name of a function object that;
  *   - takes one argument of type `T1`,
  *   - returns a value of type `R`.
  *
- * - `Fn(T1, T2, T3, T4, T5, T6, T7, T8, T9, R)` :: 
+ * - `Fn(T1, T2, T3, T4, T5, T6, T7, T8, T9, R)` ::
  *   type-name of a function object that;
  *   - takes 9 arguments of type `T1`, `T2`, ..., and `T9`,
  *   - returns a value of type `R`.
@@ -91,7 +91,8 @@
 #define typedef_Fn_r(T1, ...) internal
 
 /**
- * \brief Defines a constructor of a function object of type `Fn(T1..., R)`
+ * \brief Defines a constructor of a function object of type `Fn(T1...,
+ * R)`
  *
  * ~~~c
  * #include <cparsec3/base/base.h>
@@ -127,6 +128,5 @@
  * ~~~
  */
 #define fn(name, T1, ...) internal
-
 
 #include "./internal/function.h"

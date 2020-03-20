@@ -41,7 +41,7 @@
 #define ContOkArgs(S, T)                                                 \
   T,                   /* return type of parser */                       \
       S,               /* next input state */                            \
-      Hints(Token(S)), /* 'expecting' part of an error message */        \
+      Hints(S),        /* 'expecting' part of an error message */        \
       ParseReply(S, T) /* return type of the continuation */
 
 // -----------------------------------------------------------------------

@@ -2,8 +2,8 @@
 #pragma once
 
 #include "../base/base.h"
-#include "TextState.h"
 #include "IndexState.h"
+#include "TextState.h"
 
 #define Stream(S) TYPE_NAME(Stream, S)
 #define Token(S) TYPE_NAME(Token, S)
