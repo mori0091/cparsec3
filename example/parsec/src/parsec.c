@@ -1,5 +1,6 @@
 /* -*- coding: utf-8-unix -*- */
 
+#define CPARSEC_CONFIG_USER_TYPES int
 // #define CPARSEC_CONFIG_DATA_SOURCE String
 // #define CPARSEC_CONFIG_POSITIONER Text  /* line/column */
 // #define CPARSEC_CONFIG_POSITIONER Index /* index */
@@ -15,6 +16,31 @@
 
 // -----------------------------------------------------------------------
 #define S CPARSEC_STREAM_TYPE
+
+#include <limits.h>
+
+// -----------------------------------------------------------------------
+fn(numberFn, UnParserArgs(S, int)) {
+  DO() {
+    SCAN(digit(), x);
+    SCAN(many(digit()), xs);
+    ArrayT(char) A = trait(Array(char));
+    int y = x - '0';
+    for (char* p = A.begin(xs); p != A.end(xs); p++) {
+      int z = *p - '0';
+      if (y > INT_MAX / 10 || (y == INT_MAX / 10 && z > INT_MAX % 10)) {
+        FAIL("too large number");
+      }
+      y = 10 * y + z;
+    }
+    RETURN(y);
+  }
+}
+
+Parsec(S, int) number(void) {
+  Parsec(S, int) p = {numberFn()};
+  return label("a number [0..INT_MAX]", tryp(p));
+}
 
 // -----------------------------------------------------------------------
 fn(abcFn, UnParserArgs(S, Array(char))) {
@@ -205,5 +231,13 @@ int main(void) {
                  "0123456789abcdef\n"
                  "0123456789abcdef\n");
     // -> shall be an error at line 4, column 1 : unexpected end of input
+  }
+  {
+    __auto_type p = number();
+    parseTest(p, "");
+    parseTest(p, "123");
+    parseTest(p, "123a");
+    parseTest(p, "a123");
+    parseTest(p, "99999999999999999999");
   }
 }
