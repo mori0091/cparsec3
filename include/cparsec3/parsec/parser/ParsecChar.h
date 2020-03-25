@@ -164,7 +164,7 @@ static inline bool is_binDigit(char c) {
   return (c == '0' || c == '1');
 }
 static inline bool is_octDigit(char c) {
-  return ((char)'0' <= c || c <= (char)'7');
+  return ((char)'0' <= c && c <= (char)'7');
 }
 static inline bool is_hexDigit(char c) {
   return !!isxdigit((int)(uint8_t)c);
