@@ -53,11 +53,16 @@ BIND_FOR(impl_ParsecRunner, CPARSEC_STREAM_TYPE,
 
 #define SCAN1(_p_)                                                       \
   __auto_type TMPID = runParsec(_p_, _s_);                               \
-  if (!TMPID.result.success) {                                           \
-    __auto_type _err_ = (TMPID.consumed ? _cerr_ : _eerr_);              \
-    return fn_apply(_err_, TMPID.result.err, TMPID.result.state);        \
-  }                                                                      \
-  _s_ = TMPID.result.state;
+  _s_ = TMPID.result.state;                                              \
+  do {                                                                   \
+    if (!TMPID.result.success) {                                         \
+      Stream(CPARSEC_STREAM_TYPE) SS =                                   \
+          trait(Stream(CPARSEC_STREAM_TYPE));                            \
+      __auto_type _err_ =                                                \
+          (SS.offsetOf(_s0_) < SS.offsetOf(_s_) ? _cerr_ : _eerr_);      \
+      return fn_apply(_err_, TMPID.result.err, _s_);                     \
+    }                                                                    \
+  } while (0)
 
 #define SCAN2(_p_, _x_)                                                  \
   SCAN1(_p_);                                                            \
