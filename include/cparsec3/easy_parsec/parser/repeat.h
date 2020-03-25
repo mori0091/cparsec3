@@ -22,10 +22,10 @@
   GENERIC_PARSECREPEAT(CPARSEC_STREAM_TYPE, p).pCount_min_max(m, n, p)
 
 // -----------------------------------------------------------------------
-trait_ParsecRepeat(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
-trait_ParsecRepeat(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
+BIND_FOR(trait_ParsecRepeat, CPARSEC_STREAM_TYPE,
+         PARSER_RETURN_TYPES_0(CPARSEC_STREAM_TYPE));
 
 #ifdef CPARSEC_CONFIG_IMPLEMENT
-impl_ParsecRepeat(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
-impl_ParsecRepeat(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
+BIND_FOR(impl_ParsecRepeat, CPARSEC_STREAM_TYPE,
+         PARSER_RETURN_TYPES_0(CPARSEC_STREAM_TYPE));
 #endif

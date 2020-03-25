@@ -31,22 +31,13 @@
 
 // -----------------------------------------------------------------------
 trait_ParseError(CPARSEC_STREAM_TYPE);
-trait_ParsecRunner(CPARSEC_STREAM_TYPE, None);
-trait_ParsecRunner(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
-trait_ParsecRunner(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
-trait_ParsecRunner(CPARSEC_STREAM_TYPE,
-                   Array(Token(CPARSEC_STREAM_TYPE)));
-trait_ParsecRunner(CPARSEC_STREAM_TYPE,
-                   Array(Tokens(CPARSEC_STREAM_TYPE)));
+BIND_FOR(trait_ParsecRunner, CPARSEC_STREAM_TYPE,
+         PARSER_RETURN_TYPES(CPARSEC_STREAM_TYPE));
 
 #ifdef CPARSEC_CONFIG_IMPLEMENT
 impl_ParseError(CPARSEC_STREAM_TYPE);
-impl_ParsecRunner(CPARSEC_STREAM_TYPE, None);
-impl_ParsecRunner(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
-impl_ParsecRunner(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
-impl_ParsecRunner(CPARSEC_STREAM_TYPE, Array(Token(CPARSEC_STREAM_TYPE)));
-impl_ParsecRunner(CPARSEC_STREAM_TYPE,
-                  Array(Tokens(CPARSEC_STREAM_TYPE)));
+BIND_FOR(impl_ParsecRunner, CPARSEC_STREAM_TYPE,
+         PARSER_RETURN_TYPES(CPARSEC_STREAM_TYPE));
 #endif
 
 // -----------------------------------------------------------------------
@@ -62,15 +53,32 @@ impl_ParsecRunner(CPARSEC_STREAM_TYPE,
 
 #define SCAN1(_p_)                                                       \
   __auto_type TMPID = runParsec(_p_, _s_);                               \
-  if (!TMPID.result.success) {                                           \
-    __auto_type _err_ = (TMPID.consumed ? _cerr_ : _eerr_);              \
-    return fn_apply(_err_, TMPID.result.err, TMPID.result.state);        \
-  }                                                                      \
-  _s_ = TMPID.result.state;
+  _s_ = TMPID.result.state;                                              \
+  do {                                                                   \
+    if (!TMPID.result.success) {                                         \
+      Stream(CPARSEC_STREAM_TYPE) SS =                                   \
+          trait(Stream(CPARSEC_STREAM_TYPE));                            \
+      __auto_type _err_ =                                                \
+          (SS.offsetOf(_s0_) < SS.offsetOf(_s_) ? _cerr_ : _eerr_);      \
+      return fn_apply(_err_, TMPID.result.err, _s_);                     \
+    }                                                                    \
+  } while (0)
 
 #define SCAN2(_p_, _x_)                                                  \
   SCAN1(_p_);                                                            \
   __auto_type _x_ = TMPID.result.ok;
+
+#define FAIL(_msg_)                                                      \
+  do {                                                                   \
+    Stream(CPARSEC_STREAM_TYPE) SS = trait(Stream(CPARSEC_STREAM_TYPE)); \
+    __auto_type _err_ =                                                  \
+        (SS.offsetOf(_s0_) < SS.offsetOf(_s_) ? _cerr_ : _eerr_);        \
+    Hints(CPARSEC_STREAM_TYPE) empty_hints = {0};                        \
+    ParseError(CPARSEC_STREAM_TYPE) e =                                  \
+        trait(ParseError(CPARSEC_STREAM_TYPE))                           \
+            .unexpected_label(SS.offsetOf(_s_), _msg_, empty_hints);     \
+    return fn_apply(_err_, e, _s_);                                      \
+  } while (0)
 
 #define RETURN(_x_)                                                      \
   do {                                                                   \

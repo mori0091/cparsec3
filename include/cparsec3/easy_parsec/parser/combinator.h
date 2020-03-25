@@ -24,20 +24,10 @@
   GENERIC_PARSECCOMBINATOR(CPARSEC_STREAM_TYPE, p).pNotFollowedBy(p)
 
 // -----------------------------------------------------------------------
-trait_ParsecCombinator(CPARSEC_STREAM_TYPE, None);
-trait_ParsecCombinator(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
-trait_ParsecCombinator(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
-trait_ParsecCombinator(CPARSEC_STREAM_TYPE,
-                       Array(Token(CPARSEC_STREAM_TYPE)));
-trait_ParsecCombinator(CPARSEC_STREAM_TYPE,
-                       Array(Tokens(CPARSEC_STREAM_TYPE)));
+BIND_FOR(trait_ParsecCombinator, CPARSEC_STREAM_TYPE,
+         PARSER_RETURN_TYPES(CPARSEC_STREAM_TYPE));
 
 #ifdef CPARSEC_CONFIG_IMPLEMENT
-impl_ParsecCombinator(CPARSEC_STREAM_TYPE, None);
-impl_ParsecCombinator(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
-impl_ParsecCombinator(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
-impl_ParsecCombinator(CPARSEC_STREAM_TYPE,
-                      Array(Token(CPARSEC_STREAM_TYPE)));
-impl_ParsecCombinator(CPARSEC_STREAM_TYPE,
-                      Array(Tokens(CPARSEC_STREAM_TYPE)));
+BIND_FOR(impl_ParsecCombinator, CPARSEC_STREAM_TYPE,
+         PARSER_RETURN_TYPES(CPARSEC_STREAM_TYPE));
 #endif

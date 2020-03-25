@@ -17,20 +17,10 @@
   TRAIT_PARSECFAILURE(CPARSEC_STREAM_TYPE, T).pUnexpected(item)
 
 // -----------------------------------------------------------------------
-trait_ParsecFailure(CPARSEC_STREAM_TYPE, None);
-trait_ParsecFailure(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
-trait_ParsecFailure(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
-trait_ParsecFailure(CPARSEC_STREAM_TYPE,
-                    Array(Token(CPARSEC_STREAM_TYPE)));
-trait_ParsecFailure(CPARSEC_STREAM_TYPE,
-                    Array(Tokens(CPARSEC_STREAM_TYPE)));
+BIND_FOR(trait_ParsecFailure, CPARSEC_STREAM_TYPE,
+         PARSER_RETURN_TYPES(CPARSEC_STREAM_TYPE));
 
 #ifdef CPARSEC_CONFIG_IMPLEMENT
-impl_ParsecFailure(CPARSEC_STREAM_TYPE, None);
-impl_ParsecFailure(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
-impl_ParsecFailure(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
-impl_ParsecFailure(CPARSEC_STREAM_TYPE,
-                   Array(Token(CPARSEC_STREAM_TYPE)));
-impl_ParsecFailure(CPARSEC_STREAM_TYPE,
-                   Array(Tokens(CPARSEC_STREAM_TYPE)));
+BIND_FOR(impl_ParsecFailure, CPARSEC_STREAM_TYPE,
+         PARSER_RETURN_TYPES(CPARSEC_STREAM_TYPE));
 #endif

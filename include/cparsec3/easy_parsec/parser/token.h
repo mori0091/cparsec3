@@ -40,18 +40,11 @@
 
 // -----------------------------------------------------------------------
 trait_ParsecToken1(CPARSEC_STREAM_TYPE);
-trait_ParsecToken(CPARSEC_STREAM_TYPE, None);
-trait_ParsecToken(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
-trait_ParsecToken(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
-trait_ParsecToken(CPARSEC_STREAM_TYPE, Array(Token(CPARSEC_STREAM_TYPE)));
-trait_ParsecToken(CPARSEC_STREAM_TYPE,
-                  Array(Tokens(CPARSEC_STREAM_TYPE)));
+BIND_FOR(trait_ParsecToken, CPARSEC_STREAM_TYPE,
+         PARSER_RETURN_TYPES(CPARSEC_STREAM_TYPE));
 
 #ifdef CPARSEC_CONFIG_IMPLEMENT
 impl_ParsecToken1(CPARSEC_STREAM_TYPE);
-impl_ParsecToken(CPARSEC_STREAM_TYPE, None);
-impl_ParsecToken(CPARSEC_STREAM_TYPE, Token(CPARSEC_STREAM_TYPE));
-impl_ParsecToken(CPARSEC_STREAM_TYPE, Tokens(CPARSEC_STREAM_TYPE));
-impl_ParsecToken(CPARSEC_STREAM_TYPE, Array(Token(CPARSEC_STREAM_TYPE)));
-impl_ParsecToken(CPARSEC_STREAM_TYPE, Array(Tokens(CPARSEC_STREAM_TYPE)));
+BIND_FOR(impl_ParsecToken, CPARSEC_STREAM_TYPE,
+         PARSER_RETURN_TYPES(CPARSEC_STREAM_TYPE));
 #endif
