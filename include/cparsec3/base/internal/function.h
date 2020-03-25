@@ -13,9 +13,59 @@
 // -----------------------------------------------------------------------
 #undef fn_apply
 #define fn_apply(...) fn_apply0(__VA_ARGS__)
+
 #define fn_apply0(f, ...)                                                \
-  FOLDL(fn_apply1, (f), BIND(((f).args), __VA_ARGS__))
-#define fn_apply1(f, ax) f.apply ax
+  CAT(fn_apply, VARIADIC_SIZE(__VA_ARGS__))(f, __VA_ARGS__)
+
+#define fn_apply1(f, x1) f.apply(f.args, x1)
+#define fn_apply2(f, x1, x2) f.apply(f.args, x1).apply(f.args, x2)
+#define fn_apply3(f, x1, x2, x3)                                         \
+  f.apply(f.args, x1).apply(f.args, x2).apply(f.args, x3)
+#define fn_apply4(f, x1, x2, x3, x4)                                     \
+  f.apply(f.args, x1)                                                    \
+      .apply(f.args, x2)                                                 \
+      .apply(f.args, x3)                                                 \
+      .apply(f.args, x4)
+#define fn_apply5(f, x1, x2, x3, x4, x5)                                 \
+  f.apply(f.args, x1)                                                    \
+      .apply(f.args, x2)                                                 \
+      .apply(f.args, x3)                                                 \
+      .apply(f.args, x4)                                                 \
+      .apply(f.args, x5)
+#define fn_apply6(f, x1, x2, x3, x4, x5, x6)                             \
+  f.apply(f.args, x1)                                                    \
+      .apply(f.args, x2)                                                 \
+      .apply(f.args, x3)                                                 \
+      .apply(f.args, x4)                                                 \
+      .apply(f.args, x5)                                                 \
+      .apply(f.args, x6)
+#define fn_apply7(f, x1, x2, x3, x4, x5, x6, x7)                         \
+  f.apply(f.args, x1)                                                    \
+      .apply(f.args, x2)                                                 \
+      .apply(f.args, x3)                                                 \
+      .apply(f.args, x4)                                                 \
+      .apply(f.args, x5)                                                 \
+      .apply(f.args, x6)                                                 \
+      .apply(f.args, x7)
+#define fn_apply8(f, x1, x2, x3, x4, x5, x6, x7, x8)                     \
+  f.apply(f.args, x1)                                                    \
+      .apply(f.args, x2)                                                 \
+      .apply(f.args, x3)                                                 \
+      .apply(f.args, x4)                                                 \
+      .apply(f.args, x5)                                                 \
+      .apply(f.args, x6)                                                 \
+      .apply(f.args, x7)                                                 \
+      .apply(f.args, x8)
+#define fn_apply9(f, x1, x2, x3, x4, x5, x6, x7, x8, x9)                 \
+  f.apply(f.args, x1)                                                    \
+      .apply(f.args, x2)                                                 \
+      .apply(f.args, x3)                                                 \
+      .apply(f.args, x4)                                                 \
+      .apply(f.args, x5)                                                 \
+      .apply(f.args, x6)                                                 \
+      .apply(f.args, x7)                                                 \
+      .apply(f.args, x8)                                                 \
+      .apply(f.args, x9)
 
 // -----------------------------------------------------------------------
 #undef typedef_Fn
