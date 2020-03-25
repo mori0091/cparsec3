@@ -63,6 +63,18 @@ BIND_FOR(impl_ParsecRunner, CPARSEC_STREAM_TYPE,
   SCAN1(_p_);                                                            \
   __auto_type _x_ = TMPID.result.ok;
 
+#define FAIL(_msg_)                                                      \
+  do {                                                                   \
+    Stream(CPARSEC_STREAM_TYPE) SS = trait(Stream(CPARSEC_STREAM_TYPE)); \
+    __auto_type _err_ =                                                  \
+        (SS.offsetOf(_s0_) < SS.offsetOf(_s_) ? _cerr_ : _eerr_);        \
+    Hints(CPARSEC_STREAM_TYPE) empty_hints = {0};                        \
+    ParseError(CPARSEC_STREAM_TYPE) e =                                  \
+        trait(ParseError(CPARSEC_STREAM_TYPE))                           \
+            .unexpected_label(SS.offsetOf(_s_), _msg_, empty_hints);     \
+    return fn_apply(_err_, e, _s_);                                      \
+  } while (0)
+
 #define RETURN(_x_)                                                      \
   do {                                                                   \
     Stream(CPARSEC_STREAM_TYPE) SS = trait(Stream(CPARSEC_STREAM_TYPE)); \
