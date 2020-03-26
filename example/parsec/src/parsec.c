@@ -22,16 +22,15 @@
 // -----------------------------------------------------------------------
 fn(numberFn, UnParserArgs(S, int)) {
   DO() {
-    SCAN(digit(), x);
-    SCAN(many(digit()), xs);
+    SCAN(some(digit()), xs);
     ArrayT(char) A = trait(Array(char));
-    int y = x - '0';
+    int y = 0;
     for (char* p = A.begin(xs); p != A.end(xs); p++) {
-      int z = *p - '0';
-      if (y > INT_MAX / 10 || (y == INT_MAX / 10 && z > INT_MAX % 10)) {
+      int x = *p - '0';
+      if (y > INT_MAX / 10 || (y == INT_MAX / 10 && x > INT_MAX % 10)) {
         FAIL("too large number");
       }
-      y = 10 * y + z;
+      y = 10 * y + x;
     }
     RETURN(y);
   }
