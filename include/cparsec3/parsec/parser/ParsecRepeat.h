@@ -31,8 +31,7 @@
                                                                          \
   typedef_Fn(Parsec(S, T), UnParser(S, Array(T)));                       \
                                                                          \
-  impl_many(S, T);                                                       \
-  impl_some(S, T);                                                       \
+  impl_many_some(S, T);                                                  \
   impl_count(S, T);                                                      \
   impl_count_min_max(S, T);                                              \
                                                                          \
@@ -49,15 +48,28 @@
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-#define impl_many(S, T)                                                  \
-  fn(FUNC_NAME(many_fn, S, T), Parsec(S, T),                             \
+#define impl_many_some(S, T)                                             \
+  typedef_Fn(bool, Parsec(S, T), UnParser(S, Array(T)));                 \
+                                                                         \
+  fn(FUNC_NAME(many_fn, S, T), bool, Parsec(S, T),                       \
      UnParserArgs(S, Array(T))) {                                        \
-    g_bind((p, s, cok, cerr, eok), *args);                               \
+    g_bind((b, p, s, cok, cerr, eok, eerr), *args);                      \
     ParsecRunner(S, T) R = trait(ParsecRunner(S, T));                    \
     ArrayT(T) A = trait(Array(T));                                       \
     ParseReply(S, T) r = R.pRunParsec(p, s);                             \
     if (!r.consumed) {                                                   \
-      return fn_apply(eok, A.empty, s, (Hints(S)){0});                   \
+      if (!r.result.success) {                                           \
+        return (!b ? fn_apply(eok, A.empty, s, (Hints(S)){0})            \
+                   : fn_apply(eerr, r.result.err, s));                   \
+      } else {                                                           \
+        ParseErrorT(S) E = trait(ParseError(S));                         \
+        ParseError(S) e = E.unexpected_label(                            \
+            trait(Stream(S)).offsetOf(s),                                \
+            "many(p) / some(p) cannot accept a parser `p` that "         \
+            "succeeds without consuming any input",                      \
+            (Hints(S)){0});                                              \
+        return fn_apply(eerr, e, s);                                     \
+      }                                                                  \
     }                                                                    \
     if (!r.result.success) {                                             \
       return fn_apply(cerr, r.result.err, r.result.state);               \
@@ -81,15 +93,12 @@
                                                                          \
   static Parsec(S, Array(T)) FUNC_NAME(many, S, T)(Parsec(S, T) p) {     \
     __auto_type f = FUNC_NAME(many_fn, S, T)();                          \
-    return (Parsec(S, Array(T))){.unParser = fn_apply(f, p)};            \
+    return (Parsec(S, Array(T))){fn_apply(f, 0, p)};                     \
   }                                                                      \
                                                                          \
-  END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-#define impl_some(S, T)                                                  \
   static Parsec(S, Array(T)) FUNC_NAME(some, S, T)(Parsec(S, T) p) {     \
-    return (Parsec(S, Array(T))){0};                                     \
+    __auto_type f = FUNC_NAME(many_fn, S, T)();                          \
+    return (Parsec(S, Array(T))){fn_apply(f, 1, p)};                     \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS
