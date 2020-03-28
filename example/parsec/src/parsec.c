@@ -238,4 +238,19 @@ int main(void) {
     parseTest(count(3, digit()), "123a"); /* -> ['1', '2', '3'] */
     parseTest(count(4, digit()), "123a"); /* -> unexpected 'a' */
   }
+  {
+    parseTest(count_min_max(1, 0, digit()), ""); /* -> [] */
+    parseTest(count_min_max(0, 0, digit()), ""); /* -> [] */
+    parseTest(count_min_max(0, 1, digit()), ""); /* -> [] */
+    parseTest(count_min_max(1, 1, digit()), "");
+    /* -> unexpected end of input */
+    parseTest(count_min_max(1, 2, digit()), "123a");
+    /* -> ['1', '2'] */
+    parseTest(count_min_max(1, 3, digit()), "123a");
+    /* -> ['1', '2', '3'] */
+    parseTest(count_min_max(1, 4, digit()), "123a");
+    /* -> ['1', '2', '3'] */
+    parseTest(count_min_max(4, 4, digit()), "123a");
+    /* -> unexpected 'a' */
+  }
 }
