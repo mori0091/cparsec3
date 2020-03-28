@@ -41,6 +41,56 @@ BIND_FOR(impl_ParsecRunner, CPARSEC_STREAM_TYPE,
 #endif
 
 // -----------------------------------------------------------------------
+#define PARSER(R) Parsec(CPARSEC_STREAM_TYPE, R)
+#define FnParser(R) UnParser(CPARSEC_STREAM_TYPE, R)
+#define FnParserArgs(R) UnParserArgs(CPARSEC_STREAM_TYPE, R)
+
+#define typedef_FnParser(...)                                            \
+  CAT(typedef_FnParser, VARIADIC_SIZE(__VA_ARGS__))(__VA_ARGS__)
+
+#define typedef_FnParser1(R) typedef_Fn(FnParser(R))
+#define typedef_FnParser2(T1, R) typedef_Fn(T1, FnParser(R))
+#define typedef_FnParser3(T1, T2, R) typedef_Fn(T1, T2, FnParser(R))
+#define typedef_FnParser4(T1, T2, T3, R)                                 \
+  typedef_Fn(T1, T2, T3, FnParser(R))
+
+#define parsec(name, ...)                                                \
+  CAT(parsec, VARIADIC_SIZE(__VA_ARGS__))(name, __VA_ARGS__)
+
+#define parsec1(name, R)                                                 \
+  static FnParser(R) FUNC_NAME(name, PARSER(R))(void);                   \
+  PARSER(R) name(void) {                                                 \
+    return (PARSER(R)){                                                  \
+        FUNC_NAME(name, PARSER(R))(),                                    \
+    };                                                                   \
+  }                                                                      \
+  fn(FUNC_NAME(name, PARSER(R)), FnParserArgs(R))
+
+#define parsec2(name, T1, R)                                             \
+  static Fn(T1, FnParser(R)) FUNC_NAME(name, PARSER(R))(void);           \
+  PARSER(R) name(T1 x1) {                                                \
+    Fn(T1, FnParser(R)) f = FUNC_NAME(name, PARSER(R))();                \
+    return (PARSER(R)){fn_apply(f, x1)};                                 \
+  }                                                                      \
+  fn(FUNC_NAME(name, PARSER(R)), T1, FnParserArgs(R))
+
+#define parsec3(name, T1, T2, R)                                         \
+  static Fn(T1, T2, FnParser(R)) FUNC_NAME(name, PARSER(R))(void);       \
+  PARSER(R) name(T1 x1, T2 x2) {                                         \
+    Fn(T1, T2, FnParser(R)) f = FUNC_NAME(name, PARSER(R))();            \
+    return (PARSER(R)){fn_apply(f, x1, x2)};                             \
+  }                                                                      \
+  fn(FUNC_NAME(name, PARSER(R)), T1, T2, FnParserArgs(R))
+
+#define parsec4(name, T1, T2, T3, R)                                     \
+  static Fn(T1, T2, T3, FnParser(R)) FUNC_NAME(name, PARSER(R))(void);   \
+  PARSER(R) name(T1 x1, T2 x2, T3 x3) {                                  \
+    Fn(T1, T2, T3, FnParser(R)) f = FUNC_NAME(name, PARSER(R))();        \
+    return (PARSER(R)){fn_apply(f, x1, x2, x3)};                         \
+  }                                                                      \
+  fn(FUNC_NAME(name, PARSER(R)), T1, T2, T3, FnParserArgs(R))
+
+// -----------------------------------------------------------------------
 #define DO()                                                             \
   g_bind((_s0_, _cok_, _cerr_, _eok_, _eerr_), *args);                   \
   __auto_type _s_ = _s0_;
