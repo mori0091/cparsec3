@@ -112,10 +112,11 @@
 // ---- Structured bindings
 #define g_bind(x, t) g_bind_I(t, DISCLOSE(x))
 #define g_bind_I(t, ...)                                                 \
-  FOREACH(EXPAND, SQUASH(APPLY(g_bind0, (TMPID, t),                      \
-                               CAT(g_bind, VARIADIC_SIZE(__VA_ARGS__))(  \
-                                   TMPID, __VA_ARGS__))))
-#define g_bind0(var_, val_) IF(IS_NULL(var_))(, __auto_type var_ = val_)
+  FOREACH(EXPAND,                                                        \
+          SQUASH(APPLY(g_bind0, CAT(g_bind, VARIADIC_SIZE(__VA_ARGS__))( \
+                                    (t), __VA_ARGS__))))
+#define g_bind0(var_, val_)                                              \
+  IF(IS_NULL(var_))(, __auto_type var_ __attribute__((unused)) = val_)
 // clang-format off
 #define g_bind1(t, _1)                                                   \
   (_1, t.e1)
