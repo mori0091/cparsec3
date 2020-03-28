@@ -20,7 +20,8 @@
 #include <limits.h>
 
 // -----------------------------------------------------------------------
-fn(numberFn, UnParserArgs(S, int)) {
+// PARSER(int) number0(void);
+parsec(number0, int) {
   DO() {
     SCAN(some(digit()), xs);
     ArrayT(char) A = trait(Array(char));
@@ -36,13 +37,13 @@ fn(numberFn, UnParserArgs(S, int)) {
   }
 }
 
-Parsec(S, int) number(void) {
-  Parsec(S, int) p = {numberFn()};
-  return label("a number [0..INT_MAX]", tryp(p));
+PARSER(int) number(void) {
+  return label("a number [0..INT_MAX]", tryp(number0()));
 }
 
 // -----------------------------------------------------------------------
-fn(abcFn, UnParserArgs(S, Array(char))) {
+// PARSER(Array(char)) abc(void);
+parsec(abc, Array(char)) {
   DO() {
     SCAN(char1('a'), a);
     SCAN(char1('b'), b);
@@ -51,12 +52,9 @@ fn(abcFn, UnParserArgs(S, Array(char))) {
   }
 }
 
-Parsec(S, Array(char)) abc(void) {
-  return (Parsec(S, Array(char))){abcFn()};
-}
-
 // -----------------------------------------------------------------------
-fn(identifierImpl, UnParserArgs(S, String)) {
+// PARSER(String) identifier0(void);
+parsec(identifier0, String) {
   __auto_type identStart = either(char1('_'), letter());
   __auto_type identLetter = many(either(char1('_'), alphaNum()));
   __auto_type spaces = many(whitespace());
@@ -75,27 +73,20 @@ fn(identifierImpl, UnParserArgs(S, String)) {
   }
 }
 
-Parsec(S, String) identifier(void) {
-  Parsec(S, String) p = {identifierImpl()};
-  return label("identifier", p);
+PARSER(String) identifier(void) {
+  return label("identifier", identifier0());
 }
 
 // -----------------------------------------------------------------------
-typedef_Fn(Token(S), UnParser(S, None));
-fn(fail_on_Fn, Token(S), UnParserArgs(S, None)) {
-  DO_WITH(c) {
+// PARSER(None) fail_on(Token(S) c);
+parsec(fail_on, Token(S), None) {
+  DO() WITH(c) {
     __auto_type p = anySingleBut(c);
     for (;;) {
       SCAN(p);
     }
     RETURN((None){0});
   }
-}
-
-Parsec(S, None) fail_on(Token(S) c) {
-  __auto_type f = fail_on_Fn();
-  Parsec(S, None) p = {fn_apply(f, c)};
-  return p;
 }
 
 // -----------------------------------------------------------------------

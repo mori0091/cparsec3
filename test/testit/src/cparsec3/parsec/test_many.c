@@ -59,19 +59,6 @@ test("[parser] many(string1(\"\")), \"abc\" -> empty error") {
   c_assert(g_eq(r.state, "abc"));
 }
 
-fn(abcFn, UnParserArgs(S, String)) {
-  DO() {
-    SCAN(char1('a'));
-    SCAN(char1('b'));
-    SCAN(char1('c'));
-    RETURN("abc");
-  }
-}
-
-static Parsec(S, String) abc(void) {
-  return (Parsec(S, String)){abcFn()};
-}
-
 test("[parser] many(abc()), \"abc\" -> consumed ok") {
   ParseResult(S, Array(String)) r = runParser(many(abc()), "abc");
   c_assert(r.success);
