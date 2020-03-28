@@ -32,7 +32,6 @@
   typedef_Fn(Parsec(S, T), UnParser(S, Array(T)));                       \
                                                                          \
   impl_many_some(S, T);                                                  \
-  impl_count(S, T);                                                      \
   impl_count_min_max(S, T);                                              \
                                                                          \
   ParsecRepeat(S, T) Trait(ParsecRepeat(S, T)) {                         \
@@ -104,25 +103,37 @@
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-#define impl_count(S, T)                                                 \
+#define impl_count_min_max(S, T)                                         \
   typedef_Fn(int, Parsec(S, T), UnParser(S, Array(T)));                  \
+  typedef_Fn(int, int, Parsec(S, T), UnParser(S, Array(T)));             \
                                                                          \
-  fn(FUNC_NAME(countImpl, S, T), int, Parsec(S, T),                      \
+  fn(FUNC_NAME(count_min_max_impl, S, T), int, int, Parsec(S, T),        \
      UnParserArgs(S, Array(T))) {                                        \
-    g_bind((n, p, s, cok, cerr, eok, eerr), *args);                      \
+    g_bind((m, n, p, s, cok, cerr, eok, eerr), *args);                   \
     ParsecRunner(S, T) R = trait(ParsecRunner(S, T));                    \
     ArrayT(T) A = trait(Array(T));                                       \
-    if (n <= 0) {                                                        \
+    if (m > n || n <= 0) {                                               \
       return fn_apply(eok, A.empty, s, (Hints(S)){0});                   \
     }                                                                    \
     Array(T) a = A.create(n);                                            \
     bool consumed = false;                                               \
+    m = (m <= 0 ? 0 : m);                                                \
     for (int i = 0; i < n; ++i) {                                        \
       ParseReply(S, T) r = R.pRunParsec(p, s);                           \
       consumed |= r.consumed;                                            \
       s = r.result.state;                                                \
       if (!r.result.success) {                                           \
-        return fn_apply((consumed ? cerr : eerr), r.result.err, s);      \
+        if (i < m) {                                                     \
+          return fn_apply((consumed ? cerr : eerr), r.result.err, s);    \
+        }                                                                \
+        if (i == 0) {                                                    \
+          A.free(&a);                                                    \
+          a = A.empty;                                                   \
+          break;                                                         \
+        }                                                                \
+        a.length = i;                                                    \
+        a.data = trait(Mem(T)).recreate(a.data, a.length);               \
+        break;                                                           \
       }                                                                  \
       a.data[i] = r.result.ok;                                           \
     }                                                                    \
@@ -131,17 +142,14 @@
                                                                          \
   static Parsec(S, Array(T))                                             \
       FUNC_NAME(count, S, T)(int n, Parsec(S, T) p) {                    \
-    __auto_type f = FUNC_NAME(countImpl, S, T)();                        \
-    return (Parsec(S, Array(T))){fn_apply(f, n, p)};                     \
+    __auto_type f = FUNC_NAME(count_min_max_impl, S, T)();               \
+    return (Parsec(S, Array(T))){fn_apply(f, n, n, p)};                  \
   }                                                                      \
                                                                          \
-  END_OF_STATEMENTS
-
-// -----------------------------------------------------------------------
-#define impl_count_min_max(S, T)                                         \
   static Parsec(S, Array(T))                                             \
       FUNC_NAME(count_min_max, S, T)(int m, int n, Parsec(S, T) p) {     \
-    return (Parsec(S, Array(T))){0};                                     \
+    __auto_type f = FUNC_NAME(count_min_max_impl, S, T)();               \
+    return (Parsec(S, Array(T))){fn_apply(f, m, n, p)};                  \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS
