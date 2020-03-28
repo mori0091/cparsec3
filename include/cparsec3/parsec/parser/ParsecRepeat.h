@@ -105,9 +105,34 @@
 
 // -----------------------------------------------------------------------
 #define impl_count(S, T)                                                 \
+  typedef_Fn(int, Parsec(S, T), UnParser(S, Array(T)));                  \
+                                                                         \
+  fn(FUNC_NAME(countImpl, S, T), int, Parsec(S, T),                      \
+     UnParserArgs(S, Array(T))) {                                        \
+    g_bind((n, p, s, cok, cerr, eok, eerr), *args);                      \
+    ParsecRunner(S, T) R = trait(ParsecRunner(S, T));                    \
+    ArrayT(T) A = trait(Array(T));                                       \
+    if (n <= 0) {                                                        \
+      return fn_apply(eok, A.empty, s, (Hints(S)){0});                   \
+    }                                                                    \
+    Array(T) a = A.create(n);                                            \
+    bool consumed = false;                                               \
+    for (int i = 0; i < n; ++i) {                                        \
+      ParseReply(S, T) r = R.pRunParsec(p, s);                           \
+      consumed |= r.consumed;                                            \
+      s = r.result.state;                                                \
+      if (!r.result.success) {                                           \
+        return fn_apply((consumed ? cerr : eerr), r.result.err, s);      \
+      }                                                                  \
+      a.data[i] = r.result.ok;                                           \
+    }                                                                    \
+    return fn_apply((consumed ? cok : eok), a, s, (Hints(S)){0});        \
+  }                                                                      \
+                                                                         \
   static Parsec(S, Array(T))                                             \
       FUNC_NAME(count, S, T)(int n, Parsec(S, T) p) {                    \
-    return (Parsec(S, Array(T))){0};                                     \
+    __auto_type f = FUNC_NAME(countImpl, S, T)();                        \
+    return (Parsec(S, Array(T))){fn_apply(f, n, p)};                     \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS
