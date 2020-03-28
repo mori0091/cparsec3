@@ -230,4 +230,12 @@ int main(void) {
     parseTest(p, "a123");
     parseTest(p, "99999999999999999999");
   }
+  {
+    parseTest(count(-1, digit()), "");    /* -> [] */
+    parseTest(count(0, digit()), "");     /* -> [] */
+    parseTest(count(1, digit()), "");     /* -> unexpected end of input */
+    parseTest(count(2, digit()), "123a"); /* -> ['1', '2'] */
+    parseTest(count(3, digit()), "123a"); /* -> ['1', '2', '3'] */
+    parseTest(count(4, digit()), "123a"); /* -> unexpected 'a' */
+  }
 }
