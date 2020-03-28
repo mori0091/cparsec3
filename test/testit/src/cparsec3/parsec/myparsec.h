@@ -9,3 +9,5 @@
 #include <cparsec3/easy_parsec/parser/failure.h>
 #include <cparsec3/easy_parsec/parser/repeat.h>
 #include <cparsec3/easy_parsec/parser/token.h>
+
+extern PARSER(String) abc(void);

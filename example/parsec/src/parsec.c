@@ -79,9 +79,8 @@ PARSER(String) identifier(void) {
 
 // -----------------------------------------------------------------------
 // PARSER(None) fail_on(Token(S) c);
-typedef_FnParser(Token(S), None);
 parsec(fail_on, Token(S), None) {
-  DO_WITH(c) {
+  DO() WITH(c) {
     __auto_type p = anySingleBut(c);
     for (;;) {
       SCAN(p);
