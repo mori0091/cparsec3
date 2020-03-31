@@ -44,6 +44,8 @@
 #define impl_ParsecChar(S)                                               \
   C_API_BEGIN                                                            \
                                                                          \
+  impl_space(S);                                                         \
+                                                                         \
   static Parsec(S, char) FUNC_NAME(newline, S)(void) {                   \
     return trait(ParsecChar(S)).pChar1('\n');                            \
   }                                                                      \
@@ -108,7 +110,7 @@
         .pCrlf = FUNC_NAME(crlf, S),                                     \
         .pEol = FUNC_NAME(eol, S),                                       \
         .pTab = FUNC_NAME(tab, S),                                       \
-        .pSpace = 0,                                                     \
+        .pSpace = FUNC_NAME(space, S),                                   \
         .pSpace1 = 0,                                                    \
                                                                          \
         .pControl = FUNC_NAME(control, S),                               \
@@ -129,6 +131,30 @@
   }                                                                      \
                                                                          \
   C_API_END                                                              \
+  END_OF_STATEMENTS
+
+// -----------------------------------------------------------------------
+#define impl_space(S)                                                    \
+  fn(FUNC_NAME(spaceImpl, S), UnParserArgs(S, None)) {                   \
+    g_bind((s, cok, , eok), *args);                                      \
+    Stream(S) SS = trait(Stream(S));                                     \
+    bool consumed = false;                                               \
+    for (;;) {                                                           \
+      Maybe(Tuple(Token(S), S)) m = SS.take1(s);                         \
+      if (m.none || !is_space(m.value.e1)) {                             \
+        break;                                                           \
+      }                                                                  \
+      s = m.value.e2;                                                    \
+      consumed = true;                                                   \
+    }                                                                    \
+    return fn_apply((consumed ? cok : eok), (None){0}, s,                \
+                    (Hints(S)){0});                                      \
+  }                                                                      \
+                                                                         \
+  static Parsec(S, None) FUNC_NAME(space, S)(void) {                     \
+    return (Parsec(S, None)){FUNC_NAME(spaceImpl, S)()};                 \
+  }                                                                      \
+                                                                         \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
