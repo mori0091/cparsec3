@@ -44,6 +44,7 @@
   C_API_BEGIN                                                            \
                                                                          \
   impl_tokens(S);                                                        \
+  impl_eof(S);                                                           \
                                                                          \
   impl_single(S);                                                        \
   impl_satisfy(S);                                                       \
@@ -58,7 +59,7 @@
         .pTakeWhileP = 0,                                                \
         .pTakeWhile1P = 0,                                               \
         .pTakeP = 0,                                                     \
-        .pEof = 0,                                                       \
+        .pEof = FUNC_NAME(eof, S),                                       \
                                                                          \
         .pSingle = FUNC_NAME(single, S),                                 \
         .pSatisfy = FUNC_NAME(satisfy, S),                               \
@@ -118,6 +119,29 @@
     return (Parsec(S, Tokens(S))){                                       \
         .unParser = fn_apply(f, test, pattern),                          \
     };                                                                   \
+  }                                                                      \
+                                                                         \
+  END_OF_STATEMENTS
+
+// -----------------------------------------------------------------------
+/* eof() */
+#define impl_eof(S)                                                      \
+  fn(FUNC_NAME(eofImpl, S), UnParserArgs(S, None)) {                     \
+    g_bind((s, , , eok, eerr), *args);                                   \
+    Stream(S) SS = trait(Stream(S));                                     \
+    Maybe(Tuple(Token(S), S)) m = SS.take1(s);                           \
+    if (m.none) {                                                        \
+      return fn_apply(eok, (None){0}, s, (Hints(S)){0});                 \
+    }                                                                    \
+    Offset o = SS.offsetOf(s);                                           \
+    ErrorItem(S) ei = {.type = END_OF_INPUT};                            \
+    Hints(S) hs = trait(List(ErrorItem(S))).cons(ei, NULL);              \
+    ParseErrorT(S) E = trait(ParseError(S));                             \
+    return fn_apply(eerr, E.unexpected_token(o, m.value.e1, hs), s);     \
+  }                                                                      \
+                                                                         \
+  static Parsec(S, None) FUNC_NAME(eof, S)(void) {                       \
+    return (Parsec(S, None)){FUNC_NAME(eofImpl, S)()};                   \
   }                                                                      \
                                                                          \
   END_OF_STATEMENTS
