@@ -52,8 +52,8 @@ static Offset offsetOf(ST s) {
   return (Offset)s.index;
 }
 
-static void printState(ST s) {
-  printf("at index %zu\n", s.index);
+static void stringifyState(CharBuff* b, ST s) {
+  mem_printf(b, "at index %zu\n", s.index);
 }
 
 Stream(ST) Trait(Stream(ST)) {
@@ -67,6 +67,6 @@ Stream(ST) Trait(Stream(ST)) {
       .takeN = takeN,
 
       .offsetOf = offsetOf,
-      .printState = printState,
+      .stringifyState = stringifyState,
   };
 }
