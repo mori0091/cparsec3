@@ -27,7 +27,7 @@
     Maybe(Tuple(Tokens(S), S)) (*takeN)(int n, S s);                     \
                                                                          \
     Offset (*offsetOf)(S s);                                             \
-    void (*printState)(S s);                                             \
+    void (*stringifyState)(CharBuff * b, S s);                           \
   };                                                                     \
                                                                          \
   Stream(S) Trait(Stream(S));                                            \

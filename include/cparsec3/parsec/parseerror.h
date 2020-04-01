@@ -37,10 +37,12 @@
     bool (*null)(ErrorItem(S) e);                                        \
     Hints(S) (*toHints)(Token(S) t);                                     \
     Hints(S) (*merge)(Hints(S) hs1, Hints(S) hs2);                       \
-    void (*print)(ErrorItem(S) e);                                       \
   };                                                                     \
                                                                          \
   ErrorItemT(S) Trait(ErrorItem(S));                                     \
+                                                                         \
+  /* trait Show(ErrorItem(S)) */                                         \
+  trait_Show(ErrorItem(S));                                              \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -61,24 +63,6 @@
       return false;                                                      \
     default:                                                             \
       return true;                                                       \
-    }                                                                    \
-  }                                                                      \
-                                                                         \
-  static inline void FUNC_NAME(print, ErrorItem(S))(ErrorItem(S) e) {    \
-    switch (e.type) {                                                    \
-    case LABEL:                                                          \
-      printf("%s", e.label);                                             \
-      break;                                                             \
-    case TOKENS:;                                                        \
-      String s = trait(Stream(S)).showTokens(e.tokens);                  \
-      printf("%s", s);                                                   \
-      mem_free((void*)s);                                                \
-      break;                                                             \
-    case END_OF_INPUT:                                                   \
-      printf("end of input");                                            \
-      break;                                                             \
-    default:                                                             \
-      break;                                                             \
     }                                                                    \
   }                                                                      \
                                                                          \
@@ -117,9 +101,29 @@
         .null = FUNC_NAME(null, ErrorItem(S)),                           \
         .toHints = FUNC_NAME(toHints, Hints(S)),                         \
         .merge = FUNC_NAME(merge, Hints(S)),                             \
-        .print = FUNC_NAME(print, ErrorItem(S)),                         \
     };                                                                   \
   }                                                                      \
+                                                                         \
+  /* impl Show(ErrorItem(S)) */                                          \
+  static inline void FUNC_NAME(toString, Show(ErrorItem(S)))(            \
+      CharBuff * b, ErrorItem(S) e) {                                    \
+    switch (e.type) {                                                    \
+    case LABEL:                                                          \
+      mem_printf(b, "%s", e.label);                                      \
+      break;                                                             \
+    case TOKENS:;                                                        \
+      String s = trait(Stream(S)).showTokens(e.tokens);                  \
+      mem_printf(b, "%s", s);                                            \
+      mem_free((void*)s);                                                \
+      break;                                                             \
+    case END_OF_INPUT:                                                   \
+      mem_printf(b, "end of input");                                     \
+      break;                                                             \
+    default:                                                             \
+      break;                                                             \
+    }                                                                    \
+  }                                                                      \
+  instance_Show(ErrorItem(S), FUNC_NAME(toString, Show(ErrorItem(S))));  \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -152,10 +156,12 @@
                                        Hints(S) hs);                     \
     ParseError(S) (*unexpected_label)(Offset o, String l, Hints(S) hs);  \
     ParseError(S) (*merge)(ParseError(S) e1, ParseError(S) e2);          \
-    void (*print)(ParseError(S) e);                                      \
   };                                                                     \
                                                                          \
   ParseErrorT(S) Trait(ParseError(S));                                   \
+                                                                         \
+  /* trait Show(ParseError(S)) */                                        \
+  trait_Show(ParseError(S));                                             \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS
@@ -224,49 +230,6 @@
     };                                                                   \
   }                                                                      \
                                                                          \
-  static inline void FUNC_NAME(print, ParseError(S))(ParseError(S) e) {  \
-    ErrorItemT(S) EI = trait(ErrorItem(S));                              \
-    ParseErrorT(S) E = trait(ParseError(S));                             \
-    /* printf("error:%" PRIdMAX ":\n", e.offset); */                     \
-    if (E.null(e)) {                                                     \
-      printf("unknown error\n");                                         \
-      return;                                                            \
-    }                                                                    \
-    if (!e.unexpected.none) {                                            \
-      printf("unexpected ");                                             \
-      EI.print(e.unexpected.value);                                      \
-      printf("\n");                                                      \
-    }                                                                    \
-    if (e.expecting) {                                                   \
-      printf("expecting ");                                              \
-      ListT(ErrorItem(S)) L = trait(List(ErrorItem(S)));                 \
-      List(ErrorItem(S)) xs = e.expecting;                               \
-      if (!xs) {                                                         \
-        printf("\n");                                                    \
-        return;                                                          \
-      }                                                                  \
-      EI.print(L.head(xs));                                              \
-      xs = L.tail(xs);                                                   \
-      if (!xs) {                                                         \
-        printf("\n");                                                    \
-        return;                                                          \
-      }                                                                  \
-      if (!L.tail(xs)) {                                                 \
-        printf(" or ");                                                  \
-        EI.print(L.head(xs));                                            \
-        printf("\n");                                                    \
-        return;                                                          \
-      }                                                                  \
-      for (; L.tail(xs); xs = L.tail(xs)) {                              \
-        printf(", ");                                                    \
-        EI.print(L.head(xs));                                            \
-      }                                                                  \
-      printf(", or ");                                                   \
-      EI.print(L.head(xs));                                              \
-      printf("\n");                                                      \
-    }                                                                    \
-  }                                                                      \
-                                                                         \
   static inline ParseError(S) FUNC_NAME(merge, ParseError(S))(           \
       ParseError(S) e1, ParseError(S) e2) {                              \
     if (e1.offset < e2.offset) {                                         \
@@ -301,9 +264,53 @@
             FUNC_NAME(unexpected_tokens, ParseError(S)),                 \
         .unexpected_label = FUNC_NAME(unexpected_label, ParseError(S)),  \
         .merge = FUNC_NAME(merge, ParseError(S)),                        \
-        .print = FUNC_NAME(print, ParseError(S)),                        \
     };                                                                   \
   }                                                                      \
+                                                                         \
+  /* impl Show(ParseError(S)) */                                         \
+  static inline void FUNC_NAME(toString, Show(ParseError(S)))(           \
+      CharBuff * b, ParseError(S) e) {                                   \
+    Show(ErrorItem(S)) I = trait(Show(ErrorItem(S)));                    \
+    if (trait(ParseError(S)).null(e)) {                                  \
+      mem_printf(b, "unknown error\n");                                  \
+      return;                                                            \
+    }                                                                    \
+    if (!e.unexpected.none) {                                            \
+      mem_printf(b, "unexpected ");                                      \
+      I.toString(b, e.unexpected.value);                                 \
+      mem_printf(b, "\n");                                               \
+    }                                                                    \
+    if (e.expecting) {                                                   \
+      mem_printf(b, "expecting ");                                       \
+      ListT(ErrorItem(S)) L = trait(List(ErrorItem(S)));                 \
+      List(ErrorItem(S)) xs = e.expecting;                               \
+      if (!xs) {                                                         \
+        mem_printf(b, "\n");                                             \
+        return;                                                          \
+      }                                                                  \
+      I.toString(b, L.head(xs));                                         \
+      xs = L.tail(xs);                                                   \
+      if (!xs) {                                                         \
+        mem_printf(b, "\n");                                             \
+        return;                                                          \
+      }                                                                  \
+      if (!L.tail(xs)) {                                                 \
+        mem_printf(b, " or ");                                           \
+        I.toString(b, L.head(xs));                                       \
+        mem_printf(b, "\n");                                             \
+        return;                                                          \
+      }                                                                  \
+      for (; L.tail(xs); xs = L.tail(xs)) {                              \
+        mem_printf(b, ", ");                                             \
+        I.toString(b, L.head(xs));                                       \
+      }                                                                  \
+      mem_printf(b, ", or ");                                            \
+      I.toString(b, L.head(xs));                                         \
+      mem_printf(b, "\n");                                               \
+    }                                                                    \
+  }                                                                      \
+  instance_Show(ParseError(S),                                           \
+                FUNC_NAME(toString, Show(ParseError(S))));               \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS

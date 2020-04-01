@@ -10,6 +10,7 @@
 #define trait_ParsecRunner(S, T)                                         \
   C_API_BEGIN                                                            \
   typedef_Parsec(S, T);                                                  \
+  trait_Show(ParseResult(S, T));                                         \
   /* ---- trait ParsecRunner(S, T) */                                    \
   typedef struct ParsecRunner(S, T) ParsecRunner(S, T);                  \
   struct ParsecRunner(S, T) {                                            \
@@ -25,6 +26,18 @@
 // -----------------------------------------------------------------------
 #define impl_ParsecRunner(S, T)                                          \
   C_API_BEGIN                                                            \
+                                                                         \
+  static void FUNC_NAME(toString, Show(ParseResult(S, T)))(              \
+      CharBuff * b, ParseResult(S, T) x) {                               \
+    if (!x.success) {                                                    \
+      trait(Stream(S)).stringifyState(b, x.state);                       \
+      trait(Show(ParseError(S))).toString(b, x.err);                     \
+    } else {                                                             \
+      trait(Show(T)).toString(b, x.ok);                                  \
+    }                                                                    \
+  }                                                                      \
+  instance_Show(ParseResult(S, T),                                       \
+                FUNC_NAME(toString, Show(ParseResult(S, T))));           \
                                                                          \
   impl_runParsec(S, T);                                                  \
   impl_runParser(S, T);                                                  \
@@ -95,14 +108,10 @@
 #define impl_parseTest(S, T)                                             \
   /* ---- parseTest(p, input) */                                         \
   static bool FUNC_NAME(parseTest, S, T)(Parsec(S, T) p, S input) {      \
+    MemCtx mctx = mem_ctx_begin();                                       \
     ParseResult(S, T) result = FUNC_NAME(runParser, S, T)(p, input);     \
-    if (!result.success) {                                               \
-      trait(Stream(S)).printState(result.state);                         \
-      trait(ParseError(S)).print(result.err);                            \
-      printf("\n");                                                      \
-      return false;                                                      \
-    }                                                                    \
-    printf("%s\n", trait(Show(T)).show(result.ok));                      \
-    return true;                                                         \
+    printf("%s\n", trait(Show(ParseResult(S, T))).show(result));         \
+    mem_ctx_end(mctx);                                                   \
+    return result.success;                                               \
   }                                                                      \
   END_OF_STATEMENTS

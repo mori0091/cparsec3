@@ -105,8 +105,8 @@ static Offset offsetOf(String s) {
   return (Offset)(intptr_t)s;
 }
 
-static void printState(String s) {
-  printf("address = %p\n", (void*)s);
+static void stringifyState(CharBuff* b, String s) {
+  mem_printf(b, "address = %p\n", (void*)s);
 }
 
 /**
@@ -122,6 +122,6 @@ Stream(String) Trait(Stream(String)) {
       .takeN = takeN,
 
       .offsetOf = offsetOf,
-      .printState = printState,
+      .stringifyState = stringifyState,
   };
 }

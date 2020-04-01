@@ -72,7 +72,7 @@ static TextPosition lineColumn(ST st, size_t tabWidth) {
   return (TextPosition){.line = st.line, .column = col + 1};
 }
 
-static void printLineText(ST st, size_t tabWidth) {
+static void stringifyLineText(CharBuff* b, ST st, size_t tabWidth) {
   assert(st.headOfLine <= st.input);
   int col = 0;
   for (const Token(S)* c = st.headOfLine; *c && *c != '\n'; c++) {
@@ -80,24 +80,24 @@ static void printLineText(ST st, size_t tabWidth) {
       int n = tabWidth - (col % tabWidth);
       col += n;
       if (0 < n) {
-        printf("%*s", n, "");
+        mem_printf(b, "%*s", n, "");
       }
     } else {
       col++;
-      printf("%c", *c);
+      mem_printf(b, "%c", *c);
     }
   }
   if (!col) {
-    printf("<empty line>");
+    mem_printf(b, "<empty line>");
   }
-  printf("\n");
+  mem_printf(b, "\n");
 }
 
 static Offset offsetOf(ST s) {
   return trait(Stream(S)).offsetOf(s.input);
 }
 
-static void printState(ST s) {
+static void stringifyState(CharBuff* b, ST s) {
   size_t TAB_WIDTH = 8;
   String LINE_PREFIX = " | ";
   TextPosition pos = lineColumn(s, TAB_WIDTH);
@@ -105,11 +105,11 @@ static void printState(ST s) {
   assert(1 <= pos.column);
   int n = snprintf(0, 0, "%d", pos.line);
   assert(1 <= n);
-  printf("%d:%d:\n", pos.line, pos.column);
-  printf("%*s%s\n", n, "", LINE_PREFIX);
-  printf("%*d%s", n, pos.line, LINE_PREFIX);
-  printLineText(s, TAB_WIDTH);
-  printf("%*s%s%*s^\n", n, "", LINE_PREFIX, pos.column - 1, "");
+  mem_printf(b, "%d:%d:\n", pos.line, pos.column);
+  mem_printf(b, "%*s%s\n", n, "", LINE_PREFIX);
+  mem_printf(b, "%*d%s", n, pos.line, LINE_PREFIX);
+  stringifyLineText(b, s, TAB_WIDTH);
+  mem_printf(b, "%*s%s%*s^\n", n, "", LINE_PREFIX, pos.column - 1, "");
 }
 
 Stream(ST) Trait(Stream(ST)) {
@@ -123,6 +123,6 @@ Stream(ST) Trait(Stream(ST)) {
       .takeN = takeN,
 
       .offsetOf = offsetOf,
-      .printState = printState,
+      .stringifyState = stringifyState,
   };
 }
