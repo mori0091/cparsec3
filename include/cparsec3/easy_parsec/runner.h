@@ -6,9 +6,6 @@
 #include "config.h"
 #include "def_parsec.h"
 
-#include "../parsec/parsec.h"
-#include "../parsec/stream.h"
-
 #include "../parsec/ParsecRunner.h"
 
 // -----------------------------------------------------------------------
