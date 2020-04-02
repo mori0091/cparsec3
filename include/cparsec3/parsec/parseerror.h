@@ -35,6 +35,7 @@
   typedef struct ErrorItemT(S) ErrorItemT(S);                            \
   struct ErrorItemT(S) {                                                 \
     bool (*null)(ErrorItem(S) e);                                        \
+    Hints(S) (*emptyHints)(void);                                        \
     Hints(S) (*toHints)(Token(S) t);                                     \
     Hints(S) (*merge)(Hints(S) hs1, Hints(S) hs2);                       \
   };                                                                     \
@@ -64,6 +65,10 @@
     default:                                                             \
       return true;                                                       \
     }                                                                    \
+  }                                                                      \
+                                                                         \
+  static inline Hints(S) FUNC_NAME(emptyHints, Hints(S))(void) {         \
+    return (Hints(S)){0};                                                \
   }                                                                      \
                                                                          \
   static inline Hints(S) FUNC_NAME(toHints, Hints(S))(Token(S) t) {      \
@@ -99,6 +104,7 @@
   ErrorItemT(S) Trait(ErrorItem(S)) {                                    \
     return (ErrorItemT(S)){                                              \
         .null = FUNC_NAME(null, ErrorItem(S)),                           \
+        .emptyHints = FUNC_NAME(emptyHints, Hints(S)),                   \
         .toHints = FUNC_NAME(toHints, Hints(S)),                         \
         .merge = FUNC_NAME(merge, Hints(S)),                             \
     };                                                                   \
