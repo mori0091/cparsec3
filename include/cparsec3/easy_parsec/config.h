@@ -4,6 +4,19 @@
 #include "../base/common.h"
 
 // -----------------------------------------------------------------------
+#if !defined(CPARSEC_CONFIG_USER_TYPES)
+#define CPARSEC_USER_TYPES()
+#else
+#define CPARSEC_USER_TYPES() CPARSEC_CONFIG_USER_TYPES
+#endif
+
+#define PARSER_RETURN_TYPES(S)                                          \
+  None, PARSER_RETURN_TYPES_0(S), APPLY(Array, PARSER_RETURN_TYPES_0(S))
+
+#define PARSER_RETURN_TYPES_0(S)                    \
+  SQUASH(Token(S), Tokens(S), CPARSEC_USER_TYPES())
+
+// -----------------------------------------------------------------------
 #if !defined(CPARSEC_CONFIG_DATA_SOURCE)
 #define CPARSEC_CONFIG_DATA_SOURCE String
 #endif
