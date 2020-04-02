@@ -22,6 +22,10 @@
 #define runParser(p, input)                                              \
   GENERIC_PARSECRUNNER(CPARSEC_STREAM_TYPE, p).pRunParser(p, input)
 
+#define parse(p, input)                                                  \
+  GENERIC_PARSECRUNNER(CPARSEC_STREAM_TYPE, p)                           \
+      .pRunParser(p, CPARSEC_STREAM_NEW(input))
+
 #define parseTest(p, input)                                              \
   GENERIC_PARSECRUNNER(CPARSEC_STREAM_TYPE, p)                           \
       .pParseTest(p, CPARSEC_STREAM_NEW(input))
