@@ -108,8 +108,7 @@
 
 C_API_BEGIN
 
-typedef const char* String;
-typedef int Int;
+typedef char* String;
 typedef intmax_t Offset;
 
 C_API_END

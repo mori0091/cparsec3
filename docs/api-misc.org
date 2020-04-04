@@ -38,7 +38,7 @@ and *Generic Macros* in the library implementation.
      a 8-bit character
 
 - String          ::
-     a string. - type alias to ~const char*~ (i.e. *typedef*)
+     a string. - type alias to ~char*~ (i.e. *typedef*)
 
 - int             ::
      an integer.
