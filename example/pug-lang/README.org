@@ -1,0 +1,61 @@
+# -*- coding: utf-8-unix -*-
+#+STARTUP: showall indent
+
+* Pug - a toy programming language
+
+The ~pug~ is an interpreter of /The Pug programming language/.\\
+(that is *a toy language* for now)
+
+The ~pug~ interpreter is also a sample application powered by /CPARSEC3/
+library.
+
+* How to build
+To build the ~Pug~ interpreter, do as follows :
+- *NOTE* Suppose that the leading '*$*' is a shell prompt.
+- *NOTE* Suppose that the '*#*' follows words are comment.
+
+#+begin_src shell
+$ make
+#+end_src
+
+* Usage
+See the help that appears by the following command.
+#+begin_src shell
+$ ./bin/pug --help
+#+end_src
+
+* Example
+#+begin_src shell
+$ ./bin/pug -e '1 + 2'
+> "1 + 2"
+>> (Add (Num 1) (Num 2))
+3
+
+#+end_src
+
+* Pug programming language
+
+** Binary operators
+| Operator | Example       | Explanation               |
+|----------+---------------+---------------------------|
+| ~+~      | ~expr + expr~ | arithmetic addition       |
+| ~-~      | ~expr - expr~ | arithmetic subtraction    |
+| ~*~      | ~expr * expr~ | arithmetic multiplication |
+| ~/~      | ~expr / expr~ | arithmetic division       |
+
+** Unary operators
+| Operator | Example  | Explanation            |
+|----------+----------+------------------------|
+| ~+~      | ~+ expr~ | (equivalent to ~expr~) |
+| ~-~      | ~- expr~ | arithmetic negation    |
+| ~!~      | ~! expr~ | not                    |
+
+** Parenthesis
+| Example  | Explanation              |
+|----------+--------------------------|
+| ~(expr)~ | parenthesized expression |
+
+** Literal
+| Example           | Explanation     |
+|-------------------+-----------------|
+| ~1~, ~10~, ~-100~ | decimal integer |
