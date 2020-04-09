@@ -10,12 +10,25 @@ typedef struct Num {
 } Num;
 
 enum ExprType {
+  /* equality */
+  EQ,
+  NEQ,
+  /* ordered */
+  LE,
+  LT,
+  GT,
+  GE,
+  /* addsub */
   ADD,
   SUB,
+  /* muldiv */
   MUL,
   DIV,
+  MOD,
+  /* unary */
   NEG,
   NOT,
+  /* number */
   NUM,
 };
 
@@ -31,10 +44,17 @@ struct Expr {
 };
 
 typedef struct ExprT {
+  Expr (*eq)(Expr lhs, Expr rhs);
+  Expr (*neq)(Expr lhs, Expr rhs);
+  Expr (*le)(Expr lhs, Expr rhs);
+  Expr (*lt)(Expr lhs, Expr rhs);
+  Expr (*gt)(Expr lhs, Expr rhs);
+  Expr (*ge)(Expr lhs, Expr rhs);
   Expr (*add)(Expr lhs, Expr rhs);
   Expr (*sub)(Expr lhs, Expr rhs);
   Expr (*mul)(Expr lhs, Expr rhs);
   Expr (*div)(Expr lhs, Expr rhs);
+  Expr (*mod)(Expr lhs, Expr rhs);
   Expr (*neg)(Expr rhs);
   Expr (*not)(Expr rhs);
   Expr (*num)(Num x);
@@ -83,6 +103,24 @@ static void Expr_showUnary(CharBuff* b, String tag, Expr rhs) {
   mem_printf(b, ")");
 }
 
+static Expr FUNC_NAME(eq, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(EQ, lhs, rhs);
+}
+static Expr FUNC_NAME(neq, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(NEQ, lhs, rhs);
+}
+static Expr FUNC_NAME(le, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(LE, lhs, rhs);
+}
+static Expr FUNC_NAME(lt, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(LT, lhs, rhs);
+}
+static Expr FUNC_NAME(gt, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(GT, lhs, rhs);
+}
+static Expr FUNC_NAME(ge, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(GE, lhs, rhs);
+}
 static Expr FUNC_NAME(add, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(ADD, lhs, rhs);
 }
@@ -94,6 +132,9 @@ static Expr FUNC_NAME(mul, Expr)(Expr lhs, Expr rhs) {
 }
 static Expr FUNC_NAME(div, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(DIV, lhs, rhs);
+}
+static Expr FUNC_NAME(mod, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(MOD, lhs, rhs);
 }
 static Expr FUNC_NAME(neg, Expr)(Expr rhs) {
   return Expr_Unary(NEG, rhs);
@@ -110,10 +151,17 @@ static Expr FUNC_NAME(num, Expr)(Num x) {
 
 ExprT Trait(Expr) {
   return (ExprT){
+      .eq = FUNC_NAME(eq, Expr),
+      .neq = FUNC_NAME(neq, Expr),
+      .le = FUNC_NAME(le, Expr),
+      .lt = FUNC_NAME(lt, Expr),
+      .gt = FUNC_NAME(gt, Expr),
+      .ge = FUNC_NAME(ge, Expr),
       .add = FUNC_NAME(add, Expr),
       .sub = FUNC_NAME(sub, Expr),
       .mul = FUNC_NAME(mul, Expr),
       .div = FUNC_NAME(div, Expr),
+      .mod = FUNC_NAME(mod, Expr),
       .neg = FUNC_NAME(neg, Expr),
       .not = FUNC_NAME(not, Expr),
       .num = FUNC_NAME(num, Expr),
@@ -124,6 +172,24 @@ impl_user_type(Expr);
 
 show_user_type(Expr)(CharBuff* b, Expr x) {
   switch (x->type) {
+  case EQ:
+    Expr_showBinary(b, "Eq", x->lhs, x->rhs);
+    break;
+  case NEQ:
+    Expr_showBinary(b, "Neq", x->lhs, x->rhs);
+    break;
+  case LE:
+    Expr_showBinary(b, "Le", x->lhs, x->rhs);
+    break;
+  case LT:
+    Expr_showBinary(b, "Lt", x->lhs, x->rhs);
+    break;
+  case GT:
+    Expr_showBinary(b, "Gt", x->lhs, x->rhs);
+    break;
+  case GE:
+    Expr_showBinary(b, "Ge", x->lhs, x->rhs);
+    break;
   case ADD:
     Expr_showBinary(b, "Add", x->lhs, x->rhs);
     break;
@@ -136,6 +202,9 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
   case DIV:
     Expr_showBinary(b, "Div", x->lhs, x->rhs);
     break;
+  case MOD:
+    Expr_showBinary(b, "Mod", x->lhs, x->rhs);
+    break;
   case NEG:
     Expr_showUnary(b, "Neg", x->rhs);
     break;
@@ -147,6 +216,7 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     break;
   default:
     assert(0 && "Illegal Expr");
+    break;
   }
 }
 

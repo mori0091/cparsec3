@@ -5,18 +5,29 @@
 
 C_API_BEGIN
 
-PARSER(char) lexme(PARSER(char) p);
+#define GENERIC_LEXME(T) FUNC_NAME(lexme, T)
+#define lexme(p) GENERIC(p, PARSER, GENERIC_LEXME, char, String)(p)
+
+#define decl_lexme(T) PARSER(T) FUNC_NAME(lexme, T)(PARSER(T) p)
+
+decl_lexme(char);
+decl_lexme(String);
 
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
 
-parsec(lexme, PARSER(char), char) {
-  DO() WITH(p) {
-    SCAN(p, x);
-    SCAN(space());
-    RETURN(x);
-  }
-}
+#define impl_lexme(T)                                                    \
+  parsec(FUNC_NAME(lexme, T), PARSER(T), T) {                            \
+    DO() WITH(p) {                                                       \
+      SCAN(p, x);                                                        \
+      SCAN(space());                                                     \
+      RETURN(x);                                                         \
+    }                                                                    \
+  }                                                                      \
+  END_OF_STATEMENTS
+
+impl_lexme(char);
+impl_lexme(String);
 
 #endif
 

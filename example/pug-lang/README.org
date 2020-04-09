@@ -27,7 +27,7 @@ $ ./bin/pug --help
 * Example
 #+begin_src shell
 $ ./bin/pug -e '1 + 2'
-> "1 + 2"
+> 1 + 2
 >> (Add (Num 1) (Num 2))
 3
 
@@ -36,12 +36,19 @@ $ ./bin/pug -e '1 + 2'
 * Pug programming language
 
 ** Binary operators
-| Operator | Example       | Explanation               |
-|----------+---------------+---------------------------|
-| ~+~      | ~expr + expr~ | arithmetic addition       |
-| ~-~      | ~expr - expr~ | arithmetic subtraction    |
-| ~*~      | ~expr * expr~ | arithmetic multiplication |
-| ~/~      | ~expr / expr~ | arithmetic division       |
+| Operator | Example        | Explanation                         |
+|----------+----------------+-------------------------------------|
+| ~==~     | ~expr == expr~ | equality comparison                 |
+| ~!=~     | ~expr != expr~ | nonequality comparison              |
+| ~<=~     | ~expr <= expr~ | less than or equal to comparison    |
+| ~<~      | ~expr < expr~  | less than comparison                |
+| ~>=~     | ~expr >= expr~ | greater than or equal to comparison |
+| ~>~      | ~expr > expr~  | greater than comparison             |
+| ~+~      | ~expr + expr~  | arithmetic addition                 |
+| ~-~      | ~expr - expr~  | arithmetic subtraction              |
+| ~*~      | ~expr * expr~  | arithmetic multiplication           |
+| ~/~      | ~expr / expr~  | arithmetic division                 |
+| ~%~      | ~expr % expr~  | arithmetic reminder                 |
 
 ** Unary operators
 | Operator | Example  | Explanation            |

@@ -191,4 +191,15 @@ void pug_self_test(void) {
   assert(pug_parseTest("+ 1"));
   assert(pug_parseTest("1 - -1"));
   assert(!pug_parseTest("9999999999999999999")); /* error */
+  assert(!pug_parseTest("1 / 0"));               /* division by zero */
+  assert(!pug_parseTest("1 % 0"));               /* division by zero */
+  assert(pug_parseTest("10 % 3"));
+  assert(pug_parseTest("10 == 3"));
+  assert(pug_parseTest("10 == 10"));
+  assert(pug_parseTest("10 != 3"));
+  assert(pug_parseTest("10 != 10"));
+  assert(pug_parseTest("1 <= 10")); /* 1 */
+  assert(pug_parseTest("1 < 10"));  /* 1 */
+  assert(pug_parseTest("1 > 10"));  /* 0 */
+  assert(pug_parseTest("1 >= 10")); /* 0 */
 }
