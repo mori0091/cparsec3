@@ -113,6 +113,9 @@
   fn(FUNC_NAME(impl, name), ParsecEnv(name), UnParserArgs(S, R))
 
 // -----------------------------------------------------------------------
+#define UNIQUE_ID_NEW() UNIQUE_ID_NEW0(__COUNTER__)
+#define UNIQUE_ID_NEW0(...) CAT(cparsec_unique_identifier, __VA_ARGS__)
+
 #define DO()                                                             \
   g_bind((_par_, _s0_, _cok_, _cerr_, _eok_, _eerr_), *args);            \
   __auto_type _s_ = _s0_;
@@ -121,23 +124,24 @@
 
 #define DO_WITH(...) DO() WITH(__VA_ARGS__)
 
-#define SCAN(...) CAT(SCAN, VARIADIC_SIZE(__VA_ARGS__))(__VA_ARGS__)
+#define SCAN(...)                                                        \
+  CAT(SCAN, VARIADIC_SIZE(__VA_ARGS__))(UNIQUE_ID_NEW(), __VA_ARGS__)
 
-#define SCAN1(_p_)                                                       \
-  __auto_type TMPID = runParsec(_p_, _s_);                               \
-  _s_ = TMPID.result.state;                                              \
+#define SCAN1(_id_, _p_)                                                 \
+  __auto_type _id_ = runParsec(_p_, _s_);                                \
+  _s_ = _id_.result.state;                                               \
   do {                                                                   \
-    if (!TMPID.result.success) {                                         \
+    if (!_id_.result.success) {                                          \
       __auto_type SS = _par_.traits.stream;                              \
       __auto_type _err_ =                                                \
           (SS.offsetOf(_s0_) < SS.offsetOf(_s_) ? _cerr_ : _eerr_);      \
-      return fn_apply(_err_, TMPID.result.err, _s_);                     \
+      return fn_apply(_err_, _id_.result.err, _s_);                      \
     }                                                                    \
   } while (0)
 
-#define SCAN2(_p_, _x_)                                                  \
-  SCAN1(_p_);                                                            \
-  __auto_type _x_ = TMPID.result.ok;
+#define SCAN2(_id_, _p_, _x_)                                            \
+  SCAN1(_id_, _p_);                                                      \
+  __auto_type _x_ = _id_.result.ok;
 
 #define FAIL(_msg_)                                                      \
   do {                                                                   \
