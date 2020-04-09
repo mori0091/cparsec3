@@ -47,7 +47,7 @@ parsec(addsub, Expr) {
 parsec(muldiv, Expr) {
   ExprT E = trait(Expr);
   PARSER(Expr) p = unary();
-  PARSER(char) op = lexme(either(char1('*'), char1('/')));
+  PARSER(char) op = lexme(choice(char1('*'), char1('/'), char1('%')));
   DO() {
     SCAN(p, lhs);
     for (;;) {
@@ -56,7 +56,20 @@ parsec(muldiv, Expr) {
         break;
       }
       SCAN(p, rhs);
-      lhs = (m.value == '*') ? E.mul(lhs, rhs) : E.div(lhs, rhs);
+      switch (m.value) {
+      case '*':
+        lhs = E.mul(lhs, rhs);
+        break;
+      case '/':
+        lhs = E.div(lhs, rhs);
+        break;
+      case '%':
+        lhs = E.mod(lhs, rhs);
+        break;
+      default:
+        FAIL("Unexpected behaviour");
+        break;
+      }
     }
     RETURN(lhs);
   }

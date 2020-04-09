@@ -78,6 +78,8 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Expr x) {
     INFIX_OP(*, x->lhs, x->rhs);
   case DIV:
     DIV_MOD_OP(/, x->lhs, x->rhs);
+  case MOD:
+    DIV_MOD_OP(%, x->lhs, x->rhs);
   case NEG:
     PREFIX_OP(-, x->rhs);
   case NOT:

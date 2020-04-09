@@ -14,6 +14,7 @@ enum ExprType {
   SUB,
   MUL,
   DIV,
+  MOD,
   NEG,
   NOT,
   NUM,
@@ -35,6 +36,7 @@ typedef struct ExprT {
   Expr (*sub)(Expr lhs, Expr rhs);
   Expr (*mul)(Expr lhs, Expr rhs);
   Expr (*div)(Expr lhs, Expr rhs);
+  Expr (*mod)(Expr lhs, Expr rhs);
   Expr (*neg)(Expr rhs);
   Expr (*not)(Expr rhs);
   Expr (*num)(Num x);
@@ -95,6 +97,9 @@ static Expr FUNC_NAME(mul, Expr)(Expr lhs, Expr rhs) {
 static Expr FUNC_NAME(div, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(DIV, lhs, rhs);
 }
+static Expr FUNC_NAME(mod, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(MOD, lhs, rhs);
+}
 static Expr FUNC_NAME(neg, Expr)(Expr rhs) {
   return Expr_Unary(NEG, rhs);
 }
@@ -114,6 +119,7 @@ ExprT Trait(Expr) {
       .sub = FUNC_NAME(sub, Expr),
       .mul = FUNC_NAME(mul, Expr),
       .div = FUNC_NAME(div, Expr),
+      .mod = FUNC_NAME(mod, Expr),
       .neg = FUNC_NAME(neg, Expr),
       .not = FUNC_NAME(not, Expr),
       .num = FUNC_NAME(num, Expr),
@@ -135,6 +141,9 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     break;
   case DIV:
     Expr_showBinary(b, "Div", x->lhs, x->rhs);
+    break;
+  case MOD:
+    Expr_showBinary(b, "Mod", x->lhs, x->rhs);
     break;
   case NEG:
     Expr_showUnary(b, "Neg", x->rhs);
