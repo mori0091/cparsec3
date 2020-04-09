@@ -70,6 +70,18 @@ Interpreter(Expr) Trait(Interpreter(Expr));
 
 static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Expr x) {
   switch (x->type) {
+  case EQ:
+    INFIX_OP(==, x->lhs, x->rhs);
+  case NEQ:
+    INFIX_OP(!=, x->lhs, x->rhs);
+  case LE:
+    INFIX_OP(<=, x->lhs, x->rhs);
+  case LT:
+    INFIX_OP(<, x->lhs, x->rhs);
+  case GT:
+    INFIX_OP(>, x->lhs, x->rhs);
+  case GE:
+    INFIX_OP(>=, x->lhs, x->rhs);
   case ADD:
     INFIX_OP(+, x->lhs, x->rhs);
   case SUB:
@@ -87,7 +99,7 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Expr x) {
   case NUM:
     RETURN_OK(x->num.value);
   default:
-    assert(0 && "Illegal Expr");
+    RETURN_ERR("Illegal Expr");
   }
 }
 
