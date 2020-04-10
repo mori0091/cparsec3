@@ -10,7 +10,6 @@ typedef struct MapEntry {
   Address addr;
 } MapEntry;
 
-trait_Mem(MapEntry);
 trait_List(MapEntry);
 
 typedef struct Context {
@@ -38,7 +37,6 @@ ContextT Trait(Context);
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
 
-impl_Mem(MapEntry);
 impl_List(MapEntry);
 
 static Context* FUNC_NAME(create, Context)(size_t stack_length) {
