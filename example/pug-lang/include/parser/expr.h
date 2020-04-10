@@ -10,16 +10,23 @@
 
 C_API_BEGIN
 
-// expr     = equality
+// expr     = assign
+// assign   = equality {"=" equality}
 // equality = ordered {("==" | "!=") ordered}
 // ordered  = addsub {("<=" | "<" | ">" | ">=") addsub}
 // addsub   = muldiv {("+" | "-") muldiv}
 // muldiv   = unary {("*" | "/") unary}
 // unary    = [("+" | "-" | "!")] primary
-// primary  = paren | number
+// primary  = paren | number | variable
 // paren    = "(" expr ")"
+// variable = identifier
+//
+// identifier  = identStart{identLetter}
+// identStart  = "_" | letter
+// identLetter = "_" | alphaNum
 
 PARSER(Expr) expr(void);
+PARSER(Expr) assign(void);
 PARSER(Expr) equality(void);
 PARSER(Expr) ordered(void);
 PARSER(Expr) addsub(void);
@@ -28,11 +35,33 @@ PARSER(Expr) unary(void);
 PARSER(Expr) primary(void);
 PARSER(Expr) paren(void);
 
+PARSER(Expr) variable(void);
+PARSER(String) identifier(void);
+
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
 
 PARSER(Expr) expr(void) {
-  return equality();
+  return assign();
+}
+
+// PARSER(Expr) assign(void);
+parsec(assign, Expr) {
+  ExprT E = trait(Expr);
+  PARSER(Expr) p = equality();
+  PARSER(char) op = lexme(char1('='));
+  DO() {
+    SCAN(p, lhs);
+    if (lhs->type != VAR) {
+      RETURN(lhs);
+    }
+    SCAN(optional(op), m);
+    if (m.none) {
+      RETURN(lhs);
+    }
+    SCAN(assign(), rhs);
+    RETURN(E.assign(lhs, rhs));
+  }
 }
 
 // PARSER(Expr) equality(void);
@@ -155,7 +184,7 @@ parsec(unary, Expr) {
 // PARSER(Expr) primary(void);
 parsec(primary, Expr) {
   DO() {
-    SCAN(either(paren(), number()), x);
+    SCAN(choice(paren(), number(), variable()), x);
     SCAN(space());
     RETURN(x);
   }
@@ -169,6 +198,37 @@ parsec(paren, Expr) {
     SCAN(lexme(char1(')')));
     RETURN(x);
   }
+}
+
+// PARSER(Expr) variable(void);
+parsec(variable, Expr) {
+  DO() {
+    SCAN(lexme(identifier()), x);
+    RETURN(trait(Expr).var((Var){x}));
+  }
+}
+
+// PARSER(String) identifier0(void);
+parsec(identifier0, String) {
+  PARSER(char) identStart = either(char1('_'), letter());
+  PARSER(char) identLetter = either(char1('_'), alphaNum());
+
+  DO() {
+    SCAN(identStart, x);
+    SCAN(many(identLetter), xs);
+    SCAN(space());
+    size_t len = 1 + xs.length;
+    char* cs = mem_malloc(len + 1);
+    cs[0] = x;
+    memmove(cs + 1, xs.data, xs.length);
+    cs[len] = 0;
+    g_free(xs);
+    RETURN(cs);
+  }
+}
+
+PARSER(String) identifier(void) {
+  return label("identifier", identifier0());
 }
 
 #endif

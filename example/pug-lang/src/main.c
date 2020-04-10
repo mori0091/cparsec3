@@ -158,7 +158,8 @@ bool pug_parseTest(String input) {
   }
 
   // evaluate the AST
-  EvalResult result2 = trait(Interpreter(Expr)).eval(result.ok);
+  Context* ctx = trait(Context).create(32);
+  EvalResult result2 = trait(Interpreter(Expr)).eval(ctx, result.ok);
   {
     if (!result2.success) {
       eprintf(BOLD RED, "runtime error: ");
@@ -202,4 +203,7 @@ void pug_self_test(void) {
   assert(pug_parseTest("1 < 10"));  /* 1 */
   assert(pug_parseTest("1 > 10"));  /* 0 */
   assert(pug_parseTest("1 >= 10")); /* 0 */
+
+  assert(pug_parseTest("a"));         /* 0 */
+  assert(pug_parseTest("a = b = 1")); /* 1 */
 }
