@@ -9,7 +9,13 @@ typedef struct Num {
   int value;
 } Num;
 
+typedef struct Var {
+  String ident;
+} Var;
+
 enum ExprType {
+  /* assignment */
+  ASSIGN,
   /* equality */
   EQ,
   NEQ,
@@ -30,6 +36,8 @@ enum ExprType {
   NOT,
   /* number */
   NUM,
+  /* variable */
+  VAR,
 };
 
 struct Expr {
@@ -40,10 +48,12 @@ struct Expr {
       Expr rhs;
     };
     Num num;
+    Var var;
   };
 };
 
 typedef struct ExprT {
+  Expr (*assign)(Expr lhs, Expr rhs);
   Expr (*eq)(Expr lhs, Expr rhs);
   Expr (*neq)(Expr lhs, Expr rhs);
   Expr (*le)(Expr lhs, Expr rhs);
@@ -58,6 +68,7 @@ typedef struct ExprT {
   Expr (*neg)(Expr rhs);
   Expr (*not)(Expr rhs);
   Expr (*num)(Num x);
+  Expr (*var)(Var x);
 } ExprT;
 
 ExprT Trait(Expr);
@@ -103,6 +114,9 @@ static void Expr_showUnary(CharBuff* b, String tag, Expr rhs) {
   mem_printf(b, ")");
 }
 
+static Expr FUNC_NAME(assign, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(ASSIGN, lhs, rhs);
+}
 static Expr FUNC_NAME(eq, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(EQ, lhs, rhs);
 }
@@ -148,9 +162,16 @@ static Expr FUNC_NAME(num, Expr)(Num x) {
   e->num = x;
   return e;
 }
+static Expr FUNC_NAME(var, Expr)(Var x) {
+  Expr e = Expr_New();
+  e->type = VAR;
+  e->var = x;
+  return e;
+}
 
 ExprT Trait(Expr) {
   return (ExprT){
+      .assign = FUNC_NAME(assign, Expr),
       .eq = FUNC_NAME(eq, Expr),
       .neq = FUNC_NAME(neq, Expr),
       .le = FUNC_NAME(le, Expr),
@@ -165,6 +186,7 @@ ExprT Trait(Expr) {
       .neg = FUNC_NAME(neg, Expr),
       .not = FUNC_NAME(not, Expr),
       .num = FUNC_NAME(num, Expr),
+      .var = FUNC_NAME(var, Expr),
   };
 }
 
@@ -172,6 +194,9 @@ impl_user_type(Expr);
 
 show_user_type(Expr)(CharBuff* b, Expr x) {
   switch (x->type) {
+  case ASSIGN:
+    Expr_showBinary(b, "Assign", x->lhs, x->rhs);
+    break;
   case EQ:
     Expr_showBinary(b, "Eq", x->lhs, x->rhs);
     break;
@@ -213,6 +238,9 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     break;
   case NUM:
     mem_printf(b, "(Num %d)", x->num.value);
+    break;
+  case VAR:
+    mem_printf(b, "(Var %s)", x->var.ident);
     break;
   default:
     assert(0 && "Illegal Expr");

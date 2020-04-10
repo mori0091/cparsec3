@@ -38,6 +38,7 @@ $ ./bin/pug -e '1 + 2'
 ** Binary operators
 | Operator | Example        | Explanation                         |
 |----------+----------------+-------------------------------------|
+| ~=~      | ~var = expr~   | assignment                          |
 | ~==~     | ~expr == expr~ | equality comparison                 |
 | ~!=~     | ~expr != expr~ | nonequality comparison              |
 | ~<=~     | ~expr <= expr~ | less than or equal to comparison    |
