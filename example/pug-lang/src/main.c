@@ -203,4 +203,7 @@ void pug_self_test(void) {
   assert(pug_parseTest("1 < 10"));  /* 1 */
   assert(pug_parseTest("1 > 10"));  /* 0 */
   assert(pug_parseTest("1 >= 10")); /* 0 */
+
+  assert(pug_parseTest("a"));         /* 0 */
+  assert(pug_parseTest("a = b = 1")); /* 1 */
 }
