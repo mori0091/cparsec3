@@ -59,7 +59,7 @@ parsec(assign, Expr) {
     if (m.none) {
       RETURN(lhs);
     }
-    SCAN(assign(), rhs);
+    SCAN(p, rhs);
     RETURN(E.assign(lhs, rhs));
   }
 }
@@ -71,14 +71,12 @@ parsec(equality, Expr) {
   PARSER(String) op = lexme(either(string1("=="), string1("!=")));
   DO() {
     SCAN(p, lhs);
-    for (;;) {
-      SCAN(optional(op), m);
-      if (m.none) {
-        break;
-      }
-      SCAN(p, rhs);
-      lhs = (g_eq("==", m.value) ? E.eq : E.neq)(lhs, rhs);
+    SCAN(optional(op), m);
+    if (m.none) {
+      RETURN(lhs);
     }
+    SCAN(p, rhs);
+    lhs = (g_eq("==", m.value) ? E.eq : E.neq)(lhs, rhs);
     RETURN(lhs);
   }
 }
@@ -91,16 +89,17 @@ parsec(ordered, Expr) {
   PARSER(char) op2 = char1('=');
   DO() {
     SCAN(p, lhs);
-    for (;;) {
-      SCAN(optional(op1), lg);
-      if (lg.none) {
-        break;
-      }
-      SCAN(optional(op2), e);
-      SCAN(space());
-      SCAN(p, rhs);
-      lhs = ((e.none) ? ((lg.value == '<') ? E.lt : E.gt)
-                      : ((lg.value == '<') ? E.le : E.ge))(lhs, rhs);
+    SCAN(optional(op1), lg);
+    if (lg.none) {
+      RETURN(lhs);
+    }
+    SCAN(optional(op2), e);
+    SCAN(space());
+    SCAN(p, rhs);
+    if (e.none) {
+      lhs = ((lg.value == '<') ? E.lt : E.gt)(lhs, rhs);
+    } else {
+      lhs = ((lg.value == '<') ? E.le : E.ge)(lhs, rhs);
     }
     RETURN(lhs);
   }
