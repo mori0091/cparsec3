@@ -92,6 +92,11 @@ static EvalResult eval_as_lvalue(Context* ctx, Expr x) {
 static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context* ctx,
                                                      Expr x) {
   switch (x->type) {
+  case SEQ: {
+    EVAL(ctx, x->lhs, lhs);
+    EVAL(ctx, x->rhs, rhs);
+    RETURN_OK(rhs.ok);
+  }
   case ASSIGN: {
     EVAL_AS_LVALUE(ctx, x->lhs, lval);
     EVAL(ctx, x->rhs, rhs);
@@ -132,6 +137,8 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context* ctx,
     ContextT C = trait(Context);
     RETURN_OK(C.stack.load(ctx, lval.ok).value);
   }
+  case UNIT:
+    RETURN_OK(0);
   default:
     RETURN_ERR("Illegal Expr");
   }
