@@ -26,14 +26,21 @@ $ ./bin/pug --help
 
 * Example
 #+begin_src shell
-$ ./bin/pug -e '1 + 2'
-> 1 + 2
+$ ./bin/pug -e '1 + 2;'
+> 1 + 2;
 >> (Add (Num 1) (Num 2))
 3
 
 #+end_src
 
 * Pug programming language
+
+** Statements
+| Example | Explanation     |
+|---------+-----------------|
+| ~expr;~ | statement       |
+| ~;~     | empty statement |
+| ~{...}~ | block           |
 
 ** Binary operators
 | Operator | Example        | Explanation                         |

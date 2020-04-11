@@ -14,6 +14,8 @@ typedef struct Var {
 } Var;
 
 enum ExprType {
+  /* sequence */
+  SEQ,
   /* assignment */
   ASSIGN,
   /* equality */
@@ -38,6 +40,8 @@ enum ExprType {
   NUM,
   /* variable */
   VAR,
+  /* () */
+  UNIT,
 };
 
 struct Expr {
@@ -53,6 +57,7 @@ struct Expr {
 };
 
 typedef struct ExprT {
+  Expr (*seq)(Expr lhs, Expr rhs);
   Expr (*assign)(Expr lhs, Expr rhs);
   Expr (*eq)(Expr lhs, Expr rhs);
   Expr (*neq)(Expr lhs, Expr rhs);
@@ -69,6 +74,7 @@ typedef struct ExprT {
   Expr (*not)(Expr rhs);
   Expr (*num)(Num x);
   Expr (*var)(Var x);
+  Expr (*unit)(void);
 } ExprT;
 
 ExprT Trait(Expr);
@@ -114,6 +120,9 @@ static void Expr_showUnary(CharBuff* b, String tag, Expr rhs) {
   mem_printf(b, ")");
 }
 
+static Expr FUNC_NAME(seq, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(SEQ, lhs, rhs);
+}
 static Expr FUNC_NAME(assign, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(ASSIGN, lhs, rhs);
 }
@@ -168,9 +177,14 @@ static Expr FUNC_NAME(var, Expr)(Var x) {
   e->var = x;
   return e;
 }
+static Expr FUNC_NAME(unit, Expr)(void) {
+  static struct Expr e = {.type = UNIT};
+  return &e;
+}
 
 ExprT Trait(Expr) {
   return (ExprT){
+      .seq = FUNC_NAME(seq, Expr),
       .assign = FUNC_NAME(assign, Expr),
       .eq = FUNC_NAME(eq, Expr),
       .neq = FUNC_NAME(neq, Expr),
@@ -187,6 +201,7 @@ ExprT Trait(Expr) {
       .not = FUNC_NAME(not, Expr),
       .num = FUNC_NAME(num, Expr),
       .var = FUNC_NAME(var, Expr),
+      .unit = FUNC_NAME(unit, Expr),
   };
 }
 
@@ -194,6 +209,9 @@ impl_user_type(Expr);
 
 show_user_type(Expr)(CharBuff* b, Expr x) {
   switch (x->type) {
+  case SEQ:
+    Expr_showBinary(b, "Seq", x->lhs, x->rhs);
+    break;
   case ASSIGN:
     Expr_showBinary(b, "Assign", x->lhs, x->rhs);
     break;
@@ -241,6 +259,9 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     break;
   case VAR:
     mem_printf(b, "(Var %s)", x->var.ident);
+    break;
+  case UNIT:
+    mem_printf(b, "()");
     break;
   default:
     assert(0 && "Illegal Expr");

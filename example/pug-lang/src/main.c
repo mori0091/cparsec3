@@ -145,7 +145,7 @@ bool pug_parseTest(String input) {
   printf("> %s\n", input);
 
   // parse the source code and translate it to AST (Abstract Syntax Tree)
-  PARSE_RESULT(Expr) result = parse(stmt(), input);
+  PARSE_RESULT(Expr) result = parse(program(), input);
   {
     Show(PARSE_RESULT(Expr)) s = trait(Show(PARSE_RESULT(Expr)));
     if (!result.success) {
@@ -173,37 +173,58 @@ bool pug_parseTest(String input) {
 
 // -----------------------------------------------------------------------
 void pug_self_test(void) {
-  assert(pug_parseTest("123"));
-  assert(pug_parseTest("12*3"));
-  assert(pug_parseTest("12/3"));
-  assert(pug_parseTest("(12*3)/4"));
-  assert(pug_parseTest("(12/3)*4"));
-  assert(pug_parseTest("12*(3/4)"));
-  assert(pug_parseTest("12/(3*4)"));
-  assert(pug_parseTest("(12*3)/(3*4)"));
-  assert(pug_parseTest("(12*3)/(34)"));
-  assert(!pug_parseTest("(12*3)(3*4)")); /* error */
-  assert(!pug_parseTest("(12*3a)"));     /* error */
-  assert(pug_parseTest("5+4*3-2/1"));
-  assert(pug_parseTest("( 5 + 4 ) * 3 - 2 / 1  "));
-  assert(pug_parseTest("-1"));
-  assert(pug_parseTest("+1"));
-  assert(pug_parseTest("- 1"));
-  assert(pug_parseTest("+ 1"));
-  assert(pug_parseTest("1 - -1"));
-  assert(!pug_parseTest("9999999999999999999")); /* error */
-  assert(!pug_parseTest("1 / 0"));               /* division by zero */
-  assert(!pug_parseTest("1 % 0"));               /* division by zero */
-  assert(pug_parseTest("10 % 3"));
-  assert(pug_parseTest("10 == 3"));
-  assert(pug_parseTest("10 == 10"));
-  assert(pug_parseTest("10 != 3"));
-  assert(pug_parseTest("10 != 10"));
-  assert(pug_parseTest("1 <= 10")); /* 1 */
-  assert(pug_parseTest("1 < 10"));  /* 1 */
-  assert(pug_parseTest("1 > 10"));  /* 0 */
-  assert(pug_parseTest("1 >= 10")); /* 0 */
+  assert(pug_parseTest("123;"));
+  assert(pug_parseTest("12*3;"));
+  assert(pug_parseTest("12/3;"));
+  assert(pug_parseTest("(12*3)/4;"));
+  assert(pug_parseTest("(12/3)*4;"));
+  assert(pug_parseTest("12*(3/4);"));
+  assert(pug_parseTest("12/(3*4);"));
+  assert(pug_parseTest("(12*3)/(3*4);"));
+  assert(pug_parseTest("(12*3)/(34);"));
+  assert(!pug_parseTest("(12*3)(3*4);")); /* syntax error */
+  assert(!pug_parseTest("(12*3a);"));     /* syntax error */
+  assert(pug_parseTest("5+4*3-2/1;"));
+  assert(pug_parseTest("( 5 + 4 ) * 3 - 2 / 1 ;  "));
+  assert(pug_parseTest("-1;"));
+  assert(pug_parseTest("+1;"));
+  assert(pug_parseTest("- 1;"));
+  assert(pug_parseTest("+ 1;"));
+  assert(pug_parseTest("1 - -1;"));
+  assert(!pug_parseTest("9999999999999999999;")); /* syntax error */
+  assert(!pug_parseTest("1 / 0;"));               /* division by zero */
+  assert(!pug_parseTest("1 % 0;"));               /* division by zero */
+  assert(pug_parseTest("10 % 3;"));
+  assert(pug_parseTest("10 == 3;"));
+  assert(pug_parseTest("10 == 10;"));
+  assert(pug_parseTest("10 != 3;"));
+  assert(pug_parseTest("10 != 10;"));
+  assert(pug_parseTest("1 <= 10;")); /* 1 */
+  assert(pug_parseTest("1 < 10;"));  /* 1 */
+  assert(pug_parseTest("1 > 10;"));  /* 0 */
+  assert(pug_parseTest("1 >= 10;")); /* 0 */
 
-  assert(pug_parseTest("a"));         /* 0 */
-  assert(pug_parseTest("a = b = 1")); /* 1 */
+  assert(pug_parseTest("a;"));         /* 0 */
+  assert(pug_parseTest("a = b = 1;")); /* 1 */
+
+  assert(pug_parseTest(";"));        /* () */
+  assert(!pug_parseTest("1"));       /* syntax error */
+  assert(pug_parseTest("1;"));       /* 1 */
+  assert(pug_parseTest("1;2;"));     /* 2 */
+  assert(pug_parseTest("1;2;3;"));   /* 3 */
+  assert(pug_parseTest("{1;}"));     /* 1 */
+  assert(pug_parseTest("{1;2;}"));   /* 2 */
+  assert(pug_parseTest("{1;2;3;}")); /* 3 */
+  assert(pug_parseTest("{1;};"));    /* () */
+  assert(pug_parseTest("{1;} 2;"));  /* 2 */
+  assert(pug_parseTest("{1;}; 2;")); /* 2 */
+  assert(pug_parseTest("; {2;}"));   /* 2 */
+  assert(!pug_parseTest("1 {2;}"));  /* syntax error */
+  assert(pug_parseTest("1; {2;}"));  /* 2 */
+
+  assert(pug_parseTest("a = 1; b = 2; a + b;"));        /* 3 */
+  assert(pug_parseTest("a = 1; b = 2; c = a + b;"));    /* 3 */
+  assert(pug_parseTest("a = 1; b = 2; c = a + b; a;")); /* 1 */
+  assert(pug_parseTest("a = 1; b = 2; c = a + b; b;")); /* 2 */
+  assert(pug_parseTest("a = 1; b = 2; c = a + b; c;")); /* 3 */
 }
