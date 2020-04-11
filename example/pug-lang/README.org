@@ -43,20 +43,20 @@ $ ./bin/pug -e '1 + 2;'
 | ~{...}~ | block           |
 
 ** Binary operators
-| Operator | Example        | Explanation                         |
-|----------+----------------+-------------------------------------|
-| ~=~      | ~var = expr~   | assignment                          |
-| ~==~     | ~expr == expr~ | equality comparison                 |
-| ~!=~     | ~expr != expr~ | nonequality comparison              |
-| ~<=~     | ~expr <= expr~ | less than or equal to comparison    |
-| ~<~      | ~expr < expr~  | less than comparison                |
-| ~>=~     | ~expr >= expr~ | greater than or equal to comparison |
-| ~>~      | ~expr > expr~  | greater than comparison             |
-| ~+~      | ~expr + expr~  | arithmetic addition                 |
-| ~-~      | ~expr - expr~  | arithmetic subtraction              |
-| ~*~      | ~expr * expr~  | arithmetic multiplication           |
-| ~/~      | ~expr / expr~  | arithmetic division                 |
-| ~%~      | ~expr % expr~  | arithmetic reminder                 |
+| Operator | Associativity    | Example        | Explanation                         |
+|----------+------------------+----------------+-------------------------------------|
+| ~=~      | non-associative  | ~var = expr~   | assignment                          |
+| ~==~     | non-associative  | ~expr == expr~ | equality comparison                 |
+| ~!=~     | non-associative  | ~expr != expr~ | nonequality comparison              |
+| ~<=~     | non-associative  | ~expr <= expr~ | less than or equal to comparison    |
+| ~<~      | non-associative  | ~expr < expr~  | less than comparison                |
+| ~>=~     | non-associative  | ~expr >= expr~ | greater than or equal to comparison |
+| ~>~      | non-associative  | ~expr > expr~  | greater than comparison             |
+| ~+~      | left-associative | ~expr + expr~  | arithmetic addition                 |
+| ~-~      | left-associative | ~expr - expr~  | arithmetic subtraction              |
+| ~*~      | left-associative | ~expr * expr~  | arithmetic multiplication           |
+| ~/~      | left-associative | ~expr / expr~  | arithmetic division                 |
+| ~%~      | left-associative | ~expr % expr~  | arithmetic reminder                 |
 
 ** Unary operators
 | Operator | Example  | Explanation            |

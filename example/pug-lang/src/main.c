@@ -204,15 +204,54 @@ void pug_self_test(void) {
   assert(pug_parseTest("1 > 10;"));  /* 0 */
   assert(pug_parseTest("1 >= 10;")); /* 0 */
 
-  assert(pug_parseTest("a;"));         /* 0 */
-  assert(pug_parseTest("a = b = 1;")); /* 1 */
+  /* assignment expression results the value assigned. */
+  assert(pug_parseTest("a = 100;")); /* 100 */
 
-  assert(pug_parseTest(";"));        /* () */
-  assert(!pug_parseTest("1"));       /* syntax error */
-  assert(pug_parseTest("1;"));       /* 1 */
+  /* evaluating a variable results its value. */
+  assert(pug_parseTest("a = 100; a;")); /* 100 */
+
+  /* evaluating an undefined variable results 0. */
+  assert(pug_parseTest("a;")); /* 0 */
+
+  /* arithmetic operators are left-associative. */
+  assert(pug_parseTest("100 + 2 + 3 == (100 + 2) + 3;"));
+  assert(pug_parseTest("100 - 2 - 3 == (100 - 2) - 3;"));
+  assert(pug_parseTest("100 * 2 * 3 == (100 * 2) * 3;"));
+  assert(pug_parseTest("100 / 2 / 5 == (100 / 2) / 5;"));
+
+  /* comparison operators are non-associative */
+  assert(!pug_parseTest("1 == 2 == 0;")); /* syntax error */
+  assert(!pug_parseTest("1 != 2 == 1;")); /* syntax error */
+  assert(!pug_parseTest("2 != 2 == 0;")); /* syntax error */
+  assert(!pug_parseTest("2 == 2 == 1;")); /* syntax error */
+  assert(!pug_parseTest("1 <= 2 <= 3;")); /* syntax error */
+  assert(!pug_parseTest("1 <= 2 < 3;"));  /* syntax error */
+  assert(!pug_parseTest("1 < 2 <= 3;"));  /* syntax error */
+  assert(!pug_parseTest("1 < 2 < 3;"));   /* syntax error */
+  assert(!pug_parseTest("3 >= 2 >= 1;")); /* syntax error */
+  assert(!pug_parseTest("3 >= 2 > 1;"));  /* syntax error */
+  assert(!pug_parseTest("3 > 2 >= 1;"));  /* syntax error */
+  assert(!pug_parseTest("3 > 2 > 1;"));   /* syntax error */
+
+  /* assignment operators are non-associative. */
+  assert(!pug_parseTest("a = b = 1;")); /* syntax error */
+
+  /* empty statement results `()`. */
+  assert(pug_parseTest(";")); /* () */
+
+  /* a statement must be block or ends with ';' */
+  assert(!pug_parseTest("1"));   /* syntax error */
+  assert(pug_parseTest("1;"));   /* 1 */
+  assert(pug_parseTest("{1;}")); /* 1 */
+
+  /* empty block is not permitted. */
+  assert(!pug_parseTest("{}")); /* syntax error */
+  assert(pug_parseTest("{;}")); /* () */
+
+  /* a list of statements are evaluated in order, and results the last
+   * value. */
   assert(pug_parseTest("1;2;"));     /* 2 */
   assert(pug_parseTest("1;2;3;"));   /* 3 */
-  assert(pug_parseTest("{1;}"));     /* 1 */
   assert(pug_parseTest("{1;2;}"));   /* 2 */
   assert(pug_parseTest("{1;2;3;}")); /* 3 */
   assert(pug_parseTest("{1;};"));    /* () */
