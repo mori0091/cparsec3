@@ -31,6 +31,12 @@ Interpreter(Expr) Trait(Interpreter(Expr));
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
 
+#define EVAL_AS_NEWVAR(_ctx_, _x_, _var_)                                \
+  EvalResult _var_ = eval_as_newvar(_ctx_, _x_);                         \
+  if (!_var_.success) {                                                  \
+    return _var_;                                                        \
+  }
+
 #define EVAL_AS_LVALUE(_ctx_, _x_, _var_)                                \
   EvalResult _var_ = eval_as_lvalue(_ctx_, _x_);                         \
   if (!_var_.success) {                                                  \
@@ -85,15 +91,22 @@ Interpreter(Expr) Trait(Interpreter(Expr));
     }                                                                    \
   } while (0)
 
+static EvalResult eval_as_newvar(Context* ctx, Expr x) {
+  assert(x->kind == VAR);
+  ContextT C = trait(Context);
+  Maybe(Address) ma = C.map.put(ctx, x->var.ident);
+  if (ma.none) {
+    RETURN_ERR("Stack overflow");
+  }
+  RETURN_OK(ma.value);
+}
+
 static EvalResult eval_as_lvalue(Context* ctx, Expr x) {
   assert(x->kind == VAR);
   ContextT C = trait(Context);
   Maybe(Address) ma = C.map.lookup(ctx, x->var.ident);
   if (ma.none) {
-    ma = C.map.put(ctx, x->var.ident);
-    if (ma.none) {
-      RETURN_ERR("Stack overflow");
-    }
+    RETURN_ERR("Undefined variable");
   }
   RETURN_OK(ma.value);
 }
@@ -104,6 +117,14 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context* ctx,
   case SEQ: {
     EVAL(ctx, x->lhs, lhs);
     EVAL(ctx, x->rhs, rhs);
+    RETURN_OK(rhs.ok);
+  }
+  case DEFVAR: {
+    REQUIRE_TYPE_EQ(x->lhs, x->rhs);
+    EVAL(ctx, x->rhs, rhs);
+    EVAL_AS_NEWVAR(ctx, x->lhs, lval);
+    ContextT C = trait(Context);
+    C.stack.store(ctx, lval.ok, rhs.ok);
     RETURN_OK(rhs.ok);
   }
   case ASSIGN: {

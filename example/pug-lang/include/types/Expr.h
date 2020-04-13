@@ -18,6 +18,8 @@ typedef struct Var {
 enum ExprId {
   /* sequence */
   SEQ,
+  /* defvar */
+  DEFVAR,
   /* assignment */
   ASSIGN,
   /* equality */
@@ -61,6 +63,7 @@ struct Expr {
 
 typedef struct ExprT {
   Expr (*seq)(Expr lhs, Expr rhs);
+  Expr (*defvar)(Expr lhs, Expr rhs);
   Expr (*assign)(Expr lhs, Expr rhs);
   Expr (*eq)(Expr lhs, Expr rhs);
   Expr (*neq)(Expr lhs, Expr rhs);
@@ -127,6 +130,9 @@ static void Expr_showUnary(CharBuff* b, String tag, Expr rhs) {
 
 static Expr FUNC_NAME(seq, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(rhs->type, SEQ, lhs, rhs);
+}
+static Expr FUNC_NAME(defvar, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(rhs->type, DEFVAR, lhs, rhs);
 }
 static Expr FUNC_NAME(assign, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(rhs->type, ASSIGN, lhs, rhs);
@@ -195,6 +201,7 @@ static Expr FUNC_NAME(unit, Expr)(void) {
 ExprT Trait(Expr) {
   return (ExprT){
       .seq = FUNC_NAME(seq, Expr),
+      .defvar = FUNC_NAME(defvar, Expr),
       .assign = FUNC_NAME(assign, Expr),
       .eq = FUNC_NAME(eq, Expr),
       .neq = FUNC_NAME(neq, Expr),
@@ -221,6 +228,9 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
   switch (x->kind) {
   case SEQ:
     Expr_showBinary(b, "Seq", x->lhs, x->rhs);
+    break;
+  case DEFVAR:
+    Expr_showBinary(b, "DefVar", x->lhs, x->rhs);
     break;
   case ASSIGN:
     Expr_showBinary(b, "Assign", x->lhs, x->rhs);
