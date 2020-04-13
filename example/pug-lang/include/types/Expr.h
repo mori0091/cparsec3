@@ -3,6 +3,8 @@
 
 #include "user_type.h"
 
+#include "Type.h"
+
 typedef struct Expr* Expr;
 
 typedef struct Num {
@@ -13,7 +15,7 @@ typedef struct Var {
   String ident;
 } Var;
 
-enum ExprType {
+enum ExprId {
   /* sequence */
   SEQ,
   /* assignment */
@@ -45,7 +47,8 @@ enum ExprType {
 };
 
 struct Expr {
-  enum ExprType type;
+  Type type;
+  enum ExprId kind;
   union {
     struct {
       Expr lhs;
@@ -88,17 +91,19 @@ static Expr Expr_New(void) {
   return (Expr)mem_malloc(sizeof(struct Expr));
 }
 
-static Expr Expr_Binary(enum ExprType type, Expr lhs, Expr rhs) {
+static Expr Expr_Binary(Type type, enum ExprId kind, Expr lhs, Expr rhs) {
   Expr e = Expr_New();
   e->type = type;
+  e->kind = kind;
   e->lhs = lhs;
   e->rhs = rhs;
   return e;
 }
 
-static Expr Expr_Unary(enum ExprType type, Expr rhs) {
+static Expr Expr_Unary(Type type, enum ExprId kind, Expr rhs) {
   Expr e = Expr_New();
   e->type = type;
+  e->kind = kind;
   e->lhs = 0;
   e->rhs = rhs;
   return e;
@@ -121,64 +126,69 @@ static void Expr_showUnary(CharBuff* b, String tag, Expr rhs) {
 }
 
 static Expr FUNC_NAME(seq, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(SEQ, lhs, rhs);
+  return Expr_Binary(rhs->type, SEQ, lhs, rhs);
 }
 static Expr FUNC_NAME(assign, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(ASSIGN, lhs, rhs);
+  return Expr_Binary(rhs->type, ASSIGN, lhs, rhs);
 }
 static Expr FUNC_NAME(eq, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(EQ, lhs, rhs);
+  return Expr_Binary(trait(Type).type_bool(), EQ, lhs, rhs);
 }
 static Expr FUNC_NAME(neq, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(NEQ, lhs, rhs);
+  return Expr_Binary(trait(Type).type_bool(), NEQ, lhs, rhs);
 }
 static Expr FUNC_NAME(le, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(LE, lhs, rhs);
+  return Expr_Binary(trait(Type).type_bool(), LE, lhs, rhs);
 }
 static Expr FUNC_NAME(lt, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(LT, lhs, rhs);
+  return Expr_Binary(trait(Type).type_bool(), LT, lhs, rhs);
 }
 static Expr FUNC_NAME(gt, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(GT, lhs, rhs);
+  return Expr_Binary(trait(Type).type_bool(), GT, lhs, rhs);
 }
 static Expr FUNC_NAME(ge, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(GE, lhs, rhs);
+  return Expr_Binary(trait(Type).type_bool(), GE, lhs, rhs);
 }
 static Expr FUNC_NAME(add, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(ADD, lhs, rhs);
+  return Expr_Binary(lhs->type, ADD, lhs, rhs);
 }
 static Expr FUNC_NAME(sub, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(SUB, lhs, rhs);
+  return Expr_Binary(lhs->type, SUB, lhs, rhs);
 }
 static Expr FUNC_NAME(mul, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(MUL, lhs, rhs);
+  return Expr_Binary(lhs->type, MUL, lhs, rhs);
 }
 static Expr FUNC_NAME(div, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(DIV, lhs, rhs);
+  return Expr_Binary(lhs->type, DIV, lhs, rhs);
 }
 static Expr FUNC_NAME(mod, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(MOD, lhs, rhs);
+  return Expr_Binary(lhs->type, MOD, lhs, rhs);
 }
 static Expr FUNC_NAME(neg, Expr)(Expr rhs) {
-  return Expr_Unary(NEG, rhs);
+  return Expr_Unary(rhs->type, NEG, rhs);
 }
 static Expr FUNC_NAME(not, Expr)(Expr rhs) {
-  return Expr_Unary(NOT, rhs);
+  return Expr_Unary(rhs->type, NOT, rhs);
 }
 static Expr FUNC_NAME(num, Expr)(Num x) {
   Expr e = Expr_New();
-  e->type = NUM;
+  e->type = trait(Type).type_int();
+  e->kind = NUM;
   e->num = x;
   return e;
 }
 static Expr FUNC_NAME(var, Expr)(Var x) {
   Expr e = Expr_New();
-  e->type = VAR;
+  e->type = trait(Type).type_int();
+  e->kind = VAR;
   e->var = x;
   return e;
 }
 static Expr FUNC_NAME(unit, Expr)(void) {
-  static struct Expr e = {.type = UNIT};
+  static struct Expr e = {
+      .type = {.id = TypeId(unit)},
+      .kind = UNIT,
+  };
   return &e;
 }
 
@@ -208,7 +218,7 @@ ExprT Trait(Expr) {
 impl_user_type(Expr);
 
 show_user_type(Expr)(CharBuff* b, Expr x) {
-  switch (x->type) {
+  switch (x->kind) {
   case SEQ:
     Expr_showBinary(b, "Seq", x->lhs, x->rhs);
     break;
