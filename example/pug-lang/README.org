@@ -36,11 +36,12 @@ $ ./bin/pug -e '1 + 2;'
 * Pug programming language
 
 ** Statements
-| Example | Explanation     |
-|---------+-----------------|
-| ~expr;~ | statement       |
-| ~;~     | empty statement |
-| ~{...}~ | block           |
+| Example           | Explanation         |
+|-------------------+---------------------|
+| ~let var = expr;~ | variable definition |
+| ~expr;~           | statement           |
+| ~;~               | empty statement     |
+| ~{...}~           | block               |
 
 ** Binary operators
 | Operator | Associativity    | Example        | Explanation                         |
