@@ -52,7 +52,7 @@ parsec(assign, Expr) {
   PARSER(char) op = lexme(char1('='));
   DO() {
     SCAN(p, lhs);
-    if (lhs->type != VAR) {
+    if (lhs->kind != VAR) {
       RETURN(lhs);
     }
     SCAN(optional(op), m);
@@ -207,6 +207,18 @@ parsec(variable, Expr) {
   }
 }
 
+static bool is_a_keyword(String s) {
+  static String keywords[] = {
+      "let",
+  };
+  for (size_t i = 0; i < sizeof(keywords) / sizeof(String); ++i) {
+    if (trait(Eq(String)).eq(s, keywords[i])) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // PARSER(String) identifier0(void);
 parsec(identifier0, String) {
   PARSER(char) identStart = either(char1('_'), letter());
@@ -222,12 +234,15 @@ parsec(identifier0, String) {
     memmove(cs + 1, xs.data, xs.length);
     cs[len] = 0;
     g_free(xs);
+    if (is_a_keyword(cs)) {
+      FAIL("keyword");
+    }
     RETURN(cs);
   }
 }
 
 PARSER(String) identifier(void) {
-  return label("identifier", identifier0());
+  return label("identifier", tryp(identifier0()));
 }
 
 #endif

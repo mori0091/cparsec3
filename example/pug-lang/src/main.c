@@ -204,14 +204,18 @@ void pug_self_test(void) {
   assert(pug_parseTest("1 > 10;"));  /* 0 */
   assert(pug_parseTest("1 >= 10;")); /* 0 */
 
-  /* assignment expression results the value assigned. */
-  assert(pug_parseTest("a = 100;")); /* 100 */
+  /* evaluating an undefined variable is not permitted. */
+  assert(!pug_parseTest("a;"));         /* Undefined variable */
+  assert(!pug_parseTest("let a = a;")); /* Undefined variable */
+
+  /* a variable must be initialized when defining it. */
+  assert(pug_parseTest("let a = 100;")); /* 100 */
 
   /* evaluating a variable results its value. */
-  assert(pug_parseTest("a = 100; a;")); /* 100 */
+  assert(pug_parseTest("let a = 100; a;")); /* 100 */
 
-  /* evaluating an undefined variable results 0. */
-  assert(pug_parseTest("a;")); /* 0 */
+  /* assignment expression results the value assigned. */
+  assert(pug_parseTest("let a = 1; a = 100;")); /* 100 */
 
   /* arithmetic operators are left-associative. */
   assert(pug_parseTest("100 + 2 + 3 == (100 + 2) + 3;"));
@@ -234,7 +238,8 @@ void pug_self_test(void) {
   assert(!pug_parseTest("3 > 2 > 1;"));   /* syntax error */
 
   /* assignment operators are non-associative. */
-  assert(!pug_parseTest("a = b = 1;")); /* syntax error */
+  assert(!pug_parseTest("let a = 0; let b = 0; a = b = 1;"));
+  /* -> syntax error */
 
   /* empty statement results `()`. */
   assert(pug_parseTest(";")); /* () */
@@ -261,9 +266,7 @@ void pug_self_test(void) {
   assert(!pug_parseTest("1 {2;}"));  /* syntax error */
   assert(pug_parseTest("1; {2;}"));  /* 2 */
 
-  assert(pug_parseTest("a = 1; b = 2; a + b;"));        /* 3 */
-  assert(pug_parseTest("a = 1; b = 2; c = a + b;"));    /* 3 */
-  assert(pug_parseTest("a = 1; b = 2; c = a + b; a;")); /* 1 */
-  assert(pug_parseTest("a = 1; b = 2; c = a + b; b;")); /* 2 */
-  assert(pug_parseTest("a = 1; b = 2; c = a + b; c;")); /* 3 */
+  assert(pug_parseTest("let a = 1; let b = 2; a + b;")); /* 3 */
+  assert(pug_parseTest("let a = 1; let b = 2; a;"));     /* 1 */
+  assert(pug_parseTest("let a = 1; let b = 2; b;"));     /* 2 */
 }
