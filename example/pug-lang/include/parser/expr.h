@@ -163,10 +163,11 @@ parsec(unary, Expr) {
   PARSER(char) op = lexme(choice(char1('+'), char1('-'), char1('!')));
   DO() {
     SCAN(optional(op), m);
-    SCAN(p, rhs);
     if (m.none) {
+      SCAN(p, rhs);
       RETURN(rhs);
     }
+    SCAN(unary(), rhs);
     switch (m.value) {
     case '+':
       RETURN(rhs);
