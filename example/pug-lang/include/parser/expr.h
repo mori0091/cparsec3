@@ -17,8 +17,9 @@ C_API_BEGIN
 // addsub   = muldiv {("+" | "-") muldiv}
 // muldiv   = unary {("*" | "/") unary}
 // unary    = [("+" | "-" | "!")] primary
-// primary  = paren | number | variable
-// paren    = "(" expr ")"
+// primary  = ctor | paren | number | variable
+// ctor     = "()" | "true" | "false"
+// paren    = (" expr ")"
 // variable = identifier
 //
 // identifier  = identStart{identLetter}
@@ -33,13 +34,35 @@ PARSER(Expr) addsub(void);
 PARSER(Expr) muldiv(void);
 PARSER(Expr) unary(void);
 PARSER(Expr) primary(void);
+PARSER(Expr) ctor(String symbol, Expr e);
 PARSER(Expr) paren(void);
 
 PARSER(Expr) variable(void);
+
 PARSER(String) identifier(void);
+PARSER(char) identStart(void);
+PARSER(char) identLetter(void);
+
+PARSER(String) keyword(String s);
 
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
+
+static String KEYWORDS[] = {
+    "let",
+    "()",
+    "false",
+    "true",
+};
+
+static bool is_a_keyword(String s) {
+  for (size_t i = 0; i < sizeof(KEYWORDS) / sizeof(String); ++i) {
+    if (trait(Eq(String)).eq(s, KEYWORDS[i])) {
+      return true;
+    }
+  }
+  return false;
+}
 
 PARSER(Expr) expr(void) {
   return assign();
@@ -163,10 +186,11 @@ parsec(unary, Expr) {
   PARSER(char) op = lexme(choice(char1('+'), char1('-'), char1('!')));
   DO() {
     SCAN(optional(op), m);
-    SCAN(p, rhs);
     if (m.none) {
+      SCAN(p, rhs);
       RETURN(rhs);
     }
+    SCAN(unary(), rhs);
     switch (m.value) {
     case '+':
       RETURN(rhs);
@@ -182,10 +206,23 @@ parsec(unary, Expr) {
 
 // PARSER(Expr) primary(void);
 parsec(primary, Expr) {
+  ExprT E = trait(Expr);
   DO() {
-    SCAN(choice(paren(), number(), variable()), x);
+    SCAN(choice(ctor("()", E.unit()),            /* () */
+                ctor("true", E.boolean(true)),   /* true */
+                ctor("false", E.boolean(false)), /* false */
+                paren(), number(), variable()),
+         x);
     SCAN(space());
     RETURN(x);
+  }
+}
+
+// PARSER(Expr) ctor(String symbol, Expr e);
+parsec(ctor, String, Expr, Expr) {
+  DO() WITH(s, e) {
+    SCAN(keyword(s));
+    RETURN(e);
   }
 }
 
@@ -207,26 +244,11 @@ parsec(variable, Expr) {
   }
 }
 
-static bool is_a_keyword(String s) {
-  static String keywords[] = {
-      "let",
-  };
-  for (size_t i = 0; i < sizeof(keywords) / sizeof(String); ++i) {
-    if (trait(Eq(String)).eq(s, keywords[i])) {
-      return true;
-    }
-  }
-  return false;
-}
-
 // PARSER(String) identifier0(void);
 parsec(identifier0, String) {
-  PARSER(char) identStart = either(char1('_'), letter());
-  PARSER(char) identLetter = either(char1('_'), alphaNum());
-
   DO() {
-    SCAN(identStart, x);
-    SCAN(many(identLetter), xs);
+    SCAN(identStart(), x);
+    SCAN(many(identLetter()), xs);
     SCAN(space());
     size_t len = 1 + xs.length;
     char* cs = mem_malloc(len + 1);
@@ -243,6 +265,30 @@ parsec(identifier0, String) {
 
 PARSER(String) identifier(void) {
   return label("identifier", tryp(identifier0()));
+}
+
+PARSER(char) identStart(void) {
+  return either(char1('_'), letter());
+}
+
+PARSER(char) identLetter(void) {
+  return either(char1('_'), alphaNum());
+}
+
+// PARSER(String) keyword0(String s);
+parsec(keyword0, String, String) {
+  DO() WITH(s) {
+    SCAN(string1(s));
+    SCAN(optional(identLetter()), m);
+    if (!m.none) {
+      FAIL("?");
+    }
+    RETURN(s);
+  }
+}
+
+PARSER(String) keyword(String s) {
+  return tryp(keyword0(s));
 }
 
 #endif
