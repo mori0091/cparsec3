@@ -3,10 +3,12 @@
 
 #include "user_type.h"
 
+#define TYPE(T) trait(Type).type_##T()
 #define TypeId(T) CAT(TypeId_, T)
 
 typedef struct Type {
   enum {
+    TypeId(undetermined),
     TypeId(unit),
     TypeId(bool),
     TypeId(int),
@@ -16,6 +18,7 @@ typedef struct Type {
 trait_Eq(Type);
 
 typedef struct TypeT {
+  Type (*type_undetermined)(void);
   Type (*type_unit)(void);
   Type (*type_bool)(void);
   Type (*type_int)(void);
@@ -31,6 +34,9 @@ static bool FUNC_NAME(eq, Eq(Type))(Type a, Type b) {
 }
 instance_Eq(Type, FUNC_NAME(eq, Eq(Type)));
 
+static Type FUNC_NAME(type_undetermined, Type)(void) {
+  return (Type){.id = TypeId(undetermined)};
+}
 static Type FUNC_NAME(type_unit, Type)(void) {
   return (Type){.id = TypeId(unit)};
 }
@@ -43,6 +49,7 @@ static Type FUNC_NAME(type_int, Type)(void) {
 
 TypeT Trait(Type) {
   return (TypeT){
+      .type_undetermined = FUNC_NAME(type_undetermined, Type),
       .type_unit = FUNC_NAME(type_unit, Type),
       .type_bool = FUNC_NAME(type_bool, Type),
       .type_int = FUNC_NAME(type_int, Type),

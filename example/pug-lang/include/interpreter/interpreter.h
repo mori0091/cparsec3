@@ -11,12 +11,12 @@ typedef struct RuntimeError {
   String msg;
 } RuntimeError;
 
-// typedef_Result(int, RuntimeError);
-// typedef Result(int, RuntimeError) EvalResult;
+// typedef_Result(Expr, RuntimeError);
+// typedef Result(Expr, RuntimeError) EvalResult;
 typedef struct EvalResult {
   bool success;
   union {
-    int ok;
+    Expr ok;
     RuntimeError err;
   };
 } EvalResult;
@@ -30,18 +30,6 @@ Interpreter(Expr) Trait(Interpreter(Expr));
 
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
-
-#define EVAL_AS_NEWVAR(_ctx_, _x_, _var_)                                \
-  EvalResult _var_ = eval_as_newvar(_ctx_, _x_);                         \
-  if (!_var_.success) {                                                  \
-    return _var_;                                                        \
-  }
-
-#define EVAL_AS_LVALUE(_ctx_, _x_, _var_)                                \
-  EvalResult _var_ = eval_as_lvalue(_ctx_, _x_);                         \
-  if (!_var_.success) {                                                  \
-    return _var_;                                                        \
-  }
 
 #define EVAL(_ctx_, _x_, _var_)                                          \
   EvalResult _var_ = FUNC_NAME(eval, Interpreter(Expr))(_ctx_, _x_);     \
@@ -59,94 +47,96 @@ Interpreter(Expr) Trait(Interpreter(Expr));
     .err.msg = _msg_                                                     \
   }
 
-#define INFIX_OP(_ctx_, _op_, _a_, _b_)                                  \
+#define INFIX_BOOL_OP(_ctx_, _op_, _a_, _b_)                             \
   do {                                                                   \
-    REQUIRE_TYPE_EQ(_a_, _b_);                                           \
     EVAL(_ctx_, _a_, lhs);                                               \
     EVAL(_ctx_, _b_, rhs);                                               \
-    RETURN_OK(lhs.ok _op_ rhs.ok);                                       \
+    REQUIRE_TYPE_EQ(lhs.ok->type, rhs.ok->type);                         \
+    switch (lhs.ok->kind) {                                              \
+    case NUM: {                                                          \
+      bool x = lhs.ok->num.value _op_ rhs.ok->num.value;                 \
+      RETURN_OK(trait(Expr).boolean(x));                                 \
+    }                                                                    \
+    case FALSE:                                                          \
+    case TRUE:                                                           \
+    case UNIT: {                                                         \
+      bool x = lhs.ok->kind _op_ rhs.ok->kind;                           \
+      RETURN_OK(trait(Expr).boolean(x));                                 \
+    }                                                                    \
+    default:                                                             \
+      RETURN_ERR("Type error");                                          \
+    }                                                                    \
+  } while (0)
+
+#define INFIX_OP(_ctx_, _op_, _a_, _b_)                                  \
+  do {                                                                   \
+    EVAL(_ctx_, _a_, lhs);                                               \
+    EVAL(_ctx_, _b_, rhs);                                               \
+    REQUIRE_TYPE_EQ(lhs.ok->type, TYPE(int));                            \
+    REQUIRE_TYPE_EQ(rhs.ok->type, TYPE(int));                            \
+    int x = lhs.ok->num.value _op_ rhs.ok->num.value;                    \
+    RETURN_OK(trait(Expr).num((Num){x}));                                \
   } while (0)
 
 #define DIV_MOD_OP(_ctx_, _op_, _a_, _b_)                                \
   do {                                                                   \
-    REQUIRE_TYPE_EQ(_a_, _b_);                                           \
     EVAL(_ctx_, _a_, lhs);                                               \
     EVAL(_ctx_, _b_, rhs);                                               \
-    if (rhs.ok == 0) {                                                   \
+    REQUIRE_TYPE_EQ(lhs.ok->type, TYPE(int));                            \
+    REQUIRE_TYPE_EQ(rhs.ok->type, TYPE(int));                            \
+    if (rhs.ok->num.value == 0) {                                        \
       RETURN_ERR("Division by zero");                                    \
     }                                                                    \
-    RETURN_OK(lhs.ok _op_ rhs.ok);                                       \
-  } while (0)
-
-#define PREFIX_OP(_ctx_, _op_, _b_)                                      \
-  do {                                                                   \
-    EVAL(_ctx_, _b_, rhs);                                               \
-    RETURN_OK(_op_ rhs.ok);                                              \
+    int x = lhs.ok->num.value _op_ rhs.ok->num.value;                    \
+    RETURN_OK(trait(Expr).num((Num){x}));                                \
   } while (0)
 
 #define REQUIRE_TYPE_EQ(lhs, rhs)                                        \
   do {                                                                   \
-    if (trait(Eq(Type)).neq(lhs->type, rhs->type)) {                     \
+    if (trait(Eq(Type)).neq(lhs, rhs)) {                                 \
       RETURN_ERR("Type mismatch");                                       \
     }                                                                    \
   } while (0)
 
-static EvalResult eval_as_newvar(Context* ctx, Expr x) {
-  assert(x->kind == VAR);
-  ContextT C = trait(Context);
-  Maybe(Address) ma = C.map.put(ctx, x->var.ident);
-  if (ma.none) {
-    RETURN_ERR("Stack overflow");
-  }
-  RETURN_OK(ma.value);
-}
-
-static EvalResult eval_as_lvalue(Context* ctx, Expr x) {
-  assert(x->kind == VAR);
-  ContextT C = trait(Context);
-  Maybe(Address) ma = C.map.lookup(ctx, x->var.ident);
-  if (ma.none) {
-    RETURN_ERR("Undefined variable");
-  }
-  RETURN_OK(ma.value);
-}
-
 static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context* ctx,
                                                      Expr x) {
+  ContextT C = trait(Context);
+  ExprT E = trait(Expr);
   switch (x->kind) {
   case SEQ: {
     EVAL(ctx, x->lhs, lhs);
     EVAL(ctx, x->rhs, rhs);
     RETURN_OK(rhs.ok);
   }
-  case DEFVAR: {
-    REQUIRE_TYPE_EQ(x->lhs, x->rhs);
+  case LET: {
+    assert(x->lhs->kind == VAR);
     EVAL(ctx, x->rhs, rhs);
-    EVAL_AS_NEWVAR(ctx, x->lhs, lval);
-    ContextT C = trait(Context);
-    C.stack.store(ctx, lval.ok, rhs.ok);
+    // if the previous definiton exists, it will be shadowed.
+    C.map.put(ctx, x->lhs->var.ident, rhs.ok);
     RETURN_OK(rhs.ok);
   }
   case ASSIGN: {
-    REQUIRE_TYPE_EQ(x->lhs, x->rhs);
+    assert(x->lhs->kind == VAR);
     EVAL(ctx, x->rhs, rhs);
-    EVAL_AS_LVALUE(ctx, x->lhs, lval);
-    ContextT C = trait(Context);
-    C.stack.store(ctx, lval.ok, rhs.ok);
+    EVAL(ctx, x->lhs, lhs);
+    // types must be same with previous definition
+    REQUIRE_TYPE_EQ(lhs.ok->type, rhs.ok->type);
+    // the previous definiton will be shadowed.
+    C.map.put(ctx, x->lhs->var.ident, rhs.ok);
     RETURN_OK(rhs.ok);
   }
   case EQ:
-    INFIX_OP(ctx, ==, x->lhs, x->rhs);
+    INFIX_BOOL_OP(ctx, ==, x->lhs, x->rhs);
   case NEQ:
-    INFIX_OP(ctx, !=, x->lhs, x->rhs);
+    INFIX_BOOL_OP(ctx, !=, x->lhs, x->rhs);
   case LE:
-    INFIX_OP(ctx, <=, x->lhs, x->rhs);
+    INFIX_BOOL_OP(ctx, <=, x->lhs, x->rhs);
   case LT:
-    INFIX_OP(ctx, <, x->lhs, x->rhs);
+    INFIX_BOOL_OP(ctx, <, x->lhs, x->rhs);
   case GT:
-    INFIX_OP(ctx, >, x->lhs, x->rhs);
+    INFIX_BOOL_OP(ctx, >, x->lhs, x->rhs);
   case GE:
-    INFIX_OP(ctx, >=, x->lhs, x->rhs);
+    INFIX_BOOL_OP(ctx, >=, x->lhs, x->rhs);
   case ADD:
     INFIX_OP(ctx, +, x->lhs, x->rhs);
   case SUB:
@@ -157,19 +147,37 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context* ctx,
     DIV_MOD_OP(ctx, /, x->lhs, x->rhs);
   case MOD:
     DIV_MOD_OP(ctx, %, x->lhs, x->rhs);
-  case NEG:
-    PREFIX_OP(ctx, -, x->rhs);
-  case NOT:
-    PREFIX_OP(ctx, !, x->rhs);
-  case NUM:
-    RETURN_OK(x->num.value);
-  case VAR: {
-    EVAL_AS_LVALUE(ctx, x, lval);
-    ContextT C = trait(Context);
-    RETURN_OK(C.stack.load(ctx, lval.ok).value);
+  case NEG: {
+    Expr y = E.sub(E.num((Num){0}), x->rhs);
+    EVAL(ctx, y, rhs);
+    RETURN_OK(rhs.ok);
   }
+  case NOT: {
+    EVAL(ctx, x->rhs, rhs);
+    switch (rhs.ok->kind) {
+    case NUM:
+      RETURN_OK(E.num((Num){~rhs.ok->num.value}));
+    case TRUE:
+      RETURN_OK(E.boolean(false));
+    case FALSE:
+      RETURN_OK(E.boolean(true));
+    default:
+      RETURN_ERR("Type error");
+    }
+  }
+  case VAR: {
+    ContextT C = trait(Context);
+    Maybe(Expr) ma = C.map.lookup(ctx, x->var.ident);
+    if (ma.none) {
+      RETURN_ERR("Undefined variable");
+    }
+    RETURN_OK(ma.value);
+  }
+  case NUM:
+  case TRUE:
+  case FALSE:
   case UNIT:
-    RETURN_OK(0);
+    RETURN_OK(x);
   default:
     RETURN_ERR("Illegal Expr");
   }

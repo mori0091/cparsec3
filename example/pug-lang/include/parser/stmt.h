@@ -9,9 +9,9 @@ C_API_BEGIN
 
 // program    = stmt-list eof
 // stmt-list  = stmt {stmt}
-// stmt       = defvar | stmt1
+// stmt       = let | stmt1
 // stmt1      = block | empty_stmt | expr_stmt
-// defvar     = "var" variable "=" equality
+// let        = "let" variable "=" equality
 // block      = "{" stmt-list "}"
 // empty_stmt = ";"
 // expr_stmt  = expr ";"
@@ -21,7 +21,7 @@ PARSER(Expr) program(void);
 PARSER(Expr) stmt_list(void);
 PARSER(Expr) stmt(void);
 PARSER(Expr) stmt1(void);
-PARSER(Expr) defvar(void);
+PARSER(Expr) let(void);
 PARSER(Expr) block(void);
 PARSER(Expr) empty_stmt(void);
 PARSER(Expr) expr_stmt(void);
@@ -54,31 +54,15 @@ parsec(stmt_list, Expr) {
 }
 
 PARSER(Expr) stmt(void) {
-  return choice(defvar(), stmt1());
+  return choice(let(), stmt1());
 }
 
 PARSER(Expr) stmt1(void) {
   return choice(block(), empty_stmt(), expr_stmt());
 }
 
-parsec(keyword0, String, String) {
-  PARSER(char) identLetter = either(char1('_'), alphaNum());
-  DO() WITH(s) {
-    SCAN(string1(s));
-    SCAN(optional(identLetter), m);
-    if (!m.none) {
-      FAIL("?");
-    }
-    RETURN(s);
-  }
-}
-
-PARSER(String) keyword(String s) {
-  return tryp(keyword0(s));
-}
-
-// PARSER(Expr) defvar(void);
-parsec(defvar, Expr) {
+// PARSER(Expr) let(void);
+parsec(let, Expr) {
   ExprT E = trait(Expr);
   PARSER(char) op = lexme(char1('='));
   PARSER(char) semi = lexme(char1(';'));
@@ -88,7 +72,7 @@ parsec(defvar, Expr) {
     SCAN(op);
     SCAN(equality(), rhs);
     SCAN(semi);
-    RETURN(E.defvar(lhs, rhs));
+    RETURN(E.let(lhs, rhs));
   }
 }
 

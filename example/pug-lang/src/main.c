@@ -158,7 +158,7 @@ bool pug_parseTest(String input) {
   }
 
   // evaluate the AST
-  Context* ctx = trait(Context).create(32);
+  Context* ctx = trait(Context).create();
   EvalResult result2 = trait(Interpreter(Expr)).eval(ctx, result.ok);
   {
     if (!result2.success) {
@@ -166,7 +166,7 @@ bool pug_parseTest(String input) {
       printf("%s\n\n", result2.err.msg);
       return false;
     }
-    eprintf(BOLD GREEN, "%d\n\n", result2.ok);
+    eprintf(BOLD GREEN, "%s\n\n", trait(Show(Expr)).show(result2.ok));
     return true;
   }
 }
@@ -204,18 +204,42 @@ void pug_self_test(void) {
   assert(pug_parseTest("1 > 10;"));  /* 0 */
   assert(pug_parseTest("1 >= 10;")); /* 0 */
 
-  /* evaluating an undefined variable is not permitted. */
-  assert(!pug_parseTest("a;"));         /* Undefined variable */
-  assert(!pug_parseTest("let a = a;")); /* Undefined variable */
-
   /* a variable must be initialized when defining it. */
   assert(pug_parseTest("let a = 100;")); /* 100 */
+
+  /* defining the same variable, the previous one will be shadowed. */
+  assert(pug_parseTest("let a = 100; let a = 2;")); /* 2 */
+
+  /* defining the same variable of different type is permitted. the
+   * previous one will be shadowed. */
+  assert(pug_parseTest("let a = 100; let a = true;")); /* true */
 
   /* evaluating a variable results its value. */
   assert(pug_parseTest("let a = 100; a;")); /* 100 */
 
+  /* evaluating an undefined variable is not permitted. */
+  assert(!pug_parseTest("a;"));         /* Undefined variable */
+  assert(!pug_parseTest("let a = a;")); /* Undefined variable */
+
   /* assignment expression results the value assigned. */
   assert(pug_parseTest("let a = 1; a = 100;")); /* 100 */
+
+  /* assignment of different type is not permitted. */
+  assert(!pug_parseTest("let a = 1; a = ();")); /* Type mismatch */
+
+  /* comparison operators results `true` or `false` */
+  assert(pug_parseTest("1 == 1;"));                     /* true */
+  assert(pug_parseTest("0 == 1;"));                     /* false */
+  assert(pug_parseTest("let a = 0 < 1; a == true ;"));  /* true */
+  assert(pug_parseTest("let a = 1 < 1; a == false ;")); /* true */
+
+  /* `!expr` results the complement of `expr` if `expr` was integer. */
+  assert(pug_parseTest("!0 ;")); /* -1 */
+  assert(pug_parseTest("!1 ;")); /* -2 */
+
+  /* `!expr` results the logical `not` of `expr` if `expr` was bool. */
+  assert(pug_parseTest("!true ;"));  /* false */
+  assert(pug_parseTest("!false ;")); /* true */
 
   /* arithmetic operators are left-associative. */
   assert(pug_parseTest("100 + 2 + 3 == (100 + 2) + 3;"));

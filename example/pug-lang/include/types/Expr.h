@@ -18,8 +18,8 @@ typedef struct Var {
 enum ExprId {
   /* sequence */
   SEQ,
-  /* defvar */
-  DEFVAR,
+  /* let */
+  LET,
   /* assignment */
   ASSIGN,
   /* equality */
@@ -40,10 +40,13 @@ enum ExprId {
   /* unary */
   NEG,
   NOT,
-  /* number */
-  NUM,
   /* variable */
   VAR,
+  /* number */
+  NUM,
+  /* false, true */
+  FALSE,
+  TRUE,
   /* () */
   UNIT,
 };
@@ -63,7 +66,7 @@ struct Expr {
 
 typedef struct ExprT {
   Expr (*seq)(Expr lhs, Expr rhs);
-  Expr (*defvar)(Expr lhs, Expr rhs);
+  Expr (*let)(Expr lhs, Expr rhs);
   Expr (*assign)(Expr lhs, Expr rhs);
   Expr (*eq)(Expr lhs, Expr rhs);
   Expr (*neq)(Expr lhs, Expr rhs);
@@ -80,6 +83,7 @@ typedef struct ExprT {
   Expr (*not)(Expr rhs);
   Expr (*num)(Num x);
   Expr (*var)(Var x);
+  Expr (*boolean)(bool b);
   Expr (*unit)(void);
 } ExprT;
 
@@ -91,21 +95,21 @@ decl_user_type(Expr);
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
 
 static Expr Expr_New(void) {
-  return (Expr)mem_malloc(sizeof(struct Expr));
+  Expr e = (Expr)mem_malloc(sizeof(struct Expr));
+  e->type = TYPE(undetermined);
+  return e;
 }
 
-static Expr Expr_Binary(Type type, enum ExprId kind, Expr lhs, Expr rhs) {
+static Expr Expr_Binary(enum ExprId kind, Expr lhs, Expr rhs) {
   Expr e = Expr_New();
-  e->type = type;
   e->kind = kind;
   e->lhs = lhs;
   e->rhs = rhs;
   return e;
 }
 
-static Expr Expr_Unary(Type type, enum ExprId kind, Expr rhs) {
+static Expr Expr_Unary(enum ExprId kind, Expr rhs) {
   Expr e = Expr_New();
-  e->type = type;
   e->kind = kind;
   e->lhs = 0;
   e->rhs = rhs;
@@ -129,66 +133,76 @@ static void Expr_showUnary(CharBuff* b, String tag, Expr rhs) {
 }
 
 static Expr FUNC_NAME(seq, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(rhs->type, SEQ, lhs, rhs);
+  return Expr_Binary(SEQ, lhs, rhs);
 }
-static Expr FUNC_NAME(defvar, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(rhs->type, DEFVAR, lhs, rhs);
+static Expr FUNC_NAME(let, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(LET, lhs, rhs);
 }
 static Expr FUNC_NAME(assign, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(rhs->type, ASSIGN, lhs, rhs);
+  return Expr_Binary(ASSIGN, lhs, rhs);
 }
 static Expr FUNC_NAME(eq, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(trait(Type).type_bool(), EQ, lhs, rhs);
+  return Expr_Binary(EQ, lhs, rhs);
 }
 static Expr FUNC_NAME(neq, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(trait(Type).type_bool(), NEQ, lhs, rhs);
+  return Expr_Binary(NEQ, lhs, rhs);
 }
 static Expr FUNC_NAME(le, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(trait(Type).type_bool(), LE, lhs, rhs);
+  return Expr_Binary(LE, lhs, rhs);
 }
 static Expr FUNC_NAME(lt, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(trait(Type).type_bool(), LT, lhs, rhs);
+  return Expr_Binary(LT, lhs, rhs);
 }
 static Expr FUNC_NAME(gt, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(trait(Type).type_bool(), GT, lhs, rhs);
+  return Expr_Binary(GT, lhs, rhs);
 }
 static Expr FUNC_NAME(ge, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(trait(Type).type_bool(), GE, lhs, rhs);
+  return Expr_Binary(GE, lhs, rhs);
 }
 static Expr FUNC_NAME(add, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(lhs->type, ADD, lhs, rhs);
+  return Expr_Binary(ADD, lhs, rhs);
 }
 static Expr FUNC_NAME(sub, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(lhs->type, SUB, lhs, rhs);
+  return Expr_Binary(SUB, lhs, rhs);
 }
 static Expr FUNC_NAME(mul, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(lhs->type, MUL, lhs, rhs);
+  return Expr_Binary(MUL, lhs, rhs);
 }
 static Expr FUNC_NAME(div, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(lhs->type, DIV, lhs, rhs);
+  return Expr_Binary(DIV, lhs, rhs);
 }
 static Expr FUNC_NAME(mod, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(lhs->type, MOD, lhs, rhs);
+  return Expr_Binary(MOD, lhs, rhs);
 }
 static Expr FUNC_NAME(neg, Expr)(Expr rhs) {
-  return Expr_Unary(rhs->type, NEG, rhs);
+  return Expr_Unary(NEG, rhs);
 }
 static Expr FUNC_NAME(not, Expr)(Expr rhs) {
-  return Expr_Unary(rhs->type, NOT, rhs);
+  return Expr_Unary(NOT, rhs);
+}
+static Expr FUNC_NAME(var, Expr)(Var x) {
+  Expr e = Expr_New();
+  e->kind = VAR;
+  e->var = x;
+  return e;
 }
 static Expr FUNC_NAME(num, Expr)(Num x) {
   Expr e = Expr_New();
-  e->type = trait(Type).type_int();
+  e->type = TYPE(int);
   e->kind = NUM;
   e->num = x;
   return e;
 }
-static Expr FUNC_NAME(var, Expr)(Var x) {
-  Expr e = Expr_New();
-  e->type = trait(Type).type_int();
-  e->kind = VAR;
-  e->var = x;
-  return e;
+static Expr FUNC_NAME(boolean, Expr)(bool b) {
+  static struct Expr T = {
+      .type = {.id = TypeId(bool)},
+      .kind = TRUE,
+  };
+  static struct Expr F = {
+      .type = {.id = TypeId(bool)},
+      .kind = FALSE,
+  };
+  return (b ? &T : &F);
 }
 static Expr FUNC_NAME(unit, Expr)(void) {
   static struct Expr e = {
@@ -201,7 +215,7 @@ static Expr FUNC_NAME(unit, Expr)(void) {
 ExprT Trait(Expr) {
   return (ExprT){
       .seq = FUNC_NAME(seq, Expr),
-      .defvar = FUNC_NAME(defvar, Expr),
+      .let = FUNC_NAME(let, Expr),
       .assign = FUNC_NAME(assign, Expr),
       .eq = FUNC_NAME(eq, Expr),
       .neq = FUNC_NAME(neq, Expr),
@@ -216,8 +230,9 @@ ExprT Trait(Expr) {
       .mod = FUNC_NAME(mod, Expr),
       .neg = FUNC_NAME(neg, Expr),
       .not = FUNC_NAME(not, Expr),
-      .num = FUNC_NAME(num, Expr),
       .var = FUNC_NAME(var, Expr),
+      .num = FUNC_NAME(num, Expr),
+      .boolean = FUNC_NAME(boolean, Expr),
       .unit = FUNC_NAME(unit, Expr),
   };
 }
@@ -229,8 +244,8 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
   case SEQ:
     Expr_showBinary(b, "Seq", x->lhs, x->rhs);
     break;
-  case DEFVAR:
-    Expr_showBinary(b, "DefVar", x->lhs, x->rhs);
+  case LET:
+    Expr_showBinary(b, "Let", x->lhs, x->rhs);
     break;
   case ASSIGN:
     Expr_showBinary(b, "Assign", x->lhs, x->rhs);
@@ -274,11 +289,17 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
   case NOT:
     Expr_showUnary(b, "Not", x->rhs);
     break;
-  case NUM:
-    mem_printf(b, "(Num %d)", x->num.value);
-    break;
   case VAR:
     mem_printf(b, "(Var %s)", x->var.ident);
+    break;
+  case NUM:
+    mem_printf(b, "%d", x->num.value);
+    break;
+  case TRUE:
+    mem_printf(b, "true");
+    break;
+  case FALSE:
+    mem_printf(b, "false");
     break;
   case UNIT:
     mem_printf(b, "()");
