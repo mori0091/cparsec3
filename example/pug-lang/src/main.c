@@ -173,124 +173,132 @@ bool pug_parseTest(String input) {
 
 // -----------------------------------------------------------------------
 void pug_self_test(void) {
-  assert(pug_parseTest("123;"));
-  assert(pug_parseTest("12*3;"));
-  assert(pug_parseTest("12/3;"));
-  assert(pug_parseTest("(12*3)/4;"));
-  assert(pug_parseTest("(12/3)*4;"));
-  assert(pug_parseTest("12*(3/4);"));
-  assert(pug_parseTest("12/(3*4);"));
-  assert(pug_parseTest("(12*3)/(3*4);"));
-  assert(pug_parseTest("(12*3)/(34);"));
-  assert(!pug_parseTest("(12*3)(3*4);")); /* syntax error */
-  assert(!pug_parseTest("(12*3a);"));     /* syntax error */
-  assert(pug_parseTest("5+4*3-2/1;"));
-  assert(pug_parseTest("( 5 + 4 ) * 3 - 2 / 1 ;  "));
-  assert(pug_parseTest("-1;"));
-  assert(pug_parseTest("+1;"));
-  assert(pug_parseTest("- 1;"));
-  assert(pug_parseTest("+ 1;"));
-  assert(pug_parseTest("1 - -1;"));
-  assert(!pug_parseTest("9999999999999999999;")); /* syntax error */
-  assert(!pug_parseTest("1 / 0;"));               /* division by zero */
-  assert(!pug_parseTest("1 % 0;"));               /* division by zero */
-  assert(pug_parseTest("10 % 3;"));
-  assert(pug_parseTest("10 == 3;"));
-  assert(pug_parseTest("10 == 10;"));
-  assert(pug_parseTest("10 != 3;"));
-  assert(pug_parseTest("10 != 10;"));
-  assert(pug_parseTest("1 <= 10;")); /* 1 */
-  assert(pug_parseTest("1 < 10;"));  /* 1 */
-  assert(pug_parseTest("1 > 10;"));  /* 0 */
-  assert(pug_parseTest("1 >= 10;")); /* 0 */
+  assert(pug_parseTest("123"));
+  assert(pug_parseTest("12*3"));
+  assert(pug_parseTest("12/3"));
+  assert(pug_parseTest("(12*3)/4"));
+  assert(pug_parseTest("(12/3)*4"));
+  assert(pug_parseTest("12*(3/4)"));
+  assert(pug_parseTest("12/(3*4)"));
+  assert(pug_parseTest("(12*3)/(3*4)"));
+  assert(pug_parseTest("(12*3)/(34)"));
+  assert(!pug_parseTest("(12*3)(3*4)")); /* syntax error */
+  assert(!pug_parseTest("(12*3a)"));     /* syntax error */
+  assert(pug_parseTest("5+4*3-2/1"));
+  assert(pug_parseTest("( 5 + 4 ) * 3 - 2 / 1   "));
+  assert(pug_parseTest("-1"));
+  assert(pug_parseTest("+1"));
+  assert(pug_parseTest("- 1"));
+  assert(pug_parseTest("+ 1"));
+  assert(pug_parseTest("1 - -1"));
+  assert(!pug_parseTest("9999999999999999999")); /* syntax error */
+  assert(!pug_parseTest("1 / 0"));               /* division by zero */
+  assert(!pug_parseTest("1 % 0"));               /* division by zero */
+  assert(pug_parseTest("10 % 3"));
+  assert(pug_parseTest("10 == 3"));
+  assert(pug_parseTest("10 == 10"));
+  assert(pug_parseTest("10 != 3"));
+  assert(pug_parseTest("10 != 10"));
+  assert(pug_parseTest("1 <= 10")); /* 1 */
+  assert(pug_parseTest("1 < 10"));  /* 1 */
+  assert(pug_parseTest("1 > 10"));  /* 0 */
+  assert(pug_parseTest("1 >= 10")); /* 0 */
 
   /* a variable must be initialized when defining it. */
-  assert(pug_parseTest("let a = 100;")); /* 100 */
+  assert(pug_parseTest("let a = 100")); /* 100 */
 
   /* defining the same variable, the previous one will be shadowed. */
-  assert(pug_parseTest("let a = 100; let a = 2;")); /* 2 */
+  assert(pug_parseTest("let a = 100; let a = 2")); /* 2 */
 
   /* defining the same variable of different type is permitted. the
    * previous one will be shadowed. */
-  assert(pug_parseTest("let a = 100; let a = true;")); /* true */
+  assert(pug_parseTest("let a = 100; let a = true")); /* true */
 
   /* evaluating a variable results its value. */
-  assert(pug_parseTest("let a = 100; a;")); /* 100 */
+  assert(pug_parseTest("let a = 100; a")); /* 100 */
 
   /* evaluating an undefined variable is not permitted. */
-  assert(!pug_parseTest("a;"));         /* Undefined variable */
-  assert(!pug_parseTest("let a = a;")); /* Undefined variable */
+  assert(!pug_parseTest("a"));         /* Undefined variable */
+  assert(!pug_parseTest("let a = a")); /* Undefined variable */
 
   /* assignment expression results the value assigned. */
-  assert(pug_parseTest("let a = 1; a = 100;")); /* 100 */
+  assert(pug_parseTest("let a = 1; a = 100")); /* 100 */
 
   /* assignment of different type is not permitted. */
-  assert(!pug_parseTest("let a = 1; a = ();")); /* Type mismatch */
+  assert(!pug_parseTest("let a = 1; a = ()")); /* Type mismatch */
 
   /* comparison operators results `true` or `false` */
-  assert(pug_parseTest("1 == 1;"));                     /* true */
-  assert(pug_parseTest("0 == 1;"));                     /* false */
-  assert(pug_parseTest("let a = 0 < 1; a == true ;"));  /* true */
-  assert(pug_parseTest("let a = 1 < 1; a == false ;")); /* true */
+  assert(pug_parseTest("1 == 1"));                     /* true */
+  assert(pug_parseTest("0 == 1"));                     /* false */
+  assert(pug_parseTest("let a = 0 < 1; a == true "));  /* true */
+  assert(pug_parseTest("let a = 1 < 1; a == false ")); /* true */
 
   /* `!expr` results the complement of `expr` if `expr` was integer. */
-  assert(pug_parseTest("!0 ;")); /* -1 */
-  assert(pug_parseTest("!1 ;")); /* -2 */
+  assert(pug_parseTest("!0 ")); /* -1 */
+  assert(pug_parseTest("!1 ")); /* -2 */
 
   /* `!expr` results the logical `not` of `expr` if `expr` was bool. */
-  assert(pug_parseTest("!true ;"));  /* false */
-  assert(pug_parseTest("!false ;")); /* true */
+  assert(pug_parseTest("!true "));  /* false */
+  assert(pug_parseTest("!false ")); /* true */
 
   /* arithmetic operators are left-associative. */
-  assert(pug_parseTest("100 + 2 + 3 == (100 + 2) + 3;"));
-  assert(pug_parseTest("100 - 2 - 3 == (100 - 2) - 3;"));
-  assert(pug_parseTest("100 * 2 * 3 == (100 * 2) * 3;"));
-  assert(pug_parseTest("100 / 2 / 5 == (100 / 2) / 5;"));
+  assert(pug_parseTest("100 + 2 + 3 == (100 + 2) + 3"));
+  assert(pug_parseTest("100 - 2 - 3 == (100 - 2) - 3"));
+  assert(pug_parseTest("100 * 2 * 3 == (100 * 2) * 3"));
+  assert(pug_parseTest("100 / 2 / 5 == (100 / 2) / 5"));
 
   /* comparison operators are non-associative */
-  assert(!pug_parseTest("1 == 2 == 0;")); /* syntax error */
-  assert(!pug_parseTest("1 != 2 == 1;")); /* syntax error */
-  assert(!pug_parseTest("2 != 2 == 0;")); /* syntax error */
-  assert(!pug_parseTest("2 == 2 == 1;")); /* syntax error */
-  assert(!pug_parseTest("1 <= 2 <= 3;")); /* syntax error */
-  assert(!pug_parseTest("1 <= 2 < 3;"));  /* syntax error */
-  assert(!pug_parseTest("1 < 2 <= 3;"));  /* syntax error */
-  assert(!pug_parseTest("1 < 2 < 3;"));   /* syntax error */
-  assert(!pug_parseTest("3 >= 2 >= 1;")); /* syntax error */
-  assert(!pug_parseTest("3 >= 2 > 1;"));  /* syntax error */
-  assert(!pug_parseTest("3 > 2 >= 1;"));  /* syntax error */
-  assert(!pug_parseTest("3 > 2 > 1;"));   /* syntax error */
+  assert(!pug_parseTest("1 == 2 == 0")); /* syntax error */
+  assert(!pug_parseTest("1 != 2 == 1")); /* syntax error */
+  assert(!pug_parseTest("2 != 2 == 0")); /* syntax error */
+  assert(!pug_parseTest("2 == 2 == 1")); /* syntax error */
+  assert(!pug_parseTest("1 <= 2 <= 3")); /* syntax error */
+  assert(!pug_parseTest("1 <= 2 < 3"));  /* syntax error */
+  assert(!pug_parseTest("1 < 2 <= 3"));  /* syntax error */
+  assert(!pug_parseTest("1 < 2 < 3"));   /* syntax error */
+  assert(!pug_parseTest("3 >= 2 >= 1")); /* syntax error */
+  assert(!pug_parseTest("3 >= 2 > 1"));  /* syntax error */
+  assert(!pug_parseTest("3 > 2 >= 1"));  /* syntax error */
+  assert(!pug_parseTest("3 > 2 > 1"));   /* syntax error */
 
   /* assignment operators are non-associative. */
-  assert(!pug_parseTest("let a = 0; let b = 0; a = b = 1;"));
+  assert(!pug_parseTest("let a = 0; let b = 0; a = b = 1"));
   /* -> syntax error */
 
-  /* empty statement results `()`. */
-  assert(pug_parseTest(";")); /* () */
-
-  /* a statement must be block or ends with ';' */
-  assert(!pug_parseTest("1"));   /* syntax error */
-  assert(pug_parseTest("1;"));   /* 1 */
-  assert(pug_parseTest("{1;}")); /* 1 */
+  /* a statement must be declaration, block, or expression. */
+  assert(pug_parseTest("let a = 1")); /* 1 */
+  assert(pug_parseTest("{1}"));       /* 1 */
+  assert(pug_parseTest("1"));         /* 1 */
 
   /* empty block is not permitted. */
   assert(!pug_parseTest("{}")); /* syntax error */
-  assert(pug_parseTest("{;}")); /* () */
+
+  /* empty statement is not permitted. */
+  assert(!pug_parseTest(";")); /* syntax error */
+
+  /* each statement in a list of statements must be separated by ";". */
+  assert(!pug_parseTest("1 2"));   /* syntax error */
+  assert(!pug_parseTest("1 {2}")); /* syntax error */
+  assert(!pug_parseTest("{1} 2")); /* syntax error */
+
+  /* a list of statements may ends with an optional ";". */
+  assert(pug_parseTest("1;"));    /* 1 */
+  assert(pug_parseTest("{1;}"));  /* 1 */
+  assert(pug_parseTest("{1};"));  /* 1 */
+  assert(pug_parseTest("{1;};")); /* 1 */
 
   /* a list of statements are evaluated in order, and results the last
    * value. */
-  assert(pug_parseTest("1;2;"));     /* 2 */
-  assert(pug_parseTest("1;2;3;"));   /* 3 */
-  assert(pug_parseTest("{1;2;}"));   /* 2 */
-  assert(pug_parseTest("{1;2;3;}")); /* 3 */
-  assert(pug_parseTest("{1;};"));    /* () */
-  assert(pug_parseTest("{1;} 2;"));  /* 2 */
-  assert(pug_parseTest("{1;}; 2;")); /* 2 */
-  assert(pug_parseTest("; {2;}"));   /* 2 */
-  assert(!pug_parseTest("1 {2;}"));  /* syntax error */
-  assert(pug_parseTest("1; {2;}"));  /* 2 */
+  assert(pug_parseTest("1;2"));      /* 2 */
+  assert(pug_parseTest("1;2;3"));    /* 3 */
+  assert(pug_parseTest("{1;2}"));    /* 2 */
+  assert(pug_parseTest("{1;2;3}"));  /* 3 */
+  assert(pug_parseTest("{1}"));      /* 1 */
+  assert(pug_parseTest("{1}; 2"));   /* 2 */
+  assert(pug_parseTest("1; {2}"));   /* 2 */
+  assert(pug_parseTest("{1}; {2}")); /* 2 */
 
-  assert(pug_parseTest("let a = 1; let b = 2; a + b;")); /* 3 */
-  assert(pug_parseTest("let a = 1; let b = 2; a;"));     /* 1 */
-  assert(pug_parseTest("let a = 1; let b = 2; b;"));     /* 2 */
+  assert(pug_parseTest("let a = 1; let b = 2; a + b")); /* 3 */
+  assert(pug_parseTest("let a = 1; let b = 2; a"));     /* 1 */
+  assert(pug_parseTest("let a = 1; let b = 2; b"));     /* 2 */
 }
