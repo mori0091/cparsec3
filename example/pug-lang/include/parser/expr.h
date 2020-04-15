@@ -10,35 +10,63 @@
 
 C_API_BEGIN
 
-// expr     = assign
-// assign   = equality {"=" equality}
-// equality = ordered {("==" | "!=") ordered}
-// ordered  = addsub {("<=" | "<" | ">" | ">=") addsub}
-// addsub   = muldiv {("+" | "-") muldiv}
-// muldiv   = unary {("*" | "/") unary}
-// unary    = [("+" | "-" | "!")] primary
-// primary  = ctor | paren | number | variable
-// ctor     = "()" | "true" | "false"
-// paren    = (" expr ")"
-// variable = identifier
+// expr   = assign
+// assign = expr0 {"=" expr0}
+// expr0  = expr1
+// expr1  = expr2
+// expr2  = expr3 {"||" expr3}
+// expr3  = expr4 {"&&" expr4}
+// expr4  = expr5 [("==" | "!=" | "<=" | "<" | ">" | ">=") expr5]
+// expr5  = expr6
+// expr6  = expr7 {("+" | "-") expr7}
+// expr7  = expr8 {("*" | "/") expr8}
+// expr8  = expr9
+// expr9  = expr10
+// expr10 = unary
+// unary  = [("+" | "-" | "!")] fexpr
+// fexpr  = [fexpr] aexpr
+// aexpr  = qvar
+//        | ctor
+//        | literal
+//        | paren
 //
+// qvar    = variable
+// ctor    = "()" | "true" | "false"
+// literal = number
+// paren   = (" expr ")"
+//
+// variable    = identifier
 // identifier  = identStart{identLetter}
 // identStart  = "_" | letter
 // identLetter = "_" | alphaNum
 
 PARSER(Expr) expr(void);
 PARSER(Expr) assign(void);
-PARSER(Expr) equality(void);
-PARSER(Expr) ordered(void);
-PARSER(Expr) addsub(void);
-PARSER(Expr) muldiv(void);
+
+PARSER(Expr) expr0(void);
+PARSER(Expr) expr1(void);
+PARSER(Expr) expr2(void);
+PARSER(Expr) expr3(void);
+PARSER(Expr) expr4(void);
+PARSER(Expr) expr5(void);
+PARSER(Expr) expr6(void);
+PARSER(Expr) expr7(void);
+PARSER(Expr) expr8(void);
+PARSER(Expr) expr9(void);
+PARSER(Expr) expr10(void);
+
+PARSER(Expr) comparison(void); /* 4 */
+PARSER(Expr) addsub(void);     /* 6 */
+PARSER(Expr) muldiv(void);     /* 7 */
 PARSER(Expr) unary(void);
-PARSER(Expr) primary(void);
-PARSER(Expr) ctor(String symbol, Expr e);
+PARSER(Expr) fexpr(void); /* funcion application */
+PARSER(Expr) aexpr(void);
+PARSER(Expr) qvar(void); /* qualified variable */
+PARSER(Expr) ctor(void); /* data constructor */
+PARSER(Expr) literal(void);
 PARSER(Expr) paren(void);
 
 PARSER(Expr) variable(void);
-
 PARSER(String) identifier(void);
 PARSER(char) identStart(void);
 PARSER(char) identLetter(void);
@@ -71,7 +99,7 @@ PARSER(Expr) expr(void) {
 // PARSER(Expr) assign(void);
 parsec(assign, Expr) {
   ExprT E = trait(Expr);
-  PARSER(Expr) p = equality();
+  PARSER(Expr) p = expr0();
   PARSER(char) op = lexme(char1('='));
   DO() {
     SCAN(p, lhs);
@@ -87,11 +115,49 @@ parsec(assign, Expr) {
   }
 }
 
-// PARSER(Expr) equality(void);
-parsec(equality, Expr) {
+PARSER(Expr) expr0(void) {
+  return expr1();
+}
+PARSER(Expr) expr1(void) {
+  return expr2();
+}
+PARSER(Expr) expr2(void) {
+  return expr3();
+}
+PARSER(Expr) expr3(void) {
+  return expr4();
+}
+PARSER(Expr) expr4(void) {
+  return comparison();
+}
+PARSER(Expr) expr5(void) {
+  return expr6();
+}
+PARSER(Expr) expr6(void) {
+  return addsub();
+}
+PARSER(Expr) expr7(void) {
+  return muldiv();
+}
+PARSER(Expr) expr8(void) {
+  return expr9();
+}
+PARSER(Expr) expr9(void) {
+  return expr10();
+}
+PARSER(Expr) expr10(void) {
+  return unary();
+}
+
+// PARSER(Expr) comparison(void);
+parsec(comparison, Expr) {
   ExprT E = trait(Expr);
-  PARSER(Expr) p = ordered();
-  PARSER(String) op = lexme(either(string1("=="), string1("!=")));
+  PARSER(Expr) p = expr5();
+  PARSER(String)
+  op = lexme(choice(string1("=="), string1("!="), /* eq, neq */
+                    string1("<="), string1(">="), /* le, ge */
+                    string1("<"), string1(">"))   /* lt, gt */
+  );
   DO() {
     SCAN(p, lhs);
     SCAN(optional(op), m);
@@ -99,39 +165,24 @@ parsec(equality, Expr) {
       RETURN(lhs);
     }
     SCAN(p, rhs);
-    lhs = (g_eq("==", m.value) ? E.eq : E.neq)(lhs, rhs);
-    RETURN(lhs);
-  }
-}
-
-// PARSER(Expr) ordered(void);
-parsec(ordered, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(Expr) p = addsub();
-  PARSER(char) op1 = either(char1('<'), char1('>'));
-  PARSER(char) op2 = char1('=');
-  DO() {
-    SCAN(p, lhs);
-    SCAN(optional(op1), lg);
-    if (lg.none) {
-      RETURN(lhs);
+    if (g_eq("==", m.value)) {
+      RETURN(E.eq(lhs, rhs));
     }
-    SCAN(optional(op2), e);
-    SCAN(space());
-    SCAN(p, rhs);
-    if (e.none) {
-      lhs = ((lg.value == '<') ? E.lt : E.gt)(lhs, rhs);
+    if (g_eq("!=", m.value)) {
+      RETURN(E.neq(lhs, rhs));
+    }
+    if (!m.value[1]) {
+      RETURN(((m.value[0] == '<') ? E.lt : E.gt)(lhs, rhs));
     } else {
-      lhs = ((lg.value == '<') ? E.le : E.ge)(lhs, rhs);
+      RETURN(((m.value[0] == '<') ? E.le : E.ge)(lhs, rhs));
     }
-    RETURN(lhs);
   }
 }
 
 // PARSER(Expr) addsub(void);
 parsec(addsub, Expr) {
   ExprT E = trait(Expr);
-  PARSER(Expr) p = muldiv();
+  PARSER(Expr) p = expr7();
   PARSER(char) op = lexme(either(char1('+'), char1('-')));
   DO() {
     SCAN(p, lhs);
@@ -150,7 +201,7 @@ parsec(addsub, Expr) {
 // PARSER(Expr) muldiv(void);
 parsec(muldiv, Expr) {
   ExprT E = trait(Expr);
-  PARSER(Expr) p = unary();
+  PARSER(Expr) p = expr8();
   PARSER(char) op = lexme(choice(char1('*'), char1('/'), char1('%')));
   DO() {
     SCAN(p, lhs);
@@ -182,7 +233,7 @@ parsec(muldiv, Expr) {
 // PARSER(Expr) unary(void);
 parsec(unary, Expr) {
   ExprT E = trait(Expr);
-  PARSER(Expr) p = primary();
+  PARSER(Expr) p = fexpr();
   PARSER(char) op = lexme(choice(char1('+'), char1('-'), char1('!')));
   DO() {
     SCAN(optional(op), m);
@@ -204,26 +255,41 @@ parsec(unary, Expr) {
   }
 }
 
-// PARSER(Expr) primary(void);
-parsec(primary, Expr) {
-  ExprT E = trait(Expr);
+PARSER(Expr) fexpr(void) {
+  return aexpr();
+}
+
+// PARSER(Expr) aexpr(void);
+parsec(aexpr, Expr) {
   DO() {
-    SCAN(choice(ctor("()", E.unit()),            /* () */
-                ctor("true", E.boolean(true)),   /* true */
-                ctor("false", E.boolean(false)), /* false */
-                paren(), number(), variable()),
-         x);
+    SCAN(choice(qvar(), ctor(), literal(), paren()), x);
     SCAN(space());
     RETURN(x);
   }
 }
 
-// PARSER(Expr) ctor(String symbol, Expr e);
-parsec(ctor, String, Expr, Expr) {
+PARSER(Expr) qvar(void) {
+  return variable();
+}
+
+// PARSER(Expr) ctor0(String symbol, Expr e);
+parsec(ctor0, String, Expr, Expr) {
   DO() WITH(s, e) {
     SCAN(keyword(s));
     RETURN(e);
   }
+}
+
+PARSER(Expr) ctor(void) {
+  ExprT E = trait(Expr);
+  return choice(ctor0("()", E.unit()),           /* () */
+                ctor0("true", E.boolean(true)),  /* true */
+                ctor0("false", E.boolean(false)) /* false */
+  );
+}
+
+PARSER(Expr) literal(void) {
+  return number();
 }
 
 // PARSER(Expr) paren(void);

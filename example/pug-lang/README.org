@@ -26,9 +26,17 @@ $ ./bin/pug --help
 
 * Example
 #+begin_src shell
-$ ./bin/pug -e '1 + 2;'
-> 1 + 2;
->> (Add (Num 1) (Num 2))
+$ ./bin/pug -e '1 + 2'
+> 1 + 2
+>> (Add 1 2)
+3
+
+#+end_src
+
+#+begin_src shell
+$ ./bin/pug -e 'let x = 1; let y = 2; x + y'
+> let x = 1; let y = 2; x + y
+>> (Seq (Let (Var x) 1) (Seq (Let (Var y) 2) (Add (Var x) (Var y))))
 3
 
 #+end_src
@@ -36,12 +44,12 @@ $ ./bin/pug -e '1 + 2;'
 * Pug programming language
 
 ** Statements
-| Example           | Explanation         |
-|-------------------+---------------------|
-| ~let var = expr;~ | variable definition |
-| ~expr;~           | statement           |
-| ~;~               | empty statement     |
-| ~{...}~           | block               |
+| Example                               | Explanation         |
+|---------------------------------------+---------------------|
+| ~let var = expr~                      | variable definition |
+| ~expr~                                | expression          |
+| ~{...; ...; ...}~, ~{...; ...; ...;}~ | block               |
+| ~...; ...; ...~, ~...; ...; ...;~     | list of statements  |
 
 ** Binary operators
 | Operator | Associativity    | Example        | Explanation                         |
@@ -60,11 +68,11 @@ $ ./bin/pug -e '1 + 2;'
 | ~%~      | left-associative | ~expr % expr~  | arithmetic reminder                 |
 
 ** Unary operators
-| Operator | Example  | Explanation            |
-|----------+----------+------------------------|
-| ~+~      | ~+ expr~ | (equivalent to ~expr~) |
-| ~-~      | ~- expr~ | arithmetic negation    |
-| ~!~      | ~! expr~ | not                    |
+| Operator | Example  | Explanation                      |
+|----------+----------+----------------------------------|
+| ~+~      | ~+ expr~ | (equivalent to ~expr~)           |
+| ~-~      | ~- expr~ | arithmetic negation              |
+| ~!~      | ~! expr~ | logical not / bitwise complement |
 
 ** Parenthesis
 | Example  | Explanation              |

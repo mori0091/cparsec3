@@ -6,13 +6,15 @@
 C_API_BEGIN
 
 #define GENERIC_OPTIONAL(T) FUNC_NAME(optional, T)
-#define optional(p) GENERIC(p, PARSER, GENERIC_OPTIONAL, char, String)(p)
+#define optional(p)                                                      \
+  GENERIC(p, PARSER, GENERIC_OPTIONAL, char, String, Expr)(p)
 
 #define decl_optional(T)                                                 \
   PARSER(Maybe(T)) FUNC_NAME(optional, T)(PARSER(T) p)
 
 decl_optional(char);
 decl_optional(String);
+decl_optional(Expr);
 
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
@@ -33,6 +35,7 @@ decl_optional(String);
 
 impl_optional(char);
 impl_optional(String);
+impl_optional(Expr);
 
 #endif
 
