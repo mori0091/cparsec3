@@ -201,7 +201,7 @@ parsec(addsub, Expr) {
 // PARSER(Expr) muldiv(void);
 parsec(muldiv, Expr) {
   ExprT E = trait(Expr);
-  PARSER(Expr) p = unary();
+  PARSER(Expr) p = expr8();
   PARSER(char) op = lexme(choice(char1('*'), char1('/'), char1('%')));
   DO() {
     SCAN(p, lhs);

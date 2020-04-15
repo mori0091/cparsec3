@@ -195,14 +195,18 @@ void pug_self_test(void) {
   assert(!pug_parseTest("1 / 0"));               /* division by zero */
   assert(!pug_parseTest("1 % 0"));               /* division by zero */
   assert(pug_parseTest("10 % 3"));
-  assert(pug_parseTest("10 == 3"));
-  assert(pug_parseTest("10 == 10"));
-  assert(pug_parseTest("10 != 3"));
-  assert(pug_parseTest("10 != 10"));
-  assert(pug_parseTest("1 <= 10")); /* 1 */
-  assert(pug_parseTest("1 < 10"));  /* 1 */
-  assert(pug_parseTest("1 > 10"));  /* 0 */
-  assert(pug_parseTest("1 >= 10")); /* 0 */
+  assert(pug_parseTest("10 == 3"));  /* false */
+  assert(pug_parseTest("10 == 10")); /* true */
+  assert(pug_parseTest("10 != 3"));  /* true */
+  assert(pug_parseTest("10 != 10")); /* false */
+  assert(pug_parseTest("1 <= 10"));  /* true */
+  assert(pug_parseTest("1 < 10"));   /* true */
+  assert(pug_parseTest("1 > 10"));   /* false */
+  assert(pug_parseTest("1 >= 10"));  /* false */
+  assert(pug_parseTest("!0 == -1"));
+  assert(pug_parseTest("!1 == -2"));
+  assert(pug_parseTest("!true == false"));
+  assert(pug_parseTest("!false == true"));
 
   /* a variable must be initialized when defining it. */
   assert(pug_parseTest("let a = 100")); /* 100 */
