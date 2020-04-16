@@ -69,13 +69,14 @@ parsec(let, Expr) {
 
 // PARSER(Expr) block(void);
 parsec(block, Expr) {
+  ExprT E = trait(Expr);
   PARSER(char) open_brace = lexme(char1('{'));
   PARSER(char) close_brace = lexme(char1('}'));
   DO() {
     SCAN(open_brace);
     SCAN(stmt_list(), x);
     SCAN(close_brace);
-    RETURN(x);
+    RETURN(E.block(x));
   }
 }
 

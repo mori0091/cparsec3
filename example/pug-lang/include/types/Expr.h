@@ -16,6 +16,8 @@ typedef struct Var {
 } Var;
 
 enum ExprId {
+  /* block */
+  BLK,
   /* sequence */
   SEQ,
   /* let */
@@ -65,6 +67,7 @@ struct Expr {
 };
 
 typedef struct ExprT {
+  Expr (*block)(Expr rhs);
   Expr (*seq)(Expr lhs, Expr rhs);
   Expr (*let)(Expr lhs, Expr rhs);
   Expr (*assign)(Expr lhs, Expr rhs);
@@ -132,6 +135,9 @@ static void Expr_showUnary(CharBuff* b, String tag, Expr rhs) {
   mem_printf(b, ")");
 }
 
+static Expr FUNC_NAME(block, Expr)(Expr rhs) {
+  return Expr_Unary(BLK, rhs);
+}
 static Expr FUNC_NAME(seq, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(SEQ, lhs, rhs);
 }
@@ -214,6 +220,7 @@ static Expr FUNC_NAME(unit, Expr)(void) {
 
 ExprT Trait(Expr) {
   return (ExprT){
+      .block = FUNC_NAME(block, Expr),
       .seq = FUNC_NAME(seq, Expr),
       .let = FUNC_NAME(let, Expr),
       .assign = FUNC_NAME(assign, Expr),
@@ -241,6 +248,9 @@ impl_user_type(Expr);
 
 show_user_type(Expr)(CharBuff* b, Expr x) {
   switch (x->kind) {
+  case BLK:
+    Expr_showUnary(b, "Blk", x->rhs);
+    break;
   case SEQ:
     Expr_showBinary(b, "Seq", x->lhs, x->rhs);
     break;
