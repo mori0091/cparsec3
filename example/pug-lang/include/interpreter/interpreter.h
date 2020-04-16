@@ -103,6 +103,8 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context* ctx,
   ContextT C = trait(Context);
   ExprT E = trait(Expr);
   switch (x->kind) {
+  case LAMBDA:
+    RETURN_OK(x);
   case BLK: {
     EVAL(C.branch(ctx), x->rhs, rhs);
     RETURN_OK(rhs.ok);
