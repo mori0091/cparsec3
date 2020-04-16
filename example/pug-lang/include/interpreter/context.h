@@ -6,18 +6,19 @@
 #define Address int
 
 typedef struct MapEntry {
-  String ident;
-  Expr e;
+  String ident; ///< the name of the variable
+  Expr e;       ///< the expression bound to the variable
 } MapEntry;
 
 trait_List(MapEntry);
 
 typedef struct Context {
-  List(MapEntry) map; /* String => Address */
+  List(MapEntry) map; ///< list of variables accessible in this scope
 } Context;
 
 typedef struct ContextT {
   Context* (*create)(void);
+  Context* (*branch)(Context* ctx);
   struct {
     Maybe(Expr) (*lookup)(Context* ctx, String ident);
     void (*put)(Context* ctx, String ident, Expr e);
@@ -34,6 +35,12 @@ impl_List(MapEntry);
 static Context* FUNC_NAME(create, Context)(void) {
   Context* ctx = mem_malloc(sizeof(struct Context));
   ctx->map = trait(List(MapEntry)).empty;
+  return ctx;
+}
+
+static Context* FUNC_NAME(branch, Context)(Context* c) {
+  Context* ctx = mem_malloc(sizeof(struct Context));
+  ctx->map = c->map;
   return ctx;
 }
 
@@ -57,6 +64,7 @@ static void FUNC_NAME(put, Context)(Context* ctx, String ident, Expr e) {
 ContextT Trait(Context) {
   return (ContextT){
       .create = FUNC_NAME(create, Context),
+      .branch = FUNC_NAME(branch, Context),
       .map.lookup = FUNC_NAME(lookup, Context),
       .map.put = FUNC_NAME(put, Context),
   };

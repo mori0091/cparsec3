@@ -305,4 +305,31 @@ void pug_self_test(void) {
   assert(pug_parseTest("let a = 1; let b = 2; a + b")); /* 3 */
   assert(pug_parseTest("let a = 1; let b = 2; a"));     /* 1 */
   assert(pug_parseTest("let a = 1; let b = 2; b"));     /* 2 */
+
+  /* a block establishes new 'lexical' scope. */
+  assert(pug_parseTest("let x = 1; {x = 2}"));        /* 2 */
+  assert(pug_parseTest("let x = 1; {x = 2}; x"));     /* 1 */
+  assert(pug_parseTest("let x = 1; {let x = 2}"));    /* 2 */
+  assert(pug_parseTest("let x = 1; {let x = 2}; x")); /* 1 */
+
+  /*
+   * From inside a block,
+   * variables defined before the block in outer scope are accessible.
+   */
+  assert(pug_parseTest("let x = 1; {let y = x + 1}"));      /* 2 */
+  assert(pug_parseTest("let x = 1; {let y = 2; {x + y}}")); /* 3 */
+
+  /*
+   * From inside a block,
+   * variables defined after the block in outer scope are NOT accessible.
+   */
+  assert(!pug_parseTest("{let y = z}; let z = 2"));
+  // -> Undefined variable
+
+  /*
+   * From outside a block,
+   * variables defined in the block are NOT accessible.
+   */
+  assert(!pug_parseTest("{let y = 2}; y"));
+  // -> Undefined variable
 }
