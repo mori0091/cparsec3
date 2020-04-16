@@ -22,7 +22,8 @@ C_API_BEGIN
 // expr7  = expr8 {("*" | "/") expr8}
 // expr8  = expr9
 // expr9  = expr10
-// expr10 = unary
+// expr10 = block | unary
+//
 // unary  = [("+" | "-" | "!")] fexpr
 // fexpr  = [fexpr] aexpr
 // aexpr  = qvar
@@ -34,6 +35,13 @@ C_API_BEGIN
 // ctor    = "()" | "true" | "false"
 // literal = number
 // paren   = (" expr ")"
+//
+// block   = "{" stmts "}"
+// stmts   = stmt {";" [stmt]}
+// stmt    = decl | expr
+//
+// decl   = let
+// let     = "let" variable "=" expr0
 //
 // variable    = identifier
 // identifier  = identStart{identLetter}
@@ -72,6 +80,13 @@ PARSER(char) identStart(void);
 PARSER(char) identLetter(void);
 
 PARSER(String) keyword(String s);
+
+PARSER(Expr) block(void);
+PARSER(Expr) stmts(void);
+PARSER(Expr) stmt(void);
+
+PARSER(Expr) decl(void);
+PARSER(Expr) let(void);
 
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
@@ -146,7 +161,7 @@ PARSER(Expr) expr9(void) {
   return expr10();
 }
 PARSER(Expr) expr10(void) {
-  return unary();
+  return either(block(), unary());
 }
 
 // PARSER(Expr) comparison(void);
@@ -355,6 +370,58 @@ parsec(keyword0, String, String) {
 
 PARSER(String) keyword(String s) {
   return tryp(keyword0(s));
+}
+
+// PARSER(Expr) block(void);
+parsec(block, Expr) {
+  ExprT E = trait(Expr);
+  PARSER(char) open_brace = lexme(char1('{'));
+  PARSER(char) close_brace = lexme(char1('}'));
+  DO() {
+    SCAN(open_brace);
+    SCAN(stmts(), x);
+    SCAN(close_brace);
+    RETURN(E.block(x));
+  }
+}
+
+// PARSER(Expr) stmts(void);
+parsec(stmts, Expr) {
+  ExprT E = trait(Expr);
+  PARSER(char) semi = lexme(char1(';'));
+  DO() {
+    SCAN(stmt(), lhs);
+    SCAN(optional(semi), m);
+    if (m.none) {
+      RETURN(lhs);
+    }
+    SCAN(optional(stmts()), rhs);
+    if (rhs.none) {
+      RETURN(lhs);
+    }
+    RETURN(E.seq(lhs, rhs.value));
+  }
+}
+
+PARSER(Expr) stmt(void) {
+  return choice(decl(), expr());
+}
+
+PARSER(Expr) decl(void) {
+  return let();
+}
+
+// PARSER(Expr) let(void);
+parsec(let, Expr) {
+  ExprT E = trait(Expr);
+  PARSER(char) op = lexme(char1('='));
+  DO() {
+    SCAN(lexme(keyword("let")));
+    SCAN(variable(), lhs);
+    SCAN(op);
+    SCAN(expr0(), rhs);
+    RETURN(E.let(lhs, rhs));
+  }
 }
 
 #endif
