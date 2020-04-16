@@ -3,7 +3,7 @@
 #define CPARSEC_CONFIG_IMPLEMENT /* generate parsec code if defined */
 
 #include "interpreter/interpreter.h"
-#include "parser/stmt.h"
+#include "parser/toplevel.h"
 
 struct Options {
   bool use_color;
@@ -332,4 +332,10 @@ void pug_self_test(void) {
    */
   assert(!pug_parseTest("{let y = 2}; y"));
   // -> Undefined variable
+
+  /* block is an expression */
+  assert(pug_parseTest("let x = {1}; x"));                /* 1 */
+  assert(pug_parseTest("let x = {1} + {2}; x"));          /* 3 */
+  assert(pug_parseTest("let x = {let y = 1}; x"));        /* 1 */
+  assert(pug_parseTest("let x = {let y = 1; y + 1}; x")); /* 2 */
 }
