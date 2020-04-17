@@ -322,6 +322,7 @@ void pug_self_test(void) {
   /*
    * From inside a block,
    * variables defined after the block in outer scope are NOT accessible.
+   * NOTE: Shall be accessible? Need concideration which is better.
    */
   assert(!pug_parseTest("{let y = z}; let z = 2"));
   // -> Undefined variable
@@ -338,4 +339,34 @@ void pug_self_test(void) {
   assert(pug_parseTest("let x = {1} + {2}; x"));          /* 3 */
   assert(pug_parseTest("let x = {let y = 1}; x"));        /* 1 */
   assert(pug_parseTest("let x = {let y = 1; y + 1}; x")); /* 2 */
+
+  /* lambda expression constructs a function object. */
+  assert(pug_parseTest("|x| x+1")); /* (Lambda (Var x) (Add (Var x) 1)) */
+  assert(pug_parseTest("let f = |x| x+1; f 2"));       /* 3 */
+  assert(pug_parseTest("let f = |x y| x+y; f 1 2"));   /* 3 */
+  assert(pug_parseTest("let f = |x y| {x+y}; f 1 2")); /* 3 */
+
+  /* Function application expression has higher priority than lambda
+   * expression.
+   */
+  assert(pug_parseTest("|x y| x+y 1 2"));     /* |x y| (x + (y 1 2)) */
+  assert(!pug_parseTest("|x y| {x+y} 1 2"));  /* syntax error */
+  assert(pug_parseTest("(|x y| x+y) 1 2"));   /* 3 */
+  assert(pug_parseTest("(|x y| {x+y}) 1 2")); /* 3 */
+
+  /* function object is a curried function. */
+  assert(pug_parseTest("let f = |x y| x+y; let g = f 1; g 2"));   /* 3 */
+  assert(pug_parseTest("let f = |x| |y| x+y; let g = f 1; g 2")); /* 3 */
+  assert(pug_parseTest("let f = |x y| x+y; let g = f 1; g 2 + g 3"));
+  // -> (1+2) + (1+3) = 7
+
+  assert(pug_parseTest("let y = 10;\n"
+                       "let g = |x| x*y;\n"
+                       "let f = |x| {y = 2; y*y + g x};\n"
+                       "f 3"));
+  // -> 10
+  // NOTE: (f 3) shall be 10 if dynamic scoping.
+  // NOTE: (f 3) shall be 34 if lexical scoping.
+  // TODO: scope shall be established in compile-time not in run-time,
+  //       if the lexical scoping was expected.
 }

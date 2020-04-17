@@ -22,7 +22,19 @@ C_API_BEGIN
 // expr7  = expr8 {("*" | "/") expr8}
 // expr8  = expr9
 // expr9  = expr10
-// expr10 = block | unary
+// expr10 = lambda
+//        | block
+//        | unary
+//
+// lambda = "|" pat {pat} "|" expr0
+// pat    = variable
+//
+// block  = "{" stmts "}"
+// stmts  = stmt {";" [stmt]}
+// stmt   = decl | expr
+//
+// decl   = let
+// let    = "let" variable "=" expr0
 //
 // unary  = [("+" | "-" | "!")] fexpr
 // fexpr  = [fexpr] aexpr
@@ -35,13 +47,6 @@ C_API_BEGIN
 // ctor    = "()" | "true" | "false"
 // literal = number
 // paren   = (" expr ")"
-//
-// block   = "{" stmts "}"
-// stmts   = stmt {";" [stmt]}
-// stmt    = decl | expr
-//
-// decl   = let
-// let     = "let" variable "=" expr0
 //
 // variable    = identifier
 // identifier  = identStart{identLetter}
@@ -80,6 +85,9 @@ PARSER(char) identStart(void);
 PARSER(char) identLetter(void);
 
 PARSER(String) keyword(String s);
+
+PARSER(Expr) lambda(void);
+PARSER(Expr) pat(void);
 
 PARSER(Expr) block(void);
 PARSER(Expr) stmts(void);
@@ -161,7 +169,7 @@ PARSER(Expr) expr9(void) {
   return expr10();
 }
 PARSER(Expr) expr10(void) {
-  return either(block(), unary());
+  return choice(lambda(), block(), unary());
 }
 
 // PARSER(Expr) comparison(void);
@@ -270,8 +278,20 @@ parsec(unary, Expr) {
   }
 }
 
-PARSER(Expr) fexpr(void) {
-  return aexpr();
+//PARSER(Expr) fexpr(void)
+parsec(fexpr, Expr) {
+  ExprT E = trait(Expr);
+  ArrayT(Expr) A = trait(Array(Expr));
+  PARSER(Expr) p = aexpr();
+  DO() {
+    SCAN(some(p), xs);
+    Expr* e = A.begin(xs);
+    Expr lhs = *e++;
+    while (e != A.end(xs)) {
+      lhs = E.apply(lhs, *e++);
+    }
+    RETURN(lhs);
+  }
 }
 
 // PARSER(Expr) aexpr(void);
@@ -370,6 +390,30 @@ parsec(keyword0, String, String) {
 
 PARSER(String) keyword(String s) {
   return tryp(keyword0(s));
+}
+
+// PARSER(Expr) lambda(void);
+parsec(lambda, Expr) {
+  ExprT E = trait(Expr);
+  ArrayT(Expr) A = trait(Array(Expr));
+  PARSER(char) open_pats = lexme(char1('|'));
+  PARSER(char) close_pats = open_pats;
+  PARSER(Expr) body = expr();
+  DO() {
+    SCAN(open_pats);
+    SCAN(some(pat()), ps);
+    SCAN(close_pats);
+    SCAN(body, rhs);
+    for (Expr* p = A.end(ps); p != A.begin(ps); ) {
+      rhs = E.lambda(*--p, rhs);
+    }
+    A.free(&ps);
+    RETURN(rhs);
+  }
+}
+
+PARSER(Expr) pat(void) {
+  return variable();
 }
 
 // PARSER(Expr) block(void);

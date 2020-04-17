@@ -103,6 +103,27 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context* ctx,
   ContextT C = trait(Context);
   ExprT E = trait(Expr);
   switch (x->kind) {
+  case APPLY:{
+    EVAL(ctx, x->lhs, f);
+    if (f.ok->kind != LAMBDA) {
+      RETURN_ERR("function application");
+    }
+    Expr a = x->rhs;
+    Expr v1 = f.ok->lhs;        // (Var v1)
+    Expr e1 = f.ok->rhs;        // body
+    Expr v1a = E.let(v1, a);
+    if (e1->kind != LAMBDA) {
+      Expr fa = E.block(E.seq(v1a, e1));
+      EVAL(ctx, fa, y);
+      RETURN_OK(y.ok);
+    }
+    Expr v2 = e1->lhs;          // (Var v2)
+    Expr e2 = e1->rhs;          // body of e1
+    Expr fa = E.lambda(v2, E.block(E.seq(v1a, e2)));
+    RETURN_OK(fa);
+  }
+  case LAMBDA:
+    RETURN_OK(x);
   case BLK: {
     EVAL(C.branch(ctx), x->rhs, rhs);
     RETURN_OK(rhs.ok);
