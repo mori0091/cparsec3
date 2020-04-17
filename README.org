@@ -23,9 +23,17 @@
 
 * How to build
 
-See [[file:docs/how_to_build.org][build-instraction]] contents for the below:
+See [[file:docs/how_to_build.org][build-instruction]] contents for the below:
   - How to build
   - Directory structure of source tree
+
+* Sample Applications
+
+Here is a sample application powered by /CPARSEC3/.
+
+- [[file:example/pug-lang][pug-lang]] :: 
+     /The Pug programming language/ interpreter.\\
+     That is one of the best usecase of /CPARSEC3/ *Parsec* library.
 
 * API references
 
