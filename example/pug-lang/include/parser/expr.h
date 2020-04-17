@@ -278,8 +278,20 @@ parsec(unary, Expr) {
   }
 }
 
-PARSER(Expr) fexpr(void) {
-  return aexpr();
+//PARSER(Expr) fexpr(void)
+parsec(fexpr, Expr) {
+  ExprT E = trait(Expr);
+  ArrayT(Expr) A = trait(Array(Expr));
+  PARSER(Expr) p = aexpr();
+  DO() {
+    SCAN(some(p), xs);
+    Expr* e = A.begin(xs);
+    Expr lhs = *e++;
+    while (e != A.end(xs)) {
+      lhs = E.apply(lhs, *e++);
+    }
+    RETURN(lhs);
+  }
 }
 
 // PARSER(Expr) aexpr(void);
