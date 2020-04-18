@@ -1,9 +1,8 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include "../types/Expr.h"
-
-#include "context.h"
+#include "types/Context.h"
+#include "types/Expr.h"
 
 #define Interpreter(...) TYPE_NAME(Interpreter, __VA_ARGS__)
 
@@ -23,7 +22,7 @@ typedef struct EvalResult {
 
 typedef struct Interpreter(Expr) Interpreter(Expr);
 struct Interpreter(Expr) {
-  EvalResult (*eval)(Context * ctx, Expr x);
+  EvalResult (*eval)(Context ctx, Expr x);
 };
 
 Interpreter(Expr) Trait(Interpreter(Expr));
@@ -98,28 +97,30 @@ Interpreter(Expr) Trait(Interpreter(Expr));
     }                                                                    \
   } while (0)
 
-static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context* ctx,
+static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context ctx,
                                                      Expr x) {
   ContextT C = trait(Context);
   ExprT E = trait(Expr);
   switch (x->kind) {
-  case APPLY:{
+  case APPLY: {
     EVAL(ctx, x->lhs, f);
     if (f.ok->kind != LAMBDA) {
       RETURN_ERR("function application");
     }
     Expr a = x->rhs;
-    Expr v1 = f.ok->lhs;        // (Var v1)
-    Expr e1 = f.ok->rhs;        // body
+    Expr v1 = f.ok->lhs; // (Var v1)
+    Expr e1 = f.ok->rhs; // body
     Expr v1a = E.let(v1, a);
     if (e1->kind != LAMBDA) {
       Expr fa = E.block(E.seq(v1a, e1));
-      EVAL(ctx, fa, y);
+      EVAL(ctx, fa, y);         // TODO use lambda's context instead.
       RETURN_OK(y.ok);
     }
-    Expr v2 = e1->lhs;          // (Var v2)
-    Expr e2 = e1->rhs;          // body of e1
+    Expr v2 = e1->lhs; // (Var v2)
+    Expr e2 = e1->rhs; // body of e1
     Expr fa = E.lambda(v2, E.block(E.seq(v1a, e2)));
+    // Expr fa = E.lambda(v2, E.seq(v1a, e2));
+    // TODO set previous lambda's context to the new lambda.
     RETURN_OK(fa);
   }
   case LAMBDA:
@@ -210,7 +211,7 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context* ctx,
 
 Interpreter(Expr) Trait(Interpreter(Expr)) {
   return (Interpreter(Expr)){
-      .eval = FUNC_NAME(eval, Interpreter(Expr)),
+    .eval = FUNC_NAME(eval, Interpreter(Expr)),
   };
 }
 

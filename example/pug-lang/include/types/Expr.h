@@ -6,7 +6,9 @@
 #include "Type.h"
 
 typedef struct Expr* Expr;
+decl_user_type(Expr);
 
+// -----------------------------------------------------------------------
 typedef struct Num {
   int value;
 } Num;
@@ -70,35 +72,34 @@ struct Expr {
   };
 };
 
+// -----------------------------------------------------------------------
 typedef struct ExprT {
-  Expr (*apply)(Expr lhs, Expr rhs);
-  Expr (*lambda)(Expr lhs, Expr rhs);
-  Expr (*block)(Expr rhs);
-  Expr (*seq)(Expr lhs, Expr rhs);
-  Expr (*let)(Expr lhs, Expr rhs);
-  Expr (*assign)(Expr lhs, Expr rhs);
-  Expr (*eq)(Expr lhs, Expr rhs);
-  Expr (*neq)(Expr lhs, Expr rhs);
-  Expr (*le)(Expr lhs, Expr rhs);
-  Expr (*lt)(Expr lhs, Expr rhs);
-  Expr (*gt)(Expr lhs, Expr rhs);
-  Expr (*ge)(Expr lhs, Expr rhs);
-  Expr (*add)(Expr lhs, Expr rhs);
-  Expr (*sub)(Expr lhs, Expr rhs);
-  Expr (*mul)(Expr lhs, Expr rhs);
-  Expr (*div)(Expr lhs, Expr rhs);
-  Expr (*mod)(Expr lhs, Expr rhs);
-  Expr (*neg)(Expr rhs);
-  Expr (*not)(Expr rhs);
-  Expr (*num)(Num x);
-  Expr (*var)(Var x);
-  Expr (*boolean)(bool b);
-  Expr (*unit)(void);
+  Expr (*apply)(Expr lhs, Expr rhs);  /* function application */
+  Expr (*lambda)(Expr lhs, Expr rhs); /* lambda abstraction */
+  Expr (*block)(Expr rhs);            /* block */
+  Expr (*seq)(Expr lhs, Expr rhs);    /* list of statements */
+  Expr (*let)(Expr lhs, Expr rhs);    /* variable definition */
+  Expr (*assign)(Expr lhs, Expr rhs); /* assignment */
+  Expr (*eq)(Expr lhs, Expr rhs);     /* equality */
+  Expr (*neq)(Expr lhs, Expr rhs);    /* nonequality */
+  Expr (*le)(Expr lhs, Expr rhs);     /* less than or equal to */
+  Expr (*lt)(Expr lhs, Expr rhs);     /* less than */
+  Expr (*gt)(Expr lhs, Expr rhs);     /* greater than */
+  Expr (*ge)(Expr lhs, Expr rhs);     /* greater than or equal to */
+  Expr (*add)(Expr lhs, Expr rhs);    /* arithmetic addition */
+  Expr (*sub)(Expr lhs, Expr rhs);    /* arithmetic subtraction */
+  Expr (*mul)(Expr lhs, Expr rhs);    /* arithmetic multiplication */
+  Expr (*div)(Expr lhs, Expr rhs);    /* arithmetic division */
+  Expr (*mod)(Expr lhs, Expr rhs);    /* arithmetic reminder */
+  Expr (*neg)(Expr rhs);              /* arithmetic negation */
+  Expr (*not)(Expr rhs);   /* logical not / bitwise complement */
+  Expr (*num)(Num x);      /* number */
+  Expr (*var)(Var x);      /* variable */
+  Expr (*boolean)(bool b); /* true / false */
+  Expr (*unit)(void);      /* () */
 } ExprT;
 
 ExprT Trait(Expr);
-
-decl_user_type(Expr);
 
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
