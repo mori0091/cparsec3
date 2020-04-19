@@ -46,7 +46,7 @@ Interpreter(Expr) Trait(Interpreter(Expr));
     .err.msg = _msg_                                                     \
   }
 
-#define INFIX_BOOL_OP(_ctx_, _op_, _a_, _b_)                             \
+#define INFIX_COMPARISON_OP(_ctx_, _op_, _a_, _b_)                       \
   do {                                                                   \
     EVAL(_ctx_, _a_, lhs);                                               \
     EVAL(_ctx_, _b_, rhs);                                               \
@@ -144,18 +144,29 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context ctx,
     C.map.put(ctx, x->lhs->var.ident, rhs.ok);
     RETURN_OK(rhs.ok);
   }
+  case OR:
+  case AND: {
+    EVAL(ctx, x->lhs, lhs);
+    REQUIRE_TYPE_EQ(lhs.ok->type, TYPE(bool));
+    if (lhs.ok->kind == (x->kind == OR ? TRUE : FALSE)) {
+      RETURN_OK(lhs.ok);
+    }
+    EVAL(ctx, x->rhs, rhs);
+    REQUIRE_TYPE_EQ(rhs.ok->type, TYPE(bool));
+    RETURN_OK(rhs.ok);
+  }
   case EQ:
-    INFIX_BOOL_OP(ctx, ==, x->lhs, x->rhs);
+    INFIX_COMPARISON_OP(ctx, ==, x->lhs, x->rhs);
   case NEQ:
-    INFIX_BOOL_OP(ctx, !=, x->lhs, x->rhs);
+    INFIX_COMPARISON_OP(ctx, !=, x->lhs, x->rhs);
   case LE:
-    INFIX_BOOL_OP(ctx, <=, x->lhs, x->rhs);
+    INFIX_COMPARISON_OP(ctx, <=, x->lhs, x->rhs);
   case LT:
-    INFIX_BOOL_OP(ctx, <, x->lhs, x->rhs);
+    INFIX_COMPARISON_OP(ctx, <, x->lhs, x->rhs);
   case GT:
-    INFIX_BOOL_OP(ctx, >, x->lhs, x->rhs);
+    INFIX_COMPARISON_OP(ctx, >, x->lhs, x->rhs);
   case GE:
-    INFIX_BOOL_OP(ctx, >=, x->lhs, x->rhs);
+    INFIX_COMPARISON_OP(ctx, >=, x->lhs, x->rhs);
   case ADD:
     INFIX_OP(ctx, +, x->lhs, x->rhs);
   case SUB:

@@ -68,6 +68,8 @@ PARSER(Expr) expr8(void);
 PARSER(Expr) expr9(void);
 PARSER(Expr) expr10(void);
 
+PARSER(Expr) logic_or(void);   /* 2 */
+PARSER(Expr) logic_and(void);  /* 3 */
 PARSER(Expr) comparison(void); /* 4 */
 PARSER(Expr) addsub(void);     /* 6 */
 PARSER(Expr) muldiv(void);     /* 7 */
@@ -145,10 +147,10 @@ PARSER(Expr) expr1(void) {
   return expr2();
 }
 PARSER(Expr) expr2(void) {
-  return expr3();
+  return logic_or();
 }
 PARSER(Expr) expr3(void) {
-  return expr4();
+  return logic_and();
 }
 PARSER(Expr) expr4(void) {
   return comparison();
@@ -170,6 +172,46 @@ PARSER(Expr) expr9(void) {
 }
 PARSER(Expr) expr10(void) {
   return choice(lambda(), block(), unary());
+}
+
+// PARSER(Expr) logic_or(void);
+parsec(logic_or, Expr) {
+  ExprT E = trait(Expr);
+  PARSER(Expr) p = expr3();
+  PARSER(String) op = lexme(string1("||"));
+  DO() {
+    SCAN(p, lhs);
+    for (;;) {
+      SCAN(optional(op), m);
+      if (m.none) {
+        break;
+      }
+      /* SCAN(p, rhs); */
+      SCAN(expr2(), rhs);
+      lhs = E.logic_or(lhs, rhs);
+    }
+    RETURN(lhs);
+  }
+}
+
+// PARSER(Expr) logic_and(void);
+parsec(logic_and, Expr) {
+  ExprT E = trait(Expr);
+  PARSER(Expr) p = expr4();
+  PARSER(String) op = lexme(string1("&&"));
+  DO() {
+    SCAN(p, lhs);
+    for (;;) {
+      SCAN(optional(op), m);
+      if (m.none) {
+        break;
+      }
+      /* SCAN(p, rhs); */
+      SCAN(expr3(), rhs);
+      lhs = E.logic_and(lhs, rhs);
+    }
+    RETURN(lhs);
+  }
 }
 
 // PARSER(Expr) comparison(void);
@@ -278,7 +320,7 @@ parsec(unary, Expr) {
   }
 }
 
-//PARSER(Expr) fexpr(void)
+// PARSER(Expr) fexpr(void)
 parsec(fexpr, Expr) {
   ExprT E = trait(Expr);
   ArrayT(Expr) A = trait(Array(Expr));
@@ -404,7 +446,7 @@ parsec(lambda, Expr) {
     SCAN(some(pat()), ps);
     SCAN(close_pats);
     SCAN(body, rhs);
-    for (Expr* p = A.end(ps); p != A.begin(ps); ) {
+    for (Expr* p = A.end(ps); p != A.begin(ps);) {
       rhs = E.lambda(*--p, rhs);
     }
     A.free(&ps);

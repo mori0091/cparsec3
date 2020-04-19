@@ -33,6 +33,9 @@ enum ExprId {
   LET,
   /* assignment */
   ASSIGN,
+  /* logical and/or */
+  OR,
+  AND,
   /* equality */
   EQ,
   NEQ,
@@ -88,6 +91,8 @@ typedef struct ExprT {
   Expr (*seq)(Expr lhs, Expr rhs);        /* list of statements */
   Expr (*let)(Expr lhs, Expr rhs);        /* variable definition */
   Expr (*assign)(Expr lhs, Expr rhs);     /* assignment */
+  Expr (*logic_or)(Expr lhs, Expr rhs);   /* logical or */
+  Expr (*logic_and)(Expr lhs, Expr rhs);  /* logical and */
   Expr (*eq)(Expr lhs, Expr rhs);         /* equality */
   Expr (*neq)(Expr lhs, Expr rhs);        /* nonequality */
   Expr (*le)(Expr lhs, Expr rhs);         /* less than or equal to */
@@ -175,6 +180,12 @@ static Expr FUNC_NAME(let, Expr)(Expr lhs, Expr rhs) {
 static Expr FUNC_NAME(assign, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(ASSIGN, lhs, rhs);
 }
+static Expr FUNC_NAME(logic_or, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(OR, lhs, rhs);
+}
+static Expr FUNC_NAME(logic_and, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(AND, lhs, rhs);
+}
 static Expr FUNC_NAME(eq, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(EQ, lhs, rhs);
 }
@@ -255,6 +266,8 @@ ExprT Trait(Expr) {
       .seq = FUNC_NAME(seq, Expr),
       .let = FUNC_NAME(let, Expr),
       .assign = FUNC_NAME(assign, Expr),
+      .logic_or = FUNC_NAME(logic_or, Expr),
+      .logic_and = FUNC_NAME(logic_and, Expr),
       .eq = FUNC_NAME(eq, Expr),
       .neq = FUNC_NAME(neq, Expr),
       .le = FUNC_NAME(le, Expr),
@@ -301,6 +314,12 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     break;
   case ASSIGN:
     Expr_showBinary(b, "Assign", x->lhs, x->rhs);
+    break;
+  case OR:
+    Expr_showBinary(b, "Or", x->lhs, x->rhs);
+    break;
+  case AND:
+    Expr_showBinary(b, "And", x->lhs, x->rhs);
     break;
   case EQ:
     Expr_showBinary(b, "Eq", x->lhs, x->rhs);
