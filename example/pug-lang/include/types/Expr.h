@@ -5,6 +5,7 @@
 
 #include "Type.h"
 
+typedef struct Context* Context;
 typedef struct Expr* Expr;
 decl_user_type(Expr);
 
@@ -18,9 +19,11 @@ typedef struct Var {
 } Var;
 
 enum ExprId {
+  /* closure (a lambda abstraction bounded to a context) */
+  CLOSURE,
   /* function application (partial application) */
   APPLY,
-  /* lambda */
+  /* lambda abstraction */
   LAMBDA,
   /* block */
   BLK,
@@ -64,6 +67,10 @@ struct Expr {
   enum ExprId kind;
   union {
     struct {
+      Context ctx;
+      Expr lambda;
+    };
+    struct {
       Expr lhs;
       Expr rhs;
     };
@@ -74,24 +81,25 @@ struct Expr {
 
 // -----------------------------------------------------------------------
 typedef struct ExprT {
-  Expr (*apply)(Expr lhs, Expr rhs);  /* function application */
-  Expr (*lambda)(Expr lhs, Expr rhs); /* lambda abstraction */
-  Expr (*block)(Expr rhs);            /* block */
-  Expr (*seq)(Expr lhs, Expr rhs);    /* list of statements */
-  Expr (*let)(Expr lhs, Expr rhs);    /* variable definition */
-  Expr (*assign)(Expr lhs, Expr rhs); /* assignment */
-  Expr (*eq)(Expr lhs, Expr rhs);     /* equality */
-  Expr (*neq)(Expr lhs, Expr rhs);    /* nonequality */
-  Expr (*le)(Expr lhs, Expr rhs);     /* less than or equal to */
-  Expr (*lt)(Expr lhs, Expr rhs);     /* less than */
-  Expr (*gt)(Expr lhs, Expr rhs);     /* greater than */
-  Expr (*ge)(Expr lhs, Expr rhs);     /* greater than or equal to */
-  Expr (*add)(Expr lhs, Expr rhs);    /* arithmetic addition */
-  Expr (*sub)(Expr lhs, Expr rhs);    /* arithmetic subtraction */
-  Expr (*mul)(Expr lhs, Expr rhs);    /* arithmetic multiplication */
-  Expr (*div)(Expr lhs, Expr rhs);    /* arithmetic division */
-  Expr (*mod)(Expr lhs, Expr rhs);    /* arithmetic reminder */
-  Expr (*neg)(Expr rhs);              /* arithmetic negation */
+  Expr (*closure)(Context ctx, Expr rhs); /* closure */
+  Expr (*apply)(Expr lhs, Expr rhs);      /* function application */
+  Expr (*lambda)(Expr lhs, Expr rhs);     /* lambda abstraction */
+  Expr (*block)(Expr rhs);                /* block */
+  Expr (*seq)(Expr lhs, Expr rhs);        /* list of statements */
+  Expr (*let)(Expr lhs, Expr rhs);        /* variable definition */
+  Expr (*assign)(Expr lhs, Expr rhs);     /* assignment */
+  Expr (*eq)(Expr lhs, Expr rhs);         /* equality */
+  Expr (*neq)(Expr lhs, Expr rhs);        /* nonequality */
+  Expr (*le)(Expr lhs, Expr rhs);         /* less than or equal to */
+  Expr (*lt)(Expr lhs, Expr rhs);         /* less than */
+  Expr (*gt)(Expr lhs, Expr rhs);         /* greater than */
+  Expr (*ge)(Expr lhs, Expr rhs);         /* greater than or equal to */
+  Expr (*add)(Expr lhs, Expr rhs);        /* arithmetic addition */
+  Expr (*sub)(Expr lhs, Expr rhs);        /* arithmetic subtraction */
+  Expr (*mul)(Expr lhs, Expr rhs);        /* arithmetic multiplication */
+  Expr (*div)(Expr lhs, Expr rhs);        /* arithmetic division */
+  Expr (*mod)(Expr lhs, Expr rhs);        /* arithmetic reminder */
+  Expr (*neg)(Expr rhs);                  /* arithmetic negation */
   Expr (*not)(Expr rhs);   /* logical not / bitwise complement */
   Expr (*num)(Num x);      /* number */
   Expr (*var)(Var x);      /* variable */
@@ -142,6 +150,13 @@ static void Expr_showUnary(CharBuff* b, String tag, Expr rhs) {
   mem_printf(b, ")");
 }
 
+static Expr FUNC_NAME(closure, Expr)(Context ctx, Expr rhs) {
+  Expr e = Expr_New();
+  e->kind = CLOSURE;
+  e->ctx = ctx;
+  e->lambda = rhs;
+  return e;
+}
 static Expr FUNC_NAME(apply, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(APPLY, lhs, rhs);
 }
@@ -233,6 +248,7 @@ static Expr FUNC_NAME(unit, Expr)(void) {
 
 ExprT Trait(Expr) {
   return (ExprT){
+      .closure = FUNC_NAME(closure, Expr),
       .apply = FUNC_NAME(apply, Expr),
       .lambda = FUNC_NAME(lambda, Expr),
       .block = FUNC_NAME(block, Expr),
@@ -263,6 +279,11 @@ impl_user_type(Expr);
 
 show_user_type(Expr)(CharBuff* b, Expr x) {
   switch (x->kind) {
+  case CLOSURE:
+    mem_printf(b, "(Closure <%p> ", (void*)(x->ctx));
+    trait(Show(Expr)).toString(b, x->lambda);
+    mem_printf(b, ")");
+    break;
   case APPLY:
     Expr_showBinary(b, "Apply", x->lhs, x->rhs);
     break;
