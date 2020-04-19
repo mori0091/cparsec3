@@ -191,6 +191,13 @@ void pug_self_test(void) {
   assert(pug_parseTest("let f = |x y| x+y; let g = f 1; g 2 + g 3"));
   // -> (1+2) + (1+3) = 7
 
+  /* lexical scoping (static scoping):
+   * | a free variable refers the scope where the lambda was defined
+   * | instead of where the lambda was applied.
+   *
+   * NOTE: A term "free variable" means that variables refered in the
+   *       lambda's body excluding lambda's argumnets.
+   */
   assert(pug_parseTest("let y = 10;\n"
                        "let g = |x| x*y;\n"
                        "let f = |x| {y = 2; y*y + g x};\n"
@@ -198,4 +205,37 @@ void pug_self_test(void) {
   // -> true
   // NOTE: (f 3) shall be 10 if dynamic scoping.
   // NOTE: (f 3) shall be 34 if lexical scoping.
+  // The Pug language employs a lexical scoping.
+
+  /* logical or (short circuit)
+   * | `a || b` results one the following:
+   * | - `true` if `a` was `true`. (`b` is never evaluated)
+   * | - `b` if `a` was `false` and `b` was a bool type.
+   * | - an error, otherwise
+   */
+  assert(pug_parseTest("false || false == false"));
+  assert(pug_parseTest("false || true  == true"));
+  assert(!pug_parseTest("false || 1")); /* Type mismatch */
+  assert(pug_parseTest("true  || false == true"));
+  assert(pug_parseTest("true  || true  == true"));
+  assert(pug_parseTest("true  || 1     == true"));
+  assert(!pug_parseTest("1 || false")); /* Type mismatch */
+  assert(!pug_parseTest("1 || true"));  /* Type mismatch */
+  assert(!pug_parseTest("1 || 1"));     /* Type mismatch */
+
+  /* logical and (short circuit)
+   * | `a && b` results one the following:
+   * | - `false` if `a` was `false`. (`b` is never evaluated)
+   * | - `b` if `a` was `true` and `b` was a bool type.
+   * | - an error, otherwise
+   */
+  assert(pug_parseTest("false && false == false"));
+  assert(pug_parseTest("false && true  == false"));
+  assert(pug_parseTest("false && 1     == false"));
+  assert(pug_parseTest("true  && false == false"));
+  assert(pug_parseTest("true  && true  == true"));
+  assert(!pug_parseTest("true  && 1")); /* Type mismatch */
+  assert(!pug_parseTest("1 && false")); /* Type mismatch */
+  assert(!pug_parseTest("1 && true"));  /* Type mismatch */
+  assert(!pug_parseTest("1 && 1"));     /* Type mismatch */
 }
