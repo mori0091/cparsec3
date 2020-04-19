@@ -1,9 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include "../my_parsec.h"
-
-#define Address int
+#include "Expr.h"
 
 typedef struct MapEntry {
   String ident; ///< the name of the variable
@@ -12,16 +10,17 @@ typedef struct MapEntry {
 
 trait_List(MapEntry);
 
-typedef struct Context {
+typedef struct Context* Context;
+struct Context {
   List(MapEntry) map; ///< list of variables accessible in this scope
-} Context;
+};
 
 typedef struct ContextT {
-  Context* (*create)(void);
-  Context* (*branch)(Context* ctx);
+  Context (*create)(void);
+  Context (*branch)(Context ctx);
   struct {
-    Maybe(Expr) (*lookup)(Context* ctx, String ident);
-    void (*put)(Context* ctx, String ident, Expr e);
+    Maybe(Expr) (*lookup)(Context ctx, String ident);
+    void (*put)(Context ctx, String ident, Expr e);
   } map;
 } ContextT;
 
@@ -30,22 +29,23 @@ ContextT Trait(Context);
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
 
+#include <cparsec3/base/base_generics.h>
+
 impl_List(MapEntry);
 
-static Context* FUNC_NAME(create, Context)(void) {
-  Context* ctx = mem_malloc(sizeof(struct Context));
+static Context FUNC_NAME(create, Context)(void) {
+  Context ctx = mem_malloc(sizeof(struct Context));
   ctx->map = trait(List(MapEntry)).empty;
   return ctx;
 }
 
-static Context* FUNC_NAME(branch, Context)(Context* c) {
-  Context* ctx = mem_malloc(sizeof(struct Context));
+static Context FUNC_NAME(branch, Context)(Context c) {
+  Context ctx = mem_malloc(sizeof(struct Context));
   ctx->map = c->map;
   return ctx;
 }
 
-static Maybe(Expr)
-    FUNC_NAME(lookup, Context)(Context* ctx, String ident) {
+static Maybe(Expr) FUNC_NAME(lookup, Context)(Context ctx, String ident) {
   ListT(MapEntry) L = trait(List(MapEntry));
   for (List(MapEntry) xs = ctx->map; !L.null(xs); xs = L.tail(xs)) {
     MapEntry x = L.head(xs);
@@ -56,7 +56,7 @@ static Maybe(Expr)
   return (Maybe(Expr)){.none = true};
 }
 
-static void FUNC_NAME(put, Context)(Context* ctx, String ident, Expr e) {
+static void FUNC_NAME(put, Context)(Context ctx, String ident, Expr e) {
   MapEntry entry = {.ident = ident, .e = e};
   ctx->map = trait(List(MapEntry)).cons(entry, ctx->map);
 }

@@ -194,10 +194,8 @@ void pug_self_test(void) {
   assert(pug_parseTest("let y = 10;\n"
                        "let g = |x| x*y;\n"
                        "let f = |x| {y = 2; y*y + g x};\n"
-                       "f 3"));
-  // -> 10
+                       "f 3 == 34"));
+  // -> true
   // NOTE: (f 3) shall be 10 if dynamic scoping.
   // NOTE: (f 3) shall be 34 if lexical scoping.
-  // TODO: scope shall be established in compile-time not in run-time,
-  //       if the lexical scoping was expected.
 }

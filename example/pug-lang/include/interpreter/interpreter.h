@@ -1,9 +1,8 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
-#include "../types/Expr.h"
-
-#include "context.h"
+#include "types/Context.h"
+#include "types/Expr.h"
 
 #define Interpreter(...) TYPE_NAME(Interpreter, __VA_ARGS__)
 
@@ -23,7 +22,7 @@ typedef struct EvalResult {
 
 typedef struct Interpreter(Expr) Interpreter(Expr);
 struct Interpreter(Expr) {
-  EvalResult (*eval)(Context * ctx, Expr x);
+  EvalResult (*eval)(Context ctx, Expr x);
 };
 
 Interpreter(Expr) Trait(Interpreter(Expr));
@@ -98,32 +97,27 @@ Interpreter(Expr) Trait(Interpreter(Expr));
     }                                                                    \
   } while (0)
 
-static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context* ctx,
+static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context ctx,
                                                      Expr x) {
   ContextT C = trait(Context);
   ExprT E = trait(Expr);
   switch (x->kind) {
-  case APPLY:{
+  case APPLY: {
     EVAL(ctx, x->lhs, f);
-    if (f.ok->kind != LAMBDA) {
+    if (f.ok->kind != CLOSURE) {
       RETURN_ERR("function application");
     }
-    Expr a = x->rhs;
-    Expr v1 = f.ok->lhs;        // (Var v1)
-    Expr e1 = f.ok->rhs;        // body
-    Expr v1a = E.let(v1, a);
-    if (e1->kind != LAMBDA) {
-      Expr fa = E.block(E.seq(v1a, e1));
-      EVAL(ctx, fa, y);
-      RETURN_OK(y.ok);
-    }
-    Expr v2 = e1->lhs;          // (Var v2)
-    Expr e2 = e1->rhs;          // body of e1
-    Expr fa = E.lambda(v2, E.block(E.seq(v1a, e2)));
-    RETURN_OK(fa);
+    EVAL(ctx, x->rhs, a);
+    Expr v = f.ok->lambda->lhs;    // (Var v)
+    Expr body = f.ok->lambda->rhs; // body
+    Expr fa = E.seq(E.let(v, a.ok), body);
+    EVAL(f.ok->ctx, fa, y);
+    RETURN_OK(y.ok);
   }
-  case LAMBDA:
+  case CLOSURE:
     RETURN_OK(x);
+  case LAMBDA:
+    RETURN_OK(E.closure(C.branch(ctx), x));
   case BLK: {
     EVAL(C.branch(ctx), x->rhs, rhs);
     RETURN_OK(rhs.ok);

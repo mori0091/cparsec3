@@ -157,7 +157,7 @@ bool pug_parseTest(String input) {
   }
 
   // evaluate the AST
-  Context* ctx = trait(Context).create();
+  Context ctx = trait(Context).create();
   EvalResult result2 = trait(Interpreter(Expr)).eval(ctx, result.ok);
   {
     if (!result2.success) {
