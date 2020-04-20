@@ -458,15 +458,23 @@ PARSER(Expr) pat(void) {
   return variable();
 }
 
+// PARSER(Expr) braces(PARSER(Expr) p);
+parsec(braces, PARSER(Expr), Expr) {
+  PARSER(char) open_brace = lexme(char1('{'));
+  PARSER(char) close_brace = lexme(char1('}'));
+  DO() WITH (p) {
+    SCAN(open_brace);
+    SCAN(p, x);
+    SCAN(close_brace);
+    RETURN(x);
+  }
+}
+
 // PARSER(Expr) block(void);
 parsec(block, Expr) {
   ExprT E = trait(Expr);
-  PARSER(char) open_brace = lexme(char1('{'));
-  PARSER(char) close_brace = lexme(char1('}'));
   DO() {
-    SCAN(open_brace);
-    SCAN(stmts(), x);
-    SCAN(close_brace);
+    SCAN(braces(stmts()), x);
     RETURN(E.block(x));
   }
 }
