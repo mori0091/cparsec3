@@ -118,6 +118,17 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context ctx,
     RETURN_OK(x);
   case LAMBDA:
     RETURN_OK(E.closure(C.branch(ctx), x));
+  case IFELSE: {
+    // make implicit block scope that encloses whole if~else block
+    Context c = C.branch(ctx);
+    EVAL(c, x->lhs, cond);
+    REQUIRE_TYPE_EQ(cond.ok->type, TYPE(bool));
+    Expr then_blk = x->rhs->lhs;
+    Expr else_blk = x->rhs->rhs;
+    // REQUIRE_TYPE_EQ(then_blk->type, else_blk->type);
+    EVAL(c, (cond.ok->kind == TRUE ? then_blk : else_blk), y);
+    RETURN_OK(y.ok);
+  }
   case BLK: {
     EVAL(C.branch(ctx), x->rhs, rhs);
     RETURN_OK(rhs.ok);

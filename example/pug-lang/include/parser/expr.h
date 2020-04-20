@@ -23,11 +23,14 @@ C_API_BEGIN
 // expr8  = expr9
 // expr9  = expr10
 // expr10 = lambda
+//        | ifelse
 //        | block
 //        | unary
 //
 // lambda = "|" pat {pat} "|" expr0
 // pat    = variable
+//
+// ifelse = "if" expr0 "{" stmts "}" "else" (if_expr | "{" stmts "}")
 //
 // block  = "{" stmts "}"
 // stmts  = stmt {";" [stmt]}
@@ -91,6 +94,8 @@ PARSER(String) keyword(String s);
 PARSER(Expr) lambda(void);
 PARSER(Expr) pat(void);
 
+PARSER(Expr) ifelse(void);
+
 PARSER(Expr) block(void);
 PARSER(Expr) stmts(void);
 PARSER(Expr) stmt(void);
@@ -103,6 +108,8 @@ PARSER(Expr) let(void);
 
 static String KEYWORDS[] = {
     "let",
+    "if",
+    "else",
     "()",
     "false",
     "true",
@@ -171,7 +178,7 @@ PARSER(Expr) expr9(void) {
   return expr10();
 }
 PARSER(Expr) expr10(void) {
-  return choice(lambda(), block(), unary());
+  return choice(lambda(), ifelse(), block(), unary());
 }
 
 // PARSER(Expr) logic_or(void);
@@ -458,15 +465,39 @@ PARSER(Expr) pat(void) {
   return variable();
 }
 
+// PARSER(Expr) braces(PARSER(Expr) p);
+parsec(braces, PARSER(Expr), Expr) {
+  PARSER(char) open_brace = lexme(char1('{'));
+  PARSER(char) close_brace = lexme(char1('}'));
+  DO() WITH (p) {
+    SCAN(open_brace);
+    SCAN(p, x);
+    SCAN(close_brace);
+    RETURN(x);
+  }
+}
+
+// PARSER(Expr) ifelse(void);
+parsec(ifelse, Expr) {
+  ExprT E = trait(Expr);
+  PARSER(String) if_ = lexme(keyword("if"));
+  PARSER(String) else_ = lexme(keyword("else"));
+  PARSER(Expr) blk = block();
+  DO () {
+    SCAN(if_);
+    SCAN(expr0(), x);
+    SCAN(blk, y);
+    SCAN(else_);
+    SCAN(either(blk, ifelse()), z);
+    RETURN(E.ifelse(x, y, z));
+  }
+}
+
 // PARSER(Expr) block(void);
 parsec(block, Expr) {
   ExprT E = trait(Expr);
-  PARSER(char) open_brace = lexme(char1('{'));
-  PARSER(char) close_brace = lexme(char1('}'));
   DO() {
-    SCAN(open_brace);
-    SCAN(stmts(), x);
-    SCAN(close_brace);
+    SCAN(braces(stmts()), x);
     RETURN(E.block(x));
   }
 }

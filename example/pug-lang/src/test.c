@@ -238,4 +238,10 @@ void pug_self_test(void) {
   assert(!pug_parseTest("1 && false")); /* Type mismatch */
   assert(!pug_parseTest("1 && true"));  /* Type mismatch */
   assert(!pug_parseTest("1 && 1"));     /* Type mismatch */
+
+  /* if expr {...} else {...} */
+  assert(pug_parseTest("(if true {1} else {0}) == 1"));
+  assert(pug_parseTest("(if false {1} else {0}) == 0"));
+  assert(pug_parseTest("(if false {2} else if true {1} else {0}) == 1"));
+  assert(pug_parseTest("(if false {2} else if false {1} else {0}) == 0"));
 }

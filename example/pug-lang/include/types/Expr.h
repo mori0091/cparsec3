@@ -25,6 +25,8 @@ enum ExprId {
   APPLY,
   /* lambda abstraction */
   LAMBDA,
+  /* if else */
+  IFELSE,
   /* block */
   BLK,
   /* sequence */
@@ -87,6 +89,7 @@ typedef struct ExprT {
   Expr (*closure)(Context ctx, Expr rhs); /* closure */
   Expr (*apply)(Expr lhs, Expr rhs);      /* function application */
   Expr (*lambda)(Expr lhs, Expr rhs);     /* lambda abstraction */
+  Expr (*ifelse)(Expr c, Expr t, Expr e); /* if then else */
   Expr (*block)(Expr rhs);                /* block */
   Expr (*seq)(Expr lhs, Expr rhs);        /* list of statements */
   Expr (*let)(Expr lhs, Expr rhs);        /* variable definition */
@@ -167,6 +170,9 @@ static Expr FUNC_NAME(apply, Expr)(Expr lhs, Expr rhs) {
 }
 static Expr FUNC_NAME(lambda, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(LAMBDA, lhs, rhs);
+}
+static Expr FUNC_NAME(ifelse, Expr)(Expr c, Expr t, Expr e) {
+  return Expr_Binary(IFELSE, c, Expr_Binary(-1, t, e));
 }
 static Expr FUNC_NAME(block, Expr)(Expr rhs) {
   return Expr_Unary(BLK, rhs);
@@ -262,6 +268,7 @@ ExprT Trait(Expr) {
       .closure = FUNC_NAME(closure, Expr),
       .apply = FUNC_NAME(apply, Expr),
       .lambda = FUNC_NAME(lambda, Expr),
+      .ifelse = FUNC_NAME(ifelse, Expr),
       .block = FUNC_NAME(block, Expr),
       .seq = FUNC_NAME(seq, Expr),
       .let = FUNC_NAME(let, Expr),
@@ -291,10 +298,11 @@ ExprT Trait(Expr) {
 impl_user_type(Expr);
 
 show_user_type(Expr)(CharBuff* b, Expr x) {
+  Show(Expr) s = trait(Show(Expr));
   switch (x->kind) {
   case CLOSURE:
     mem_printf(b, "(Closure <%p> ", (void*)(x->ctx));
-    trait(Show(Expr)).toString(b, x->lambda);
+    s.toString(b, x->lambda);
     mem_printf(b, ")");
     break;
   case APPLY:
@@ -302,6 +310,15 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     break;
   case LAMBDA:
     Expr_showBinary(b, "Lambda", x->lhs, x->rhs);
+    break;
+  case IFELSE:
+    mem_printf(b, "(Ifelse ");
+    s.toString(b, x->lhs);
+    mem_printf(b, " ");
+    s.toString(b, x->rhs->lhs);
+    mem_printf(b, " ");
+    s.toString(b, x->rhs->rhs);
+    mem_printf(b, ")");
     break;
   case BLK:
     Expr_showUnary(b, "Blk", x->rhs);

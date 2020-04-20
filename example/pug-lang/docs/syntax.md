@@ -2,30 +2,33 @@
 
 ## Statements
 
-| Example | Explanation                                                         |
-| ------- | ------------------------------------------------------------------- |
-| `...`   | list of statements (*declaration* or *expression* separated by `;`) |
-| `...;`  | list of statements (statements may ends with optional `;`)          |
+| Example | Explanation                                                               |
+| ------- | ------------------------------------------------------------------------- |
+| `...`   | list of statements (*declarations* and/or *expressions* separated by `;`) |
+| `...;`  | list of statements (statements may ends with optional `;`)                |
 
 ## Declaratons
 
-| Example          | Explanation         |
-| ---------------- | ------------------- |
-| `let var = expr` | variable definition |
+| Example         | Explanation         |
+| --------------- | ------------------- |
+| `let x = expr`  | variable definition |
 
 ## Block, lambda expression
 
-| Example                               | Explanation                                           |
-| ------------------------------------- | ----------------------------------------------------- |
-| `{...}`                               | block (enclosed list of statements)                   |
-| `{...;}`                              | block (enclosed statements may ends with optional `;` |
-| <code>&#124;x y ...&#124; expr</code> | lambda (i.e. function object, closure)                |
+| Example                                                   | Explanation                                           |
+| --------------------------------------------------------- | ----------------------------------------------------- |
+| `{ stmts }`                                               | block (enclosed list of statements)                   |
+| `if expr { stmts } else { stmts }`                        | if block                                              |
+| `if expr { stmts } else if expr { stmts } else { stmts }` | if block                                              |
+| <code>&#124;x&#124; expr</code>                           | lambda (i.e. function object, closure)                |
+| <code>&#124;x y ...&#124; expr</code>                     | lambda (i.e. function object, closure)                |
+| <code>&#124;x&#124; &#124;y&#124; ... expr</code>         | lambda (i.e. function object, closure)                |
 
 ## Binary operators
 
 | Operator                  | Associativity     | Example                             | Explanation                         |
 | ------------------------- | ----------------- | ----------------------------------- | ----------------------------------- |
-| `=`                       | non-associative   | `var = expr`                        | assignment                          |
+| `=`                       | non-associative   | `x = expr`                          | assignment                          |
 | <code>&#124;&#124;</code> | right-associative | <code>expr &#124;&#124; expr</code> | logical OR                          |
 | `&&`                      | right-associative | `expr && expr`                      | logical AND                         |
 | `==`                      | non-associative   | `expr == expr`                      | equality comparison                 |
