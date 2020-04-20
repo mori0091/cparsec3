@@ -137,7 +137,7 @@ void pug_self_test(void) {
   assert(pug_parseTest("let a = 1; let b = 2; a"));     /* 1 */
   assert(pug_parseTest("let a = 1; let b = 2; b"));     /* 2 */
 
-  /* a block establishes new 'lexical' scope. */
+  /* a block establishes new **branch** of lexical scope. */
   assert(pug_parseTest("let x = 1; {x = 2}"));        /* 2 */
   assert(pug_parseTest("let x = 1; {x = 2}; x"));     /* 1 */
   assert(pug_parseTest("let x = 1; {let x = 2}"));    /* 2 */
@@ -145,15 +145,15 @@ void pug_self_test(void) {
 
   /*
    * From inside a block,
-   * variables defined before the block in outer scope are accessible.
+   * variables defined before the block in outer block are accessible.
    */
   assert(pug_parseTest("let x = 1; {let y = x + 1}"));      /* 2 */
   assert(pug_parseTest("let x = 1; {let y = 2; {x + y}}")); /* 3 */
 
   /*
    * From inside a block,
-   * variables defined after the block in outer scope are NOT accessible.
-   * NOTE: Shall be accessible? Need concideration which is better.
+   * variables defined after the block in outer block are NOT accessible.
+   * (block's scope isn't a **nested scope** but a **branched scope**)
    */
   assert(!pug_parseTest("{let y = z}; let z = 2"));
   // -> Undefined variable
@@ -206,6 +206,20 @@ void pug_self_test(void) {
   // NOTE: (f 3) shall be 10 if dynamic scoping.
   // NOTE: (f 3) shall be 34 if lexical scoping.
   // The Pug language employs a lexical scoping.
+
+  /*
+   * From inside a lambda (i.e. closure),
+   * any variables defined in outer scope are accessible even if the
+   * variable was not defined before the lambda.
+   * (because closure's scope is a **nested scope**)
+   */
+  assert(pug_parseTest("let f = |x| y; let y = 2; (f 1) == 2"));
+
+  /* Recursive function is also available.
+   * (because closure's scope is a **nested scope**)
+   */
+  assert(pug_parseTest("let f = |x| if x <= 1 {1} else {x * f(x-1)};\n"
+                       "f 5 == 120"));
 
   /* logical or (short circuit)
    * | `a || b` results one the following:

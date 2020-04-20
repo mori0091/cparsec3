@@ -117,7 +117,7 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context ctx,
   case CLOSURE:
     RETURN_OK(x);
   case LAMBDA:
-    RETURN_OK(E.closure(C.branch(ctx), x));
+    RETURN_OK(E.closure(C.nested(ctx), x));
   case IFELSE: {
     // make implicit block scope that encloses whole if~else block
     Context c = C.branch(ctx);
