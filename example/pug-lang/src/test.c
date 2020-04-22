@@ -39,6 +39,14 @@ void pug_self_test(void) {
   assert(pug_parseTest("!true == false"));
   assert(pug_parseTest("!false == true"));
 
+  /* leading and/or trailing white-spaces are permitted. */
+  assert(pug_parseTest("    1")); /* 1 */
+  assert(pug_parseTest("  1  ")); /* 1 */
+  assert(pug_parseTest("1    ")); /* 1 */
+  assert(pug_parseTest("\n"
+                       "let x = 1;\n"
+                       "x + 3\n")); /* 4 */
+
   /* a variable must be initialized when defining it. */
   assert(pug_parseTest("let a = 100")); /* 100 */
 
