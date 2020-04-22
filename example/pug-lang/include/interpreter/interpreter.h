@@ -110,8 +110,10 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context ctx,
     EVAL(ctx, x->rhs, a);
     Expr v = f.ok->lambda->lhs;    // (Var v)
     Expr body = f.ok->lambda->rhs; // body
-    Expr fa = E.seq(E.let(v, a.ok), body);
-    EVAL(f.ok->ctx, fa, y);
+    /* Expr fa = E.seq(E.let(v, a.ok), body); */
+    /* EVAL(f.ok->ctx, fa, y); */
+    C.map.put(f.ok->ctx, v->var.ident, a.ok);
+    EVAL(f.ok->ctx, body, y);
     RETURN_OK(y.ok);
   }
   case CLOSURE:
@@ -134,8 +136,11 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context ctx,
     RETURN_OK(rhs.ok);
   }
   case SEQ: {
-    EVAL(ctx, x->lhs, lhs);
-    EVAL(ctx, x->rhs, rhs);
+    do {
+      EVAL(ctx, x->lhs, lhs);
+      x = x->rhs;
+    } while (x->kind == SEQ);
+    EVAL(ctx, x, rhs);
     RETURN_OK(rhs.ok);
   }
   case LET: {
