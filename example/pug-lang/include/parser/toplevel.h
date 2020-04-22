@@ -17,6 +17,7 @@ PARSER(Expr) program(void);
 // PARSER(Expr) program(void);
 parsec(program, Expr) {
   DO() {
+    SCAN(space());
     SCAN(stmts(), x);
     SCAN(eof());
     RETURN(x);
