@@ -3,6 +3,8 @@
 
 #include "../my_parsec.h"
 
+#include "blank.h"
+
 C_API_BEGIN
 
 #define GENERIC_LEXME(T) FUNC_NAME(lexme, T)
@@ -20,7 +22,7 @@ decl_lexme(String);
   parsec(FUNC_NAME(lexme, T), PARSER(T), T) {                            \
     DO() WITH(p) {                                                       \
       SCAN(p, x);                                                        \
-      SCAN(space());                                                     \
+      SCAN(blank());                                                     \
       RETURN(x);                                                         \
     }                                                                    \
   }                                                                      \

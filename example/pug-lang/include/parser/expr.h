@@ -3,6 +3,7 @@
 
 #include "../my_parsec.h"
 
+#include "blank.h"
 #include "lexme.h"
 #include "optional.h"
 
@@ -107,12 +108,7 @@ PARSER(Expr) let(void);
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
 
 static String KEYWORDS[] = {
-    "let",
-    "if",
-    "else",
-    "()",
-    "false",
-    "true",
+    "let", "if", "else", "()", "false", "true",
 };
 
 static bool is_a_keyword(String s) {
@@ -347,7 +343,7 @@ parsec(fexpr, Expr) {
 parsec(aexpr, Expr) {
   DO() {
     SCAN(choice(qvar(), ctor(), literal(), paren()), x);
-    SCAN(space());
+    SCAN(blank());
     RETURN(x);
   }
 }
@@ -399,7 +395,7 @@ parsec(identifier0, String) {
   DO() {
     SCAN(identStart(), x);
     SCAN(many(identLetter()), xs);
-    SCAN(space());
+    SCAN(blank());
     size_t len = 1 + xs.length;
     char* cs = mem_malloc(len + 1);
     cs[0] = x;
@@ -469,7 +465,7 @@ PARSER(Expr) pat(void) {
 parsec(braces, PARSER(Expr), Expr) {
   PARSER(char) open_brace = lexme(char1('{'));
   PARSER(char) close_brace = lexme(char1('}'));
-  DO() WITH (p) {
+  DO() WITH(p) {
     SCAN(open_brace);
     SCAN(p, x);
     SCAN(close_brace);
@@ -483,7 +479,7 @@ parsec(ifelse, Expr) {
   PARSER(String) if_ = lexme(keyword("if"));
   PARSER(String) else_ = lexme(keyword("else"));
   PARSER(Expr) blk = block();
-  DO () {
+  DO() {
     SCAN(if_);
     SCAN(expr0(), x);
     SCAN(blk, y);

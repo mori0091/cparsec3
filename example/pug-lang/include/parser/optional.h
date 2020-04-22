@@ -7,11 +7,12 @@ C_API_BEGIN
 
 #define GENERIC_OPTIONAL(T) FUNC_NAME(optional, T)
 #define optional(p)                                                      \
-  GENERIC(p, PARSER, GENERIC_OPTIONAL, char, String, Expr)(p)
+  GENERIC(p, PARSER, GENERIC_OPTIONAL, None, char, String, Expr)(p)
 
 #define decl_optional(T)                                                 \
   PARSER(Maybe(T)) FUNC_NAME(optional, T)(PARSER(T) p)
 
+decl_optional(None);
 decl_optional(char);
 decl_optional(String);
 decl_optional(Expr);
@@ -33,6 +34,7 @@ decl_optional(Expr);
   }                                                                      \
   END_OF_STATEMENTS
 
+impl_optional(None);
 impl_optional(char);
 impl_optional(String);
 impl_optional(Expr);

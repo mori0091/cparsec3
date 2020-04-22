@@ -47,6 +47,17 @@ void pug_self_test(void) {
                        "let x = 1;\n"
                        "x + 3\n")); /* 4 */
 
+  /* line-comment:
+   * `//` followed by any characters and ends with end of line.
+   */
+  assert(pug_parseTest("1 // (1)")); /* 1 */
+  assert(pug_parseTest("// (1)\n"
+                       "\n"
+                       "// (2)\n"
+                       "100\n"
+                       "// (3)\n"
+                       "\n"));  /* 100 */
+
   /* a variable must be initialized when defining it. */
   assert(pug_parseTest("let a = 100")); /* 100 */
 

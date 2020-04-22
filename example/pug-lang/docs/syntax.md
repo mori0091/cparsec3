@@ -1,5 +1,11 @@
 # Pug programming language Syntax
 
+## Comments
+
+| Example | Explanation                                                               |
+| ------- | ------------------------------------------------------------------------- |
+| `//...` | line comments (`//` followed by any characters and ends with end-of-line) |
+
 ## Statements
 
 | Example | Explanation                                                               |
