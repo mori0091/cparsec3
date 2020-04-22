@@ -3,6 +3,7 @@
 
 #include "../my_parsec.h"
 
+#include "blank.h"
 #include "expr.h"
 
 C_API_BEGIN
@@ -17,7 +18,7 @@ PARSER(Expr) program(void);
 // PARSER(Expr) program(void);
 parsec(program, Expr) {
   DO() {
-    SCAN(space());
+    SCAN(blank());
     SCAN(stmts(), x);
     SCAN(eof());
     RETURN(x);
