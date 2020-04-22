@@ -136,8 +136,11 @@ static EvalResult FUNC_NAME(eval, Interpreter(Expr))(Context ctx,
     RETURN_OK(rhs.ok);
   }
   case SEQ: {
-    EVAL(ctx, x->lhs, lhs);
-    EVAL(ctx, x->rhs, rhs);
+    do {
+      EVAL(ctx, x->lhs, lhs);
+      x = x->rhs;
+    } while (x->kind == SEQ);
+    EVAL(ctx, x, rhs);
     RETURN_OK(rhs.ok);
   }
   case LET: {
