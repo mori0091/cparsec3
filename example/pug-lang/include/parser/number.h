@@ -17,10 +17,11 @@ parsec(number0, Expr) {
   DO() {
     SCAN(some(digit()), xs);
     ArrayT(char) A = trait(Array(char));
-    int y = 0;
+    int64_t y = 0;
     for (char* p = A.begin(xs); p != A.end(xs); p++) {
-      int x = *p - '0';
-      if (y > INT_MAX / 10 || (y == INT_MAX / 10 && x > INT_MAX % 10)) {
+      int64_t x = *p - '0';
+      if (y > INT64_MAX / 10 ||
+          (y == INT64_MAX / 10 && x > INT64_MAX % 10)) {
         FAIL("too large number");
       }
       y = 10 * y + x;
@@ -30,7 +31,7 @@ parsec(number0, Expr) {
 }
 
 PARSER(Expr) number(void) {
-  return label("a number [0..INT_MAX]", tryp(number0()));
+  return label("a number [0..2^63-1]", tryp(number0()));
 }
 
 #endif

@@ -73,7 +73,7 @@ Interpreter(Expr) Trait(Interpreter(Expr));
     EVAL(_ctx_, _b_, rhs);                                               \
     REQUIRE_TYPE_EQ(lhs.ok->type, TYPE(int));                            \
     REQUIRE_TYPE_EQ(rhs.ok->type, TYPE(int));                            \
-    int x = lhs.ok->num.value _op_ rhs.ok->num.value;                    \
+    int64_t x = lhs.ok->num.value _op_ rhs.ok->num.value;                \
     RETURN_OK(trait(Expr).num((Num){x}));                                \
   } while (0)
 
@@ -86,7 +86,7 @@ Interpreter(Expr) Trait(Interpreter(Expr));
     if (rhs.ok->num.value == 0) {                                        \
       RETURN_ERR("Division by zero");                                    \
     }                                                                    \
-    int x = lhs.ok->num.value _op_ rhs.ok->num.value;                    \
+    int64_t x = lhs.ok->num.value _op_ rhs.ok->num.value;                \
     RETURN_OK(trait(Expr).num((Num){x}));                                \
   } while (0)
 

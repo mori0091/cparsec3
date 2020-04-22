@@ -11,7 +11,7 @@ decl_user_type(Expr);
 
 // -----------------------------------------------------------------------
 typedef struct Num {
-  int value;
+  int64_t value;
 } Num;
 
 typedef struct Var {
@@ -381,7 +381,7 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     mem_printf(b, "(Var %s)", x->var.ident);
     break;
   case NUM:
-    mem_printf(b, "%d", x->num.value);
+    mem_printf(b, "%" PRId64, x->num.value);
     break;
   case TRUE:
     mem_printf(b, "true");
