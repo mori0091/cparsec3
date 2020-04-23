@@ -41,6 +41,23 @@ $ ./bin/pug -e 'let x = 1; let y = 2; x + y'
 
 #+end_src
 
+Example: fibonacci function ~fib~
+#+begin_src
+// `fib n` calculates `n`th fibonacci number (n>=0)
+let fib = |n| {
+  let f = |n a b|
+    if n == 0 {
+      1
+    } else if n == 1 {
+      a
+    } else {
+      f (n-1) (a+b) a
+    }
+  ;
+  f n 1 1;
+};
+#+end_src
+
 * Pug programming language
 
 - [[file:docs/syntax.md][Syntax]] :: Declaratons, Expressions, Operators syntax.
