@@ -56,7 +56,7 @@ void pug_self_test(void) {
                        "// (2)\n"
                        "100\n"
                        "// (3)\n"
-                       "\n"));  /* 100 */
+                       "\n")); /* 100 */
 
   /* a variable must be initialized when defining it. */
   assert(pug_parseTest("let a = 100")); /* 100 */
@@ -277,4 +277,19 @@ void pug_self_test(void) {
   assert(pug_parseTest("(if false {1} else {0}) == 0"));
   assert(pug_parseTest("(if false {2} else if true {1} else {0}) == 1"));
   assert(pug_parseTest("(if false {2} else if false {1} else {0}) == 0"));
+
+  /* nested function definition and recursive call */
+  assert(pug_parseTest("// factorial function\n"
+                       "let fact = |x| {\n"
+                       "  let f = |x a|\n"
+                       "    if x <= 1 {\n"
+                       "      a\n"
+                       "    } else {\n"
+                       "      f (x-1) (x*a)\n"
+                       "    }\n"
+                       "  ;\n"
+                       "  f x 1\n"
+                       "}\n"
+                       ";\n"
+                       "fact 4 == 24")); /* true */
 }
