@@ -24,7 +24,7 @@ See the help that appears by the following command.
 $ ./bin/pug --help
 #+end_src
 
-* Example
+To run a script, use ~-e SCRIPT~ option:
 #+begin_src shell
 $ ./bin/pug -e '1 + 2'
 > 1 + 2
@@ -41,8 +41,10 @@ $ ./bin/pug -e 'let x = 1; let y = 2; x + y'
 
 #+end_src
 
+* Example
+
 Example: fibonacci function ~fib~
-#+begin_src
+#+begin_src rust
 // `fib n` calculates `n`th fibonacci number (n>=0)
 let fib = |n| {
   let f = |n a b|
@@ -55,6 +57,25 @@ let fib = |n| {
     }
   ;
   f n 1 1;
+};
+#+end_src
+
+Example: factorial function ~fact~
+#+begin_src rust
+// `fact x` calculates `x!` (i.e. x * (x-1) * (x-2) * ... * 1)
+//
+// NOTE: The argument `x` should be `x <= 20`,
+//       otherwise calculation overflows.
+//       (21! is too large for 64bit integer)
+let fact = |x| {
+  let f = |x a|
+    if x <= 1 {
+      a
+    } else {
+      f (x-1) (x*a)
+    }
+  ;
+  f x 1
 };
 #+end_src
 
