@@ -3,6 +3,7 @@
 #include "interpreter/interpreter.h"
 
 // -----------------------------------------------------------------------
+static EvalResult eval_expr1(Context ctx, Expr x);
 static EvalResult eval_expr(Context ctx, Expr x);
 
 Interpreter(Expr) Trait(Interpreter(Expr)) {
@@ -81,20 +82,19 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
 
 // -----------------------------------------------------------------------
 static EvalResult eval_apply(Context ctx, Expr x) {
-  ContextT C = trait(Context);
   EVAL(ctx, x->lhs, f);
   if (f.ok->kind != CLOSURE) {
     RETURN_ERR("function application");
   }
-  EVAL(ctx, x->rhs, a);
+  /* TODO: what should be done to do lazy evaluation? */
+  EVAL(ctx, x->rhs, a); // <-
+  ContextT C = trait(Context);
+  ExprT E = trait(Expr);
   Expr v = f.ok->lambda->lhs;    // (Var v)
   Expr body = f.ok->lambda->rhs; // body
-  /* Expr fa = E.block(E.seq(E.let(v, a.ok), body)); */
-  /* EVAL(f.ok->ctx, fa, y); */
   Context c = C.branch(f.ok->ctx);
   C.map.put(c, v->var.ident, a.ok);
-  EVAL(c, body, y);
-  RETURN_OK(y.ok);
+  RETURN_OK(E.thunk(c, body));
 }
 
 static EvalResult eval_lambda(Context ctx, Expr x) {
@@ -105,6 +105,7 @@ static EvalResult eval_lambda(Context ctx, Expr x) {
 
 static EvalResult eval_ifelse(Context ctx, Expr x) {
   ContextT C = trait(Context);
+  ExprT E = trait(Expr);
   // make implicit block scope that encloses whole if~else block
   Context c = C.branch(ctx);
   EVAL(c, x->lhs, cond);
@@ -112,23 +113,19 @@ static EvalResult eval_ifelse(Context ctx, Expr x) {
   Expr then_blk = x->rhs->lhs;
   Expr else_blk = x->rhs->rhs;
   // REQUIRE_TYPE_EQ(then_blk->type, else_blk->type);
-  EVAL(c, (cond.ok->kind == TRUE ? then_blk : else_blk), y);
-  RETURN_OK(y.ok);
+  RETURN_OK(E.thunk(c, (cond.ok->kind == TRUE ? then_blk : else_blk)));
 }
 
 static EvalResult eval_block(Context ctx, Expr x) {
   ContextT C = trait(Context);
-  EVAL(C.branch(ctx), x->rhs, rhs);
-  RETURN_OK(rhs.ok);
+  ExprT E = trait(Expr);
+  RETURN_OK(E.thunk(C.branch(ctx), x->rhs));
 }
 
 static EvalResult eval_seq(Context ctx, Expr x) {
-  do {
-    EVAL(ctx, x->lhs, lhs);
-    x = x->rhs;
-  } while (x->kind == SEQ);
-  EVAL(ctx, x, rhs);
-  RETURN_OK(rhs.ok);
+  ExprT E = trait(Expr);
+  EVAL(ctx, x->lhs, lhs);
+  RETURN_OK(E.thunk(ctx, x->rhs));
 }
 
 static EvalResult eval_let(Context ctx, Expr x) {
@@ -195,7 +192,7 @@ static EvalResult eval_var(Context ctx, Expr x) {
 }
 
 // -----------------------------------------------------------------------
-static EvalResult eval_expr(Context ctx, Expr x) {
+static EvalResult eval_expr1(Context ctx, Expr x) {
   switch (x->kind) {
   case APPLY:
     return eval_apply(ctx, x);
@@ -247,8 +244,25 @@ static EvalResult eval_expr(Context ctx, Expr x) {
   case FALSE:
   case UNIT:
   case CLOSURE:
+  case THUNK:
     RETURN_OK(x);
   default:
     RETURN_ERR("Illegal Expr");
   }
+}
+
+static EvalResult eval_expr(Context ctx, Expr x) {
+  EvalResult r = eval_expr1(ctx, x);
+  if (!r.success) {
+    return r;
+  }
+  x = r.ok;
+  while (x->kind == THUNK) {
+    r = eval_expr1(x->ctx, x->value);
+    if (!r.success) {
+      return r;
+    }
+    x = x->value = r.ok;
+  }
+  return r;
 }
