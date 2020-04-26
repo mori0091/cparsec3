@@ -160,6 +160,13 @@ static EvalResult eval_logical_AND_OR(Context ctx, Expr x) {
   RETURN_OK(rhs.ok);
 }
 
+static EvalResult eval_print(Context ctx, Expr x) {
+  ExprT E = trait(Expr);
+  EVAL(ctx, x->rhs, rhs);
+  printf("%s\n", trait(Show(Expr)).show(rhs.ok));
+  RETURN_OK(E.unit());
+}
+
 static EvalResult eval_negate(Context ctx, Expr x) {
   ExprT E = trait(Expr);
   Expr y = E.sub(E.num((Num){0}), x->rhs);
@@ -233,6 +240,8 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
     DIV_MOD_OP(ctx, /, x->lhs, x->rhs);
   case MOD:
     DIV_MOD_OP(ctx, %, x->lhs, x->rhs);
+  case PRINT:
+    return eval_print(ctx, x);
   case NEG:
     return eval_negate(ctx, x);
   case NOT:

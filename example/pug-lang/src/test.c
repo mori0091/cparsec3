@@ -292,4 +292,8 @@ void pug_self_test(void) {
                        "}\n"
                        ";\n"
                        "fact 4 == 24")); /* true */
+
+  /* print a value of expression. returns `()` */
+  /* NOTE: it's tentative and will be removed when I/O library ready. */
+  assert(pug_parseTest("let f = |x| 2 * x; print (f 10);"));
 }
