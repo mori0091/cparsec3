@@ -26,6 +26,7 @@ C_API_BEGIN
 // expr10 = lambda
 //        | ifelse
 //        | block
+//        | print
 //        | unary
 //
 // lambda = "|" pat {pat} "|" expr0
@@ -40,6 +41,7 @@ C_API_BEGIN
 // decl   = let
 // let    = "let" variable "=" expr0
 //
+// print  = "print" fexpr           (TODO: remove when I/O library ready.)
 // unary  = [("+" | "-" | "!")] fexpr
 // fexpr  = [fexpr] aexpr
 // aexpr  = qvar
@@ -77,6 +79,11 @@ PARSER(Expr) logic_and(void);  /* 3 */
 PARSER(Expr) comparison(void); /* 4 */
 PARSER(Expr) addsub(void);     /* 6 */
 PARSER(Expr) muldiv(void);     /* 7 */
+
+/* print statement (for debug purpose) */
+/* NOTE: it's tentative and will be removed when I/O library ready. */
+PARSER(Expr) print(void);
+
 PARSER(Expr) unary(void);
 PARSER(Expr) fexpr(void); /* funcion application */
 PARSER(Expr) aexpr(void);
@@ -108,7 +115,7 @@ PARSER(Expr) let(void);
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
 
 static String KEYWORDS[] = {
-    "let", "if", "else", "()", "false", "true",
+    "let", "if", "else", "()", "false", "true", "print",
 };
 
 static bool is_a_keyword(String s) {
@@ -174,7 +181,7 @@ PARSER(Expr) expr9(void) {
   return expr10();
 }
 PARSER(Expr) expr10(void) {
-  return choice(lambda(), ifelse(), block(), unary());
+  return choice(lambda(), ifelse(), block(), print(), unary());
 }
 
 // PARSER(Expr) logic_or(void);
@@ -295,6 +302,18 @@ parsec(muldiv, Expr) {
       }
     }
     RETURN(lhs);
+  }
+}
+
+// PARSER(Expr) print(void);
+parsec(print, Expr) {
+  ExprT E = trait(Expr);
+  PARSER(String) f = lexme(keyword("print"));
+  PARSER(Expr) p = fexpr();
+  DO() {
+    SCAN(f);
+    SCAN(p, rhs);
+    RETURN(E.print(rhs));
   }
 }
 

@@ -19,6 +19,10 @@ typedef struct Var {
 } Var;
 
 enum ExprId {
+  /* print statement (for debug purpose) */
+  /* NOTE: it's tentative and will be removed when I/O library ready. */
+  PRINT,
+  // ----
   /* thunk (a lazy expression bounded to a context) */
   THUNK,
   /* closure (a lambda abstraction bounded to a context) */
@@ -93,6 +97,8 @@ struct Expr {
 
 // -----------------------------------------------------------------------
 typedef struct ExprT {
+  Expr (*print)(Expr rhs); /* print statement for debug purpose */
+  // ----
   Expr (*thunk)(Context ctx, Expr rhs);   /* thunk */
   Expr (*closure)(Context ctx, Expr rhs); /* closure */
   Expr (*apply)(Expr lhs, Expr rhs);      /* function application */
@@ -116,7 +122,7 @@ typedef struct ExprT {
   Expr (*div)(Expr lhs, Expr rhs);        /* arithmetic division */
   Expr (*mod)(Expr lhs, Expr rhs);        /* arithmetic reminder */
   Expr (*neg)(Expr rhs);                  /* arithmetic negation */
-  Expr (*not)(Expr rhs);   /* logical not / bitwise complement */
+  Expr (*not )(Expr rhs);  /* logical not / bitwise complement */
   Expr (*num)(Num x);      /* number */
   Expr (*var)(Var x);      /* variable */
   Expr (*boolean)(bool b); /* true / false */
@@ -166,6 +172,11 @@ static void Expr_showUnary(CharBuff* b, String tag, Expr rhs) {
   mem_printf(b, ")");
 }
 
+// ---- print statement ----
+static Expr FUNC_NAME(print, Expr)(Expr rhs) {
+  return Expr_Unary(PRINT, rhs);
+}
+// ----
 static Expr FUNC_NAME(thunk, Expr)(Context ctx, Expr rhs) {
   Expr e = Expr_New();
   e->kind = THUNK;
@@ -280,6 +291,8 @@ static Expr FUNC_NAME(unit, Expr)(void) {
 
 ExprT Trait(Expr) {
   return (ExprT){
+      .print = FUNC_NAME(print, Expr),
+      // ----
       .thunk = FUNC_NAME(thunk, Expr),
       .closure = FUNC_NAME(closure, Expr),
       .apply = FUNC_NAME(apply, Expr),
@@ -316,6 +329,11 @@ impl_user_type(Expr);
 show_user_type(Expr)(CharBuff* b, Expr x) {
   Show(Expr) s = trait(Show(Expr));
   switch (x->kind) {
+    // ----
+  case PRINT:
+    Expr_showUnary(b, "Print", x->rhs);
+    break;
+    // ----
   case THUNK:
     mem_printf(b, "(Thunk <%p> ", (void*)(x->ctx));
     s.toString(b, x->value);
