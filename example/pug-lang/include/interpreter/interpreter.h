@@ -6,6 +6,24 @@
 
 #define Interpreter(...) TYPE_NAME(Interpreter, __VA_ARGS__)
 
+#define EVAL_RESULT_OK(_x_)                                              \
+  ((EvalResult){                                                         \
+      .success = true,                                                   \
+      .ok = _x_,                                                         \
+  })
+
+#define EVAL_RESULT_ERR(_msg_)                                           \
+  ((EvalResult){                                                         \
+      .err.msg = _msg_,                                                  \
+  })
+
+#define EVAL_RESULT_DEFERED(_ctx_, _x_)                                  \
+  ((EvalResult){                                                         \
+      .success = true,                                                   \
+      .ok = _x_,                                                         \
+      .ctx = _ctx_,                                                      \
+  })
+
 typedef struct RuntimeError {
   String msg;
 } RuntimeError;
@@ -13,7 +31,11 @@ typedef struct RuntimeError {
 typedef struct EvalResult {
   bool success;
   union {
-    Expr ok;
+    struct {
+      Expr ok;
+      /** non-null if this was a 'thunk' (i.e. evaluation was defered) */
+      Context ctx;
+    };
     RuntimeError err;
   };
 } EvalResult;
