@@ -296,4 +296,7 @@ void pug_self_test(void) {
   /* print a value of expression. returns `()` */
   /* NOTE: it's tentative and will be removed when I/O library ready. */
   assert(pug_parseTest("let f = |x| 2 * x; print (f 10);"));
+
+  /* operator symbol may be used as a variable */
+  assert(pug_parseTest("let (+++) = |a b| a+b; (+++) 2 3 == 5"));
 }
