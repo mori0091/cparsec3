@@ -23,8 +23,6 @@ enum ExprId {
   /* NOTE: it's tentative and will be removed when I/O library ready. */
   PRINT,
   // ----
-  /* thunk (a lazy expression bounded to a context) */
-  THUNK,
   /* closure (a lambda abstraction bounded to a context) */
   CLOSURE,
   /* function application (partial application) */
@@ -78,13 +76,9 @@ struct Expr {
   enum ExprId kind;
   union {
     struct {
+      /* for CLOSURE */
       Context ctx;
-      union {
-        /* for THUNK */
-        Expr value;
-        /* for CLOSURE */
-        Expr lambda;
-      };
+      Expr lambda;
     };
     struct {
       Expr lhs;
@@ -99,7 +93,6 @@ struct Expr {
 typedef struct ExprT {
   Expr (*print)(Expr rhs); /* print statement for debug purpose */
   // ----
-  Expr (*thunk)(Context ctx, Expr rhs);   /* thunk */
   Expr (*closure)(Context ctx, Expr rhs); /* closure */
   Expr (*apply)(Expr lhs, Expr rhs);      /* function application */
   Expr (*lambda)(Expr lhs, Expr rhs);     /* lambda abstraction */
@@ -177,13 +170,6 @@ static Expr FUNC_NAME(print, Expr)(Expr rhs) {
   return Expr_Unary(PRINT, rhs);
 }
 // ----
-static Expr FUNC_NAME(thunk, Expr)(Context ctx, Expr rhs) {
-  Expr e = Expr_New();
-  e->kind = THUNK;
-  e->ctx = ctx;
-  e->value = rhs;
-  return e;
-}
 static Expr FUNC_NAME(closure, Expr)(Context ctx, Expr rhs) {
   Expr e = Expr_New();
   e->kind = CLOSURE;
@@ -293,7 +279,6 @@ ExprT Trait(Expr) {
   return (ExprT){
       .print = FUNC_NAME(print, Expr),
       // ----
-      .thunk = FUNC_NAME(thunk, Expr),
       .closure = FUNC_NAME(closure, Expr),
       .apply = FUNC_NAME(apply, Expr),
       .lambda = FUNC_NAME(lambda, Expr),
@@ -334,11 +319,6 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     Expr_showUnary(b, "Print", x->rhs);
     break;
     // ----
-  case THUNK:
-    mem_printf(b, "(Thunk <%p> ", (void*)(x->ctx));
-    s.toString(b, x->value);
-    mem_printf(b, ")");
-    break;
   case CLOSURE:
     mem_printf(b, "(Closure <%p> ", (void*)(x->ctx));
     s.toString(b, x->lambda);

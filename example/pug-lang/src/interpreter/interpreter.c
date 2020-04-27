@@ -19,15 +19,9 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
     return _var_;                                                        \
   }
 
-#define RETURN_OK(_x_)                                                   \
-  return (EvalResult) {                                                  \
-    .success = true, .ok = _x_                                           \
-  }
-
-#define RETURN_ERR(_msg_)                                                \
-  return (EvalResult) {                                                  \
-    .err.msg = _msg_                                                     \
-  }
+#define RETURN_OK(_x_) return EVAL_RESULT_OK(_x_)
+#define RETURN_DEFERED(_ctx_, _x_) return EVAL_RESULT_DEFERED(_ctx_, _x_)
+#define RETURN_ERR(_msg_) return EVAL_RESULT_ERR(_msg_)
 
 #define INFIX_COMPARISON_OP(_ctx_, _op_, _a_, _b_)                       \
   do {                                                                   \
@@ -89,12 +83,11 @@ static EvalResult eval_apply(Context ctx, Expr x) {
   /* TODO: what should be done to do lazy evaluation? */
   EVAL(ctx, x->rhs, a); // <-
   ContextT C = trait(Context);
-  ExprT E = trait(Expr);
   Expr v = f.ok->lambda->lhs;    // (Var v)
   Expr body = f.ok->lambda->rhs; // body
   Context c = C.branch(f.ok->ctx);
   C.map.put(c, v->var.ident, a.ok);
-  RETURN_OK(E.thunk(c, body));
+  RETURN_DEFERED(c, body);
 }
 
 static EvalResult eval_lambda(Context ctx, Expr x) {
@@ -105,7 +98,6 @@ static EvalResult eval_lambda(Context ctx, Expr x) {
 
 static EvalResult eval_ifelse(Context ctx, Expr x) {
   ContextT C = trait(Context);
-  ExprT E = trait(Expr);
   // make implicit block scope that encloses whole if~else block
   Context c = C.branch(ctx);
   EVAL(c, x->lhs, cond);
@@ -113,19 +105,17 @@ static EvalResult eval_ifelse(Context ctx, Expr x) {
   Expr then_blk = x->rhs->lhs;
   Expr else_blk = x->rhs->rhs;
   // REQUIRE_TYPE_EQ(then_blk->type, else_blk->type);
-  RETURN_OK(E.thunk(c, (cond.ok->kind == TRUE ? then_blk : else_blk)));
+  RETURN_DEFERED(c, (cond.ok->kind == TRUE ? then_blk : else_blk));
 }
 
 static EvalResult eval_block(Context ctx, Expr x) {
   ContextT C = trait(Context);
-  ExprT E = trait(Expr);
-  RETURN_OK(E.thunk(C.branch(ctx), x->rhs));
+  RETURN_DEFERED(C.branch(ctx), x->rhs);
 }
 
 static EvalResult eval_seq(Context ctx, Expr x) {
-  ExprT E = trait(Expr);
   EVAL(ctx, x->lhs, lhs);
-  RETURN_OK(E.thunk(ctx, x->rhs));
+  RETURN_DEFERED(ctx, x->rhs);
 }
 
 static EvalResult eval_let(Context ctx, Expr x) {
@@ -253,25 +243,20 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
   case FALSE:
   case UNIT:
   case CLOSURE:
-  case THUNK:
     RETURN_OK(x);
   default:
     RETURN_ERR("Illegal Expr");
   }
 }
 
+static inline bool is_defered(EvalResult r) {
+  return r.ctx != 0;
+}
+
 static EvalResult eval_expr(Context ctx, Expr x) {
   EvalResult r = eval_expr1(ctx, x);
-  if (!r.success) {
-    return r;
-  }
-  x = r.ok;
-  while (x->kind == THUNK) {
-    r = eval_expr1(x->ctx, x->value);
-    if (!r.success) {
-      return r;
-    }
-    x = x->value = r.ok;
+  while (is_defered(r)) {
+    r = eval_expr1(r.ctx, r.ok);
   }
   return r;
 }
