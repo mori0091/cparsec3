@@ -54,10 +54,16 @@ C_API_BEGIN
 // literal = number
 // paren   = (" expr ")"
 //
-// variable    = identifier
+// variable    = identifier | varsym
+//
 // identifier  = identStart{identLetter}
 // identStart  = "_" | letter
 // identLetter = "_" | alphaNum
+//
+// varsym      = "(" symbol{symbol} ")"
+// symbol      = "!" | "%" | "&" | "=" | "~" | "|"
+//             | "-" | "^" | "+" | "*" | "<" | ">"
+//             | "/" | "?"
 
 PARSER(Expr) expr(void);
 PARSER(Expr) assign(void);
@@ -93,9 +99,13 @@ PARSER(Expr) literal(void);
 PARSER(Expr) paren(void);
 
 PARSER(Expr) variable(void);
+
 PARSER(String) identifier(void);
 PARSER(char) identStart(void);
 PARSER(char) identLetter(void);
+
+PARSER(String) varsym(void);
+PARSER(char) symbol(void);
 
 PARSER(String) keyword(String s);
 
@@ -118,13 +128,27 @@ static String KEYWORDS[] = {
     "let", "if", "else", "()", "false", "true", "print",
 };
 
-static bool is_a_keyword(String s) {
-  for (size_t i = 0; i < sizeof(KEYWORDS) / sizeof(String); ++i) {
-    if (trait(Eq(String)).eq(s, KEYWORDS[i])) {
+static String RESERVED_OP[] = {
+    "!", "|", "-", "=", ";", ":", "::",
+};
+
+#define IS_RESERVED(name, tbl)                                           \
+  (is_reserved(name, tbl, sizeof(tbl) / sizeof(tbl[0])))
+
+static bool is_reserved(String s, String* tbl, size_t n) {
+  for (size_t i = 0; i < n; ++i) {
+    if (trait(Eq(String)).eq(s, tbl[i])) {
       return true;
     }
   }
   return false;
+}
+static bool is_a_keyword(String s) {
+  return IS_RESERVED(s, KEYWORDS);
+}
+
+static bool is_a_reserved_op(String s) {
+  return IS_RESERVED(s, RESERVED_OP);
 }
 
 PARSER(Expr) expr(void) {
@@ -404,7 +428,7 @@ parsec(paren, Expr) {
 // PARSER(Expr) variable(void);
 parsec(variable, Expr) {
   DO() {
-    SCAN(lexme(identifier()), x);
+    SCAN(lexme(either(identifier(), varsym())), x);
     RETURN(trait(Expr).var((Var){x}));
   }
 }
@@ -438,6 +462,32 @@ PARSER(char) identStart(void) {
 
 PARSER(char) identLetter(void) {
   return either(char1('_'), alphaNum());
+}
+
+parsec(varsym0, String) {
+  DO() {
+    SCAN(lexme(char1('(')));
+    SCAN(some(symbol()), xs);
+    SCAN(blank());
+    SCAN(lexme(char1(')')));
+    char* cs = mem_realloc(xs.data, xs.length + 1);
+    cs[xs.length] = '\0';
+    if (is_a_reserved_op(cs)) {
+      FAIL("reserved operator");
+    }
+    RETURN(cs);
+  }
+}
+
+PARSER(String) varsym(void) {
+  return label("operator symbol", tryp(varsym0()));
+}
+
+PARSER(char) symbol(void) {
+  return choice(char1('!'), char1('%'), char1('&'), char1('='),
+                char1('~'), char1(','), char1('-'), char1('^'),
+                char1('+'), char1('*'), char1('<'), char1('>'),
+                char1('/'), char1('?'));
 }
 
 // PARSER(String) keyword0(String s);
