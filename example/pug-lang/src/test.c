@@ -73,7 +73,8 @@ void pug_self_test(void) {
 
   /* evaluating an undefined variable is not permitted. */
   assert(!pug_parseTest("a"));         /* Undefined variable */
-  assert(!pug_parseTest("let a = a")); /* Undefined variable */
+  assert(pug_parseTest("let a = a"));  /* -> (Var a) */
+  /* NOTE right-hand side is not evaluated. */
 
   /* assignment expression results the value assigned. */
   assert(pug_parseTest("let a = 1; a = 100")); /* 100 */
@@ -174,8 +175,10 @@ void pug_self_test(void) {
    * variables defined after the block in outer block are NOT accessible.
    * (block's scope isn't a **nested scope** but a **branched scope**)
    */
-  assert(!pug_parseTest("{let y = z}; let z = 2"));
+  assert(!pug_parseTest("{z}; let z = 2"));
   // -> Undefined variable
+  assert(pug_parseTest("{let y = z}; let z = 2")); /* 2 */
+  // NOTE `z` in the block is never evaluated
 
   /*
    * From outside a block,

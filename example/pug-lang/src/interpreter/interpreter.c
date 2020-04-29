@@ -81,10 +81,10 @@ static EvalResult eval_apply(Context ctx, Expr x) {
     RETURN_ERR("function application");
   }
   /* TODO: what should be done to do lazy evaluation? */
-  EVAL(ctx, x->rhs, a); // <-
-  ContextT C = trait(Context);
+  EVAL(ctx, x->rhs, a);          // <-
   Expr v = f.ok->lambda->lhs;    // (Var v)
   Expr body = f.ok->lambda->rhs; // body
+  ContextT C = trait(Context);
   Context c = C.branch(f.ok->ctx);
   C.map.put(c, v->var.ident, a.ok);
   RETURN_DEFERED(c, body);
@@ -121,10 +121,9 @@ static EvalResult eval_seq(Context ctx, Expr x) {
 static EvalResult eval_let(Context ctx, Expr x) {
   ContextT C = trait(Context);
   assert(x->lhs->kind == VAR);
-  EVAL(ctx, x->rhs, rhs);
   // if the previous definiton exists, it will be shadowed.
-  C.map.put(ctx, x->lhs->var.ident, rhs.ok);
-  RETURN_OK(rhs.ok);
+  C.map.put(ctx, x->lhs->var.ident, x->rhs);
+  RETURN_OK(x->rhs);
 }
 
 static EvalResult eval_assign(Context ctx, Expr x) {
@@ -181,11 +180,13 @@ static EvalResult eval_not(Context ctx, Expr x) {
 
 static EvalResult eval_var(Context ctx, Expr x) {
   ContextT C = trait(Context);
-  Maybe(Expr) m = C.map.lookup(ctx, x->var.ident);
-  if (m.none) {
+  MapEntry* m = C.map.lookup(ctx, x->var.ident);
+  if (!m) {
     RETURN_ERR("Undefined variable");
   }
-  RETURN_OK(m.value);
+  EVAL(ctx, m->e, val);
+  m->e = val.ok; /* replace with evaluated value */
+  RETURN_OK(val.ok);
 }
 
 // -----------------------------------------------------------------------
