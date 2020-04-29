@@ -84,13 +84,15 @@ static EvalResult eval_apply(Context ctx, Expr x) {
   if (f.ok->kind != CLOSURE) {
     RETURN_ERR("function application");
   }
-  /* TODO: what should be done to do lazy evaluation? */
-  EVAL(ctx, x->rhs, a);          // <-
   Expr v = f.ok->lambda->lhs;    // (Var v)
   Expr body = f.ok->lambda->rhs; // body
   ContextT C = trait(Context);
   Context c = C.branch(f.ok->ctx);
-  C.map.put(c, v->var.ident, a.ok);
+  /* TODO: what should be done to do lazy evaluation? */
+  /* EVAL(ctx, x->rhs, a); // <- */
+  /* C.map.put(c, v->var.ident, a.ok); */
+  ExprT E = trait(Expr);
+  C.map.put(c, v->var.ident, E.thunk(ctx, x->rhs));
   RETURN_DEFERED(c, body);
 }
 
@@ -193,9 +195,22 @@ static EvalResult eval_var(Context ctx, Expr x) {
   RETURN_OK(val.ok);
 }
 
+static EvalResult eval_thunk(Context ctx, Expr x) {
+  ((void)ctx); /* unused */
+  if (!x->ctx) {
+    RETURN_OK(x->expr);
+  }
+  EVAL(x->ctx, x->expr, e);
+  x->ctx = 0;     /* no more evaluation is needed */
+  x->expr = e.ok; /* replace with evaluated value (cache) */
+  RETURN_OK(e.ok);
+}
+
 // -----------------------------------------------------------------------
 static EvalResult eval_expr1(Context ctx, Expr x) {
   switch (x->kind) {
+  case THUNK:
+    return eval_thunk(ctx, x);
   case APPLY:
     return eval_apply(ctx, x);
   case LAMBDA:
