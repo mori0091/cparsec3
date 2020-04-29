@@ -180,7 +180,7 @@ static EvalResult eval_not(Context ctx, Expr x) {
 
 static EvalResult eval_var(Context ctx, Expr x) {
   ContextT C = trait(Context);
-  MapEntry* m = C.map.lookupEx(ctx, x->var.ident);
+  MapEntry* m = C.map.lookup(ctx, x->var.ident);
   if (!m) {
     RETURN_ERR("Undefined variable");
   }
