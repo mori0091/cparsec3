@@ -85,6 +85,7 @@ See also sample code in the [[file:example/][example]] folder.
 - [[file:example/fact.txt][factorial function]]
 - [[file:example/fib.txt][fibonacci number]]
 - [[file:example/list.txt][list and folding functions]]
+- [[file:example/lambda_calculus.txt][bool and list (implemented using just lambda expression)]]
 
 
 * Pug programming language
