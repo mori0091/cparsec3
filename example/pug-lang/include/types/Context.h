@@ -21,6 +21,7 @@ typedef struct ContextT {
   Context (*branch)(Context ctx); ///< creates branced context
   Context (*nested)(Context ctx); ///< creates nested (inner) context
   struct {
+    MapEntry* (*lookupEx)(Context ctx, String ident);
     Maybe(Expr) (*lookup)(Context ctx, String ident);
     void (*put)(Context ctx, String ident, Expr e);
   } map;
@@ -56,6 +57,20 @@ static Context FUNC_NAME(nested, Context)(Context c) {
   return ctx;
 }
 
+static MapEntry* FUNC_NAME(lookupEx, Context)(Context ctx, String ident) {
+  ListT(MapEntry) L = trait(List(MapEntry));
+  while (ctx) {
+    for (List(MapEntry) xs = ctx->map; !L.null(xs); xs = L.tail(xs)) {
+      MapEntry* x = &xs->head;
+      if (g_eq(x->ident, ident)) {
+        return x;
+      }
+    }
+    ctx = ctx->outer;
+  }
+  return NULL;
+}
+
 static Maybe(Expr) FUNC_NAME(lookup, Context)(Context ctx, String ident) {
   ListT(MapEntry) L = trait(List(MapEntry));
   while (ctx) {
@@ -80,6 +95,7 @@ ContextT Trait(Context) {
       .create = FUNC_NAME(create, Context),
       .branch = FUNC_NAME(branch, Context),
       .nested = FUNC_NAME(nested, Context),
+      .map.lookupEx = FUNC_NAME(lookupEx, Context),
       .map.lookup = FUNC_NAME(lookup, Context),
       .map.put = FUNC_NAME(put, Context),
   };
