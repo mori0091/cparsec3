@@ -79,6 +79,14 @@ let fact = |x| {
 };
 #+end_src
 
+* Sample code
+
+See also sample code in the [[file:example/][example]] folder.
+- [[file:example/fact.txt][factorial function]]
+- [[file:example/fib.txt][fibonacci number]]
+- [[file:example/list.txt][list and folding functions]]
+
+
 * Pug programming language
 
 - [[file:docs/syntax.md][Syntax]] :: Declaratons, Expressions, Operators syntax.

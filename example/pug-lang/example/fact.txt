@@ -1,0 +1,31 @@
+// -*- coding: utf-8-unix -*-
+
+// Here are three implementations of `factorial` function.
+//
+// NOTE: The argument `x` should be `x <= 20`,
+//       otherwise calculation overflows.
+//       (21! is too large for 64bit integer)
+
+// factorial
+let fact1 = |x|
+  if x <=1 {
+    1
+  } else {
+    x * fact (x-1)
+  }
+;
+
+// factorial (tail recursive call version)
+let fact2 = |x| {
+  let f = |x a| {
+    print a;
+    if x <= 1 {
+      a
+    } else {
+      f (x-1) (x*a)
+    }
+  };
+  f x 1
+};
+
+let fact = fact2;
