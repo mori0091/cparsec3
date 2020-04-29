@@ -39,6 +39,10 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
       bool x = lhs.ok->kind _op_ rhs.ok->kind;                           \
       RETURN_OK(trait(Expr).boolean(x));                                 \
     }                                                                    \
+    case CLOSURE: {                                                      \
+      bool x = lhs.ok _op_ rhs.ok;                                       \
+      RETURN_OK(trait(Expr).boolean(x));                                 \
+    }                                                                    \
     default:                                                             \
       RETURN_ERR("Type error");                                          \
     }                                                                    \
