@@ -33,7 +33,7 @@ typedef struct EvalResult {
   union {
     struct {
       Expr ok;
-      /** non-null if this was a 'thunk' (i.e. evaluation was defered) */
+      /** non-null if evaluation was defered. */
       Context ctx;
     };
     RuntimeError err;
