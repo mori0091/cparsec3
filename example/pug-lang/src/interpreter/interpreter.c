@@ -88,9 +88,6 @@ static EvalResult eval_apply(Context ctx, Expr x) {
   Expr body = f.ok->lambda->rhs; // body
   ContextT C = trait(Context);
   Context c = C.branch(f.ok->ctx);
-  /* TODO: what should be done to do lazy evaluation? */
-  /* EVAL(ctx, x->rhs, a); // <- */
-  /* C.map.put(c, v->var.ident, a.ok); */
   ExprT E = trait(Expr);
   C.map.put(c, v->var.ident, E.thunk(ctx, x->rhs));
   RETURN_DEFERED(c, body);
@@ -195,22 +192,10 @@ static EvalResult eval_var(Context ctx, Expr x) {
   RETURN_OK(val.ok);
 }
 
-static EvalResult eval_thunk(Context ctx, Expr x) {
-  ((void)ctx); /* unused */
-  if (!x->ctx) {
-    RETURN_OK(x->expr);
-  }
-  EVAL(x->ctx, x->expr, e);
-  x->ctx = 0;     /* no more evaluation is needed */
-  x->expr = e.ok; /* replace with evaluated value (cache) */
-  RETURN_OK(e.ok);
-}
 
 // -----------------------------------------------------------------------
 static EvalResult eval_expr1(Context ctx, Expr x) {
   switch (x->kind) {
-  case THUNK:
-    return eval_thunk(ctx, x);
   case APPLY:
     return eval_apply(ctx, x);
   case LAMBDA:
@@ -263,6 +248,7 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
   case FALSE:
   case UNIT:
   case CLOSURE:
+  case THUNK:
     RETURN_OK(x);
   default:
     RETURN_ERR("Illegal Expr");
@@ -273,10 +259,23 @@ static inline bool is_defered(EvalResult r) {
   return r.ctx != 0;
 }
 
+static inline bool is_thunk(EvalResult r) {
+  return r.success && r.ok->kind == THUNK;
+}
+
 static EvalResult eval_expr(Context ctx, Expr x) {
   EvalResult r = eval_expr1(ctx, x);
-  while (is_defered(r)) {
-    r = eval_expr1(r.ctx, r.ok);
+  while (is_defered(r) || is_thunk(r)) {
+    if (is_defered(r)) {
+      r = eval_expr1(r.ctx, r.ok);
+    }
+    if (is_thunk(r)) {
+      Expr thunk = r.ok;
+      r = eval_expr1(thunk->ctx, thunk->expr);
+      if (r.success) {
+        thunk->expr = r.ok;
+      }
+    }
   }
   return r;
 }
