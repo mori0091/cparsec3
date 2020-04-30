@@ -63,6 +63,8 @@ let foldr = |f a xs|
   if null xs == True {
     a
   } else {
+    // force strict evaluation of `a` for avoiding stack overflow
+    a;
     f (head xs) (foldr f a (tail xs))
   }
 ;
@@ -71,6 +73,8 @@ let foldl = |f a xs|
   if null xs == True {
     a
   } else {
+    // force strict evaluation of `a` for avoiding stack overflow
+    a;
     foldl f (f a (head xs)) (tail xs)
   }
 ;
@@ -82,3 +86,54 @@ print (foldr (+) 0 xs);         // 6
 print (foldl (+) 0 xs);         // 6
 print (foldr sub 0 xs);         // 2
 print (foldl sub 0 xs);         // -6
+
+// take leading `n` elements from list
+let take = |n xs|
+  if n <= 0 {
+    Nil
+  } else {
+    Cons (head xs) (take (n-1) (tail xs))
+  }
+;
+
+// drop leading `n` elements from list
+let drop = |n xs|
+  if n <= 0 {
+    xs
+  } else {
+    drop (n-1) (tail xs)
+  }
+;
+
+let repeat   = |x| Cons x (repeat x);
+let sequence = |x| Cons x (sequence (x+1));
+
+print (foldl (+) 0 (take 1000 (repeat 1)));   // 1000
+print (foldl (+) 0 (take 1000 (sequence 1))); // 500500
+
+let zipWith = |f xs ys|
+  if or (null xs) (null ys) == True {
+    Nil
+  } else {
+    Cons (f (head xs) (head ys)) (zipWith f (tail xs) (tail ys))
+  }
+;
+
+// sequence of fibonacci numbers
+let fib = Cons 0 (Cons 1 (zipWith (+) fib (tail fib)));
+
+// print each element of list
+let printList = |xs|
+  if null xs == True {
+    ()
+  } else {
+    print (head xs);
+    printList (tail xs);
+  }
+;
+
+// print sequence of fibonacci numbers
+printList (take 10 fib);
+
+// print 20th fibonacci number
+print (head (drop 19 fib));
