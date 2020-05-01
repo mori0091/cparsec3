@@ -1,4 +1,4 @@
-// -*- coding: utf-8-unix -*-
+// -*- coding: utf-8-unix ; mode: rust -*-
 
 let cons = |x xs| |y|
   if y == 0 {

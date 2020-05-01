@@ -1,13 +1,35 @@
 # -*- coding: utf-8-unix -*-
 #+STARTUP: showall indent
 
-* Pug - a toy programming language
+* Pug - a /Pug programming language/ interpreter
 
 The ~pug~ is an interpreter of /The Pug programming language/.\\
 (that is *a toy language* for now)
 
 The ~pug~ interpreter is also a sample application powered by /CPARSEC3/
 library.
+
+#+begin_quote
+- *NOTE* /The Pug programming language/ is not /Pug(Jade)/. ::
+     Though I know there is another language named /Pug(Jade)/,
+     this is unrelated to that.\\
+     (I didn't know that Jade was renamed to Pug. sigh.)
+#+end_quote
+
+* Pug Programming Language
+
+/The Pug programming language/ is :
+- A pure functional language.
+- Syntax is similar to /Rust/, semantics is similar to /Haskell/.
+- A scope of accessible variables is based on *static / lexical scoping*.
+- A function is a first class object (i.e. function is an object)
+- Function is represented as a *lambda expression*. (lambda abstraction)
+- All function is *curried*. (i.e. ~f x y z~ = ~((f x) y) z~)
+- Partial *function application* is ofcourse supported.
+- there is no special syntax for defining a named function.\\
+  Defining a named function is *defining a variable whose value is a lambda*.
+
+- [[file:docs/syntax.md][Syntax]] :: Declaratons, Expressions, Operators syntax.
 
 * How to build
 To build the ~Pug~ interpreter, do as follows :
@@ -87,7 +109,3 @@ See also sample code in the [[file:example/][example]] folder.
 - [[file:example/list.txt][list and folding functions]]
 - [[file:example/lambda_calculus.txt][bool and list (implemented using just lambda expression)]]
 
-
-* Pug programming language
-
-- [[file:docs/syntax.md][Syntax]] :: Declaratons, Expressions, Operators syntax.
