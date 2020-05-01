@@ -18,14 +18,18 @@ let fact1 = |x|
 // factorial (tail recursive call version)
 let fact2 = |x| {
   let f = |x a| {
-    print a;
     if x <= 1 {
       a
     } else {
+      a;                        // force strict evaluation
       f (x-1) (x*a)
     }
   };
   f x 1
 };
+
+// NOTE: In the above inner function `f` of `fact2`,
+//       force strict evaluation of `a` shall be done
+//       before recursive call of `f`.
 
 let fact = fact2;

@@ -79,13 +79,16 @@ let foldl = |f a xs|
   }
 ;
 
+let (*) = |a b| a * b;
 let (+) = |a b| a + b;
 let sub = |a b| a - b;
 
-print (foldr (+) 0 xs);         // 6
-print (foldl (+) 0 xs);         // 6
-print (foldr sub 0 xs);         // 2
-print (foldl sub 0 xs);         // -6
+print (foldr (*) 1 xs);         // 6  (1 * (2 * (3 * 1)))
+print (foldl (*) 1 xs);         // 6  (((1 * 1) * 2) * 3)
+print (foldr (+) 0 xs);         // 6  (1 + (2 + (3 + 0)))
+print (foldl (+) 0 xs);         // 6  (((0 + 1) + 2) + 3)
+print (foldr sub 0 xs);         // 2  (1 - (2 - (3 - 0)))
+print (foldl sub 0 xs);         // -6 (((0 - 1) - 2) - 3)
 
 // take leading `n` elements from list
 let take = |n xs|
@@ -137,3 +140,13 @@ printList (take 10 fib);
 
 // print 20th fibonacci number
 print (head (drop 19 fib));
+
+// sum xs = foldl (+) 0 xs
+let sum = foldl (+) 0;
+print (sum (take 1000 (repeat 1)));   // 1000
+print (sum (take 1000 (sequence 1))); // 500500
+
+// product xs = foldl (*) 1 xs
+let product = foldl (*) 1;
+print (product (take 10 (repeat 2)));   // 2^10
+print (product (take 10 (sequence 1))); // 10!
