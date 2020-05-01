@@ -1,0 +1,7 @@
+# All `*.txt` files in this folder is code written in Pug-Language.
+# Though, GitHub does not know Pug-Language.
+# However syntax of Pug-Language is similar to Rust.
+#
+# So, reclassifies `.txt` files in this folder as Rust code
+# for syntax highlighting on GitHub.
+*.txt linguist-language=Rust -linguist-detectable

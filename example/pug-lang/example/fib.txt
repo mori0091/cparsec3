@@ -1,4 +1,4 @@
-// -*- coding: utf-8-unix ; mode: rust -*-
+// -*- coding: utf-8-unix -*-
 
 // `fib n` calculates `n`th fibonacci number (n>=0)
 let fib = |n| {

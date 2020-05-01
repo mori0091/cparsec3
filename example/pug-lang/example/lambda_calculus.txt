@@ -1,4 +1,4 @@
-// -*- coding: utf-8-unix ; mode: rust -*-
+// -*- coding: utf-8-unix -*-
 
 // -----------------------------------------------------------------------
 // Bool can be implemented by using just lambda expression.
