@@ -8,8 +8,15 @@ let fib = |n| {
     } else if n == 1 {
       a
     } else {
+      a;                        // force strict evaluation of `a`
       f (n-1) (a+b) a
     }
   };
   f n 1 1;
 };
+
+// NOTE: In the above inner function `f`,
+//       force strict evaluation of `n` and `a` shall be done
+//       before recursive call of `f`.
+//       In this case, `n` is already evaluated strictly by `if`.
+//       Therefore just a strict evaluation of `a` is enough.
