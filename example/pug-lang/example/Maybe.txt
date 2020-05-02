@@ -1,0 +1,39 @@
+// -*- coding: utf-8-unix -*-
+
+// -----------------------------------------------------------------------
+// `Maybe a` can be implemented by using just lambda expression.
+
+// data Maybe a = Nothing | Just a ;
+let Nothing = |_| undefined;
+let Just    = |a| |_| a;
+
+let option = |default ma|
+  if ma == Nothing {
+    default
+  } else {
+    unwrap ma
+  }
+;
+
+// unwrap m = case m of {Just a -> a; Nothing -> undefined};
+let unwrap = |m| m _;
+
+let (==) = |ma mb|
+  if ma == Nothing {
+    mb == Nothing
+  } else {
+    mb != Nothing && (unwrap ma) == (unwrap mb)
+  }
+;
+
+print ((==) Nothing Nothing);   // true
+print ((==) Nothing (Just 1));  // false
+print ((==) (Just 1) Nothing);  // false
+print ((==) (Just 1) (Just 1)); // true
+print ((==) (Just 2) (Just 1)); // false
+
+print (option (-1) (Just 10));  // 10
+print (option (-1) Nothing);    // -1
+
+print (unwrap (Just 10));       // 10
+print (unwrap Nothing);         // undefined
