@@ -1,3 +1,5 @@
+# -*- coding: utf-8-unix -*-
+
 # All `*.txt` files in this folder is code written in Pug-Language.
 # Though, GitHub does not know Pug-Language.
 # However syntax of Pug-Language is similar to Rust.
