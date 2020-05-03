@@ -109,4 +109,5 @@ See also sample code in the [[file:example/][example]] folder.
 - [[file:example/list.txt][list and folding functions]]
 - [[file:example/lambda_calculus.txt][bool and list (implemented using just lambda expression)]]
 - [[file:example/Maybe.txt][Haskell's ~Maybe a~ (a.k.a Rust's ~Option<T>~)]]
+- [[file:example/CardsSuits.txt][Cards suits (how to define constuctors of `enum`)]]
 
