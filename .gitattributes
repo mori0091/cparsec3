@@ -1,0 +1,4 @@
+# -*- coding: utf-8-unix -*-
+
+# Reclassifies `.h` files as C code instead of C++
+*.h linguist-language=C
