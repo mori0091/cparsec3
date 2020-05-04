@@ -89,7 +89,7 @@ static EvalResult eval_apply(Context ctx, Expr x) {
   ContextT C = trait(Context);
   Context c = C.branch(f.ok->ctx);
   ExprT E = trait(Expr);
-  C.map.put(c, v->var.ident, E.thunk(ctx, x->rhs));
+  C.map.put(c, v->var.ident, NULL, E.thunk(ctx, x->rhs));
   RETURN_DEFERED(c, body);
 }
 
@@ -125,7 +125,7 @@ static EvalResult eval_let(Context ctx, Expr x) {
   ContextT C = trait(Context);
   assert(x->lhs->kind == VAR);
   // if the previous definiton exists, it will be shadowed.
-  C.map.put(ctx, x->lhs->var.ident, x->rhs);
+  C.map.put(ctx, x->lhs->var.ident, NULL, x->rhs);
   RETURN_OK(x->rhs);
 }
 
@@ -137,7 +137,7 @@ static EvalResult eval_assign(Context ctx, Expr x) {
   // types must be same with previous definition
   REQUIRE_TYPE_EQ(lhs.ok->type, rhs.ok->type);
   // the previous definiton will be shadowed.
-  C.map.put(ctx, x->lhs->var.ident, rhs.ok);
+  C.map.put(ctx, x->lhs->var.ident, NULL, rhs.ok);
   RETURN_OK(rhs.ok);
 }
 

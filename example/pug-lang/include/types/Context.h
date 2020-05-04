@@ -5,6 +5,7 @@
 
 typedef struct MapEntry {
   String ident; ///< the name of the variable
+  Type type;    ///< type of the variable, or NULL if undetermined.
   Expr e;       ///< the expression bound to the variable
 } MapEntry;
 
@@ -33,7 +34,7 @@ typedef struct ContextT {
     /**
      * add variable to the given context.
      */
-    void (*put)(Context ctx, String ident, Expr e);
+    void (*put)(Context ctx, String ident, Type type, Expr e);
   } map;
 } ContextT;
 
@@ -90,8 +91,9 @@ static MapEntry* FUNC_NAME(lookup, Context)(Context ctx, String ident) {
   return NULL;
 }
 
-static void FUNC_NAME(put, Context)(Context ctx, String ident, Expr e) {
-  MapEntry entry = {.ident = ident, .e = e};
+static void FUNC_NAME(put, Context)(Context ctx, String ident, Type type,
+                                    Expr e) {
+  MapEntry entry = {.ident = ident, .type = type, .e = e};
   ctx->map = trait(List(MapEntry)).cons(entry, ctx->map);
 }
 
