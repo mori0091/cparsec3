@@ -3,7 +3,7 @@
 
 #include "user_type.h"
 
-#include "TExpr.h"
+#include "Type.h"
 
 typedef struct Context* Context;
 typedef struct Expr* Expr;
@@ -74,7 +74,7 @@ enum ExprId {
 };
 
 struct Expr {
-  TExpr type;
+  Type type;
   enum ExprId kind;
   union {
     struct {

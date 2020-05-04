@@ -73,7 +73,7 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
 
 #define REQUIRE_TYPE_EQ(lhs, rhs)                                        \
   do {                                                                   \
-    if (trait(Eq(TExpr)).neq(lhs, rhs)) {                                \
+    if (trait(Eq(Type)).neq(lhs, rhs)) {                                 \
       RETURN_ERR("Type mismatch");                                       \
     }                                                                    \
   } while (0)
