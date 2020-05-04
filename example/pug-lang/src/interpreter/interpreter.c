@@ -124,8 +124,27 @@ static EvalResult eval_seq(Context ctx, Expr x) {
 static EvalResult eval_let(Context ctx, Expr x) {
   ContextT C = trait(Context);
   assert(x->lhs->kind == VAR);
+  MapEntry* m = C.map.lookup_local(ctx, x->lhs->var.ident);
+  if (m && m->type && !m->e) {
+    // if the variable is locally declared but not defined yet, type
+    // must be same.
+    REQUIRE_TYPE_EQ(m->type, x->rhs->type);
+    // if the previous definiton exists (in outer context), it will be
+    // shadowed.
+    C.map.put(ctx, x->lhs->var.ident, m->type, x->rhs);
+  } else {
+    // if the previous definiton exists, it will be shadowed.
+    C.map.put(ctx, x->lhs->var.ident, x->rhs->type, x->rhs);
+  }
+  RETURN_OK(x->rhs);
+}
+
+static EvalResult eval_declvar(Context ctx, Expr x) {
+  ContextT C = trait(Context);
+  assert(x->lhs->kind == VAR);
+  assert(x->rhs->kind == TYPE);
   // if the previous definiton exists, it will be shadowed.
-  C.map.put(ctx, x->lhs->var.ident, NULL, x->rhs);
+  C.map.put(ctx, x->lhs->var.ident, x->rhs->texpr, NULL);
   RETURN_OK(x->rhs);
 }
 
@@ -184,7 +203,7 @@ static EvalResult eval_not(Context ctx, Expr x) {
 static EvalResult eval_var(Context ctx, Expr x) {
   ContextT C = trait(Context);
   MapEntry* m = C.map.lookup(ctx, x->var.ident);
-  if (!m) {
+  if (!m || !m->e) {
     RETURN_ERR("Undefined variable");
   }
   EVAL(ctx, m->e, val);
@@ -249,6 +268,10 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
   case CLOSURE:
   case THUNK:
     RETURN_OK(x);
+  case DECLVAR:
+    return eval_declvar(ctx, x);
+  case TYPE:
+    RETURN_OK(x); /* TODO */
   default:
     RETURN_ERR("Illegal Expr");
   }

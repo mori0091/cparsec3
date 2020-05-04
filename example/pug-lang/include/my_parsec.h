@@ -5,7 +5,7 @@
 // #define CPARSEC_CONFIG_IMPLEMENT /* generate parsec code if defined */
 
 // -----------------------------------------------------------------------
-#define CPARSEC_CONFIG_USER_TYPES Expr
+#define CPARSEC_CONFIG_USER_TYPES Expr, Type
 #include "types/Expr.h"
 
 // -----------------------------------------------------------------------

@@ -15,9 +15,10 @@
 
 ## Declaratons
 
-| Example         | Explanation         |
-| --------------- | ------------------- |
-| `let x = expr`  | variable definition |
+| Example         | Explanation          |
+| --------------- | -------------------- |
+| `var x : type`  | variable declaration |
+| `let x = expr`  | variable definition  |
 
 ## Block, lambda expression
 
@@ -70,3 +71,11 @@
 | `1`, `10`, `-100` | decimal integer                       |
 | `false`, `true`   | boolean                               |
 | `()`              | the singleton value of the unit type. |
+
+## Basic Type
+
+| Example | Explanation  |
+| ------- | ------------ |
+| `()`    | unit type    |
+| `bool`  | boolean type |
+| `int`   | integer type |

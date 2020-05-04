@@ -38,8 +38,13 @@ C_API_BEGIN
 // stmts  = stmt {";" [stmt]}
 // stmt   = decl | expr
 //
-// decl   = let
+// decl   = let | declvar
 // let    = "let" variable "=" expr0
+// declvar = "var" variable type_annotation
+//
+// type_annotation = ":" texpr
+// texpr  = tctor
+// tctor  = "()" | "bool" | "int"
 //
 // print  = "print" fexpr           (TODO: remove when I/O library ready.)
 // unary  = [("+" | "-" | "!")] fexpr
@@ -120,12 +125,17 @@ PARSER(Expr) stmt(void);
 
 PARSER(Expr) decl(void);
 PARSER(Expr) let(void);
+PARSER(Expr) declvar(void);
+PARSER(Expr) type_annotation(void);
+PARSER(Type) texpr(void);
+PARSER(Type) tctor(void);
 
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
 
 static String KEYWORDS[] = {
-    "let", "if", "else", "()", "false", "true", "print",
+    "let",   "var",  "if",    "else", "()",
+    "false", "true", "print", "int",  "bool",
 };
 
 static String RESERVED_OP[] = {
@@ -590,7 +600,7 @@ PARSER(Expr) stmt(void) {
 }
 
 PARSER(Expr) decl(void) {
-  return let();
+  return either(let(), declvar());
 }
 
 // PARSER(Expr) let(void);
@@ -604,6 +614,53 @@ parsec(let, Expr) {
     SCAN(expr0(), rhs);
     RETURN(E.let(lhs, rhs));
   }
+}
+
+// PARSER(Expr) declvar(void);
+parsec(declvar, Expr) {
+  ExprT E = trait(Expr);
+  DO() {
+    SCAN(lexme(keyword("var")));
+    SCAN(variable(), lhs);
+    SCAN(type_annotation(), rhs);
+    RETURN(E.declvar(lhs, rhs));
+  }
+}
+
+// PARSER(Expr) type_annotation(void);
+parsec(type_annotation, Expr) {
+  ExprT E = trait(Expr);
+  PARSER(char) op = lexme(char1(':'));
+  DO() {
+    SCAN(op);
+    SCAN(tctor(), ty);
+    RETURN(E.type(ty));
+  }
+}
+
+parsec(tctor_unit, Type) {
+  DO() {
+    SCAN(lexme(keyword("()")));
+    RETURN(TYPE(unit));
+  }
+}
+
+parsec(tctor_bool, Type) {
+  DO() {
+    SCAN(lexme(keyword("bool")));
+    RETURN(TYPE(bool));
+  }
+}
+
+parsec(tctor_int, Type) {
+  DO() {
+    SCAN(lexme(keyword("int")));
+    RETURN(TYPE(int));
+  }
+}
+
+PARSER(Type) tctor(void) {
+  return choice(tctor_unit(), tctor_bool(), tctor_int());
 }
 
 #endif
