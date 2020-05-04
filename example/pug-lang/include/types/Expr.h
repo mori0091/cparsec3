@@ -3,7 +3,7 @@
 
 #include "user_type.h"
 
-#include "Type.h"
+#include "TExpr.h"
 
 typedef struct Context* Context;
 typedef struct Expr* Expr;
@@ -74,7 +74,7 @@ enum ExprId {
 };
 
 struct Expr {
-  Type type;
+  TExpr type;
   enum ExprId kind;
   union {
     struct {
@@ -136,7 +136,7 @@ ExprT Trait(Expr);
 
 static Expr Expr_New(void) {
   Expr e = (Expr)mem_malloc(sizeof(struct Expr));
-  e->type = TYPE(undetermined);
+  e->type = 0;
   return e;
 }
 
@@ -271,21 +271,14 @@ static Expr FUNC_NAME(num, Expr)(Num x) {
   return e;
 }
 static Expr FUNC_NAME(boolean, Expr)(bool b) {
-  static struct Expr T = {
-      .type = {.id = TypeId(bool)},
-      .kind = TRUE,
-  };
-  static struct Expr F = {
-      .type = {.id = TypeId(bool)},
-      .kind = FALSE,
-  };
+  static struct Expr T = {.kind = TRUE};
+  static struct Expr F = {.kind = FALSE};
+  T.type = F.type = TYPE(bool);
   return (b ? &T : &F);
 }
 static Expr FUNC_NAME(unit, Expr)(void) {
-  static struct Expr e = {
-      .type = {.id = TypeId(unit)},
-      .kind = UNIT,
-  };
+  static struct Expr e = {.kind = UNIT};
+  e.type = TYPE(unit);
   return &e;
 }
 

@@ -73,7 +73,7 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
 
 #define REQUIRE_TYPE_EQ(lhs, rhs)                                        \
   do {                                                                   \
-    if (trait(Eq(Type)).neq(lhs, rhs)) {                                 \
+    if (trait(Eq(TExpr)).neq(lhs, rhs)) {                                \
       RETURN_ERR("Type mismatch");                                       \
     }                                                                    \
   } while (0)
@@ -191,7 +191,6 @@ static EvalResult eval_var(Context ctx, Expr x) {
   m->e = val.ok; /* replace with evaluated value */
   RETURN_OK(val.ok);
 }
-
 
 // -----------------------------------------------------------------------
 static EvalResult eval_expr1(Context ctx, Expr x) {
