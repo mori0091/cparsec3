@@ -37,7 +37,11 @@ enum ExprId {
   BLK,
   /* sequence */
   SEQ,
-  /* let */
+  /* var (declares a variable and its type) */
+  DECLVAR,
+  /* type expression (for type annotation) */
+  TYPE,
+  /* let (define a variable) */
   LET,
   /* assignment */
   ASSIGN,
@@ -92,6 +96,7 @@ struct Expr {
     };
     Num num;
     Var var;
+    Type texpr;
   };
 };
 
@@ -106,6 +111,7 @@ typedef struct ExprT {
   Expr (*ifelse)(Expr c, Expr t, Expr e); /* if then else */
   Expr (*block)(Expr rhs);                /* block */
   Expr (*seq)(Expr lhs, Expr rhs);        /* list of statements */
+  Expr (*declvar)(Expr lhs, Expr rhs);    /* variable declaration */
   Expr (*let)(Expr lhs, Expr rhs);        /* variable definition */
   Expr (*assign)(Expr lhs, Expr rhs);     /* assignment */
   Expr (*logic_or)(Expr lhs, Expr rhs);   /* logical or */
@@ -127,6 +133,7 @@ typedef struct ExprT {
   Expr (*var)(Var x);      /* variable */
   Expr (*boolean)(bool b); /* true / false */
   Expr (*unit)(void);      /* () */
+  Expr (*type)(Type t);    /* type annotation */
 } ExprT;
 
 ExprT Trait(Expr);
@@ -136,7 +143,7 @@ ExprT Trait(Expr);
 
 static Expr Expr_New(void) {
   Expr e = (Expr)mem_malloc(sizeof(struct Expr));
-  e->type = TYPE(undetermined);
+  e->type = 0;
   return e;
 }
 
@@ -206,6 +213,9 @@ static Expr FUNC_NAME(block, Expr)(Expr rhs) {
 static Expr FUNC_NAME(seq, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(SEQ, lhs, rhs);
 }
+static Expr FUNC_NAME(declvar, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(DECLVAR, lhs, rhs);
+}
 static Expr FUNC_NAME(let, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(LET, lhs, rhs);
 }
@@ -271,21 +281,20 @@ static Expr FUNC_NAME(num, Expr)(Num x) {
   return e;
 }
 static Expr FUNC_NAME(boolean, Expr)(bool b) {
-  static struct Expr T = {
-      .type = {.id = TypeId(bool)},
-      .kind = TRUE,
-  };
-  static struct Expr F = {
-      .type = {.id = TypeId(bool)},
-      .kind = FALSE,
-  };
+  static struct Expr T = {.kind = TRUE};
+  static struct Expr F = {.kind = FALSE};
+  T.type = F.type = TYPE(bool);
   return (b ? &T : &F);
 }
 static Expr FUNC_NAME(unit, Expr)(void) {
-  static struct Expr e = {
-      .type = {.id = TypeId(unit)},
-      .kind = UNIT,
-  };
+  static struct Expr e = {.kind = UNIT};
+  e.type = TYPE(unit);
+  return &e;
+}
+static Expr FUNC_NAME(type, Expr)(Type t) {
+  static struct Expr e = {.kind = TYPE};
+  e.type = 0; /* TODO: what should be set? */
+  e.texpr = t;
   return &e;
 }
 
@@ -300,6 +309,7 @@ ExprT Trait(Expr) {
       .ifelse = FUNC_NAME(ifelse, Expr),
       .block = FUNC_NAME(block, Expr),
       .seq = FUNC_NAME(seq, Expr),
+      .declvar = FUNC_NAME(declvar, Expr),
       .let = FUNC_NAME(let, Expr),
       .assign = FUNC_NAME(assign, Expr),
       .logic_or = FUNC_NAME(logic_or, Expr),
@@ -321,6 +331,7 @@ ExprT Trait(Expr) {
       .num = FUNC_NAME(num, Expr),
       .boolean = FUNC_NAME(boolean, Expr),
       .unit = FUNC_NAME(unit, Expr),
+      .type = FUNC_NAME(type, Expr),
   };
 }
 
@@ -364,6 +375,9 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     break;
   case SEQ:
     Expr_showBinary(b, "Seq", x->lhs, x->rhs);
+    break;
+  case DECLVAR:
+    Expr_showBinary(b, "Declvar", x->lhs, x->rhs);
     break;
   case LET:
     Expr_showBinary(b, "Let", x->lhs, x->rhs);
@@ -430,6 +444,11 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     break;
   case UNIT:
     mem_printf(b, "()");
+    break;
+  case TYPE:
+    mem_printf(b, "(Type ");
+    trait(Show(Type)).toString(b, x->texpr);
+    mem_printf(b, ")");
     break;
   default:
     assert(0 && "Illegal Expr");

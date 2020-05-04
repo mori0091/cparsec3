@@ -67,13 +67,14 @@ void pug_self_test(void) {
   /* defining the same variable of different type is permitted. the
    * previous one will be shadowed. */
   assert(pug_parseTest("let a = 100; let a = true")); /* true */
+  /* TODO Should this be disallowed in the same local scope? */
 
   /* evaluating a variable results its value. */
   assert(pug_parseTest("let a = 100; a")); /* 100 */
 
   /* evaluating an undefined variable is not permitted. */
-  assert(!pug_parseTest("a"));         /* Undefined variable */
-  assert(pug_parseTest("let a = a"));  /* -> (Var a) */
+  assert(!pug_parseTest("a"));        /* Undefined variable */
+  assert(pug_parseTest("let a = a")); /* -> (Var a) */
   /* NOTE right-hand side is not evaluated. */
 
   /* assignment expression results the value assigned. */
@@ -302,4 +303,36 @@ void pug_self_test(void) {
 
   /* operator symbol may be used as a variable */
   assert(pug_parseTest("let (+++) = |a b| a+b; (+++) 2 3 == 5"));
+
+  /* `var VAR : TYPE` declares variable with type annotation */
+  assert(pug_parseTest("var x: int"));
+  assert(pug_parseTest("var x: bool"));
+  assert(pug_parseTest("var x: ()"));
+
+  /* if the variable was declared but not defined yet, it cannot be
+   * refered. */
+  assert(!pug_parseTest("var x: int; x")); /* undefined */
+
+  /* if the variable was declared, its definition must be same type. */
+  assert(pug_parseTest("var x: int; let x = 100;")); /* 100 */
+  assert(!pug_parseTest("var x: int; let x = true;"));
+  /* -> Type mismatch */
+
+  /* if the same variable was declared, the previous one will be shadowed.
+   */
+  assert(!pug_parseTest("let x = 100;"
+                        "var x: bool;"
+                        "let x = 10;")); /* Type mismatch */
+
+  assert(!pug_parseTest("let x = 100;"
+                        "var x: bool;"
+                        "x;")); /* Undefined */
+
+  assert(!pug_parseTest("let x = 100;"
+                        "var x: bool;"
+                        "x = true;")); /* Undefined */
+
+  assert(pug_parseTest("let x = 100;"
+                       "var x: bool;"
+                       "let x = true;")); /* true */
 }

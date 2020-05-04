@@ -5,6 +5,7 @@
 
 typedef struct MapEntry {
   String ident; ///< the name of the variable
+  Type type;    ///< type of the variable, or NULL if undetermined.
   Expr e;       ///< the expression bound to the variable
 } MapEntry;
 
@@ -21,8 +22,19 @@ typedef struct ContextT {
   Context (*branch)(Context ctx); ///< creates branced context
   Context (*nested)(Context ctx); ///< creates nested (inner) context
   struct {
+    /**
+     * lookup variable in the given context.
+     */
+    MapEntry* (*lookup_local)(Context ctx, String ident);
+    /**
+     * lookup variable in the given context or in outer context
+     * recursively.
+     */
     MapEntry* (*lookup)(Context ctx, String ident);
-    void (*put)(Context ctx, String ident, Expr e);
+    /**
+     * add variable to the given context.
+     */
+    void (*put)(Context ctx, String ident, Type type, Expr e);
   } map;
 } ContextT;
 
@@ -56,22 +68,32 @@ static Context FUNC_NAME(nested, Context)(Context c) {
   return ctx;
 }
 
-static MapEntry* FUNC_NAME(lookup, Context)(Context ctx, String ident) {
+static MapEntry* FUNC_NAME(lookup_local, Context)(Context ctx,
+                                                  String ident) {
   ListT(MapEntry) L = trait(List(MapEntry));
+  for (List(MapEntry) xs = ctx->map; !L.null(xs); xs = L.tail(xs)) {
+    MapEntry* x = &xs->head;
+    if (g_eq(x->ident, ident)) {
+      return x;
+    }
+  }
+  return NULL;
+}
+
+static MapEntry* FUNC_NAME(lookup, Context)(Context ctx, String ident) {
   while (ctx) {
-    for (List(MapEntry) xs = ctx->map; !L.null(xs); xs = L.tail(xs)) {
-      MapEntry* x = &xs->head;
-      if (g_eq(x->ident, ident)) {
-        return x;
-      }
+    MapEntry* x = FUNC_NAME(lookup_local, Context)(ctx, ident);
+    if (x) {
+      return x;
     }
     ctx = ctx->outer;
   }
   return NULL;
 }
 
-static void FUNC_NAME(put, Context)(Context ctx, String ident, Expr e) {
-  MapEntry entry = {.ident = ident, .e = e};
+static void FUNC_NAME(put, Context)(Context ctx, String ident, Type type,
+                                    Expr e) {
+  MapEntry entry = {.ident = ident, .type = type, .e = e};
   ctx->map = trait(List(MapEntry)).cons(entry, ctx->map);
 }
 
@@ -80,6 +102,7 @@ ContextT Trait(Context) {
       .create = FUNC_NAME(create, Context),
       .branch = FUNC_NAME(branch, Context),
       .nested = FUNC_NAME(nested, Context),
+      .map.lookup_local = FUNC_NAME(lookup_local, Context),
       .map.lookup = FUNC_NAME(lookup, Context),
       .map.put = FUNC_NAME(put, Context),
   };
