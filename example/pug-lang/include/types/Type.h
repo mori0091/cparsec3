@@ -4,9 +4,9 @@
 #include "user_type.h"
 
 #define TYPE(T) TYPE_##T()
-#define TYPE_int() trait(Type).Int()
-#define TYPE_bool() trait(Type).Bool()
-#define TYPE_unit() trait(Type).Unit()
+#define TYPE_int() trait(Type).tcon_int()
+#define TYPE_bool() trait(Type).tcon_bool()
+#define TYPE_unit() trait(Type).tcon_unit()
 
 typedef struct Type* Type;
 decl_user_type(Type);
@@ -27,7 +27,7 @@ enum TypeId {
   TVAR,
   /* type constructor */
   TCON,
-  /* type function application */
+  /* type application */
   TAPPLY,
 };
 
@@ -52,12 +52,14 @@ trait_Eq(Type);
 typedef struct TypeT {
   Type (*tvar)(TVar x);               /* create type variable */
   Type (*tcon)(TCon x);               /* create type constructor */
-  Type (*tapply)(Type lhs, Type rhs); /* type function application */
-  // ----
-  Type (*Bool)(void); /* type constructor `bool` */
-  Type (*Int)(void);  /* type constructor `int` */
-  Type (*Unit)(void); /* type constructor `()` */
-  Type (*Fn)(void);   /* type constructor `Fn` */
+  Type (*tapply)(Type lhs, Type rhs); /* type application */
+  // ---- helper to create builtin type constructors
+  Type (*tcon_bool)(void); /* type constructor `bool` */
+  Type (*tcon_int)(void);  /* type constructor `int` */
+  Type (*tcon_unit)(void); /* type constructor `()` */
+  Type (*tcon_Fn)(void);   /* type constructor `Fn` */
+  // ---- helper to create type of a function
+  Type (*funcType)(Type arg, Type ret);
 } TypeT;
 
 TypeT Trait(Type);
@@ -115,24 +117,29 @@ static Type FUNC_NAME(tapply, Type)(Type lhs, Type rhs) {
   return e;
 }
 
-static Type FUNC_NAME(Bool, Type)(void) {
+static Type FUNC_NAME(tcon_bool, Type)(void) {
   static struct Type e = {.kind = TCON, .tcon = {"bool"}};
   return &e;
 }
 
-static Type FUNC_NAME(Int, Type)(void) {
+static Type FUNC_NAME(tcon_int, Type)(void) {
   static struct Type e = {.kind = TCON, .tcon = {"int"}};
   return &e;
 }
 
-static Type FUNC_NAME(Unit, Type)(void) {
+static Type FUNC_NAME(tcon_unit, Type)(void) {
   static struct Type e = {.kind = TCON, .tcon = {"()"}};
   return &e;
 }
 
-static Type FUNC_NAME(Fn, Type)(void) {
+static Type FUNC_NAME(tcon_Fn, Type)(void) {
   static struct Type e = {.kind = TCON, .tcon = {"Fn"}};
   return &e;
+}
+
+static Type FUNC_NAME(funcType, Type)(Type arg, Type ret) {
+  TypeT t = trait(Type);
+  return t.tapply(t.tapply(t.tcon_Fn(), arg), ret);
 }
 
 TypeT Trait(Type) {
@@ -140,10 +147,11 @@ TypeT Trait(Type) {
       .tvar = FUNC_NAME(tvar, Type),
       .tcon = FUNC_NAME(tcon, Type),
       .tapply = FUNC_NAME(tapply, Type),
-      .Bool = FUNC_NAME(Bool, Type),
-      .Int = FUNC_NAME(Int, Type),
-      .Unit = FUNC_NAME(Unit, Type),
-      .Fn = FUNC_NAME(Fn, Type),
+      .tcon_bool = FUNC_NAME(tcon_bool, Type),
+      .tcon_int = FUNC_NAME(tcon_int, Type),
+      .tcon_unit = FUNC_NAME(tcon_unit, Type),
+      .tcon_Fn = FUNC_NAME(tcon_Fn, Type),
+      .funcType = FUNC_NAME(funcType, Type),
   };
 }
 

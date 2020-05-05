@@ -308,6 +308,18 @@ void pug_self_test(void) {
   assert(pug_parseTest("var x: int"));
   assert(pug_parseTest("var x: bool"));
   assert(pug_parseTest("var x: ()"));
+  assert(pug_parseTest("var f : |int int| int;"));
+  /* -> a type of a binary function */
+  assert(pug_parseTest("var x : Data0;"));
+  /* -> a type of a data type */
+  assert(pug_parseTest("var x : Data1 a;"));
+  /* -> a type of a data type */
+  assert(pug_parseTest("var x : Data1 bool;"));
+  /* -> a type of a data type */
+  assert(pug_parseTest("var x : Data2 f a;"));
+  /* -> a type of a data type */
+  assert(pug_parseTest("var x : Data2 (|a b| b) a;"));
+  /* -> a type of a data type */
 
   /* if the variable was declared but not defined yet, it cannot be
    * refered. */
@@ -335,4 +347,12 @@ void pug_self_test(void) {
   assert(pug_parseTest("let x = 100;"
                        "var x: bool;"
                        "let x = true;")); /* true */
+
+  /* TODO type check for function is not implemented yet */
+  // assert(pug_parseTest("var f : |int| int; let f = |x| x;"));
+  /* -> This should be okay but type mismatch. fix it. */
+
+  /* TODO type inference is not implemented yet */
+  // assert(pug_parseTest("var f : |a| a; let f = |x| x;"));
+  /* -> This should be okay but type mismatch. fix it. */
 }
