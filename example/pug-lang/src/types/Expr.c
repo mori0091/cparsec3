@@ -153,10 +153,11 @@ static Expr FUNC_NAME(unit, Expr)(void) {
   return &e;
 }
 static Expr FUNC_NAME(type, Expr)(Type t) {
-  static struct Expr e = {.kind = TYPE};
-  e.type = 0; /* TODO: what should be set? */
-  e.texpr = t;
-  return &e;
+  Expr e = Expr_New();
+  e->type = 0; /* TODO: what should be set? */
+  e->kind = TYPE;
+  e->texpr = t;
+  return e;
 }
 
 ExprT Trait(Expr) {
