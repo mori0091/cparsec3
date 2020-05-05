@@ -46,6 +46,8 @@ struct Type {
   };
 };
 
+trait_Eq(TVar);
+trait_Eq(TCon);
 trait_Eq(Type);
 
 // -----------------------------------------------------------------------
@@ -67,6 +69,25 @@ TypeT Trait(Type);
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
 
+// -------------------------------------
+// trait Eq(TVar)
+
+static bool FUNC_NAME(eq, Eq(TVar))(TVar a, TVar b) {
+  return (a.ident == b.ident) || trait(Eq(String)).eq(a.ident, b.ident);
+}
+instance_Eq(TVar, FUNC_NAME(eq, Eq(TVar)));
+
+// -------------------------------------
+// trait Eq(TCon)
+
+static bool FUNC_NAME(eq, Eq(TCon))(TCon a, TCon b) {
+  return (a.ident == b.ident) || trait(Eq(String)).eq(a.ident, b.ident);
+}
+instance_Eq(TCon, FUNC_NAME(eq, Eq(TCon)));
+
+// -------------------------------------
+// trait Eq(Type)
+
 static bool FUNC_NAME(eq, Eq(Type))(Type a, Type b) {
   if (a == b) {
     return true;
@@ -78,17 +99,18 @@ static bool FUNC_NAME(eq, Eq(Type))(Type a, Type b) {
     return false;
   }
   if (a->kind == TVAR) {
-    return (a->tvar.ident == b->tvar.ident) ||
-           trait(Eq(String)).eq(a->tvar.ident, b->tvar.ident);
+    return trait(Eq(TVar)).eq(a->tvar, b->tvar);
   }
   if (a->kind == TCON) {
-    return (a->tcon.ident == b->tcon.ident) ||
-           trait(Eq(String)).eq(a->tcon.ident, b->tcon.ident);
+    return trait(Eq(TCon)).eq(a->tcon, b->tcon);
   }
   return FUNC_NAME(eq, Eq(Type))(a->lhs, b->lhs) &&
          FUNC_NAME(eq, Eq(Type))(a->rhs, b->rhs);
 }
 instance_Eq(Type, FUNC_NAME(eq, Eq(Type)));
+
+// -------------------------------------
+// trait Type
 
 static Type Type_New(void) {
   Type e = (Type)mem_malloc(sizeof(struct Type));
