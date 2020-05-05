@@ -43,8 +43,17 @@ C_API_BEGIN
 // declvar = "var" variable type_annotation
 //
 // type_annotation = ":" texpr
-// texpr  = tctor
-// tctor  = "()" | "bool" | "int"
+// texpr  = tlambda | btype
+// tlambda = "|" atype {atype} "|" atype
+// btype  = [btype] atype
+// atype  = tctor
+//        | tvar
+//        | tparen
+//
+// tctor  = "()" | "bool" | "int" | qtctor
+// qtctor = Identifier
+// tvar   = identifier
+// tparen = "(" texpr ")"
 //
 // print  = "print" fexpr           (TODO: remove when I/O library ready.)
 // unary  = [("+" | "-" | "!")] fexpr
@@ -61,6 +70,7 @@ C_API_BEGIN
 //
 // variable    = identifier | varsym
 //
+// Identifier  = upper{identLetter}
 // identifier  = identStart{identLetter}
 // identStart  = "_" | letter
 // identLetter = "_" | alphaNum
@@ -105,6 +115,9 @@ PARSER(Expr) paren(void);
 
 PARSER(Expr) variable(void);
 
+/* an identifer start w/ uppercase letter */
+PARSER(String) Identifier(void);
+/* an identifier start w/ lowercase letter or '_' */
 PARSER(String) identifier(void);
 PARSER(char) identStart(void);
 PARSER(char) identLetter(void);
@@ -126,16 +139,24 @@ PARSER(Expr) stmt(void);
 PARSER(Expr) decl(void);
 PARSER(Expr) let(void);
 PARSER(Expr) declvar(void);
+
 PARSER(Expr) type_annotation(void);
+
 PARSER(Type) texpr(void);
+PARSER(Type) btype(void);
+PARSER(Type) atype(void);
+PARSER(Type) tlambda(void);
 PARSER(Type) tctor(void);
+PARSER(Type) qtctor(void);
+PARSER(Type) tvar(void);
+PARSER(Type) tparen(void);
 
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
 
 static String KEYWORDS[] = {
-    "let",   "var",  "if",    "else", "()",
-    "false", "true", "print", "int",  "bool",
+    "let",   "var", "if",   "else", "false", "true",
+    "print", "()",  "bool", "int",  "Fn",
 };
 
 static String RESERVED_OP[] = {
@@ -388,6 +409,7 @@ parsec(fexpr, Expr) {
     while (e != A.end(xs)) {
       lhs = E.apply(lhs, *e++);
     }
+    A.free(&xs);
     RETURN(lhs);
   }
 }
@@ -443,11 +465,11 @@ parsec(variable, Expr) {
   }
 }
 
-// PARSER(String) identifier0(void);
-parsec(identifier0, String) {
-  DO() {
-    SCAN(identStart(), x);
-    SCAN(many(identLetter()), xs);
+// PARSER(String) identifier0(PARSER(char), PARSER(char));
+parsec(identifier0, PARSER(char), PARSER(char), String) {
+  DO() WITH(idStart, idLetter) {
+    SCAN(idStart, x);
+    SCAN(many(idLetter), xs);
     SCAN(blank());
     size_t len = 1 + xs.length;
     char* cs = mem_malloc(len + 1);
@@ -463,7 +485,12 @@ parsec(identifier0, String) {
 }
 
 PARSER(String) identifier(void) {
-  return label("identifier", tryp(identifier0()));
+  return label("identifier",
+               tryp(identifier0(identStart(), identLetter())));
+}
+
+PARSER(String) Identifier(void) {
+  return label("Identifier", tryp(identifier0(upper(), identLetter())));
 }
 
 PARSER(char) identStart(void) {
@@ -633,34 +660,110 @@ parsec(type_annotation, Expr) {
   PARSER(char) op = lexme(char1(':'));
   DO() {
     SCAN(op);
-    SCAN(tctor(), ty);
+    SCAN(texpr(), ty);
     RETURN(E.type(ty));
   }
+}
+
+PARSER(Type) texpr(void) {
+  return either(tlambda(), btype());
+}
+
+// PARSER(Type) tlambda(void);
+parsec(tlambda, Type) {
+  TypeT t = trait(Type);
+  ArrayT(Type) A = trait(Array(Type));
+  PARSER(char) open_pats = lexme(char1('|'));
+  PARSER(char) close_pats = open_pats;
+  PARSER(Type) arg = atype();
+  PARSER(Type) body = texpr();
+  DO() {
+    SCAN(open_pats);
+    SCAN(some(arg), ps);
+    SCAN(close_pats);
+    SCAN(body, rhs);
+    for (Type* p = A.end(ps); p != A.begin(ps);) {
+      rhs = t.funcType(*--p, rhs);
+    }
+    A.free(&ps);
+    RETURN(rhs);
+  }
+}
+
+// PARSER(Type) btype(void);
+parsec(btype, Type) {
+  TypeT t = trait(Type);
+  ArrayT(Type) A = trait(Array(Type));
+  PARSER(Type) p = atype();
+  DO() {
+    SCAN(some(p), xs);
+    Type* e = A.begin(xs);
+    Type lhs = *e++;
+    while (e != A.end(xs)) {
+      lhs = t.tapply(lhs, *e++);
+    }
+    A.free(&xs);
+    RETURN(lhs);
+  }
+}
+
+PARSER(Type) atype(void) {
+  return choice(tctor(), tvar(), tparen());
 }
 
 parsec(tctor_unit, Type) {
   DO() {
     SCAN(lexme(keyword("()")));
-    RETURN(TYPE(unit));
+    RETURN(trait(Type).tcon_unit());
   }
 }
 
 parsec(tctor_bool, Type) {
   DO() {
     SCAN(lexme(keyword("bool")));
-    RETURN(TYPE(bool));
+    RETURN(trait(Type).tcon_bool());
   }
 }
 
 parsec(tctor_int, Type) {
   DO() {
     SCAN(lexme(keyword("int")));
-    RETURN(TYPE(int));
+    RETURN(trait(Type).tcon_int());
   }
 }
 
 PARSER(Type) tctor(void) {
-  return choice(tctor_unit(), tctor_bool(), tctor_int());
+  return label("type constructor",
+               choice(tctor_unit(), tctor_bool(), tctor_int(), qtctor()));
+}
+
+// PARSER(Type) qtctor(void);
+parsec(qtctor, Type) {
+  DO() {
+    SCAN(Identifier(), x);
+    RETURN(trait(Type).tcon((TCon){x}));
+  }
+}
+
+parsec(tvar0, Type) {
+  DO() {
+    SCAN(identifier(), x);
+    RETURN(trait(Type).tvar((TVar){x}));
+  }
+}
+
+PARSER(Type) tvar(void) {
+  return label("type variable", tvar0());
+}
+
+// PARSER(Type) tparen(void);
+parsec(tparen, Type) {
+  DO() {
+    SCAN(lexme(char1('(')));
+    SCAN(texpr(), x);
+    SCAN(lexme(char1(')')));
+    RETURN(x);
+  }
 }
 
 #endif
