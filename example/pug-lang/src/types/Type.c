@@ -113,6 +113,10 @@ TypeT Trait(Type) {
 impl_user_type(Type);
 
 show_user_type(Type)(CharBuff* b, Type x) {
+  if (!x) {
+    mem_printf(b, "<unknown>");
+    return;
+  }
   Show(Type) s = trait(Show(Type));
   switch (x->kind) {
   case TVAR:

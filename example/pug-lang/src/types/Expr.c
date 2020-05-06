@@ -200,6 +200,10 @@ ExprT Trait(Expr) {
 impl_user_type(Expr);
 
 show_user_type(Expr)(CharBuff* b, Expr x) {
+  if (!x) {
+    mem_printf(b, "<nullptr>");
+    return;
+  }
   Show(Expr) s = trait(Show(Expr));
   switch (x->kind) {
     // ----
