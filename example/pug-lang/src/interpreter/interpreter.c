@@ -123,6 +123,7 @@ static EvalResult eval_seq(Context ctx, Expr x) {
 
 static EvalResult eval_let(Context ctx, Expr x) {
   ContextT C = trait(Context);
+  ExprT E = trait(Expr);
   assert(x->lhs->kind == VAR);
   MapEntry* m = C.map.lookup_local(ctx, x->lhs->var.ident);
   if (m && m->type && !m->e) {
@@ -131,10 +132,10 @@ static EvalResult eval_let(Context ctx, Expr x) {
     REQUIRE_TYPE_EQ(m->type, x->rhs->type);
     // if the previous definiton exists (in outer context), it will be
     // shadowed.
-    C.map.put(ctx, x->lhs->var.ident, m->type, x->rhs);
+    C.map.put(ctx, x->lhs->var.ident, m->type, E.thunk(ctx, x->rhs));
   } else {
     // if the previous definiton exists, it will be shadowed.
-    C.map.put(ctx, x->lhs->var.ident, x->rhs->type, x->rhs);
+    C.map.put(ctx, x->lhs->var.ident, x->rhs->type, E.thunk(ctx, x->rhs));
   }
   RETURN_OK(x->rhs);
 }
@@ -150,13 +151,14 @@ static EvalResult eval_declvar(Context ctx, Expr x) {
 
 static EvalResult eval_assign(Context ctx, Expr x) {
   ContextT C = trait(Context);
+  ExprT E = trait(Expr);
   assert(x->lhs->kind == VAR);
   EVAL(ctx, x->rhs, rhs);
   EVAL(ctx, x->lhs, lhs);
   // types must be same with previous definition
   REQUIRE_TYPE_EQ(lhs.ok->type, rhs.ok->type);
   // the previous definiton will be shadowed.
-  C.map.put(ctx, x->lhs->var.ident, NULL, rhs.ok);
+  C.map.put(ctx, x->lhs->var.ident, NULL, E.thunk(ctx, rhs.ok));
   RETURN_OK(rhs.ok);
 }
 
