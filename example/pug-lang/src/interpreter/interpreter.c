@@ -1,6 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 
 #include "interpreter/interpreter.h"
+#include "types/TypeEnv.h"
 
 // -----------------------------------------------------------------------
 static EvalResult eval_expr1(Context ctx, Expr x);
@@ -158,7 +159,7 @@ static EvalResult eval_assign(Context ctx, Expr x) {
   // types must be same with previous definition
   REQUIRE_TYPE_EQ(lhs.ok->type, rhs.ok->type);
   // the previous definiton will be shadowed.
-  C.map.put(ctx, x->lhs->var.ident, NULL, E.thunk(ctx, rhs.ok));
+  C.map.put(ctx, x->lhs->var.ident, rhs.ok->type, E.thunk(ctx, rhs.ok));
   RETURN_OK(rhs.ok);
 }
 
@@ -215,6 +216,7 @@ static EvalResult eval_var(Context ctx, Expr x) {
 
 // -----------------------------------------------------------------------
 static EvalResult eval_expr1(Context ctx, Expr x) {
+  trait(TypeEnv).judge(ctx, x); /* infer type of x */
   switch (x->kind) {
   case APPLY:
     return eval_apply(ctx, x);
