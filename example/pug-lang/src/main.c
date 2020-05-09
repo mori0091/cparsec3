@@ -134,6 +134,8 @@ void pug_help(String arg0) {
 // -----------------------------------------------------------------------
 #define PARSE_RESULT(T) ParseResult(CPARSEC_STREAM_TYPE, T)
 
+#include "types/TypeInferCombinator.h"
+
 bool pug_parseTest(String input) {
   // Establishes a "scoped" memory allocation context. All memory
   // allocated within this scope (by calling `mem_malloc()` explicitly or
@@ -154,6 +156,17 @@ bool pug_parseTest(String input) {
     }
     // show the AST
     eprintf(BOLD CYAN, ">> %s\n", s.show(result));
+  }
+
+  {
+    TIResult(Type) r = testInfer(result.ok);
+    if (!r.success) {
+      eprintf(BOLD RED, "type error:");
+      printf(" %s\n\n", r.err.msg);
+      return false;
+    } else {
+      eprintf(BOLD CYAN, ">> : %s\n", trait(Show(Type)).show(r.ok));
+    }
   }
 
   // evaluate the AST

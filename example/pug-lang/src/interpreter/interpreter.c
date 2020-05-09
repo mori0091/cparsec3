@@ -72,12 +72,16 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
     RETURN_OK(trait(Expr).num((Num){x}));                                \
   } while (0)
 
+#if 1
+#define REQUIRE_TYPE_EQ(lhs, rhs)
+#else
 #define REQUIRE_TYPE_EQ(lhs, rhs)                                        \
   do {                                                                   \
     if (trait(Eq(Type)).neq(lhs, rhs)) {                                 \
       RETURN_ERR("Type mismatch");                                       \
     }                                                                    \
   } while (0)
+#endif
 
 // -----------------------------------------------------------------------
 static EvalResult eval_apply(Context ctx, Expr x) {
@@ -216,7 +220,7 @@ static EvalResult eval_var(Context ctx, Expr x) {
 
 // -----------------------------------------------------------------------
 static EvalResult eval_expr1(Context ctx, Expr x) {
-  trait(TypeEnv).judge(ctx, x); /* infer type of x */
+  //trait(TypeEnv).judge(ctx, x); /* infer type of x */
   switch (x->kind) {
   case APPLY:
     return eval_apply(ctx, x);

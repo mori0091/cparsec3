@@ -22,6 +22,11 @@ typedef struct TCon {
   String ident;
 } TCon;
 
+/* Universal quantified type variable (e.g. ∀a) */
+typedef struct TAny {
+  int n;
+} TAny;
+
 enum TypeId {
   /* type variable */
   TVAR,
@@ -29,6 +34,8 @@ enum TypeId {
   TCON,
   /* type application */
   TAPPLY,
+  /* universal quantified type variable (e.g. ∀a) */
+  TANY,
 };
 
 struct Type {
@@ -38,23 +45,31 @@ struct Type {
     TVar tvar;
     /* for type constructor */
     TCon tcon;
-    /* for type function application*/
+    /* for type application*/
     struct {
       Type lhs;
       Type rhs;
     };
+    /* for universal quantified type variable */
+    TAny any;
   };
 };
 
 trait_Eq(TVar);
 trait_Eq(TCon);
+trait_Eq(TAny);
 trait_Eq(Type);
 
 // -----------------------------------------------------------------------
 typedef struct TypeT {
-  Type (*tvar)(TVar x);               /* create type variable */
-  Type (*tcon)(TCon x);               /* create type constructor */
-  Type (*tapply)(Type lhs, Type rhs); /* type application */
+  /** create type variable */
+  Type (*tvar)(TVar x);
+  /** create type constructor */
+  Type (*tcon)(TCon x);
+  /** type application */
+  Type (*tapply)(Type lhs, Type rhs);
+  /** create universal quantified type variable */
+  Type (*any)(TAny x);
   // ---- helper to create builtin type constructors
   Type (*tcon_bool)(void); /* type constructor `bool` */
   Type (*tcon_int)(void);  /* type constructor `int` */

@@ -19,6 +19,14 @@ static bool FUNC_NAME(eq, Eq(TCon))(TCon a, TCon b) {
 instance_Eq(TCon, FUNC_NAME(eq, Eq(TCon)));
 
 // -------------------------------------
+// trait Eq(TAny)
+
+static bool FUNC_NAME(eq, Eq(TAny))(TAny a, TAny b) {
+  return (a.n == b.n);
+}
+instance_Eq(TAny, FUNC_NAME(eq, Eq(TAny)));
+
+// -------------------------------------
 // trait Eq(Type)
 
 static bool FUNC_NAME(eq, Eq(Type))(Type a, Type b) {
@@ -36,6 +44,9 @@ static bool FUNC_NAME(eq, Eq(Type))(Type a, Type b) {
   }
   if (a->kind == TCON) {
     return trait(Eq(TCon)).eq(a->tcon, b->tcon);
+  }
+  if (a->kind == TANY) {
+    return trait(Eq(TAny)).eq(a->any, b->any);
   }
   return FUNC_NAME(eq, Eq(Type))(a->lhs, b->lhs) &&
          FUNC_NAME(eq, Eq(Type))(a->rhs, b->rhs);
@@ -72,6 +83,13 @@ static Type FUNC_NAME(tapply, Type)(Type lhs, Type rhs) {
   return e;
 }
 
+static Type FUNC_NAME(any, Type)(TAny x) {
+  Type e = Type_New();
+  e->kind = TANY;
+  e->any = x;
+  return e;
+}
+
 static Type FUNC_NAME(tcon_bool, Type)(void) {
   static struct Type e = {.kind = TCON, .tcon = {"bool"}};
   return &e;
@@ -102,6 +120,7 @@ TypeT Trait(Type) {
       .tvar = FUNC_NAME(tvar, Type),
       .tcon = FUNC_NAME(tcon, Type),
       .tapply = FUNC_NAME(tapply, Type),
+      .any = FUNC_NAME(any, Type),
       .tcon_bool = FUNC_NAME(tcon_bool, Type),
       .tcon_int = FUNC_NAME(tcon_int, Type),
       .tcon_unit = FUNC_NAME(tcon_unit, Type),
@@ -120,17 +139,22 @@ show_user_type(Type)(CharBuff* b, Type x) {
   Show(Type) s = trait(Show(Type));
   switch (x->kind) {
   case TVAR:
-    mem_printf(b, "(TVar %s)", x->tvar.ident);
+    /* mem_printf(b, "(TVar %s)", x->tvar.ident); */
+    mem_printf(b, "%s", x->tvar.ident);
     break;
   case TCON:
     mem_printf(b, "%s", x->tcon.ident);
     break;
   case TAPPLY:
-    mem_printf(b, "(TApply ");
+    /* mem_printf(b, "(TApply "); */
+    mem_printf(b, "(");
     s.toString(b, x->lhs);
     mem_printf(b, " ");
     s.toString(b, x->rhs);
     mem_printf(b, ")");
+    break;
+  case TANY:
+    mem_printf(b, "#a%d", x->any.n);
     break;
   default:
     assert(0 && "Illegal Type");
