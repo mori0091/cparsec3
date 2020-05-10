@@ -45,6 +45,7 @@
 // TypeScheme / TypeAssumption
 #define t_gen(as, type) trait(Assumption).scheme(as, type)
 #define t_find(var, as) trait(Assumption).lookup(var, as)
+#define t_add(var, scheme, as) trait(Assumption).add(var, scheme, as)
 
 // TypeUnify
 #define t_unifier(type1, type2) trait(TypeUnify).unifier(type1, type2)

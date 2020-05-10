@@ -26,6 +26,10 @@ typedef struct Assumption {
    * Finds a scheme bounded to a variable `var` within assumption `as`.
    */
   Maybe(TypeScheme) (*lookup)(Var var, List(TypeAssumption) as);
+  /**
+   * Adds new (var, scheme) assumption to the list.
+   */
+  List(TypeAssumption) (*add)(Var var, TypeScheme sc, List(TypeAssumption) as);
 } Assumption;
 
 Assumption Trait(Assumption);

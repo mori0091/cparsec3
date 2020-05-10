@@ -160,8 +160,8 @@ fn(typeOfLambda, List(TypeAssumption), Expr, Type,
   TI_RUN(newTVar(), a);
   TI_RUN(newTVar(), b);
   TI_RUN(unify(T.funcType(a, b), t));
-  TypeAssumption c = {.var = e->lhs->var, .scheme = {0, a}};
-  as = trait(List(TypeAssumption)).cons(c, as);
+  TypeScheme sc = {0, a};
+  as = t_add(e->lhs->var, sc, as);
   TI_RUN(typeOf0(as, e->rhs, b), x);
   TI_RETURN(x);
 }
@@ -200,8 +200,7 @@ fn(typeOfSeq, List(TypeAssumption), Expr, Type, UnTypeInferArgs(None)) {
   switch (e->lhs->kind) {
   case DECLVAR: {
     TypeScheme sc = t_gen(as, e->lhs->rhs->texpr);
-    TypeAssumption c = {.var = e->lhs->lhs->var, .scheme = sc};
-    as = trait(List(TypeAssumption)).cons(c, as);
+    as = t_add(e->lhs->lhs->var, sc, as);
     TI_RUN(typeOf0(as, e->rhs, t), x);
     TI_RETURN(x);
   }
@@ -212,15 +211,14 @@ fn(typeOfSeq, List(TypeAssumption), Expr, Type, UnTypeInferArgs(None)) {
       TI_RUN(newTVar(), b);
       TI_RUN(newTVar(), f);
       TI_RUN(unify(T.funcType(a, b), f));
-      TypeAssumption c = {.var = e->lhs->lhs->var, .scheme = {0, f}};
-      as = trait(List(TypeAssumption)).cons(c, as);
+      TypeScheme sc = {0, f};
+      as = t_add(e->lhs->lhs->var, sc, as);
     }
     TI_RUN(newTVar(), a);
     TI_RUN(typeOf0(as, e->lhs->rhs, a));
     TI_RUN(getSubst(), sub);
     TypeScheme sc = t_gen(as, t_apply_subst(sub, a));
-    TypeAssumption c = {.var = e->lhs->lhs->var, .scheme = sc};
-    as = trait(List(TypeAssumption)).cons(c, as);
+    as = t_add(e->lhs->lhs->var, sc, as);
     TI_RUN(typeOf0(as, e->rhs, t), x);
     TI_RETURN(x);
   }
@@ -268,8 +266,8 @@ fn(typeOfLet, List(TypeAssumption), Expr, Type, UnTypeInferArgs(None)) {
       TI_RUN(newTVar(), b);
       TI_RUN(newTVar(), f);
       TI_RUN(unify(T.funcType(a, b), f));
-      TypeAssumption c = {.var = e->lhs->var, .scheme = {0, f}};
-      as = trait(List(TypeAssumption)).cons(c, as);
+      TypeScheme sc = {0, f};
+      as = t_add(e->lhs->var, sc, as);
     }
     TI_RUN(typeOf0(as, e->rhs, t), x);
     TI_RETURN(x);

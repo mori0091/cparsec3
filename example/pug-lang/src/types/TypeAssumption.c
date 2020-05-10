@@ -97,10 +97,18 @@ static Maybe(TypeScheme)
   return (Maybe(TypeScheme)){.none = true};
 }
 
+static List(TypeAssumption)
+    FUNC_NAME(add, Assumption)(Var var, TypeScheme sc,
+                               List(TypeAssumption) as) {
+  TypeAssumption c = {.var = var, .scheme = sc};
+  as = trait(List(TypeAssumption)).cons(c, as);
+  return as;
+}
+
 Assumption Trait(Assumption) {
   return (Assumption){
       .scheme = FUNC_NAME(scheme, Assumption),
       .lookup = FUNC_NAME(lookup, Assumption),
-
+      .add = FUNC_NAME(add, Assumption),
   };
 }
