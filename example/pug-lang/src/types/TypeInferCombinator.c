@@ -26,7 +26,6 @@ fn(unifyImpl, Type, Type, UnTypeInferArgs(None)) {
     mem_printf(&b, "\n  t2 = ");
     S.toString(&b, t2);
     TypeError e = {b.data};
-    // TypeError e = {"Type mismatch"};
     return fn_apply(err, e, s);
   }
   s.subst = t_composite_subst(u.value, s.subst);
@@ -203,22 +202,32 @@ fn(typeOfSeq, TAList, Expr, Type, UnTypeInferArgs(None)) {
     TI_RETURN(x);
   }
   case LET: {
-    // TODO what should we do if the variable was already declared?
-    if (e->lhs->rhs->kind == LAMBDA) {
-      TI_RUN(newTVar(), a);
-      TI_RUN(newTVar(), b);
-      TI_RUN(newTVar(), f);
-      TI_RUN(unify(T.funcType(a, b), f));
-      TypeScheme sc = {0, f};
+    Maybe(TypeScheme) sc = t_find(e->lhs->var, as);
+    if (!sc.none) {
+      TI_RUN(freshInst(sc.value), a);
+      TI_RUN(typeOf0(as, e->lhs->rhs, a));
+      TI_RUN(getSubst(), sub);
+      TypeScheme sc = t_gen(as, t_apply_subst(sub, a));
       as = t_add(e->lhs->lhs->var, sc, as);
+      TI_RUN(typeOf0(as, e->rhs, t), x);
+      TI_RETURN(x);
+    } else {
+      if (e->lhs->rhs->kind == LAMBDA) {
+        TI_RUN(newTVar(), a);
+        TI_RUN(newTVar(), b);
+        TI_RUN(newTVar(), f);
+        TI_RUN(unify(T.funcType(a, b), f));
+        TypeScheme sc = {0, f};
+        as = t_add(e->lhs->lhs->var, sc, as);
+      }
+      TI_RUN(newTVar(), a);
+      TI_RUN(typeOf0(as, e->lhs->rhs, a));
+      TI_RUN(getSubst(), sub);
+      TypeScheme sc = t_gen(as, t_apply_subst(sub, a));
+      as = t_add(e->lhs->lhs->var, sc, as);
+      TI_RUN(typeOf0(as, e->rhs, t), x);
+      TI_RETURN(x);
     }
-    TI_RUN(newTVar(), a);
-    TI_RUN(typeOf0(as, e->lhs->rhs, a));
-    TI_RUN(getSubst(), sub);
-    TypeScheme sc = t_gen(as, t_apply_subst(sub, a));
-    as = t_add(e->lhs->lhs->var, sc, as);
-    TI_RUN(typeOf0(as, e->rhs, t), x);
-    TI_RETURN(x);
   }
   default: {
     TI_RUN(newTVar(), a);
@@ -248,12 +257,11 @@ fn(typeOfAssign, TAList, Expr, Type, UnTypeInferArgs(None)) {
 
 fn(typeOfLet, TAList, Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
-  // TODO what should we do here?
   Maybe(TypeScheme) sc = t_find(e->lhs->var, as);
   if (!sc.none) {
-    TI_RUN(freshInst(sc.value), t2);
-    TI_RUN(typeOf0(as, e->rhs, t2));
-    TI_RUN(unify(t2, t), x);
+    TI_RUN(freshInst(sc.value), a);
+    TI_RUN(typeOf0(as, e->rhs, a));
+    TI_RUN(unify(a, t), x);
     TI_RETURN(x);
   } else {
     if (e->rhs->kind == LAMBDA) {
