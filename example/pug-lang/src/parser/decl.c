@@ -3,7 +3,7 @@
 #include "parser/expr.h"
 
 PARSER(Expr) decl(void) {
-  return either(let(), declvar());
+  return choice(let(), declvar(), decltype());
 }
 
 // PARSER(Expr) let(void);
@@ -27,6 +27,61 @@ parsec(declvar, Expr) {
     SCAN(variable(), lhs);
     SCAN(type_annotation(), rhs);
     RETURN(E.declvar(lhs, rhs));
+  }
+}
+
+// PARSER(Expr) decltype(void);
+parsec(decltype, Expr) {
+  ExprT E = trait(Expr);
+  DO() {
+    SCAN(lexme(keyword("type")));
+    SCAN(simpletype(), lhs);
+    SCAN(lexme(char1('=')));
+    SCAN(constrs(E.type(lhs)), rhs);
+    RETURN(rhs);
+  }
+}
+
+// PARSER(Type) simpletype(void);
+parsec(simpletype, Type) {
+  ArrayT(Type) A = trait(Array(Type));
+  TypeT T = trait(Type);
+  DO() {
+    SCAN(qtctor(), lhs);        /* Type ; (TCon t) */
+    SCAN(many(tvar()), tvars);  /* Array(Type) ; arrya of (TVar v) */
+    for (Type* t = A.begin(tvars); t != A.end(tvars); t++) {
+      lhs = T.tapply(lhs, *t);
+    }
+    A.free(&tvars);
+    RETURN(lhs);
+  }
+}
+
+// PARSER(Expr) constrs(Expr datatype);
+parsec(constrs, Expr, Expr) {
+  ExprT E = trait(Expr);
+  PARSER(Maybe(char)) sep = optional(lexme(char1('|')));
+  DO() WITH(datatype) {
+    PARSER(Expr) p = constr(datatype);
+    SCAN(p, xs);
+    SCAN(sep, m);
+    if (m.none) {
+      RETURN(xs);
+    }
+    SCAN(constrs(datatype), ys);
+    xs->rhs = E.seq(xs->rhs, ys);
+    RETURN(xs);
+  }
+}
+
+// PARSER(Expr) constr(Expr datatype);
+parsec(constr, Expr, Expr) {
+  ExprT E = trait(Expr);
+  DO() WITH(datatype) {
+    SCAN(Identifier(), name);
+    Expr x = E.var((Var){name});
+    Expr val = E.con((Con){name});
+    RETURN(E.seq(E.declvar(x, datatype), E.let(x, val)));
   }
 }
 

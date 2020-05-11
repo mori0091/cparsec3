@@ -40,7 +40,8 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
       bool x = lhs.ok->kind _op_ rhs.ok->kind;                           \
       RETURN_OK(trait(Expr).boolean(x));                                 \
     }                                                                    \
-    case CLOSURE: {                                                      \
+    case CLOSURE:                                                        \
+    case CON: {                                                          \
       bool x = lhs.ok _op_ rhs.ok;                                       \
       RETURN_OK(trait(Expr).boolean(x));                                 \
     }                                                                    \
@@ -220,7 +221,7 @@ static EvalResult eval_var(Context ctx, Expr x) {
 
 // -----------------------------------------------------------------------
 static EvalResult eval_expr1(Context ctx, Expr x) {
-  //trait(TypeEnv).judge(ctx, x); /* infer type of x */
+  // trait(TypeEnv).judge(ctx, x); /* infer type of x */
   switch (x->kind) {
   case APPLY:
     return eval_apply(ctx, x);
@@ -280,6 +281,13 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
     return eval_declvar(ctx, x);
   case TYPE:
     RETURN_OK(x); /* TODO */
+  case CON:
+    RETURN_OK(x);
+  case CAPPLY: {
+    /* ExprT E = trait(Expr); */
+    /* x = E.capply(eval_expr(ctx, x->lhs), eval_expr(ctx, x->rhs)); */
+    RETURN_OK(x);
+  }
   default:
     RETURN_ERR("Illegal Expr");
   }

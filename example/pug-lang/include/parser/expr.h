@@ -38,9 +38,13 @@ C_API_BEGIN
 // stmts  = stmt {";" [stmt]}
 // stmt   = decl | expr
 //
-// decl   = let | declvar
+// decl   = let | declvar | decltype
 // let    = "let" variable "=" expr0
 // declvar = "var" variable type_annotation
+// decltype = "type" simpletype "=" constrs
+//
+// simpletype = qtctor {tvar}
+// constrs = constr {"|" constr}
 //
 // type_annotation = ":" texpr
 // texpr  = tlambda | btype
@@ -55,6 +59,8 @@ C_API_BEGIN
 // tvar   = identifier
 // tparen = "(" texpr ")"
 //
+// constr  = Identifier {texpr}
+//
 // print  = "print" fexpr           (TODO: remove when I/O library ready.)
 // unary  = [("+" | "-" | "!")] fexpr
 // fexpr  = [fexpr] aexpr
@@ -64,10 +70,11 @@ C_API_BEGIN
 //        | paren
 //
 // qvar    = variable
-// ctor    = "()" | "true" | "false"
+// ctor    = "()" | "true" | "false" | varctor
 // literal = number
 // paren   = (" expr ")"
 //
+// varctor       = Identifier
 // variable    = identifier | varsym
 //
 // Identifier  = upper{identLetter}
@@ -113,6 +120,7 @@ PARSER(Expr) ctor(void); /* data constructor */
 PARSER(Expr) literal(void);
 PARSER(Expr) paren(void);
 
+PARSER(Expr) varctor(void);
 PARSER(Expr) variable(void);
 
 /* an identifer start w/ uppercase letter */
@@ -139,6 +147,10 @@ PARSER(Expr) stmt(void);
 PARSER(Expr) decl(void);
 PARSER(Expr) let(void);
 PARSER(Expr) declvar(void);
+PARSER(Expr) decltype(void);
+PARSER(Type) simpletype(void);
+PARSER(Expr) constrs(Expr datatype);
+PARSER(Expr) constr(Expr datatype);
 
 PARSER(Expr) type_annotation(void);
 

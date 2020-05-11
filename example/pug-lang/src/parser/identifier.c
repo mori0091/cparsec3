@@ -4,7 +4,7 @@
 
 static String KEYWORDS[] = {
     "let",   "var", "if",   "else", "false", "true",
-    "print", "()",  "bool", "int",  "Fn",
+    "print", "()",  "bool", "int",  "Fn",    "type",
 };
 
 static String RESERVED_OP[] = {

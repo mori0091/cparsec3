@@ -257,9 +257,10 @@ parsec(ctor0, String, Expr, Expr) {
 
 PARSER(Expr) ctor(void) {
   ExprT E = trait(Expr);
-  return choice(ctor0("()", E.unit()),           /* () */
-                ctor0("true", E.boolean(true)),  /* true */
-                ctor0("false", E.boolean(false)) /* false */
+  return choice(ctor0("()", E.unit()),            /* () */
+                ctor0("true", E.boolean(true)),   /* true */
+                ctor0("false", E.boolean(false)), /* false */
+                varctor()                         /* ADT */
   );
 }
 
@@ -274,6 +275,14 @@ parsec(paren, Expr) {
     SCAN(expr(), x);
     SCAN(lexme(char1(')')));
     RETURN(x);
+  }
+}
+
+// PARSER(Expr) varctor(void);
+parsec(varctor, Expr) {
+  DO() {
+    SCAN(lexme(Identifier()), x);
+    RETURN(trait(Expr).var((Var){x}));
   }
 }
 

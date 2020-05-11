@@ -159,6 +159,15 @@ static Expr FUNC_NAME(type, Expr)(Type t) {
   e->texpr = t;
   return e;
 }
+static Expr FUNC_NAME(con, Expr)(Con c) {
+  Expr e = Expr_New();
+  e->kind = CON;
+  e->con = c;
+  return e;
+}
+static Expr FUNC_NAME(capply, Expr)(Expr lhs, Expr rhs) {
+  return Expr_Binary(CAPPLY, lhs, rhs);
+}
 
 ExprT Trait(Expr) {
   return (ExprT){
@@ -194,6 +203,8 @@ ExprT Trait(Expr) {
       .boolean = FUNC_NAME(boolean, Expr),
       .unit = FUNC_NAME(unit, Expr),
       .type = FUNC_NAME(type, Expr),
+      .con = FUNC_NAME(con, Expr),
+      .capply = FUNC_NAME(capply, Expr),
   };
 }
 
@@ -315,6 +326,12 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     mem_printf(b, "(Type ");
     trait(Show(Type)).toString(b, x->texpr);
     mem_printf(b, ")");
+    break;
+  case CON:
+    mem_printf(b, "(Con %s)", x->con.ident);
+    break;
+  case CAPPLY:
+    Expr_showBinary(b, "Capply", x->lhs, x->rhs);
     break;
   default:
     assert(0 && "Illegal Expr");

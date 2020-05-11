@@ -360,6 +360,24 @@ fn(typeOfPrint, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RETURN(x);
 }
 
+static Expr c2f(Expr ctor) {
+  ExprT E = trait(Expr);
+  switch (ctor->kind) {
+  case CON:
+    return E.var((Var){ctor->con.ident});
+  case CAPPLY:
+    return E.apply(c2f(ctor->lhs), c2f(ctor->rhs));
+  default:
+    return ctor;
+  }
+}
+
+fn(typeOfCon, TAList, Expr, Type, UnTypeInferArgs(None)) {
+  g_bind((as, e, t, s, ok, err), *args);
+  TI_RUN(typeOf0(as, c2f(e), t), x);
+  TI_RETURN(x);
+}
+
 fn(typeOfFail, TAList, Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   TI_FAIL((TypeError){"Invalid expr"});
@@ -448,6 +466,10 @@ static TypeInfer(None) typeOf0Impl(TAList as, Expr e, Type t) {
   }
   case PRINT: {
     __auto_type f = typeOfPrint();
+    return (TypeInfer(None)){fn_apply(f, as, e, t)};
+  }
+  case CON: {
+    __auto_type f = typeOfCon();
     return (TypeInfer(None)){fn_apply(f, as, e, t)};
   }
   default: {

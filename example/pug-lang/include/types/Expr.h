@@ -18,6 +18,10 @@ typedef struct Var {
   String ident;
 } Var;
 
+typedef struct Con {
+  String ident;
+} Con;
+
 enum ExprId {
   /* print statement (for debug purpose) */
   /* NOTE: it's tentative and will be removed when I/O library ready. */
@@ -75,6 +79,10 @@ enum ExprId {
   TRUE,
   /* () */
   UNIT,
+  /* constructor */
+  CON,
+  /* constructor application */
+  CAPPLY,
 };
 
 struct Expr {
@@ -97,6 +105,7 @@ struct Expr {
     Num num;
     Var var;
     Type texpr;
+    Con con;
   };
 };
 
@@ -134,6 +143,8 @@ typedef struct ExprT {
   Expr (*boolean)(bool b); /* true / false */
   Expr (*unit)(void);      /* () */
   Expr (*type)(Type t);    /* type annotation */
+  Expr (*con)(Con c);      /* constructor */
+  Expr (*capply)(Expr lhs, Expr rhs); /* constructor application */
 } ExprT;
 
 ExprT Trait(Expr);
