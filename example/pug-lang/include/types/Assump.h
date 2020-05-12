@@ -5,16 +5,14 @@
 #include "Scheme.h"
 #include "Types.h"
 
-typedef struct TypeAssumption {
+typedef struct Assump {
   Var var;
   Scheme scheme;
-} TypeAssumption;
+} Assump;
 
-trait_List(TypeAssumption);
-trait_Types(TypeAssumption);
-trait_Types(List(TypeAssumption));
-
-typedef List(TypeAssumption) TAList;
+trait_List(Assump);
+trait_Types(Assump);
+trait_Types(List(Assump));
 
 trait_Maybe(Scheme);
 
@@ -31,15 +29,15 @@ typedef struct Assumption {
    * when `t` was `s -> u1 -> u2`, where u1 and u2 was unknown.
    * then it results a scheme `∀a.∀b.s -> a -> b`.
    */
-  Scheme (*scheme)(TAList as, Type t);
+  Scheme (*scheme)(List(Assump) as, Type t);
   /**
    * Finds a scheme bounded to a variable `var` within the list `as`.
    */
-  Maybe(Scheme) (*lookup)(Var var, TAList as);
+  Maybe(Scheme) (*lookup)(Var var, List(Assump) as);
   /**
    * Adds new (var, scheme) assumption to the list `as`.
    */
-  TAList (*add)(Var var, Scheme sc, TAList as);
+  List(Assump) (*add)(Var var, Scheme sc, List(Assump) as);
 } Assumption;
 
 Assumption Trait(Assumption);

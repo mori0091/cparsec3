@@ -1,33 +1,31 @@
 /* -*- coding: utf-8-unix -*- */
 
-#include "types/TypeAssumption.h"
+#include "types/Assump.h"
 
 // -----------------------------------------------------------------------
-// ---- trait Types(TypeAssumption)
+// ---- trait Types(Assump)
 
-static TypeAssumption
-FUNC_NAME(subst, Types(TypeAssumption))(Subst s, TypeAssumption as) {
+static Assump FUNC_NAME(subst, Types(Assump))(Subst s, Assump as) {
   as.scheme = trait(Types(Scheme)).subst(s, as.scheme);
   return as;
 }
 
-static List(Tyvar)
-    FUNC_NAME(tvarsOf, Types(TypeAssumption))(TypeAssumption as) {
+static List(Tyvar) FUNC_NAME(tvarsOf, Types(Assump))(Assump as) {
   return trait(Types(Scheme)).tvarsOf(as.scheme);
 }
 
-Types(TypeAssumption) Trait(Types(TypeAssumption)) {
-  return (Types(TypeAssumption)){
-      .subst = FUNC_NAME(subst, Types(TypeAssumption)),
-      .tvarsOf = FUNC_NAME(tvarsOf, Types(TypeAssumption)),
+Types(Assump) Trait(Types(Assump)) {
+  return (Types(Assump)){
+      .subst = FUNC_NAME(subst, Types(Assump)),
+      .tvarsOf = FUNC_NAME(tvarsOf, Types(Assump)),
   };
 }
 
 // -----------------------------------------------------------------------
-// ---- trait Types(List(TypeAssumption))
+// ---- trait Types(List(Assump))
 
-impl_List(TypeAssumption);
-impl_Types_List(TypeAssumption);
+impl_List(Assump);
+impl_Types_List(Assump);
 
 // -----------------------------------------------------------------------
 // ---- trait Assumption
@@ -61,10 +59,9 @@ List(Tyvar) subtractTyvars(List(Tyvar) a, List(Tyvar) b) {
   return a;
 }
 
-static Scheme FUNC_NAME(scheme, Assumption)(List(TypeAssumption) as,
-                                            Type t) {
+static Scheme FUNC_NAME(scheme, Assumption)(List(Assump) as, Type t) {
   Types(Type) S = trait(Types(Type));
-  Types(List(TypeAssumption)) SA = trait(Types(List(TypeAssumption)));
+  Types(List(Assump)) SA = trait(Types(List(Assump)));
   List(Tyvar) gs = subtractTyvars(S.tvarsOf(t), SA.tvarsOf(as));
   // int n = trait(List(Tyvar)).length(gs);
   TypeT T = trait(Type);
@@ -85,7 +82,7 @@ static Scheme FUNC_NAME(scheme, Assumption)(List(TypeAssumption) as,
 }
 
 static Maybe(Scheme)
-    FUNC_NAME(lookup, Assumption)(Var var, List(TypeAssumption) as) {
+    FUNC_NAME(lookup, Assumption)(Var var, List(Assump) as) {
   while (as) {
     if (trait(Eq(String)).eq(var.ident, as->head.var.ident)) {
       return (Maybe(Scheme)){.value = as->head.scheme};
@@ -95,11 +92,10 @@ static Maybe(Scheme)
   return (Maybe(Scheme)){.none = true};
 }
 
-static List(TypeAssumption)
-    FUNC_NAME(add, Assumption)(Var var, Scheme sc,
-                               List(TypeAssumption) as) {
-  TypeAssumption c = {.var = var, .scheme = sc};
-  as = trait(List(TypeAssumption)).cons(c, as);
+static List(Assump)
+    FUNC_NAME(add, Assumption)(Var var, Scheme sc, List(Assump) as) {
+  Assump c = {.var = var, .scheme = sc};
+  as = trait(List(Assump)).cons(c, as);
   return as;
 }
 

@@ -31,9 +31,9 @@ TypeInfer(Type) freshInst(Scheme sc);
 /**
  * Creates TypeInfer monad that infers type of expression `e`.
  */
-TypeInfer(Type) typeOf(TAList as, Expr e);
+TypeInfer(Type) typeOf(List(Assump) as, Expr e);
 
-static inline TIResult(Type) testInferP(TAList as, Expr e) {
+static inline TIResult(Type) testInferP(List(Assump) as, Expr e) {
   return runTypeInfer(typeOf(as, e));
 }
 

@@ -135,11 +135,11 @@ TypeInfer(None) ti_label(TypeInfer(None) ti, Expr e) {
 }
 
 // -----------------------------------------------------------------------
-static TypeInfer(None) typeOf0(TAList as, Expr e, Type t);
+static TypeInfer(None) typeOf0(List(Assump) as, Expr e, Type t);
 
-typedef_Fn_r(TAList, Expr, Fn(Type, UnTypeInfer(None)));
+typedef_Fn_r(List(Assump), Expr, Fn(Type, UnTypeInfer(None)));
 
-fn(typeOfVar, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfVar, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   Maybe(Scheme) sc = t_find(e->var, as);
   if (sc.none) {
@@ -152,7 +152,7 @@ fn(typeOfVar, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RETURN(x);
 }
 
-fn(typeOfLambda, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfLambda, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   TypeT T = trait(Type);
   TI_RUN(newTVar(), a);
@@ -164,7 +164,7 @@ fn(typeOfLambda, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RETURN(x);
 }
 
-fn(typeOfApply, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfApply, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   TypeT T = trait(Type);
   TI_RUN(newTVar(), a);
@@ -173,7 +173,7 @@ fn(typeOfApply, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RETURN(x);
 }
 
-fn(typeOfIfelse, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfIfelse, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   Type Bool = trait(Type).tcon_bool();
   TI_RUN(typeOf0(as, e->lhs, Bool));
@@ -185,13 +185,13 @@ fn(typeOfIfelse, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RETURN(x);
 }
 
-fn(typeOfBlk, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfBlk, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   TI_RUN(typeOf0(as, e->rhs, t), x);
   TI_RETURN(x);
 }
 
-fn(typeOfSeq, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfSeq, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   TypeT T = trait(Type);
   switch (e->lhs->id) {
@@ -238,14 +238,14 @@ fn(typeOfSeq, TAList, Expr, Type, UnTypeInferArgs(None)) {
   }
 }
 
-fn(typeOfDeclvar, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfDeclvar, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   // TODO what should we do here?
   TI_RUN(unify(e->rhs->texpr, t), x);
   TI_RETURN(x);
 }
 
-fn(typeOfAssign, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfAssign, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   TI_RUN(newTVar(), a);
   TI_RUN(typeOf0(as, e->lhs, a));
@@ -255,7 +255,7 @@ fn(typeOfAssign, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RETURN(x);
 }
 
-fn(typeOfLet, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfLet, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   Maybe(Scheme) sc = t_find(e->lhs->var, as);
   if (!sc.none) {
@@ -278,7 +278,7 @@ fn(typeOfLet, TAList, Expr, Type, UnTypeInferArgs(None)) {
   }
 }
 
-fn(typeOfOrAnd, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfOrAnd, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   Type Bool = trait(Type).tcon_bool();
   TI_RUN(typeOf0(as, e->lhs, Bool));
@@ -287,7 +287,7 @@ fn(typeOfOrAnd, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RETURN(x);
 }
 
-fn(typeOfComparisson, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfComparisson, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   Type Bool = trait(Type).tcon_bool();
   TI_RUN(newTVar(), a);
@@ -297,7 +297,7 @@ fn(typeOfComparisson, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RETURN(x);
 }
 
-fn(typeOfArithmetic, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfArithmetic, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   Type Int = trait(Type).tcon_int();
   TI_RUN(typeOf0(as, e->lhs, Int));
@@ -306,7 +306,7 @@ fn(typeOfArithmetic, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RETURN(x);
 }
 
-fn(typeOfNeg, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfNeg, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   Type Int = trait(Type).tcon_int();
   TI_RUN(typeOf0(as, e->rhs, Int));
@@ -314,7 +314,7 @@ fn(typeOfNeg, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RETURN(x);
 }
 
-fn(typeOfNot, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfNot, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   Type Bool = trait(Type).tcon_bool();
   Type Int = trait(Type).tcon_int();
@@ -330,28 +330,28 @@ fn(typeOfNot, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_FAIL((TypeError){"Type mismatch"});
 }
 
-fn(typeOfNum, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfNum, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   Type Int = trait(Type).tcon_int();
   TI_RUN(unify(Int, t), x);
   TI_RETURN(x);
 }
 
-fn(typeOfFalseTrue, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfFalseTrue, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   Type Bool = trait(Type).tcon_bool();
   g_bind((as, e, t, s, ok, err), *args);
   TI_RUN(unify(Bool, t), x);
   TI_RETURN(x);
 }
 
-fn(typeOfUnit, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfUnit, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   Type Unit = trait(Type).tcon_unit();
   TI_RUN(unify(Unit, t), x);
   TI_RETURN(x);
 }
 
-fn(typeOfPrint, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfPrint, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   Type Unit = trait(Type).tcon_unit();
   TI_RUN(newTVar(), a);
@@ -360,14 +360,14 @@ fn(typeOfPrint, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RETURN(x);
 }
 
-fn(typeOfCon, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfCon, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   ExprT E = trait(Expr);
   TI_RUN(typeOf0(as, E.var((Var){e->con.ident}), t), x);
   TI_RETURN(x);
 }
 
-fn(typeOfCapply, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfCapply, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   // TODO fix this ; does not work expected.
   TypeT T = trait(Type);
@@ -392,12 +392,12 @@ fn(typeOfCapply, TAList, Expr, Type, UnTypeInferArgs(None)) {
   // ~~~
 }
 
-fn(typeOfFail, TAList, Expr, Type, UnTypeInferArgs(None)) {
+fn(typeOfFail, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   TI_FAIL((TypeError){"Invalid expr"});
 }
 
-static TypeInfer(None) typeOf0Impl(TAList as, Expr e, Type t) {
+static TypeInfer(None) typeOf0Impl(List(Assump) as, Expr e, Type t) {
   switch (e->id) {
   case VAR: {
     __auto_type f = typeOfVar();
@@ -497,13 +497,13 @@ static TypeInfer(None) typeOf0Impl(TAList as, Expr e, Type t) {
   }
 }
 
-static TypeInfer(None) typeOf0(TAList as, Expr e, Type t) {
+static TypeInfer(None) typeOf0(List(Assump) as, Expr e, Type t) {
   return ti_label(typeOf0Impl(as, e, t), e);
 }
 
 // -----------------------------------------------------------------------
-typedef_Fn_r(TAList, Expr, UnTypeInfer(Type));
-fn(typeOfImpl, TAList, Expr, UnTypeInferArgs(Type)) {
+typedef_Fn_r(List(Assump), Expr, UnTypeInfer(Type));
+fn(typeOfImpl, List(Assump), Expr, UnTypeInferArgs(Type)) {
   g_bind((as, e, s, ok, err), *args);
   TI_RUN(newTVar(), a);
   TI_RUN(typeOf0(as, e, a));
@@ -511,7 +511,7 @@ fn(typeOfImpl, TAList, Expr, UnTypeInferArgs(Type)) {
   TI_RETURN(t_apply_subst(sub, a));
 }
 
-TypeInfer(Type) typeOf(TAList as, Expr e) {
+TypeInfer(Type) typeOf(List(Assump) as, Expr e) {
   __auto_type f = typeOfImpl();
   return (TypeInfer(Type)){fn_apply(f, as, e)};
 }

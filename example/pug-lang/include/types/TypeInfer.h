@@ -3,10 +3,10 @@
 
 #include <cparsec3/base/base_generics.h>
 
+#include "Assump.h"
 #include "Scheme.h"
 #include "Subst.h"
 #include "Type.h"
-#include "TypeAssumption.h"
 
 typedef struct TIState {
   /** current type substitution */

@@ -13,14 +13,14 @@
 
 #include "TypeInfer.h"
 
-#include "TypeAssumption.h"
+#include "Assump.h"
 #include "TypeUnify.h"
 
 #define TRAIT_TYPES(T) trait(Types(T))
 
 #define GENERIC_TYPES(t)                                                 \
-  GENERIC(t, IDENTITY, TRAIT_TYPES, Type, Scheme, TypeAssumption,        \
-          List(Type), List(Scheme), List(TypeAssumption))
+  GENERIC(t, IDENTITY, TRAIT_TYPES, Type, Scheme, Assump, List(Type),    \
+          List(Scheme), List(Assump))
 
 #define TRAIT_TIRUNNER(T) trait(TIRunner(T))
 
@@ -41,7 +41,7 @@
 #define runTypeInferP(ti, st) GENERIC_TIRUNNER(ti).pRunTypeInferP(ti, st)
 #define runTypeInfer(ti) GENERIC_TIRUNNER(ti).pRunTypeInfer(ti)
 
-// Scheme / TypeAssumption
+// Scheme / Assump
 #define t_gen(as, type) trait(Assumption).scheme(as, type)
 #define t_find(var, as) trait(Assumption).lookup(var, as)
 #define t_add(var, scheme, as) trait(Assumption).add(var, scheme, as)
