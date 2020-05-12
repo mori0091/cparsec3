@@ -284,8 +284,10 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
   case CON:
     RETURN_OK(x);
   case CAPPLY: {
-    /* ExprT E = trait(Expr); */
-    /* x = E.capply(eval_expr(ctx, x->lhs), eval_expr(ctx, x->rhs)); */
+    ExprT E = trait(Expr);
+    EVAL(ctx, x->lhs, lhs);
+    EVAL(ctx, x->rhs, rhs);
+    x = E.capply(lhs.ok, rhs.ok);
     RETURN_OK(x);
   }
   default:

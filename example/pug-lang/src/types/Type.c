@@ -139,15 +139,15 @@ show_user_type(Type)(CharBuff* b, Type x) {
   Show(Type) s = trait(Show(Type));
   switch (x->kind) {
   case TVAR:
-    /* mem_printf(b, "(TVar %s)", x->tvar.ident); */
-    mem_printf(b, "%s", x->tvar.ident);
+    mem_printf(b, "(TVar %s)", x->tvar.ident);
+    /* mem_printf(b, "%s", x->tvar.ident); */
     break;
   case TCON:
     mem_printf(b, "%s", x->tcon.ident);
     break;
   case TAPPLY:
-    /* mem_printf(b, "(TApply "); */
-    mem_printf(b, "(");
+    mem_printf(b, "(TApply ");
+    /* mem_printf(b, "("); */
     s.toString(b, x->lhs);
     mem_printf(b, " ");
     s.toString(b, x->rhs);

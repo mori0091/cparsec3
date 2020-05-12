@@ -360,22 +360,35 @@ fn(typeOfPrint, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RETURN(x);
 }
 
-static Expr c2f(Expr ctor) {
-  ExprT E = trait(Expr);
-  switch (ctor->kind) {
-  case CON:
-    return E.var((Var){ctor->con.ident});
-  case CAPPLY:
-    return E.apply(c2f(ctor->lhs), c2f(ctor->rhs));
-  default:
-    return ctor;
-  }
-}
-
 fn(typeOfCon, TAList, Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
-  TI_RUN(typeOf0(as, c2f(e), t), x);
+  ExprT E = trait(Expr);
+  TI_RUN(typeOf0(as, E.var((Var){e->con.ident}), t), x);
   TI_RETURN(x);
+}
+
+fn(typeOfCapply, TAList, Expr, Type, UnTypeInferArgs(None)) {
+  g_bind((as, e, t, s, ok, err), *args);
+  // TODO fix this ; does not work expected.
+  TypeT T = trait(Type);
+  TI_RUN(newTVar(), a);
+  TI_RUN(newTVar(), b);
+  TI_RUN(typeOf0(as, e->rhs, a));
+  TI_RUN(typeOf0(as, e->lhs, T.funcType(a, b)));
+  TI_RUN(unify(b, t), x);
+  TI_RETURN(x);
+
+  // NOTE the below works as expecetd,
+  // if and only if `e` was `Just x` of `Maybe a` type.
+  // ~~~c
+  // TypeT T = trait(Type);
+  // TI_RUN(newTVar(), a);
+  // Type b = T.tapply(T.tcon((TCon){"Maybe"}), a);
+  // TI_RUN(typeOf0(as, e->rhs, a));
+  // TI_RUN(typeOf0(as, e->lhs, T.funcType(a, b)));
+  // TI_RUN(unify(b, t), x);
+  // TI_RETURN(x);
+  // ~~~
 }
 
 fn(typeOfFail, TAList, Expr, Type, UnTypeInferArgs(None)) {
@@ -470,6 +483,10 @@ static TypeInfer(None) typeOf0Impl(TAList as, Expr e, Type t) {
   }
   case CON: {
     __auto_type f = typeOfCon();
+    return (TypeInfer(None)){fn_apply(f, as, e, t)};
+  }
+  case CAPPLY: {
+    __auto_type f = typeOfCapply();
     return (TypeInfer(None)){fn_apply(f, as, e, t)};
   }
   default: {

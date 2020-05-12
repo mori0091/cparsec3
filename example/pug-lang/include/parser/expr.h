@@ -149,8 +149,8 @@ PARSER(Expr) let(void);
 PARSER(Expr) declvar(void);
 PARSER(Expr) decltype(void);
 PARSER(Type) simpletype(void);
-PARSER(Expr) constrs(Expr datatype);
-PARSER(Expr) constr(Expr datatype);
+PARSER(Expr) constrs(Type datatype);
+PARSER(Expr) constr(Type datatype);
 
 PARSER(Expr) type_annotation(void);
 

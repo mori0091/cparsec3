@@ -32,12 +32,11 @@ parsec(declvar, Expr) {
 
 // PARSER(Expr) decltype(void);
 parsec(decltype, Expr) {
-  ExprT E = trait(Expr);
   DO() {
     SCAN(lexme(keyword("type")));
     SCAN(simpletype(), lhs);
     SCAN(lexme(char1('=')));
-    SCAN(constrs(E.type(lhs)), rhs);
+    SCAN(constrs(lhs), rhs);
     RETURN(rhs);
   }
 }
@@ -47,8 +46,8 @@ parsec(simpletype, Type) {
   ArrayT(Type) A = trait(Array(Type));
   TypeT T = trait(Type);
   DO() {
-    SCAN(qtctor(), lhs);        /* Type ; (TCon t) */
-    SCAN(many(tvar()), tvars);  /* Array(Type) ; arrya of (TVar v) */
+    SCAN(qtctor(), lhs);       /* Type ; (TCon t) */
+    SCAN(many(tvar()), tvars); /* Array(Type) ; arrya of (TVar v) */
     for (Type* t = A.begin(tvars); t != A.end(tvars); t++) {
       lhs = T.tapply(lhs, *t);
     }
@@ -58,7 +57,7 @@ parsec(simpletype, Type) {
 }
 
 // PARSER(Expr) constrs(Expr datatype);
-parsec(constrs, Expr, Expr) {
+parsec(constrs, Type, Expr) {
   ExprT E = trait(Expr);
   PARSER(Maybe(char)) sep = optional(lexme(char1('|')));
   DO() WITH(datatype) {
@@ -75,13 +74,44 @@ parsec(constrs, Expr, Expr) {
 }
 
 // PARSER(Expr) constr(Expr datatype);
-parsec(constr, Expr, Expr) {
+parsec(constr, Type, Expr) {
+  TypeT T = trait(Type);
+  ArrayT(Type) A = trait(Array(Type));
   ExprT E = trait(Expr);
   DO() WITH(datatype) {
     SCAN(Identifier(), name);
+    SCAN(many(atype()), args);
     Expr x = E.var((Var){name});
-    Expr val = E.con((Con){name});
-    RETURN(E.seq(E.declvar(x, datatype), E.let(x, val)));
+    Expr c = E.con((Con){name});
+    // ---- nullary constructor
+    if (A.null(args)) {
+      RETURN(E.seq(E.declvar(x, E.type(datatype)), E.let(x, c)));
+    }
+    // ---- n-ary constructor
+    // type of constructor (function type)
+    for (Type* t = A.end(args); t != A.begin(args);) {
+      datatype = T.funcType(*(--t), datatype);
+    }
+    size_t n = A.length(args);
+    A.free(&args);
+    // function's arguments
+    Expr vars[n];
+    for (size_t i = 0; i < n; ++i) {
+      CharBuff b = {0};
+      mem_printf(&b, "a%zu", i);
+      vars[i] = E.var((Var){b.data});
+    }
+    // function's body
+    Expr body = c;
+    for (size_t i = 0; i < n; ++i) {
+      body = E.capply(body, vars[i]);
+    }
+    // function
+    Expr f = body;
+    while (n) {
+      f = E.lambda(vars[--n], f);
+    }
+    RETURN(E.seq(E.declvar(x, E.type(datatype)), E.let(x, f)));
   }
 }
 
