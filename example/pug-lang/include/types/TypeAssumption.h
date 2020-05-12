@@ -3,7 +3,7 @@
 
 #include "Expr.h"
 #include "TypeScheme.h"
-#include "TypeVarProc.h"
+#include "Types.h"
 
 typedef struct TypeAssumption {
   Var var;
@@ -11,8 +11,8 @@ typedef struct TypeAssumption {
 } TypeAssumption;
 
 trait_List(TypeAssumption);
-trait_TypeVarProc(TypeAssumption);
-trait_TypeVarProc(List(TypeAssumption));
+trait_Types(TypeAssumption);
+trait_Types(List(TypeAssumption));
 
 typedef List(TypeAssumption) TAList;
 

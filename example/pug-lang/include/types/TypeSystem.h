@@ -7,7 +7,7 @@
 #include "TypeEnv.h"
 
 #include "Subst.h"
-#include "TypeVarProc.h"
+#include "Types.h"
 
 #include "TypeScheme.h"
 
@@ -16,12 +16,11 @@
 #include "TypeAssumption.h"
 #include "TypeUnify.h"
 
-#define TRAIT_TYPEVARPROC(T) trait(TypeVarProc(T))
+#define TRAIT_TYPES(T) trait(Types(T))
 
-#define GENERIC_TYPEVARPROC(t)                                           \
-  GENERIC(t, IDENTITY, TRAIT_TYPEVARPROC, Type, TypeScheme,              \
-          TypeAssumption, List(Type), List(TypeScheme),                  \
-          List(TypeAssumption))
+#define GENERIC_TYPES(t)                                                 \
+  GENERIC(t, IDENTITY, TRAIT_TYPES, Type, TypeScheme, TypeAssumption,    \
+          List(Type), List(TypeScheme), List(TypeAssumption))
 
 #define TRAIT_TIRUNNER(T) trait(TIRunner(T))
 
@@ -33,9 +32,9 @@
 #define t_create_subst(tvar, type) trait(Subst).create(tvar, type)
 #define t_composite_subst(s1, s2) trait(Subst).composite(s1, s2)
 
-// TypeVarProc
-#define t_apply_subst(s, t) GENERIC_TYPEVARPROC(t).subst(s, t)
-#define t_extract_tvars(t) GENERIC_TYPEVARPROC(t).tvarsOf(t)
+// Types
+#define t_apply_subst(s, t) GENERIC_TYPES(t).subst(s, t)
+#define t_extract_tvars(t) GENERIC_TYPES(t).tvarsOf(t)
 #define t_union_tvars(tvars1, tvars2) unionTyvars(tvars1, tvars2)
 
 // TypeInfer / TIRunner (type inference monad)

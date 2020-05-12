@@ -3,32 +3,31 @@
 #include "types/TypeAssumption.h"
 
 // -----------------------------------------------------------------------
-// ---- trait TypeVarProc(TypeAssumption)
+// ---- trait Types(TypeAssumption)
 
 static TypeAssumption
-FUNC_NAME(subst, TypeVarProc(TypeAssumption))(Subst s,
-                                              TypeAssumption as) {
-  as.scheme = trait(TypeVarProc(TypeScheme)).subst(s, as.scheme);
+FUNC_NAME(subst, Types(TypeAssumption))(Subst s, TypeAssumption as) {
+  as.scheme = trait(Types(TypeScheme)).subst(s, as.scheme);
   return as;
 }
 
 static List(Tyvar)
-    FUNC_NAME(tvarsOf, TypeVarProc(TypeAssumption))(TypeAssumption as) {
-  return trait(TypeVarProc(TypeScheme)).tvarsOf(as.scheme);
+    FUNC_NAME(tvarsOf, Types(TypeAssumption))(TypeAssumption as) {
+  return trait(Types(TypeScheme)).tvarsOf(as.scheme);
 }
 
-TypeVarProc(TypeAssumption) Trait(TypeVarProc(TypeAssumption)) {
-  return (TypeVarProc(TypeAssumption)){
-      .subst = FUNC_NAME(subst, TypeVarProc(TypeAssumption)),
-      .tvarsOf = FUNC_NAME(tvarsOf, TypeVarProc(TypeAssumption)),
+Types(TypeAssumption) Trait(Types(TypeAssumption)) {
+  return (Types(TypeAssumption)){
+      .subst = FUNC_NAME(subst, Types(TypeAssumption)),
+      .tvarsOf = FUNC_NAME(tvarsOf, Types(TypeAssumption)),
   };
 }
 
 // -----------------------------------------------------------------------
-// ---- trait TypeVarProc(List(TypeAssumption))
+// ---- trait Types(List(TypeAssumption))
 
 impl_List(TypeAssumption);
-impl_TypeVarProc_List(TypeAssumption);
+impl_Types_List(TypeAssumption);
 
 // -----------------------------------------------------------------------
 // ---- trait Assumption
@@ -64,9 +63,8 @@ List(Tyvar) subtractTyvars(List(Tyvar) a, List(Tyvar) b) {
 
 static TypeScheme FUNC_NAME(scheme, Assumption)(List(TypeAssumption) as,
                                                 Type t) {
-  TypeVarProc(Type) S = trait(TypeVarProc(Type));
-  TypeVarProc(List(TypeAssumption)) SA =
-      trait(TypeVarProc(List(TypeAssumption)));
+  Types(Type) S = trait(Types(Type));
+  Types(List(TypeAssumption)) SA = trait(Types(List(TypeAssumption)));
   List(Tyvar) gs = subtractTyvars(S.tvarsOf(t), SA.tvarsOf(as));
   // int n = trait(List(Tyvar)).length(gs);
   TypeT T = trait(Type);

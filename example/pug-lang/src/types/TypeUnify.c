@@ -1,10 +1,10 @@
 /* -*- coding: utf-8-unix -*- */
 
 #include "types/TypeUnify.h"
-#include "types/TypeVarProc.h"
+#include "types/Types.h"
 
 Maybe(Subst) FUNC_NAME(unifier, TypeUnify)(Type t1, Type t2) {
-  TypeVarProc(Type) S = trait(TypeVarProc(Type));
+  Types(Type) S = trait(Types(Type));
   TypeUnify U = trait(TypeUnify);
   if (t1->id == TAPPLY && t2->id == TAPPLY) {
     Maybe(Subst) s1, s2;
@@ -43,7 +43,7 @@ Maybe(Subst) FUNC_NAME(tbind, TypeUnify)(Tyvar tvar, Type t) {
   }
   /* Is type `t` contains same type variable with `tvar` ? */
   {
-    List(Tyvar) xs = trait(TypeVarProc(Type)).tvarsOf(t);
+    List(Tyvar) xs = trait(Types(Type)).tvarsOf(t);
     while (xs) {
       if (E.eq(xs->head, tvar)) {
         return (Maybe(Subst)){.none = true}; /* error */

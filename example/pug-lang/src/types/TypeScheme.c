@@ -3,28 +3,27 @@
 #include "types/TypeScheme.h"
 
 // -----------------------------------------------------------------------
-// ---- trait TypeVarProc(TypeScheme)
+// ---- trait Types(TypeScheme)
 
-static TypeScheme
-FUNC_NAME(subst, TypeVarProc(TypeScheme))(Subst s, TypeScheme t) {
-  t.type = trait(TypeVarProc(Type)).subst(s, t.type);
+static TypeScheme FUNC_NAME(subst, Types(TypeScheme))(Subst s,
+                                                      TypeScheme t) {
+  t.type = trait(Types(Type)).subst(s, t.type);
   return t;
 }
 
-static List(Tyvar)
-    FUNC_NAME(tvarsOf, TypeVarProc(TypeScheme))(TypeScheme t) {
-  return trait(TypeVarProc(Type)).tvarsOf(t.type);
+static List(Tyvar) FUNC_NAME(tvarsOf, Types(TypeScheme))(TypeScheme t) {
+  return trait(Types(Type)).tvarsOf(t.type);
 }
 
-TypeVarProc(TypeScheme) Trait(TypeVarProc(TypeScheme)) {
-  return (TypeVarProc(TypeScheme)){
-      .subst = FUNC_NAME(subst, TypeVarProc(TypeScheme)),
-      .tvarsOf = FUNC_NAME(tvarsOf, TypeVarProc(TypeScheme)),
+Types(TypeScheme) Trait(Types(TypeScheme)) {
+  return (Types(TypeScheme)){
+      .subst = FUNC_NAME(subst, Types(TypeScheme)),
+      .tvarsOf = FUNC_NAME(tvarsOf, Types(TypeScheme)),
   };
 }
 
 // -----------------------------------------------------------------------
-// ---- trait TypeVarProc(List(TypeScheme))
+// ---- trait Types(List(TypeScheme))
 
 impl_List(TypeScheme);
-impl_TypeVarProc_List(TypeScheme);
+impl_Types_List(TypeScheme);

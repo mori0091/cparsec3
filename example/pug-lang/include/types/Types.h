@@ -13,37 +13,36 @@ trait_List(Tyvar);
 List(Tyvar) unionTyvars(List(Tyvar) as, List(Tyvar) bs);
 
 // -----------------------------------------------------------------------
-#define TypeVarProc(T) TYPE_NAME(TypeVarProc, T)
+#define Types(T) TYPE_NAME(Types, T)
 
-#define trait_TypeVarProc(T)                                             \
+#define trait_Types(T)                                                   \
   C_API_BEGIN                                                            \
                                                                          \
-  typedef struct TypeVarProc(T) TypeVarProc(T);                          \
-  struct TypeVarProc(T) {                                                \
+  typedef struct Types(T) Types(T);                                      \
+  struct Types(T) {                                                      \
     /** apply type substitution */                                       \
     T (*subst)(Subst s, T t);                                            \
     /** extract list of type variables */                                \
     List(Tyvar) (*tvarsOf)(T t);                                         \
   };                                                                     \
                                                                          \
-  TypeVarProc(T) Trait(TypeVarProc(T));                                  \
+  Types(T) Trait(Types(T));                                              \
                                                                          \
   C_API_END                                                              \
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
 trait_List(Type);
-trait_TypeVarProc(Type);
-trait_TypeVarProc(List(Type));
+trait_Types(Type);
+trait_Types(List(Type));
 
 // -----------------------------------------------------------------------
-// ---- trait TypeVarProc(List(T))
+// ---- trait Types(List(T))
 
-#define impl_TypeVarProc_List(T)                                         \
+#define impl_Types_List(T)                                               \
                                                                          \
-  static List(T)                                                         \
-      FUNC_NAME(subst, TypeVarProc(List(T)))(Subst s, List(T) t) {       \
-    TypeVarProc(T) S = trait(TypeVarProc(T));                            \
+  static List(T) FUNC_NAME(subst, Types(List(T)))(Subst s, List(T) t) {  \
+    Types(T) S = trait(Types(T));                                        \
     ListT(T) L = trait(List(T));                                         \
     List(T) xs = L.empty;                                                \
     while (t) {                                                          \
@@ -53,12 +52,11 @@ trait_TypeVarProc(List(Type));
     return xs;                                                           \
   }                                                                      \
                                                                          \
-  static List(Tyvar)                                                     \
-      FUNC_NAME(tvarsOf, TypeVarProc(List(T)))(List(T) t) {              \
+  static List(Tyvar) FUNC_NAME(tvarsOf, Types(List(T)))(List(T) t) {     \
     if (!t) {                                                            \
       return NULL;                                                       \
     }                                                                    \
-    TypeVarProc(T) S = trait(TypeVarProc(T));                            \
+    Types(T) S = trait(Types(T));                                        \
     ListT(T) L = trait(List(T));                                         \
     List(Tyvar) xs = NULL;                                               \
     while (t) {                                                          \
@@ -68,10 +66,10 @@ trait_TypeVarProc(List(Type));
     return xs;                                                           \
   }                                                                      \
                                                                          \
-  TypeVarProc(List(T)) Trait(TypeVarProc(List(T))) {                     \
-    return (TypeVarProc(List(T))){                                       \
-        .subst = FUNC_NAME(subst, TypeVarProc(List(T))),                 \
-        .tvarsOf = FUNC_NAME(tvarsOf, TypeVarProc(List(T))),             \
+  Types(List(T)) Trait(Types(List(T))) {                                 \
+    return (Types(List(T))){                                             \
+        .subst = FUNC_NAME(subst, Types(List(T))),                       \
+        .tvarsOf = FUNC_NAME(tvarsOf, Types(List(T))),                   \
     };                                                                   \
   }                                                                      \
                                                                          \

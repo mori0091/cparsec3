@@ -1,7 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 
 #include "types/Subst.h"
-#include "types/TypeVarProc.h"
+#include "types/Types.h"
 
 #include <inttypes.h>
 
@@ -32,7 +32,7 @@ static Subst FUNC_NAME(composite, Subst)(Subst s1, Subst s2) {
     return s1;
   }
   SubstT T = trait(Subst);
-  TypeVarProc(Type) S = trait(TypeVarProc(Type));
+  Types(Type) S = trait(Types(Type));
   Subst s = T.create(s2->head.tvar, S.subst(s1, s2->head.type));
   Subst st = s;
   s2 = s2->tail;

@@ -1,6 +1,6 @@
 /* -*- coding: utf-8-unix -*- */
 
-#include "types/TypeVarProc.h"
+#include "types/Types.h"
 
 // -----------------------------------------------------------------------
 impl_List(Tyvar);
@@ -33,7 +33,7 @@ List(Tyvar) unionTyvars(List(Tyvar) as, List(Tyvar) bs) {
 }
 
 // -----------------------------------------------------------------------
-// ---- trait TypeVarProc(Type)
+// ---- trait Types(Type)
 
 static Type subst_tvar_to_type(Subst s, Type t) {
   assert(t && t->id == TVAR && "Not a type variable");
@@ -47,14 +47,14 @@ static Type subst_tvar_to_type(Subst s, Type t) {
   return t;
 }
 
-static Type FUNC_NAME(subst, TypeVarProc(Type))(Subst s, Type t) {
+static Type FUNC_NAME(subst, Types(Type))(Subst s, Type t) {
   assert(t && "Null pointer");
   switch (t->id) {
   case TVAR:
     return subst_tvar_to_type(s, t);
   case TAPPLY: {
     TypeT T = trait(Type);
-    TypeVarProc(Type) S = trait(TypeVarProc(Type));
+    Types(Type) S = trait(Types(Type));
     return T.TAp(S.subst(s, t->lhs), S.subst(s, t->rhs));
   }
   default:
@@ -62,14 +62,14 @@ static Type FUNC_NAME(subst, TypeVarProc(Type))(Subst s, Type t) {
   }
 }
 
-static List(Tyvar) FUNC_NAME(tvarsOf, TypeVarProc(Type))(Type t) {
+static List(Tyvar) FUNC_NAME(tvarsOf, Types(Type))(Type t) {
   assert(t && "Null pointer");
   ListT(Tyvar) L = trait(List(Tyvar));
   switch (t->id) {
   case TVAR:
     return L.cons(t->tvar, L.empty);
   case TAPPLY: {
-    TypeVarProc(Type) S = trait(TypeVarProc(Type));
+    Types(Type) S = trait(Types(Type));
     return unionTyvars(S.tvarsOf(t->lhs), S.tvarsOf(t->rhs));
   }
   default:
@@ -77,15 +77,15 @@ static List(Tyvar) FUNC_NAME(tvarsOf, TypeVarProc(Type))(Type t) {
   }
 }
 
-TypeVarProc(Type) Trait(TypeVarProc(Type)) {
-  return (TypeVarProc(Type)){
-      .subst = FUNC_NAME(subst, TypeVarProc(Type)),
-      .tvarsOf = FUNC_NAME(tvarsOf, TypeVarProc(Type)),
+Types(Type) Trait(Types(Type)) {
+  return (Types(Type)){
+      .subst = FUNC_NAME(subst, Types(Type)),
+      .tvarsOf = FUNC_NAME(tvarsOf, Types(Type)),
   };
 }
 
 // -----------------------------------------------------------------------
-// ---- trait TypeVarProc(List(Type))
+// ---- trait Types(List(Type))
 
 impl_List(Type);
-impl_TypeVarProc_List(Type);
+impl_Types_List(Type);

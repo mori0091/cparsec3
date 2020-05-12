@@ -3,7 +3,7 @@
 
 #include "Subst.h"
 #include "Type.h"
-#include "TypeVarProc.h"
+#include "Types.h"
 
 typedef struct TypeScheme {
   int numTGen; ///< number of `TGen` in the `type`.
@@ -11,5 +11,5 @@ typedef struct TypeScheme {
 } TypeScheme;
 
 trait_List(TypeScheme);
-trait_TypeVarProc(TypeScheme);
-trait_TypeVarProc(List(TypeScheme));
+trait_Types(TypeScheme);
+trait_Types(List(TypeScheme));
