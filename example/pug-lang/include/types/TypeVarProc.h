@@ -3,8 +3,8 @@
 
 #include <cparsec3/base/base.h>
 
+#include "Subst.h"
 #include "Type.h"
-#include "TypeSubst.h"
 
 // -----------------------------------------------------------------------
 trait_List(Tyvar);
@@ -21,7 +21,7 @@ List(Tyvar) unionTyvars(List(Tyvar) as, List(Tyvar) bs);
   typedef struct TypeVarProc(T) TypeVarProc(T);                          \
   struct TypeVarProc(T) {                                                \
     /** apply type substitution */                                       \
-    T (*subst)(TypeSubst s, T t);                                        \
+    T (*subst)(Subst s, T t);                                            \
     /** extract list of type variables */                                \
     List(Tyvar) (*tvarsOf)(T t);                                         \
   };                                                                     \
@@ -42,7 +42,7 @@ trait_TypeVarProc(List(Type));
 #define impl_TypeVarProc_List(T)                                         \
                                                                          \
   static List(T)                                                         \
-      FUNC_NAME(subst, TypeVarProc(List(T)))(TypeSubst s, List(T) t) {   \
+      FUNC_NAME(subst, TypeVarProc(List(T)))(Subst s, List(T) t) {       \
     TypeVarProc(T) S = trait(TypeVarProc(T));                            \
     ListT(T) L = trait(List(T));                                         \
     List(T) xs = L.empty;                                                \

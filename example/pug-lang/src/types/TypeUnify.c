@@ -3,11 +3,11 @@
 #include "types/TypeUnify.h"
 #include "types/TypeVarProc.h"
 
-Maybe(TypeSubst) FUNC_NAME(unifier, TypeUnify)(Type t1, Type t2) {
+Maybe(Subst) FUNC_NAME(unifier, TypeUnify)(Type t1, Type t2) {
   TypeVarProc(Type) S = trait(TypeVarProc(Type));
   TypeUnify U = trait(TypeUnify);
   if (t1->id == TAPPLY && t2->id == TAPPLY) {
-    Maybe(TypeSubst) s1, s2;
+    Maybe(Subst) s1, s2;
     s1 = U.unifier(t1->lhs, t2->lhs);
     if (s1.none) {
       return s1; /* error */
@@ -17,8 +17,8 @@ Maybe(TypeSubst) FUNC_NAME(unifier, TypeUnify)(Type t1, Type t2) {
     if (s2.none) {
       return s2; /* error */
     }
-    TypeSubstT TS = trait(TypeSubst);
-    return (Maybe(TypeSubst)){.value = TS.composite(s2.value, s1.value)};
+    SubstT TS = trait(Subst);
+    return (Maybe(Subst)){.value = TS.composite(s2.value, s1.value)};
   }
   if (t1->id == TVAR) {
     return U.tbind(t1->tvar, t2);
@@ -27,32 +27,32 @@ Maybe(TypeSubst) FUNC_NAME(unifier, TypeUnify)(Type t1, Type t2) {
     return U.tbind(t2->tvar, t1);
   }
   if (t1->id == TCON && t2->id == TCON && trait(Eq(Type)).eq(t1, t2)) {
-    return (Maybe(TypeSubst)){.value = NULL};
+    return (Maybe(Subst)){.value = NULL};
   }
   /* otherwise error */
-  return (Maybe(TypeSubst)){.none = true};
+  return (Maybe(Subst)){.none = true};
 }
 
-Maybe(TypeSubst) FUNC_NAME(tbind, TypeUnify)(Tyvar tvar, Type t) {
-  TypeSubstT TS = trait(TypeSubst);
+Maybe(Subst) FUNC_NAME(tbind, TypeUnify)(Tyvar tvar, Type t) {
+  SubstT TS = trait(Subst);
   Eq(Tyvar) E = trait(Eq(Tyvar));
 
   /* Is type `t` same as the type variable `tvar` ? */
   if (t->id == TVAR && E.eq(t->tvar, tvar)) {
-    return (Maybe(TypeSubst)){.value = TS.empty};
+    return (Maybe(Subst)){.value = TS.empty};
   }
   /* Is type `t` contains same type variable with `tvar` ? */
   {
     List(Tyvar) xs = trait(TypeVarProc(Type)).tvarsOf(t);
     while (xs) {
       if (E.eq(xs->head, tvar)) {
-        return (Maybe(TypeSubst)){.none = true}; /* error */
+        return (Maybe(Subst)){.none = true}; /* error */
       }
       xs = xs->tail;
     }
   }
   /* otherwise */
-  return (Maybe(TypeSubst)){.value = TS.create(tvar, t)};
+  return (Maybe(Subst)){.value = TS.create(tvar, t)};
 }
 
 TypeUnify Trait(TypeUnify) {

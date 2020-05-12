@@ -3,20 +3,20 @@
 #include "types/TypeInferCombinator.h"
 
 // -----------------------------------------------------------------------
-fn(getSubstImpl, UnTypeInferArgs(TypeSubst)) {
+fn(getSubstImpl, UnTypeInferArgs(Subst)) {
   g_bind((s, ok), *args);
   return fn_apply(ok, s.subst, s);
 }
 
-TypeInfer(TypeSubst) getSubst(void) {
-  return (TypeInfer(TypeSubst)){getSubstImpl()};
+TypeInfer(Subst) getSubst(void) {
+  return (TypeInfer(Subst)){getSubstImpl()};
 }
 
 // -----------------------------------------------------------------------
 typedef_Fn_r(Type, Type, UnTypeInfer(None));
 fn(unifyImpl, Type, Type, UnTypeInferArgs(None)) {
   g_bind((t1, t2, s, ok, err), *args);
-  Maybe(TypeSubst) u =
+  Maybe(Subst) u =
       t_unifier(t_apply_subst(s.subst, t1), t_apply_subst(s.subst, t2));
   if (u.none) {
     Show(Type) S = trait(Show(Type));

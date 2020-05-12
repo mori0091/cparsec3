@@ -35,10 +35,10 @@ List(Tyvar) unionTyvars(List(Tyvar) as, List(Tyvar) bs) {
 // -----------------------------------------------------------------------
 // ---- trait TypeVarProc(Type)
 
-static Type subst_tvar_to_type(TypeSubst s, Type t) {
+static Type subst_tvar_to_type(Subst s, Type t) {
   assert(t && t->id == TVAR && "Not a type variable");
   while (s) {
-    TypeSubstEntry* e = &s->head;
+    SubstEntry* e = &s->head;
     if (trait(Eq(Tyvar)).eq(e->tvar, t->tvar)) {
       return e->type;
     }
@@ -47,7 +47,7 @@ static Type subst_tvar_to_type(TypeSubst s, Type t) {
   return t;
 }
 
-static Type FUNC_NAME(subst, TypeVarProc(Type))(TypeSubst s, Type t) {
+static Type FUNC_NAME(subst, TypeVarProc(Type))(Subst s, Type t) {
   assert(t && "Null pointer");
   switch (t->id) {
   case TVAR:

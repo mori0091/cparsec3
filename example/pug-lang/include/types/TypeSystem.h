@@ -6,7 +6,7 @@
 #include "Type.h"
 #include "TypeEnv.h"
 
-#include "TypeSubst.h"
+#include "Subst.h"
 #include "TypeVarProc.h"
 
 #include "TypeScheme.h"
@@ -28,10 +28,10 @@
 #define GENERIC_TIRUNNER(ti)                                             \
   GENERIC(ti, TypeInfer, TRAIT_TIRUNNER, TYPE_INFER_RETURN_TYPES())
 
-// TypeSubst
-#define t_empty_subst() trait(TypeSubst).empty
-#define t_create_subst(tvar, type) trait(TypeSubst).create(tvar, type)
-#define t_composite_subst(s1, s2) trait(TypeSubst).composite(s1, s2)
+// Subst
+#define t_empty_subst() trait(Subst).empty
+#define t_create_subst(tvar, type) trait(Subst).create(tvar, type)
+#define t_composite_subst(s1, s2) trait(Subst).composite(s1, s2)
 
 // TypeVarProc
 #define t_apply_subst(s, t) GENERIC_TYPEVARPROC(t).subst(s, t)

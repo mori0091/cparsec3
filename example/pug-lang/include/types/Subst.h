@@ -11,25 +11,25 @@ Tyvar freshTyvar(void);
 // -----------------------------------------------------------------------
 // type substitution ; a map from `type variable` to `type`
 
-typedef struct TypeSubstEntry {
+typedef struct SubstEntry {
   Tyvar tvar;
   Type type;
-} TypeSubstEntry;
+} SubstEntry;
 
-trait_List(TypeSubstEntry);
+trait_List(SubstEntry);
 
-typedef List(TypeSubstEntry) TypeSubst;
+typedef List(SubstEntry) Subst;
 
 // -----------------------------------------------------------------------
-// ---- trait TypeSubst
+// ---- trait Subst
 
-typedef struct TypeSubstT {
+typedef struct SubstT {
   /** empty type-substitution */
-  TypeSubst empty;
+  Subst empty;
   /** creates a type-substitution consists of one entry. */
-  TypeSubst (*create)(Tyvar tvar, Type type);
+  Subst (*create)(Tyvar tvar, Type type);
   /** Composites two type-substitutions. */
-  TypeSubst (*composite)(TypeSubst s1, TypeSubst s2);
-} TypeSubstT;
+  Subst (*composite)(Subst s1, Subst s2);
+} SubstT;
 
-TypeSubstT Trait(TypeSubst);
+SubstT Trait(Subst);

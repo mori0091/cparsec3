@@ -3,14 +3,14 @@
 
 #include <cparsec3/base/base_generics.h>
 
+#include "Subst.h"
 #include "Type.h"
 #include "TypeAssumption.h"
 #include "TypeScheme.h"
-#include "TypeSubst.h"
 
 typedef struct TIState {
   /** current type substitution */
-  TypeSubst subst;
+  Subst subst;
   /** next index for creating universal quantified type variable */
   int i;
 } TIState;
@@ -141,9 +141,9 @@ typedef struct TypeError {
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-#define TYPE_INFER_RETURN_TYPES() None, Type, TypeSubst, TypeScheme
+#define TYPE_INFER_RETURN_TYPES() None, Type, Subst, TypeScheme
 
 trait_TIRunner(None);
 trait_TIRunner(Type);
-trait_TIRunner(TypeSubst);
+trait_TIRunner(Subst);
 trait_TIRunner(TypeScheme);

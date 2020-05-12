@@ -6,7 +6,7 @@
 /**
  * Creates TypeInfer monad that gets current type-substitution.
  */
-TypeInfer(TypeSubst) getSubst(void);
+TypeInfer(Subst) getSubst(void);
 
 /**
  * Creates TypeInfer monad that extends current type-substitution by the

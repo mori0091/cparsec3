@@ -6,7 +6,7 @@
 // ---- trait TypeVarProc(TypeAssumption)
 
 static TypeAssumption
-FUNC_NAME(subst, TypeVarProc(TypeAssumption))(TypeSubst s,
+FUNC_NAME(subst, TypeVarProc(TypeAssumption))(Subst s,
                                               TypeAssumption as) {
   as.scheme = trait(TypeVarProc(TypeScheme)).subst(s, as.scheme);
   return as;
@@ -70,11 +70,11 @@ static TypeScheme FUNC_NAME(scheme, Assumption)(List(TypeAssumption) as,
   List(Tyvar) gs = subtractTyvars(S.tvarsOf(t), SA.tvarsOf(as));
   // int n = trait(List(Tyvar)).length(gs);
   TypeT T = trait(Type);
-  ListT(TypeSubstEntry) L = trait(List(TypeSubstEntry));
-  TypeSubst s = 0;
+  ListT(SubstEntry) L = trait(List(SubstEntry));
+  Subst s = 0;
   int n = 0;
   while (gs) {
-    TypeSubstEntry x = {.tvar = gs->head, .type = T.TGen(n)};
+    SubstEntry x = {.tvar = gs->head, .type = T.TGen(n)};
     s = L.cons(x, s);
     gs = gs->tail;
     n++;

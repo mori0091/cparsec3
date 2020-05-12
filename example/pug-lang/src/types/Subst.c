@@ -1,6 +1,6 @@
 /* -*- coding: utf-8-unix -*- */
 
-#include "types/TypeSubst.h"
+#include "types/Subst.h"
 #include "types/TypeVarProc.h"
 
 #include <inttypes.h>
@@ -14,28 +14,27 @@ Tyvar freshTVar(void) {
 }
 
 // -----------------------------------------------------------------------
-impl_List(TypeSubstEntry);
+impl_List(SubstEntry);
 
 // -----------------------------------------------------------------------
-// ---- trait TypeSubst
+// ---- trait Subst
 
-static TypeSubst FUNC_NAME(create, TypeSubst)(Tyvar tvar, Type type) {
-  TypeSubstEntry e = {.tvar = tvar, .type = type};
-  return trait(List(TypeSubstEntry)).cons(e, NULL);
+static Subst FUNC_NAME(create, Subst)(Tyvar tvar, Type type) {
+  SubstEntry e = {.tvar = tvar, .type = type};
+  return trait(List(SubstEntry)).cons(e, NULL);
 }
 
-static TypeSubst FUNC_NAME(composite, TypeSubst)(TypeSubst s1,
-                                                 TypeSubst s2) {
+static Subst FUNC_NAME(composite, Subst)(Subst s1, Subst s2) {
   if (!s1) {
     return s2;
   }
   if (!s2) {
     return s1;
   }
-  TypeSubstT T = trait(TypeSubst);
+  SubstT T = trait(Subst);
   TypeVarProc(Type) S = trait(TypeVarProc(Type));
-  TypeSubst s = T.create(s2->head.tvar, S.subst(s1, s2->head.type));
-  TypeSubst st = s;
+  Subst s = T.create(s2->head.tvar, S.subst(s1, s2->head.type));
+  Subst st = s;
   s2 = s2->tail;
   while (s2) {
     st->tail = T.create(s2->head.tvar, S.subst(s1, s2->head.type));
@@ -46,10 +45,10 @@ static TypeSubst FUNC_NAME(composite, TypeSubst)(TypeSubst s1,
   return s;
 }
 
-TypeSubstT Trait(TypeSubst) {
-  return (TypeSubstT){
+SubstT Trait(Subst) {
+  return (SubstT){
       .empty = NULL,
-      .create = FUNC_NAME(create, TypeSubst),
-      .composite = FUNC_NAME(composite, TypeSubst),
+      .create = FUNC_NAME(create, Subst),
+      .composite = FUNC_NAME(composite, Subst),
   };
 }

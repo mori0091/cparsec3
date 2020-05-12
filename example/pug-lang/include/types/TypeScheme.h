@@ -1,8 +1,8 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
+#include "Subst.h"
 #include "Type.h"
-#include "TypeSubst.h"
 #include "TypeVarProc.h"
 
 typedef struct TypeScheme {

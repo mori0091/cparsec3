@@ -6,7 +6,7 @@
 // ---- trait TypeVarProc(TypeScheme)
 
 static TypeScheme
-FUNC_NAME(subst, TypeVarProc(TypeScheme))(TypeSubst s, TypeScheme t) {
+FUNC_NAME(subst, TypeVarProc(TypeScheme))(Subst s, TypeScheme t) {
   t.type = trait(TypeVarProc(Type)).subst(s, t.type);
   return t;
 }
