@@ -11,7 +11,7 @@ static Type judge1(Context ctx, Expr e) {
   Type Unit = T.tcon_unit();
   Type Bool = T.tcon_bool();
   Type Int = T.tcon_int();
-  switch (e->kind) {
+  switch (e->id) {
   case PRINT:
     return Unit;
   case THUNK:

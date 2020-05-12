@@ -3,6 +3,8 @@
 
 #include "user_type.h"
 
+#include "Kind.h"
+
 #define TYPE(T) TYPE_##T()
 #define TYPE_int() trait(Type).tcon_int()
 #define TYPE_bool() trait(Type).tcon_bool()
@@ -15,6 +17,7 @@ decl_user_type(Type);
 /* Type variable */
 typedef struct TVar {
   String ident;
+  Kind kind;
 } TVar;
 
 /* Type constructor */
@@ -39,7 +42,7 @@ enum TypeId {
 };
 
 struct Type {
-  enum TypeId kind;
+  enum TypeId id;
   union {
     /* for type variable */
     TVar tvar;

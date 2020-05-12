@@ -52,7 +52,7 @@ TypeInfer(Type) newTVar(void) {
 
 // -----------------------------------------------------------------------
 static Type inst(Type* ts, size_t n, Type t) {
-  switch (t->kind) {
+  switch (t->id) {
   case TAPPLY:
     return trait(Type).tapply(inst(ts, n, t->lhs), inst(ts, n, t->rhs));
   case TANY:
@@ -123,7 +123,7 @@ fn(ti_labelImpl, TypeInfer(None), Expr, UnTypeInferArgs(None)) {
 }
 
 TypeInfer(None) ti_label(TypeInfer(None) ti, Expr e) {
-  switch (e->kind) {
+  switch (e->id) {
   case SEQ:
   case BLK:
     return ti;
@@ -194,7 +194,7 @@ fn(typeOfBlk, TAList, Expr, Type, UnTypeInferArgs(None)) {
 fn(typeOfSeq, TAList, Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   TypeT T = trait(Type);
-  switch (e->lhs->kind) {
+  switch (e->lhs->id) {
   case DECLVAR: {
     TypeScheme sc = t_gen(as, e->lhs->rhs->texpr);
     as = t_add(e->lhs->lhs->var, sc, as);
@@ -212,7 +212,7 @@ fn(typeOfSeq, TAList, Expr, Type, UnTypeInferArgs(None)) {
       TI_RUN(typeOf0(as, e->rhs, t), x);
       TI_RETURN(x);
     } else {
-      if (e->lhs->rhs->kind == LAMBDA) {
+      if (e->lhs->rhs->id == LAMBDA) {
         TI_RUN(newTVar(), a);
         TI_RUN(newTVar(), b);
         TI_RUN(newTVar(), f);
@@ -264,7 +264,7 @@ fn(typeOfLet, TAList, Expr, Type, UnTypeInferArgs(None)) {
     TI_RUN(unify(a, t), x);
     TI_RETURN(x);
   } else {
-    if (e->rhs->kind == LAMBDA) {
+    if (e->rhs->id == LAMBDA) {
       TypeT T = trait(Type);
       TI_RUN(newTVar(), a);
       TI_RUN(newTVar(), b);
@@ -397,7 +397,7 @@ fn(typeOfFail, TAList, Expr, Type, UnTypeInferArgs(None)) {
 }
 
 static TypeInfer(None) typeOf0Impl(TAList as, Expr e, Type t) {
-  switch (e->kind) {
+  switch (e->id) {
   case VAR: {
     __auto_type f = typeOfVar();
     return (TypeInfer(None)){fn_apply(f, as, e, t)};

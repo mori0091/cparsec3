@@ -87,7 +87,7 @@ enum ExprId {
 
 struct Expr {
   Type type;
-  enum ExprId kind;
+  enum ExprId id;
   union {
     struct {
       Context ctx;

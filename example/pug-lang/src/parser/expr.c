@@ -13,7 +13,7 @@ parsec(assign, Expr) {
   PARSER(char) op = lexme(char1('='));
   DO() {
     SCAN(p, lhs);
-    if (lhs->kind != VAR) {
+    if (lhs->id != VAR) {
       RETURN(lhs);
     }
     SCAN(optional(op), m);

@@ -29,7 +29,7 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
     EVAL(_ctx_, _a_, lhs);                                               \
     EVAL(_ctx_, _b_, rhs);                                               \
     REQUIRE_TYPE_EQ(lhs.ok->type, rhs.ok->type);                         \
-    switch (lhs.ok->kind) {                                              \
+    switch (lhs.ok->id) {                                                \
     case NUM: {                                                          \
       bool x = lhs.ok->num.value _op_ rhs.ok->num.value;                 \
       RETURN_OK(trait(Expr).boolean(x));                                 \
@@ -37,7 +37,7 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
     case FALSE:                                                          \
     case TRUE:                                                           \
     case UNIT: {                                                         \
-      bool x = lhs.ok->kind _op_ rhs.ok->kind;                           \
+      bool x = lhs.ok->id _op_ rhs.ok->id;                               \
       RETURN_OK(trait(Expr).boolean(x));                                 \
     }                                                                    \
     case CLOSURE:                                                        \
@@ -87,7 +87,7 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
 // -----------------------------------------------------------------------
 static EvalResult eval_apply(Context ctx, Expr x) {
   EVAL(ctx, x->lhs, f);
-  if (f.ok->kind != CLOSURE) {
+  if (f.ok->id != CLOSURE) {
     RETURN_ERR("function application");
   }
   Expr v = f.ok->lambda->lhs;    // (Var v)
@@ -114,7 +114,7 @@ static EvalResult eval_ifelse(Context ctx, Expr x) {
   Expr then_blk = x->rhs->lhs;
   Expr else_blk = x->rhs->rhs;
   // REQUIRE_TYPE_EQ(then_blk->type, else_blk->type);
-  RETURN_DEFERED(c, (cond.ok->kind == TRUE ? then_blk : else_blk));
+  RETURN_DEFERED(c, (cond.ok->id == TRUE ? then_blk : else_blk));
 }
 
 static EvalResult eval_block(Context ctx, Expr x) {
@@ -130,7 +130,7 @@ static EvalResult eval_seq(Context ctx, Expr x) {
 static EvalResult eval_let(Context ctx, Expr x) {
   ContextT C = trait(Context);
   ExprT E = trait(Expr);
-  assert(x->lhs->kind == VAR);
+  assert(x->lhs->id == VAR);
   MapEntry* m = C.map.lookup_local(ctx, x->lhs->var.ident);
   if (m && m->type && !m->e) {
     // if the variable is locally declared but not defined yet, type
@@ -148,8 +148,8 @@ static EvalResult eval_let(Context ctx, Expr x) {
 
 static EvalResult eval_declvar(Context ctx, Expr x) {
   ContextT C = trait(Context);
-  assert(x->lhs->kind == VAR);
-  assert(x->rhs->kind == TYPE);
+  assert(x->lhs->id == VAR);
+  assert(x->rhs->id == TYPE);
   // if the previous definiton exists, it will be shadowed.
   C.map.put(ctx, x->lhs->var.ident, x->rhs->texpr, NULL);
   RETURN_OK(x->rhs);
@@ -158,7 +158,7 @@ static EvalResult eval_declvar(Context ctx, Expr x) {
 static EvalResult eval_assign(Context ctx, Expr x) {
   ContextT C = trait(Context);
   ExprT E = trait(Expr);
-  assert(x->lhs->kind == VAR);
+  assert(x->lhs->id == VAR);
   EVAL(ctx, x->rhs, rhs);
   EVAL(ctx, x->lhs, lhs);
   // types must be same with previous definition
@@ -171,7 +171,7 @@ static EvalResult eval_assign(Context ctx, Expr x) {
 static EvalResult eval_logical_AND_OR(Context ctx, Expr x) {
   EVAL(ctx, x->lhs, lhs);
   REQUIRE_TYPE_EQ(lhs.ok->type, TYPE(bool));
-  if (lhs.ok->kind == (x->kind == OR ? TRUE : FALSE)) {
+  if (lhs.ok->id == (x->id == OR ? TRUE : FALSE)) {
     RETURN_OK(lhs.ok);
   }
   EVAL(ctx, x->rhs, rhs);
@@ -196,7 +196,7 @@ static EvalResult eval_negate(Context ctx, Expr x) {
 static EvalResult eval_not(Context ctx, Expr x) {
   ExprT E = trait(Expr);
   EVAL(ctx, x->rhs, rhs);
-  switch (rhs.ok->kind) {
+  switch (rhs.ok->id) {
   case NUM:
     RETURN_OK(E.num((Num){~rhs.ok->num.value}));
   case TRUE:
@@ -222,7 +222,7 @@ static EvalResult eval_var(Context ctx, Expr x) {
 // -----------------------------------------------------------------------
 static EvalResult eval_expr1(Context ctx, Expr x) {
   // trait(TypeEnv).judge(ctx, x); /* infer type of x */
-  switch (x->kind) {
+  switch (x->id) {
   case APPLY:
     return eval_apply(ctx, x);
   case LAMBDA:
@@ -300,7 +300,7 @@ static inline bool is_defered(EvalResult r) {
 }
 
 static inline bool is_thunk(EvalResult r) {
-  return r.success && r.ok->kind == THUNK;
+  return r.success && r.ok->id == THUNK;
 }
 
 static EvalResult eval_expr(Context ctx, Expr x) {

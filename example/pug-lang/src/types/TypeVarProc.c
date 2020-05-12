@@ -36,7 +36,7 @@ List(TVar) unionTVars(List(TVar) as, List(TVar) bs) {
 // ---- trait TypeVarProc(Type)
 
 static Type subst_tvar_to_type(TypeSubst s, Type t) {
-  assert(t && t->kind == TVAR && "Not a type variable");
+  assert(t && t->id == TVAR && "Not a type variable");
   while (s) {
     TypeSubstEntry* e = &s->head;
     if (trait(Eq(TVar)).eq(e->tvar, t->tvar)) {
@@ -49,7 +49,7 @@ static Type subst_tvar_to_type(TypeSubst s, Type t) {
 
 static Type FUNC_NAME(subst, TypeVarProc(Type))(TypeSubst s, Type t) {
   assert(t && "Null pointer");
-  switch (t->kind) {
+  switch (t->id) {
   case TVAR:
     return subst_tvar_to_type(s, t);
   case TAPPLY: {
@@ -65,7 +65,7 @@ static Type FUNC_NAME(subst, TypeVarProc(Type))(TypeSubst s, Type t) {
 static List(TVar) FUNC_NAME(tvarsOf, TypeVarProc(Type))(Type t) {
   assert(t && "Null pointer");
   ListT(TVar) L = trait(List(TVar));
-  switch (t->kind) {
+  switch (t->id) {
   case TVAR:
     return L.cons(t->tvar, L.empty);
   case TAPPLY: {

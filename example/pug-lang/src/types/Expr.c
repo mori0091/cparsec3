@@ -8,17 +8,17 @@ static Expr Expr_New(void) {
   return e;
 }
 
-static Expr Expr_Binary(enum ExprId kind, Expr lhs, Expr rhs) {
+static Expr Expr_Binary(enum ExprId id, Expr lhs, Expr rhs) {
   Expr e = Expr_New();
-  e->kind = kind;
+  e->id = id;
   e->lhs = lhs;
   e->rhs = rhs;
   return e;
 }
 
-static Expr Expr_Unary(enum ExprId kind, Expr rhs) {
+static Expr Expr_Unary(enum ExprId id, Expr rhs) {
   Expr e = Expr_New();
-  e->kind = kind;
+  e->id = id;
   e->lhs = 0;
   e->rhs = rhs;
   return e;
@@ -47,14 +47,14 @@ static Expr FUNC_NAME(print, Expr)(Expr rhs) {
 // ----
 static Expr FUNC_NAME(thunk, Expr)(Context ctx, Expr rhs) {
   Expr e = Expr_New();
-  e->kind = THUNK;
+  e->id = THUNK;
   e->ctx = ctx;
   e->expr = rhs;
   return e;
 }
 static Expr FUNC_NAME(closure, Expr)(Context ctx, Expr rhs) {
   Expr e = Expr_New();
-  e->kind = CLOSURE;
+  e->id = CLOSURE;
   e->ctx = ctx;
   e->lambda = rhs;
   return e;
@@ -130,38 +130,38 @@ static Expr FUNC_NAME(not, Expr)(Expr rhs) {
 }
 static Expr FUNC_NAME(var, Expr)(Var x) {
   Expr e = Expr_New();
-  e->kind = VAR;
+  e->id = VAR;
   e->var = x;
   return e;
 }
 static Expr FUNC_NAME(num, Expr)(Num x) {
   Expr e = Expr_New();
   e->type = TYPE(int);
-  e->kind = NUM;
+  e->id = NUM;
   e->num = x;
   return e;
 }
 static Expr FUNC_NAME(boolean, Expr)(bool b) {
-  static struct Expr T = {.kind = TRUE};
-  static struct Expr F = {.kind = FALSE};
+  static struct Expr T = {.id = TRUE};
+  static struct Expr F = {.id = FALSE};
   T.type = F.type = TYPE(bool);
   return (b ? &T : &F);
 }
 static Expr FUNC_NAME(unit, Expr)(void) {
-  static struct Expr e = {.kind = UNIT};
+  static struct Expr e = {.id = UNIT};
   e.type = TYPE(unit);
   return &e;
 }
 static Expr FUNC_NAME(type, Expr)(Type t) {
   Expr e = Expr_New();
   e->type = 0; /* TODO: what should be set? */
-  e->kind = TYPE;
+  e->id = TYPE;
   e->texpr = t;
   return e;
 }
 static Expr FUNC_NAME(con, Expr)(Con c) {
   Expr e = Expr_New();
-  e->kind = CON;
+  e->id = CON;
   e->con = c;
   return e;
 }
@@ -216,7 +216,7 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     return;
   }
   Show(Expr) s = trait(Show(Expr));
-  switch (x->kind) {
+  switch (x->id) {
     // ----
   case PRINT:
     Expr_showUnary(b, "Print", x->rhs);

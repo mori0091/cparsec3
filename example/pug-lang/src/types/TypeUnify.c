@@ -6,7 +6,7 @@
 Maybe(TypeSubst) FUNC_NAME(unifier, TypeUnify)(Type t1, Type t2) {
   TypeVarProc(Type) S = trait(TypeVarProc(Type));
   TypeUnify U = trait(TypeUnify);
-  if (t1->kind == TAPPLY && t2->kind == TAPPLY) {
+  if (t1->id == TAPPLY && t2->id == TAPPLY) {
     Maybe(TypeSubst) s1, s2;
     s1 = U.unifier(t1->lhs, t2->lhs);
     if (s1.none) {
@@ -20,14 +20,13 @@ Maybe(TypeSubst) FUNC_NAME(unifier, TypeUnify)(Type t1, Type t2) {
     TypeSubstT TS = trait(TypeSubst);
     return (Maybe(TypeSubst)){.value = TS.composite(s2.value, s1.value)};
   }
-  if (t1->kind == TVAR) {
+  if (t1->id == TVAR) {
     return U.tbind(t1->tvar, t2);
   }
-  if (t2->kind == TVAR) {
+  if (t2->id == TVAR) {
     return U.tbind(t2->tvar, t1);
   }
-  if (t1->kind == TCON && t2->kind == TCON &&
-      trait(Eq(Type)).eq(t1, t2)) {
+  if (t1->id == TCON && t2->id == TCON && trait(Eq(Type)).eq(t1, t2)) {
     return (Maybe(TypeSubst)){.value = NULL};
   }
   /* otherwise error */
@@ -39,7 +38,7 @@ Maybe(TypeSubst) FUNC_NAME(tbind, TypeUnify)(TVar tvar, Type t) {
   Eq(TVar) E = trait(Eq(TVar));
 
   /* Is type `t` same as the type variable `tvar` ? */
-  if (t->kind == TVAR && E.eq(t->tvar, tvar)) {
+  if (t->id == TVAR && E.eq(t->tvar, tvar)) {
     return (Maybe(TypeSubst)){.value = TS.empty};
   }
   /* Is type `t` contains same type variable with `tvar` ? */

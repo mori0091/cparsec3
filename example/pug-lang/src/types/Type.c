@@ -36,16 +36,16 @@ static bool FUNC_NAME(eq, Eq(Type))(Type a, Type b) {
   if (!a || !b) {
     return false; // type of either `a` or `b` is undetermined
   }
-  if (a->kind != b->kind) {
+  if (a->id != b->id) {
     return false;
   }
-  if (a->kind == TVAR) {
+  if (a->id == TVAR) {
     return trait(Eq(TVar)).eq(a->tvar, b->tvar);
   }
-  if (a->kind == TCON) {
+  if (a->id == TCON) {
     return trait(Eq(TCon)).eq(a->tcon, b->tcon);
   }
-  if (a->kind == TANY) {
+  if (a->id == TANY) {
     return trait(Eq(TAny)).eq(a->any, b->any);
   }
   return FUNC_NAME(eq, Eq(Type))(a->lhs, b->lhs) &&
@@ -63,21 +63,21 @@ static Type Type_New(void) {
 
 static Type FUNC_NAME(tvar, Type)(TVar x) {
   Type e = Type_New();
-  e->kind = TVAR;
+  e->id = TVAR;
   e->tvar = x;
   return e;
 }
 
 static Type FUNC_NAME(tcon, Type)(TCon x) {
   Type e = Type_New();
-  e->kind = TCON;
+  e->id = TCON;
   e->tcon = x;
   return e;
 }
 
 static Type FUNC_NAME(tapply, Type)(Type lhs, Type rhs) {
   Type e = Type_New();
-  e->kind = TAPPLY;
+  e->id = TAPPLY;
   e->lhs = lhs;
   e->rhs = rhs;
   return e;
@@ -85,28 +85,28 @@ static Type FUNC_NAME(tapply, Type)(Type lhs, Type rhs) {
 
 static Type FUNC_NAME(any, Type)(TAny x) {
   Type e = Type_New();
-  e->kind = TANY;
+  e->id = TANY;
   e->any = x;
   return e;
 }
 
 static Type FUNC_NAME(tcon_bool, Type)(void) {
-  static struct Type e = {.kind = TCON, .tcon = {"bool"}};
+  static struct Type e = {.id = TCON, .tcon = {"bool"}};
   return &e;
 }
 
 static Type FUNC_NAME(tcon_int, Type)(void) {
-  static struct Type e = {.kind = TCON, .tcon = {"int"}};
+  static struct Type e = {.id = TCON, .tcon = {"int"}};
   return &e;
 }
 
 static Type FUNC_NAME(tcon_unit, Type)(void) {
-  static struct Type e = {.kind = TCON, .tcon = {"()"}};
+  static struct Type e = {.id = TCON, .tcon = {"()"}};
   return &e;
 }
 
 static Type FUNC_NAME(tcon_Fn, Type)(void) {
-  static struct Type e = {.kind = TCON, .tcon = {"Fn"}};
+  static struct Type e = {.id = TCON, .tcon = {"Fn"}};
   return &e;
 }
 
@@ -137,7 +137,7 @@ show_user_type(Type)(CharBuff* b, Type x) {
     return;
   }
   Show(Type) s = trait(Show(Type));
-  switch (x->kind) {
+  switch (x->id) {
   case TVAR:
     mem_printf(b, "(TVar %s)", x->tvar.ident);
     /* mem_printf(b, "%s", x->tvar.ident); */

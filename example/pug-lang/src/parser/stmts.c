@@ -16,11 +16,11 @@ parsec(stmts, Expr) {
     if (rhs.none) {
       RETURN(lhs);
     }
-    if (lhs->kind != SEQ) {
+    if (lhs->id != SEQ) {
       RETURN(E.seq(lhs, rhs.value));
     }
     Expr e = lhs;
-    while (e->rhs->kind == SEQ) {
+    while (e->rhs->id == SEQ) {
       e = e->rhs;
     }
     e->rhs = E.seq(e->rhs, rhs.value);
