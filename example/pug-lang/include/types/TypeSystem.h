@@ -14,7 +14,7 @@
 #include "TypeInfer.h"
 
 #include "Assump.h"
-#include "TypeUnify.h"
+#include "Unify.h"
 
 #define TRAIT_TYPES(T) trait(Types(T))
 
@@ -46,6 +46,6 @@
 #define t_find(var, as) trait(Assumption).lookup(var, as)
 #define t_add(var, scheme, as) trait(Assumption).add(var, scheme, as)
 
-// TypeUnify
-#define t_unifier(type1, type2) trait(TypeUnify).unifier(type1, type2)
-#define t_tbind(tvar, type) trait(TypeUnify).tbind(tvar, type)
+// Unify
+#define t_unifier(type1, type2) trait(Unify).unifier(type1, type2)
+#define t_tbind(tvar, type) trait(Unify).tbind(tvar, type)
