@@ -215,3 +215,43 @@ show_user_type(Type)(CharBuff* b, Type x) {
     break;
   }
 }
+
+// -----------------------------------------------------------------------
+
+static Kind FUNC_NAME(kind, HasKind(Tyvar))(Tyvar t) {
+  return t.kind;
+}
+static Kind FUNC_NAME(kind, HasKind(Tycon))(Tycon t) {
+  return t.kind;
+}
+static Kind FUNC_NAME(kind, HasKind(Type))(Type t) {
+  switch (t->id) {
+  case TVAR:
+    return t->tvar.kind;
+  case TCON:
+    return t->tcon.kind;
+  case TAPPLY:
+    return FUNC_NAME(kind, HasKind(Type))(t->lhs)->rhs;
+  default:
+    assert(0 && "Invalid Type");
+    abort();
+  }
+}
+
+HasKind(Tyvar) Trait(HasKind(Tyvar)) {
+  return (HasKind(Tyvar)){
+      .kind = FUNC_NAME(kind, HasKind(Tyvar)),
+  };
+}
+
+HasKind(Tycon) Trait(HasKind(Tycon)) {
+  return (HasKind(Tycon)){
+      .kind = FUNC_NAME(kind, HasKind(Tycon)),
+  };
+}
+
+HasKind(Type) Trait(HasKind(Type)) {
+  return (HasKind(Type)){
+      .kind = FUNC_NAME(kind, HasKind(Type)),
+  };
+}

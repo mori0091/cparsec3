@@ -10,6 +10,8 @@
 #define TYPE_bool() trait(Type).tcon_bool()
 #define TYPE_unit() trait(Type).tcon_unit()
 
+C_API_BEGIN
+
 typedef struct Type* Type;
 decl_user_type(Type);
 
@@ -88,3 +90,25 @@ typedef struct TypeT {
 } TypeT;
 
 TypeT Trait(Type);
+
+C_API_END
+
+// -----------------------------------------------------------------------
+#define HasKind(T) TYPE_NAME(HasKind, T)
+
+#define trait_HasKind(T)                                                 \
+  C_API_BEGIN                                                            \
+                                                                         \
+  typedef struct HasKind(T) {                                            \
+    Kind (*kind)(T t);                                                   \
+  }                                                                      \
+  HasKind(T);                                                            \
+                                                                         \
+  HasKind(T) Trait(HasKind(T));                                          \
+                                                                         \
+  C_API_END                                                              \
+  END_OF_STATEMENTS
+
+trait_HasKind(Tyvar);
+trait_HasKind(Tycon);
+trait_HasKind(Type);
