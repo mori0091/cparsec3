@@ -5,11 +5,11 @@
 #include "Type.h"
 #include "Types.h"
 
-typedef struct TypeScheme {
+typedef struct Scheme {
   int numTGen; ///< number of `TGen` in the `type`.
   Type type;   ///< type prototype.
-} TypeScheme;
+} Scheme;
 
-trait_List(TypeScheme);
-trait_Types(TypeScheme);
-trait_Types(List(TypeScheme));
+trait_List(Scheme);
+trait_Types(Scheme);
+trait_Types(List(Scheme));

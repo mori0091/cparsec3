@@ -5,4 +5,4 @@
 impl_TIRunner(None);
 impl_TIRunner(Type);
 impl_TIRunner(Subst);
-impl_TIRunner(TypeScheme);
+impl_TIRunner(Scheme);

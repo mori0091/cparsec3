@@ -3,10 +3,10 @@
 
 #include <cparsec3/base/base_generics.h>
 
+#include "Scheme.h"
 #include "Subst.h"
 #include "Type.h"
 #include "TypeAssumption.h"
-#include "TypeScheme.h"
 
 typedef struct TIState {
   /** current type substitution */
@@ -141,9 +141,9 @@ typedef struct TypeError {
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-#define TYPE_INFER_RETURN_TYPES() None, Type, Subst, TypeScheme
+#define TYPE_INFER_RETURN_TYPES() None, Type, Subst, Scheme
 
 trait_TIRunner(None);
 trait_TIRunner(Type);
 trait_TIRunner(Subst);
-trait_TIRunner(TypeScheme);
+trait_TIRunner(Scheme);

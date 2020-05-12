@@ -26,7 +26,7 @@ TypeInfer(Type) newTVar(void);
  * will be for example `(t1,t2,t2,c)`; where `t1` and `t2` are new unique
  * type variables.
  */
-TypeInfer(Type) freshInst(TypeScheme sc);
+TypeInfer(Type) freshInst(Scheme sc);
 
 /**
  * Creates TypeInfer monad that infers type of expression `e`.

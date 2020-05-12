@@ -62,8 +62,8 @@ static Type inst(Type* ts, size_t n, Type t) {
   }
 }
 
-typedef_Fn_r(TypeScheme, UnTypeInfer(Type));
-fn(freshInstImpl, TypeScheme, UnTypeInferArgs(Type)) {
+typedef_Fn_r(Scheme, UnTypeInfer(Type));
+fn(freshInstImpl, Scheme, UnTypeInferArgs(Type)) {
   g_bind((sc, s, ok, err), *args);
   if (!sc.numTGen) {
     return fn_apply(ok, sc.type, s);
@@ -79,7 +79,7 @@ fn(freshInstImpl, TypeScheme, UnTypeInferArgs(Type)) {
   return fn_apply(ok, t, s);
 }
 
-TypeInfer(Type) freshInst(TypeScheme sc) {
+TypeInfer(Type) freshInst(Scheme sc) {
   __auto_type f = freshInstImpl();
   return (TypeInfer(Type)){fn_apply(f, sc)};
 }
@@ -141,7 +141,7 @@ typedef_Fn_r(TAList, Expr, Fn(Type, UnTypeInfer(None)));
 
 fn(typeOfVar, TAList, Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
-  Maybe(TypeScheme) sc = t_find(e->var, as);
+  Maybe(Scheme) sc = t_find(e->var, as);
   if (sc.none) {
     CharBuff b = {0};
     mem_printf(&b, "Undefined variable - %s", e->var.ident);
@@ -158,7 +158,7 @@ fn(typeOfLambda, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RUN(newTVar(), a);
   TI_RUN(newTVar(), b);
   TI_RUN(unify(T.func(a, b), t));
-  TypeScheme sc = {0, a};
+  Scheme sc = {0, a};
   as = t_add(e->lhs->var, sc, as);
   TI_RUN(typeOf0(as, e->rhs, b), x);
   TI_RETURN(x);
@@ -196,18 +196,18 @@ fn(typeOfSeq, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TypeT T = trait(Type);
   switch (e->lhs->id) {
   case DECLVAR: {
-    TypeScheme sc = t_gen(as, e->lhs->rhs->texpr);
+    Scheme sc = t_gen(as, e->lhs->rhs->texpr);
     as = t_add(e->lhs->lhs->var, sc, as);
     TI_RUN(typeOf0(as, e->rhs, t), x);
     TI_RETURN(x);
   }
   case LET: {
-    Maybe(TypeScheme) sc = t_find(e->lhs->var, as);
+    Maybe(Scheme) sc = t_find(e->lhs->var, as);
     if (!sc.none) {
       TI_RUN(freshInst(sc.value), a);
       TI_RUN(typeOf0(as, e->lhs->rhs, a));
       TI_RUN(getSubst(), sub);
-      TypeScheme sc = t_gen(as, t_apply_subst(sub, a));
+      Scheme sc = t_gen(as, t_apply_subst(sub, a));
       as = t_add(e->lhs->lhs->var, sc, as);
       TI_RUN(typeOf0(as, e->rhs, t), x);
       TI_RETURN(x);
@@ -217,13 +217,13 @@ fn(typeOfSeq, TAList, Expr, Type, UnTypeInferArgs(None)) {
         TI_RUN(newTVar(), b);
         TI_RUN(newTVar(), f);
         TI_RUN(unify(T.func(a, b), f));
-        TypeScheme sc = {0, f};
+        Scheme sc = {0, f};
         as = t_add(e->lhs->lhs->var, sc, as);
       }
       TI_RUN(newTVar(), a);
       TI_RUN(typeOf0(as, e->lhs->rhs, a));
       TI_RUN(getSubst(), sub);
-      TypeScheme sc = t_gen(as, t_apply_subst(sub, a));
+      Scheme sc = t_gen(as, t_apply_subst(sub, a));
       as = t_add(e->lhs->lhs->var, sc, as);
       TI_RUN(typeOf0(as, e->rhs, t), x);
       TI_RETURN(x);
@@ -257,7 +257,7 @@ fn(typeOfAssign, TAList, Expr, Type, UnTypeInferArgs(None)) {
 
 fn(typeOfLet, TAList, Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
-  Maybe(TypeScheme) sc = t_find(e->lhs->var, as);
+  Maybe(Scheme) sc = t_find(e->lhs->var, as);
   if (!sc.none) {
     TI_RUN(freshInst(sc.value), a);
     TI_RUN(typeOf0(as, e->rhs, a));
@@ -270,7 +270,7 @@ fn(typeOfLet, TAList, Expr, Type, UnTypeInferArgs(None)) {
       TI_RUN(newTVar(), b);
       TI_RUN(newTVar(), f);
       TI_RUN(unify(T.func(a, b), f));
-      TypeScheme sc = {0, f};
+      Scheme sc = {0, f};
       as = t_add(e->lhs->var, sc, as);
     }
     TI_RUN(typeOf0(as, e->rhs, t), x);
