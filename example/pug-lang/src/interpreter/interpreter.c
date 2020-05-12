@@ -1,7 +1,6 @@
 /* -*- coding: utf-8-unix -*- */
 
 #include "interpreter/interpreter.h"
-#include "types/TypeEnv.h"
 
 // -----------------------------------------------------------------------
 static EvalResult eval_expr1(Context ctx, Expr x);
@@ -221,7 +220,6 @@ static EvalResult eval_var(Context ctx, Expr x) {
 
 // -----------------------------------------------------------------------
 static EvalResult eval_expr1(Context ctx, Expr x) {
-  // trait(TypeEnv).judge(ctx, x); /* infer type of x */
   switch (x->id) {
   case APPLY:
     return eval_apply(ctx, x);

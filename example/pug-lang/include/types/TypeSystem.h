@@ -4,7 +4,6 @@
 #include <cparsec3/base/base_generics.h>
 
 #include "Type.h"
-#include "TypeEnv.h"
 
 #include "Subst.h"
 #include "Types.h"
