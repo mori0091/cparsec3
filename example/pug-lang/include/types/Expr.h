@@ -137,7 +137,7 @@ typedef struct ExprT {
   Expr (*div)(Expr lhs, Expr rhs);        /* arithmetic division */
   Expr (*mod)(Expr lhs, Expr rhs);        /* arithmetic reminder */
   Expr (*neg)(Expr rhs);                  /* arithmetic negation */
-  Expr (*not )(Expr rhs);  /* logical not / bitwise complement */
+  Expr (*not)(Expr rhs);   /* logical not / bitwise complement */
   Expr (*num)(Num x);      /* number */
   Expr (*var)(Var x);      /* variable */
   Expr (*boolean)(bool b); /* true / false */

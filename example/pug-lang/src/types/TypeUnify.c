@@ -33,9 +33,9 @@ Maybe(TypeSubst) FUNC_NAME(unifier, TypeUnify)(Type t1, Type t2) {
   return (Maybe(TypeSubst)){.none = true};
 }
 
-Maybe(TypeSubst) FUNC_NAME(tbind, TypeUnify)(TVar tvar, Type t) {
+Maybe(TypeSubst) FUNC_NAME(tbind, TypeUnify)(Tyvar tvar, Type t) {
   TypeSubstT TS = trait(TypeSubst);
-  Eq(TVar) E = trait(Eq(TVar));
+  Eq(Tyvar) E = trait(Eq(Tyvar));
 
   /* Is type `t` same as the type variable `tvar` ? */
   if (t->id == TVAR && E.eq(t->tvar, tvar)) {
@@ -43,7 +43,7 @@ Maybe(TypeSubst) FUNC_NAME(tbind, TypeUnify)(TVar tvar, Type t) {
   }
   /* Is type `t` contains same type variable with `tvar` ? */
   {
-    List(TVar) xs = trait(TypeVarProc(Type)).tvarsOf(t);
+    List(Tyvar) xs = trait(TypeVarProc(Type)).tvarsOf(t);
     while (xs) {
       if (E.eq(xs->head, tvar)) {
         return (Maybe(TypeSubst)){.none = true}; /* error */

@@ -6,11 +6,11 @@
 #include <inttypes.h>
 
 // -----------------------------------------------------------------------
-TVar freshTVar(void) {
+Tyvar freshTVar(void) {
   static uint32_t n = 0;
   CharBuff b = {0};
   mem_printf(&b, "#%" PRIx32, n++);
-  return (TVar){.ident = b.data};
+  return (Tyvar){.ident = b.data};
 }
 
 // -----------------------------------------------------------------------
@@ -19,7 +19,7 @@ impl_List(TypeSubstEntry);
 // -----------------------------------------------------------------------
 // ---- trait TypeSubst
 
-static TypeSubst FUNC_NAME(create, TypeSubst)(TVar tvar, Type type) {
+static TypeSubst FUNC_NAME(create, TypeSubst)(Tyvar tvar, Type type) {
   TypeSubstEntry e = {.tvar = tvar, .type = type};
   return trait(List(TypeSubstEntry)).cons(e, NULL);
 }

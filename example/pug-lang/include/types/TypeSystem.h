@@ -36,7 +36,7 @@
 // TypeVarProc
 #define t_apply_subst(s, t) GENERIC_TYPEVARPROC(t).subst(s, t)
 #define t_extract_tvars(t) GENERIC_TYPEVARPROC(t).tvarsOf(t)
-#define t_union_tvars(tvars1, tvars2) unionTVars(tvars1, tvars2)
+#define t_union_tvars(tvars1, tvars2) unionTyvars(tvars1, tvars2)
 
 // TypeInfer / TIRunner (type inference monad)
 #define runTypeInferP(ti, st) GENERIC_TIRUNNER(ti).pRunTypeInferP(ti, st)

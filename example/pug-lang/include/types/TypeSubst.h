@@ -6,13 +6,13 @@
 #include "Type.h"
 
 /** creates fresh/unique type variable */
-TVar freshTVar(void);
+Tyvar freshTyvar(void);
 
 // -----------------------------------------------------------------------
 // type substitution ; a map from `type variable` to `type`
 
 typedef struct TypeSubstEntry {
-  TVar tvar;
+  Tyvar tvar;
   Type type;
 } TypeSubstEntry;
 
@@ -27,7 +27,7 @@ typedef struct TypeSubstT {
   /** empty type-substitution */
   TypeSubst empty;
   /** creates a type-substitution consists of one entry. */
-  TypeSubst (*create)(TVar tvar, Type type);
+  TypeSubst (*create)(Tyvar tvar, Type type);
   /** Composites two type-substitutions. */
   TypeSubst (*composite)(TypeSubst s1, TypeSubst s2);
 } TypeSubstT;

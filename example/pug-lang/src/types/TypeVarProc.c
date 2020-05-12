@@ -3,9 +3,9 @@
 #include "types/TypeVarProc.h"
 
 // -----------------------------------------------------------------------
-impl_List(TVar);
+impl_List(Tyvar);
 
-List(TVar) unionTVars(List(TVar) as, List(TVar) bs) {
+List(Tyvar) unionTyvars(List(Tyvar) as, List(Tyvar) bs) {
   if (!as) {
     return bs;
   }
@@ -14,16 +14,16 @@ List(TVar) unionTVars(List(TVar) as, List(TVar) bs) {
   }
   while (bs) {
     bool found = false;
-    for (List(TVar) xs = as; xs; xs = xs->tail) {
-      if (trait(Eq(TVar)).eq(xs->head, bs->head)) {
+    for (List(Tyvar) xs = as; xs; xs = xs->tail) {
+      if (trait(Eq(Tyvar)).eq(xs->head, bs->head)) {
         found = true;
         break;
       }
     }
     if (found) {
-      bs = trait(List(TVar)).drop(1, bs);
+      bs = trait(List(Tyvar)).drop(1, bs);
     } else {
-      List(TVar) ys = bs;
+      List(Tyvar) ys = bs;
       bs = bs->tail;
       ys->tail = as;
       as = ys;
@@ -39,7 +39,7 @@ static Type subst_tvar_to_type(TypeSubst s, Type t) {
   assert(t && t->id == TVAR && "Not a type variable");
   while (s) {
     TypeSubstEntry* e = &s->head;
-    if (trait(Eq(TVar)).eq(e->tvar, t->tvar)) {
+    if (trait(Eq(Tyvar)).eq(e->tvar, t->tvar)) {
       return e->type;
     }
     s = s->tail;
@@ -62,15 +62,15 @@ static Type FUNC_NAME(subst, TypeVarProc(Type))(TypeSubst s, Type t) {
   }
 }
 
-static List(TVar) FUNC_NAME(tvarsOf, TypeVarProc(Type))(Type t) {
+static List(Tyvar) FUNC_NAME(tvarsOf, TypeVarProc(Type))(Type t) {
   assert(t && "Null pointer");
-  ListT(TVar) L = trait(List(TVar));
+  ListT(Tyvar) L = trait(List(Tyvar));
   switch (t->id) {
   case TVAR:
     return L.cons(t->tvar, L.empty);
   case TAPPLY: {
     TypeVarProc(Type) S = trait(TypeVarProc(Type));
-    return unionTVars(S.tvarsOf(t->lhs), S.tvarsOf(t->rhs));
+    return unionTyvars(S.tvarsOf(t->lhs), S.tvarsOf(t->rhs));
   }
   default:
     return L.empty;

@@ -3,20 +3,20 @@
 #include "types/Type.h"
 
 // -------------------------------------
-// trait Eq(TVar)
+// trait Eq(Tyvar)
 
-static bool FUNC_NAME(eq, Eq(TVar))(TVar a, TVar b) {
+static bool FUNC_NAME(eq, Eq(Tyvar))(Tyvar a, Tyvar b) {
   return (a.ident == b.ident) || trait(Eq(String)).eq(a.ident, b.ident);
 }
-instance_Eq(TVar, FUNC_NAME(eq, Eq(TVar)));
+instance_Eq(Tyvar, FUNC_NAME(eq, Eq(Tyvar)));
 
 // -------------------------------------
-// trait Eq(TCon)
+// trait Eq(Tycon)
 
-static bool FUNC_NAME(eq, Eq(TCon))(TCon a, TCon b) {
+static bool FUNC_NAME(eq, Eq(Tycon))(Tycon a, Tycon b) {
   return (a.ident == b.ident) || trait(Eq(String)).eq(a.ident, b.ident);
 }
-instance_Eq(TCon, FUNC_NAME(eq, Eq(TCon)));
+instance_Eq(Tycon, FUNC_NAME(eq, Eq(Tycon)));
 
 // -------------------------------------
 // trait Eq(TGen)
@@ -40,10 +40,10 @@ static bool FUNC_NAME(eq, Eq(Type))(Type a, Type b) {
     return false;
   }
   if (a->id == TVAR) {
-    return trait(Eq(TVar)).eq(a->tvar, b->tvar);
+    return trait(Eq(Tyvar)).eq(a->tvar, b->tvar);
   }
   if (a->id == TCON) {
-    return trait(Eq(TCon)).eq(a->tcon, b->tcon);
+    return trait(Eq(Tycon)).eq(a->tcon, b->tcon);
   }
   if (a->id == TGEN) {
     return trait(Eq(TGen)).eq(a->tgen, b->tgen);
@@ -61,14 +61,14 @@ static Type Type_New(void) {
   return e;
 }
 
-static Type FUNC_NAME(tvar, Type)(TVar x) {
+static Type FUNC_NAME(tvar, Type)(Tyvar x) {
   Type e = Type_New();
   e->id = TVAR;
   e->tvar = x;
   return e;
 }
 
-static Type FUNC_NAME(tcon, Type)(TCon x) {
+static Type FUNC_NAME(tcon, Type)(Tycon x) {
   Type e = Type_New();
   e->id = TCON;
   e->tcon = x;

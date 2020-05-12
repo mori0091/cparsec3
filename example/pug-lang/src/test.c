@@ -83,12 +83,11 @@ void pug_self_test(void) {
   assert(!pug_parseTest("let a = 100; |x|{x; let a = true}"));
   /* -> type error: Type mismatch */
 
-
   /* evaluating a variable results its value. */
   assert(pug_parseTest("let a = 100; a")); /* 100 */
 
   /* evaluating an undefined variable is not permitted. */
-  assert(!pug_parseTest("a"));        /* Undefined variable */
+  assert(!pug_parseTest("a")); /* Undefined variable */
   assert(!pug_parseTest("let a = a"));
   /* -> type error: Undefined variable */
   assert(pug_parseTest("var a : a; let a = a")); /* -> (Var a) */

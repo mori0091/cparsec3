@@ -42,7 +42,7 @@ fn(newTVarImpl, UnTypeInferArgs(Type)) {
   g_bind((s, ok, err), *args);
   CharBuff b = {0};
   mem_printf(&b, "#a%d", s.i++);
-  Type t = trait(Type).tvar((TVar){b.data});
+  Type t = trait(Type).tvar((Tyvar){b.data});
   return fn_apply(ok, t, s);
 }
 
@@ -383,7 +383,7 @@ fn(typeOfCapply, TAList, Expr, Type, UnTypeInferArgs(None)) {
   // ~~~c
   // TypeT T = trait(Type);
   // TI_RUN(newTVar(), a);
-  // Type b = T.tapply(T.tcon((TCon){"Maybe"}), a);
+  // Type b = T.tapply(T.tcon((Tycon){"Maybe"}), a);
   // TI_RUN(typeOf0(as, e->rhs, a));
   // TI_RUN(typeOf0(as, e->lhs, T.func(a, b)));
   // TI_RUN(unify(b, t), x);

@@ -12,7 +12,7 @@ FUNC_NAME(subst, TypeVarProc(TypeAssumption))(TypeSubst s,
   return as;
 }
 
-static List(TVar)
+static List(Tyvar)
     FUNC_NAME(tvarsOf, TypeVarProc(TypeAssumption))(TypeAssumption as) {
   return trait(TypeVarProc(TypeScheme)).tvarsOf(as.scheme);
 }
@@ -33,21 +33,21 @@ impl_TypeVarProc_List(TypeAssumption);
 // -----------------------------------------------------------------------
 // ---- trait Assumption
 
-List(TVar) subtractTVars(List(TVar) a, List(TVar) b) {
+List(Tyvar) subtractTyvars(List(Tyvar) a, List(Tyvar) b) {
   if (!a) {
     return NULL;
   }
   if (!b) {
     return a;
   }
-  ListT(TVar) L = trait(List(TVar));
-  Eq(TVar) E = trait(Eq(TVar));
+  ListT(Tyvar) L = trait(List(Tyvar));
+  Eq(Tyvar) E = trait(Eq(Tyvar));
   while (b) {
     if (E.eq(a->head, b->head)) {
       /* a = drop(1, a); */
       a = L.tail(a);
     } else {
-      List(TVar) xs = a;
+      List(Tyvar) xs = a;
       while (xs->tail) {
         if (E.eq(xs->tail->head, b->head)) {
           /* xs->tail = L.drop(1, xs->tail); */
@@ -67,8 +67,8 @@ static TypeScheme FUNC_NAME(scheme, Assumption)(List(TypeAssumption) as,
   TypeVarProc(Type) S = trait(TypeVarProc(Type));
   TypeVarProc(List(TypeAssumption)) SA =
       trait(TypeVarProc(List(TypeAssumption)));
-  List(TVar) gs = subtractTVars(S.tvarsOf(t), SA.tvarsOf(as));
-  // int n = trait(List(TVar)).length(gs);
+  List(Tyvar) gs = subtractTyvars(S.tvarsOf(t), SA.tvarsOf(as));
+  // int n = trait(List(Tyvar)).length(gs);
   TypeT T = trait(Type);
   ListT(TypeSubstEntry) L = trait(List(TypeSubstEntry));
   TypeSubst s = 0;

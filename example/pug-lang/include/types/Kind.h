@@ -9,8 +9,8 @@ decl_user_type(Kind);
 trait_Eq(Kind);
 
 enum KindId {
-  STAR,                         // *
-  KFUN,                         // * -> *
+  STAR, // *
+  KFUN, // * -> *
 };
 
 struct Kind {

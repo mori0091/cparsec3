@@ -7,10 +7,10 @@
 #include "TypeSubst.h"
 
 // -----------------------------------------------------------------------
-trait_List(TVar);
+trait_List(Tyvar);
 
 /** make union list of type variables */
-List(TVar) unionTVars(List(TVar) as, List(TVar) bs);
+List(Tyvar) unionTyvars(List(Tyvar) as, List(Tyvar) bs);
 
 // -----------------------------------------------------------------------
 #define TypeVarProc(T) TYPE_NAME(TypeVarProc, T)
@@ -23,7 +23,7 @@ List(TVar) unionTVars(List(TVar) as, List(TVar) bs);
     /** apply type substitution */                                       \
     T (*subst)(TypeSubst s, T t);                                        \
     /** extract list of type variables */                                \
-    List(TVar) (*tvarsOf)(T t);                                          \
+    List(Tyvar) (*tvarsOf)(T t);                                         \
   };                                                                     \
                                                                          \
   TypeVarProc(T) Trait(TypeVarProc(T));                                  \
@@ -53,16 +53,16 @@ trait_TypeVarProc(List(Type));
     return xs;                                                           \
   }                                                                      \
                                                                          \
-  static List(TVar)                                                      \
+  static List(Tyvar)                                                     \
       FUNC_NAME(tvarsOf, TypeVarProc(List(T)))(List(T) t) {              \
     if (!t) {                                                            \
       return NULL;                                                       \
     }                                                                    \
     TypeVarProc(T) S = trait(TypeVarProc(T));                            \
     ListT(T) L = trait(List(T));                                         \
-    List(TVar) xs = NULL;                                                \
+    List(Tyvar) xs = NULL;                                               \
     while (t) {                                                          \
-      xs = unionTVars(xs, S.tvarsOf(L.head(t)));                         \
+      xs = unionTyvars(xs, S.tvarsOf(L.head(t)));                        \
       t = L.tail(t);                                                     \
     }                                                                    \
     return xs;                                                           \

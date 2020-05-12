@@ -15,15 +15,15 @@ decl_user_type(Type);
 
 // -----------------------------------------------------------------------
 /* Type variable */
-typedef struct TVar {
+typedef struct Tyvar {
   String ident;
   Kind kind;
-} TVar;
+} Tyvar;
 
 /* Type constructor */
-typedef struct TCon {
+typedef struct Tycon {
   String ident;
-} TCon;
+} Tycon;
 
 /* Universal quantified type variable (e.g. ∀a) */
 typedef struct TGen {
@@ -45,9 +45,9 @@ struct Type {
   enum TypeId id;
   union {
     /* for type variable */
-    TVar tvar;
+    Tyvar tvar;
     /* for type constructor */
-    TCon tcon;
+    Tycon tcon;
     /* for type application*/
     struct {
       Type lhs;
@@ -58,17 +58,17 @@ struct Type {
   };
 };
 
-trait_Eq(TVar);
-trait_Eq(TCon);
+trait_Eq(Tyvar);
+trait_Eq(Tycon);
 trait_Eq(TGen);
 trait_Eq(Type);
 
 // -----------------------------------------------------------------------
 typedef struct TypeT {
   /** create type variable */
-  Type (*tvar)(TVar x);
+  Type (*tvar)(Tyvar x);
   /** create type constructor */
-  Type (*tcon)(TCon x);
+  Type (*tcon)(Tycon x);
   /** type application */
   Type (*tapply)(Type lhs, Type rhs);
   /** create universal quantified type variable */

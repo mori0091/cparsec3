@@ -11,7 +11,7 @@ FUNC_NAME(subst, TypeVarProc(TypeScheme))(TypeSubst s, TypeScheme t) {
   return t;
 }
 
-static List(TVar)
+static List(Tyvar)
     FUNC_NAME(tvarsOf, TypeVarProc(TypeScheme))(TypeScheme t) {
   return trait(TypeVarProc(Type)).tvarsOf(t.type);
 }

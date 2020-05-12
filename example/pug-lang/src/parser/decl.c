@@ -46,8 +46,8 @@ parsec(simpletype, Type) {
   ArrayT(Type) A = trait(Array(Type));
   TypeT T = trait(Type);
   DO() {
-    SCAN(qtctor(), lhs);       /* Type ; (TCon t) */
-    SCAN(many(tvar()), tvars); /* Array(Type) ; arrya of (TVar v) */
+    SCAN(qtctor(), lhs);       /* Type ; (Tycon t) */
+    SCAN(many(tvar()), tvars); /* Array(Type) ; arrya of (Tyvar v) */
     for (Type* t = A.begin(tvars); t != A.end(tvars); t++) {
       lhs = T.tapply(lhs, *t);
     }
@@ -202,14 +202,14 @@ PARSER(Type) tctor(void) {
 parsec(qtctor, Type) {
   DO() {
     SCAN(Identifier(), x);
-    RETURN(trait(Type).tcon((TCon){x}));
+    RETURN(trait(Type).tcon((Tycon){x}));
   }
 }
 
 parsec(tvar0, Type) {
   DO() {
     SCAN(identifier(), x);
-    RETURN(trait(Type).tvar((TVar){x}));
+    RETURN(trait(Type).tvar((Tyvar){x}));
   }
 }
 
