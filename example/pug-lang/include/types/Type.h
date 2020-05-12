@@ -23,12 +23,13 @@ typedef struct Tyvar {
 /* Type constructor */
 typedef struct Tycon {
   String ident;
+  Kind kind;
 } Tycon;
 
 /* Universal quantified type variable (e.g. ∀a) */
-typedef struct TGen {
+typedef struct Tygen {
   int n;
-} TGen;
+} Tygen;
 
 enum TypeId {
   /* type variable */
@@ -54,25 +55,25 @@ struct Type {
       Type rhs;
     };
     /* for universal quantified type variable */
-    TGen tgen;
+    Tygen tgen;
   };
 };
 
 trait_Eq(Tyvar);
 trait_Eq(Tycon);
-trait_Eq(TGen);
+trait_Eq(Tygen);
 trait_Eq(Type);
 
 // -----------------------------------------------------------------------
 typedef struct TypeT {
   /** create type variable */
-  Type (*tvar)(Tyvar x);
+  Type (*TVar)(String ident, Kind kind);
   /** create type constructor */
-  Type (*tcon)(Tycon x);
+  Type (*TCon)(String ident, Kind kind);
   /** type application */
-  Type (*tapply)(Type lhs, Type rhs);
+  Type (*TAp)(Type lhs, Type rhs);
   /** create universal quantified type variable */
-  Type (*tgen)(TGen x);
+  Type (*TGen)(int n);
   // ---- helper to create builtin type constructors
   Type (*tcon_bool)(void);   /* type constructor `bool` */
   Type (*tcon_int)(void);    /* type constructor `int` */

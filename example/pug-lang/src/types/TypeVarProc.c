@@ -55,7 +55,7 @@ static Type FUNC_NAME(subst, TypeVarProc(Type))(TypeSubst s, Type t) {
   case TAPPLY: {
     TypeT T = trait(Type);
     TypeVarProc(Type) S = trait(TypeVarProc(Type));
-    return T.tapply(S.subst(s, t->lhs), S.subst(s, t->rhs));
+    return T.TAp(S.subst(s, t->lhs), S.subst(s, t->rhs));
   }
   default:
     return t;

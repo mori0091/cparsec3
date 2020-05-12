@@ -10,7 +10,7 @@ trait_Eq(Kind);
 
 enum KindId {
   STAR, // *
-  KFUN, // * -> *
+  KFUN, // k1 -> k2
 };
 
 struct Kind {
@@ -23,8 +23,10 @@ struct Kind {
 };
 
 typedef struct KindT {
-  Kind (*Star)(void);
-  Kind (*Kfun)(Kind k1, Kind k2);
+  Kind (*Star)(void);             // *
+  Kind (*Star_Star)(void);        // * -> *
+  Kind (*Star_Star_Star)(void);   // * -> * -> *
+  Kind (*Kfun)(Kind k1, Kind k2); // k1 -> k2
 } KindT;
 
 KindT Trait(Kind);

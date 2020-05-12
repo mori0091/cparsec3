@@ -74,7 +74,7 @@ static TypeScheme FUNC_NAME(scheme, Assumption)(List(TypeAssumption) as,
   TypeSubst s = 0;
   int n = 0;
   while (gs) {
-    TypeSubstEntry x = {.tvar = gs->head, .type = T.tgen((TGen){n})};
+    TypeSubstEntry x = {.tvar = gs->head, .type = T.TGen(n)};
     s = L.cons(x, s);
     gs = gs->tail;
     n++;

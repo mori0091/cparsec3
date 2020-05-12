@@ -6,7 +6,9 @@
 // trait Eq(Tyvar)
 
 static bool FUNC_NAME(eq, Eq(Tyvar))(Tyvar a, Tyvar b) {
-  return (a.ident == b.ident) || trait(Eq(String)).eq(a.ident, b.ident);
+  return ((a.ident == b.ident) ||
+          trait(Eq(String)).eq(a.ident, b.ident)) &&
+         trait(Eq(Kind)).eq(a.kind, b.kind);
 }
 instance_Eq(Tyvar, FUNC_NAME(eq, Eq(Tyvar)));
 
@@ -14,17 +16,19 @@ instance_Eq(Tyvar, FUNC_NAME(eq, Eq(Tyvar)));
 // trait Eq(Tycon)
 
 static bool FUNC_NAME(eq, Eq(Tycon))(Tycon a, Tycon b) {
-  return (a.ident == b.ident) || trait(Eq(String)).eq(a.ident, b.ident);
+  return ((a.ident == b.ident) ||
+          trait(Eq(String)).eq(a.ident, b.ident)) &&
+         trait(Eq(Kind)).eq(a.kind, b.kind);
 }
 instance_Eq(Tycon, FUNC_NAME(eq, Eq(Tycon)));
 
 // -------------------------------------
-// trait Eq(TGen)
+// trait Eq(Tygen)
 
-static bool FUNC_NAME(eq, Eq(TGen))(TGen a, TGen b) {
+static bool FUNC_NAME(eq, Eq(Tygen))(Tygen a, Tygen b) {
   return (a.n == b.n);
 }
-instance_Eq(TGen, FUNC_NAME(eq, Eq(TGen)));
+instance_Eq(Tygen, FUNC_NAME(eq, Eq(Tygen)));
 
 // -------------------------------------
 // trait Eq(Type)
@@ -46,7 +50,7 @@ static bool FUNC_NAME(eq, Eq(Type))(Type a, Type b) {
     return trait(Eq(Tycon)).eq(a->tcon, b->tcon);
   }
   if (a->id == TGEN) {
-    return trait(Eq(TGen)).eq(a->tgen, b->tgen);
+    return trait(Eq(Tygen)).eq(a->tgen, b->tgen);
   }
   return FUNC_NAME(eq, Eq(Type))(a->lhs, b->lhs) &&
          FUNC_NAME(eq, Eq(Type))(a->rhs, b->rhs);
@@ -61,21 +65,23 @@ static Type Type_New(void) {
   return e;
 }
 
-static Type FUNC_NAME(tvar, Type)(Tyvar x) {
+static Type FUNC_NAME(TVar, Type)(String ident, Kind kind) {
   Type e = Type_New();
   e->id = TVAR;
-  e->tvar = x;
+  e->tvar.ident = ident;
+  e->tvar.kind = kind;
   return e;
 }
 
-static Type FUNC_NAME(tcon, Type)(Tycon x) {
+static Type FUNC_NAME(TCon, Type)(String ident, Kind kind) {
   Type e = Type_New();
   e->id = TCON;
-  e->tcon = x;
+  e->tcon.ident = ident;
+  e->tcon.kind = kind;
   return e;
 }
 
-static Type FUNC_NAME(tapply, Type)(Type lhs, Type rhs) {
+static Type FUNC_NAME(TAp, Type)(Type lhs, Type rhs) {
   Type e = Type_New();
   e->id = TAPPLY;
   e->lhs = lhs;
@@ -83,64 +89,88 @@ static Type FUNC_NAME(tapply, Type)(Type lhs, Type rhs) {
   return e;
 }
 
-static Type FUNC_NAME(tgen, Type)(TGen x) {
+static Type FUNC_NAME(TGen, Type)(int n) {
   Type e = Type_New();
   e->id = TGEN;
-  e->tgen = x;
+  e->tgen.n = n;
   return e;
 }
 
 static Type FUNC_NAME(tcon_bool, Type)(void) {
-  static struct Type e = {.id = TCON, .tcon = {"bool"}};
+  static struct Type e = {
+      .id = TCON,
+      .tcon.ident = "bool",
+  };
+  e.tcon.kind = trait(Kind).Star();
   return &e;
 }
 
 static Type FUNC_NAME(tcon_int, Type)(void) {
-  static struct Type e = {.id = TCON, .tcon = {"int"}};
+  static struct Type e = {
+      .id = TCON,
+      .tcon.ident = "int",
+  };
+  e.tcon.kind = trait(Kind).Star();
   return &e;
 }
 
 static Type FUNC_NAME(tcon_unit, Type)(void) {
-  static struct Type e = {.id = TCON, .tcon = {"()"}};
+  static struct Type e = {
+      .id = TCON,
+      .tcon.ident = "()",
+  };
+  e.tcon.kind = trait(Kind).Star();
   return &e;
 }
 
 static Type FUNC_NAME(tcon_Fn, Type)(void) {
-  static struct Type e = {.id = TCON, .tcon = {"Fn"}};
+  static struct Type e = {
+      .id = TCON,
+      .tcon.ident = "Fn",
+  };
+  e.tcon.kind = trait(Kind).Star_Star_Star();
   return &e;
 }
 
 static Type FUNC_NAME(tcon_List, Type)(void) {
-  static struct Type e = {.id = TCON, .tcon = {"[,]"}};
+  static struct Type e = {
+      .id = TCON,
+      .tcon.ident = "[,]",
+  };
+  e.tcon.kind = trait(Kind).Star_Star();
   return &e;
 }
 
 static Type FUNC_NAME(tcon_Tuple2, Type)(void) {
-  static struct Type e = {.id = TCON, .tcon = {"(,)"}};
+  static struct Type e = {
+      .id = TCON,
+      .tcon.ident = "(,)",
+  };
+  e.tcon.kind = trait(Kind).Star_Star_Star();
   return &e;
 }
 
 static Type FUNC_NAME(func, Type)(Type arg, Type ret) {
   TypeT t = trait(Type);
-  return t.tapply(t.tapply(t.tcon_Fn(), arg), ret);
+  return t.TAp(t.TAp(t.tcon_Fn(), arg), ret);
 }
 
 static Type FUNC_NAME(list, Type)(Type arg) {
   TypeT t = trait(Type);
-  return t.tapply(t.tcon_List(), arg);
+  return t.TAp(t.tcon_List(), arg);
 }
 
 static Type FUNC_NAME(pair, Type)(Type a, Type b) {
   TypeT t = trait(Type);
-  return t.tapply(t.tapply(t.tcon_Tuple2(), a), b);
+  return t.TAp(t.TAp(t.tcon_Tuple2(), a), b);
 }
 
 TypeT Trait(Type) {
   return (TypeT){
-      .tvar = FUNC_NAME(tvar, Type),
-      .tcon = FUNC_NAME(tcon, Type),
-      .tapply = FUNC_NAME(tapply, Type),
-      .tgen = FUNC_NAME(tgen, Type),
+      .TVar = FUNC_NAME(TVar, Type),
+      .TCon = FUNC_NAME(TCon, Type),
+      .TAp = FUNC_NAME(TAp, Type),
+      .TGen = FUNC_NAME(TGen, Type),
       .tcon_bool = FUNC_NAME(tcon_bool, Type),
       .tcon_int = FUNC_NAME(tcon_int, Type),
       .tcon_unit = FUNC_NAME(tcon_unit, Type),
@@ -170,7 +200,7 @@ show_user_type(Type)(CharBuff* b, Type x) {
     mem_printf(b, "%s", x->tcon.ident);
     break;
   case TAPPLY:
-    mem_printf(b, "(TApply ");
+    mem_printf(b, "(TAp ");
     /* mem_printf(b, "("); */
     s.toString(b, x->lhs);
     mem_printf(b, " ");

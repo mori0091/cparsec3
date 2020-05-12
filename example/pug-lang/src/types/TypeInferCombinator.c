@@ -42,7 +42,7 @@ fn(newTVarImpl, UnTypeInferArgs(Type)) {
   g_bind((s, ok, err), *args);
   CharBuff b = {0};
   mem_printf(&b, "#a%d", s.i++);
-  Type t = trait(Type).tvar((Tyvar){b.data});
+  Type t = trait(Type).TVar(b.data, trait(Kind).Star());
   return fn_apply(ok, t, s);
 }
 
@@ -54,7 +54,7 @@ TypeInfer(Type) newTVar(void) {
 static Type inst(Type* ts, size_t n, Type t) {
   switch (t->id) {
   case TAPPLY:
-    return trait(Type).tapply(inst(ts, n, t->lhs), inst(ts, n, t->rhs));
+    return trait(Type).TAp(inst(ts, n, t->lhs), inst(ts, n, t->rhs));
   case TGEN:
     return ts[t->tgen.n];
   default:
@@ -382,8 +382,9 @@ fn(typeOfCapply, TAList, Expr, Type, UnTypeInferArgs(None)) {
   // if and only if `e` was `Just x` of `Maybe a` type.
   // ~~~c
   // TypeT T = trait(Type);
+  // KindT K = trait(Kind);
   // TI_RUN(newTVar(), a);
-  // Type b = T.tapply(T.tcon((Tycon){"Maybe"}), a);
+  // Type b = T.TAp(T.TCon("Maybe", K.Star()), a);
   // TI_RUN(typeOf0(as, e->rhs, a));
   // TI_RUN(typeOf0(as, e->lhs, T.func(a, b)));
   // TI_RUN(unify(b, t), x);
