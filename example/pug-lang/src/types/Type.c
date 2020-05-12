@@ -110,9 +110,29 @@ static Type FUNC_NAME(tcon_Fn, Type)(void) {
   return &e;
 }
 
-static Type FUNC_NAME(funcType, Type)(Type arg, Type ret) {
+static Type FUNC_NAME(tcon_List, Type)(void) {
+  static struct Type e = {.id = TCON, .tcon = {"[,]"}};
+  return &e;
+}
+
+static Type FUNC_NAME(tcon_Tuple2, Type)(void) {
+  static struct Type e = {.id = TCON, .tcon = {"(,)"}};
+  return &e;
+}
+
+static Type FUNC_NAME(func, Type)(Type arg, Type ret) {
   TypeT t = trait(Type);
   return t.tapply(t.tapply(t.tcon_Fn(), arg), ret);
+}
+
+static Type FUNC_NAME(list, Type)(Type arg) {
+  TypeT t = trait(Type);
+  return t.tapply(t.tcon_List(), arg);
+}
+
+static Type FUNC_NAME(pair, Type)(Type a, Type b) {
+  TypeT t = trait(Type);
+  return t.tapply(t.tapply(t.tcon_Tuple2(), a), b);
 }
 
 TypeT Trait(Type) {
@@ -125,7 +145,11 @@ TypeT Trait(Type) {
       .tcon_int = FUNC_NAME(tcon_int, Type),
       .tcon_unit = FUNC_NAME(tcon_unit, Type),
       .tcon_Fn = FUNC_NAME(tcon_Fn, Type),
-      .funcType = FUNC_NAME(funcType, Type),
+      .tcon_List = FUNC_NAME(tcon_List, Type),
+      .tcon_Tuple2 = FUNC_NAME(tcon_Tuple2, Type),
+      .func = FUNC_NAME(func, Type),
+      .list = FUNC_NAME(list, Type),
+      .pair = FUNC_NAME(pair, Type),
   };
 }
 

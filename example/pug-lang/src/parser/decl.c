@@ -90,7 +90,7 @@ parsec(constr, Type, Expr) {
     // ---- n-ary constructor
     // type of constructor (function type)
     for (Type* t = A.end(args); t != A.begin(args);) {
-      datatype = T.funcType(*(--t), datatype);
+      datatype = T.func(*(--t), datatype);
     }
     size_t n = A.length(args);
     A.free(&args);
@@ -144,7 +144,7 @@ parsec(tlambda, Type) {
     SCAN(close_pats);
     SCAN(body, rhs);
     for (Type* p = A.end(ps); p != A.begin(ps);) {
-      rhs = t.funcType(*--p, rhs);
+      rhs = t.func(*--p, rhs);
     }
     A.free(&ps);
     RETURN(rhs);

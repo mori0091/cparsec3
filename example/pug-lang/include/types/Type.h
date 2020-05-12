@@ -74,12 +74,16 @@ typedef struct TypeT {
   /** create universal quantified type variable */
   Type (*tgen)(TGen x);
   // ---- helper to create builtin type constructors
-  Type (*tcon_bool)(void); /* type constructor `bool` */
-  Type (*tcon_int)(void);  /* type constructor `int` */
-  Type (*tcon_unit)(void); /* type constructor `()` */
-  Type (*tcon_Fn)(void);   /* type constructor `Fn` */
-  // ---- helper to create type of a function
-  Type (*funcType)(Type arg, Type ret);
+  Type (*tcon_bool)(void);   /* type constructor `bool` */
+  Type (*tcon_int)(void);    /* type constructor `int` */
+  Type (*tcon_unit)(void);   /* type constructor `()` */
+  Type (*tcon_Fn)(void);     /* type constructor `Fn` */
+  Type (*tcon_List)(void);   /* type constructor `[,]` */
+  Type (*tcon_Tuple2)(void); /* type constructor `(,)` */
+  // ---- helper to create type of a function, list, and 2-tuple
+  Type (*func)(Type arg, Type ret);
+  Type (*list)(Type arg);
+  Type (*pair)(Type a, Type b);
 } TypeT;
 
 TypeT Trait(Type);

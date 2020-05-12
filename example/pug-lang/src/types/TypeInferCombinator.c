@@ -157,7 +157,7 @@ fn(typeOfLambda, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TypeT T = trait(Type);
   TI_RUN(newTVar(), a);
   TI_RUN(newTVar(), b);
-  TI_RUN(unify(T.funcType(a, b), t));
+  TI_RUN(unify(T.func(a, b), t));
   TypeScheme sc = {0, a};
   as = t_add(e->lhs->var, sc, as);
   TI_RUN(typeOf0(as, e->rhs, b), x);
@@ -168,7 +168,7 @@ fn(typeOfApply, TAList, Expr, Type, UnTypeInferArgs(None)) {
   g_bind((as, e, t, s, ok, err), *args);
   TypeT T = trait(Type);
   TI_RUN(newTVar(), a);
-  TI_RUN(typeOf0(as, e->lhs, T.funcType(a, t)));
+  TI_RUN(typeOf0(as, e->lhs, T.func(a, t)));
   TI_RUN(typeOf0(as, e->rhs, a), x);
   TI_RETURN(x);
 }
@@ -216,7 +216,7 @@ fn(typeOfSeq, TAList, Expr, Type, UnTypeInferArgs(None)) {
         TI_RUN(newTVar(), a);
         TI_RUN(newTVar(), b);
         TI_RUN(newTVar(), f);
-        TI_RUN(unify(T.funcType(a, b), f));
+        TI_RUN(unify(T.func(a, b), f));
         TypeScheme sc = {0, f};
         as = t_add(e->lhs->lhs->var, sc, as);
       }
@@ -269,7 +269,7 @@ fn(typeOfLet, TAList, Expr, Type, UnTypeInferArgs(None)) {
       TI_RUN(newTVar(), a);
       TI_RUN(newTVar(), b);
       TI_RUN(newTVar(), f);
-      TI_RUN(unify(T.funcType(a, b), f));
+      TI_RUN(unify(T.func(a, b), f));
       TypeScheme sc = {0, f};
       as = t_add(e->lhs->var, sc, as);
     }
@@ -374,7 +374,7 @@ fn(typeOfCapply, TAList, Expr, Type, UnTypeInferArgs(None)) {
   TI_RUN(newTVar(), a);
   TI_RUN(newTVar(), b);
   TI_RUN(typeOf0(as, e->rhs, a));
-  TI_RUN(typeOf0(as, e->lhs, T.funcType(a, b)));
+  TI_RUN(typeOf0(as, e->lhs, T.func(a, b)));
   TI_RUN(unify(b, t), x);
   TI_RETURN(x);
 
@@ -385,7 +385,7 @@ fn(typeOfCapply, TAList, Expr, Type, UnTypeInferArgs(None)) {
   // TI_RUN(newTVar(), a);
   // Type b = T.tapply(T.tcon((TCon){"Maybe"}), a);
   // TI_RUN(typeOf0(as, e->rhs, a));
-  // TI_RUN(typeOf0(as, e->lhs, T.funcType(a, b)));
+  // TI_RUN(typeOf0(as, e->lhs, T.func(a, b)));
   // TI_RUN(unify(b, t), x);
   // TI_RETURN(x);
   // ~~~
