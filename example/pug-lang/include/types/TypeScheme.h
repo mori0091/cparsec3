@@ -6,8 +6,8 @@
 #include "TypeVarProc.h"
 
 typedef struct TypeScheme {
-  int numAny;                   ///< number of `TANY` in the `type`.
-  Type type;                    ///< type prototype.
+  int numTGen; ///< number of `TGen` in the `type`.
+  Type type;   ///< type prototype.
 } TypeScheme;
 
 trait_List(TypeScheme);

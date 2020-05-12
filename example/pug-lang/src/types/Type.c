@@ -19,12 +19,12 @@ static bool FUNC_NAME(eq, Eq(TCon))(TCon a, TCon b) {
 instance_Eq(TCon, FUNC_NAME(eq, Eq(TCon)));
 
 // -------------------------------------
-// trait Eq(TAny)
+// trait Eq(TGen)
 
-static bool FUNC_NAME(eq, Eq(TAny))(TAny a, TAny b) {
+static bool FUNC_NAME(eq, Eq(TGen))(TGen a, TGen b) {
   return (a.n == b.n);
 }
-instance_Eq(TAny, FUNC_NAME(eq, Eq(TAny)));
+instance_Eq(TGen, FUNC_NAME(eq, Eq(TGen)));
 
 // -------------------------------------
 // trait Eq(Type)
@@ -45,8 +45,8 @@ static bool FUNC_NAME(eq, Eq(Type))(Type a, Type b) {
   if (a->id == TCON) {
     return trait(Eq(TCon)).eq(a->tcon, b->tcon);
   }
-  if (a->id == TANY) {
-    return trait(Eq(TAny)).eq(a->any, b->any);
+  if (a->id == TGEN) {
+    return trait(Eq(TGen)).eq(a->tgen, b->tgen);
   }
   return FUNC_NAME(eq, Eq(Type))(a->lhs, b->lhs) &&
          FUNC_NAME(eq, Eq(Type))(a->rhs, b->rhs);
@@ -83,10 +83,10 @@ static Type FUNC_NAME(tapply, Type)(Type lhs, Type rhs) {
   return e;
 }
 
-static Type FUNC_NAME(any, Type)(TAny x) {
+static Type FUNC_NAME(tgen, Type)(TGen x) {
   Type e = Type_New();
-  e->id = TANY;
-  e->any = x;
+  e->id = TGEN;
+  e->tgen = x;
   return e;
 }
 
@@ -120,7 +120,7 @@ TypeT Trait(Type) {
       .tvar = FUNC_NAME(tvar, Type),
       .tcon = FUNC_NAME(tcon, Type),
       .tapply = FUNC_NAME(tapply, Type),
-      .any = FUNC_NAME(any, Type),
+      .tgen = FUNC_NAME(tgen, Type),
       .tcon_bool = FUNC_NAME(tcon_bool, Type),
       .tcon_int = FUNC_NAME(tcon_int, Type),
       .tcon_unit = FUNC_NAME(tcon_unit, Type),
@@ -153,8 +153,8 @@ show_user_type(Type)(CharBuff* b, Type x) {
     s.toString(b, x->rhs);
     mem_printf(b, ")");
     break;
-  case TANY:
-    mem_printf(b, "#a%d", x->any.n);
+  case TGEN:
+    mem_printf(b, "#a%d", x->tgen.n);
     break;
   default:
     assert(0 && "Illegal Type");

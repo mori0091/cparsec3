@@ -55,8 +55,8 @@ static Type inst(Type* ts, size_t n, Type t) {
   switch (t->id) {
   case TAPPLY:
     return trait(Type).tapply(inst(ts, n, t->lhs), inst(ts, n, t->rhs));
-  case TANY:
-    return ts[t->any.n];
+  case TGEN:
+    return ts[t->tgen.n];
   default:
     return t;
   }
@@ -65,17 +65,17 @@ static Type inst(Type* ts, size_t n, Type t) {
 typedef_Fn_r(TypeScheme, UnTypeInfer(Type));
 fn(freshInstImpl, TypeScheme, UnTypeInferArgs(Type)) {
   g_bind((sc, s, ok, err), *args);
-  if (!sc.numAny) {
+  if (!sc.numTGen) {
     return fn_apply(ok, sc.type, s);
   }
-  Type ts[sc.numAny];
+  Type ts[sc.numTGen];
   TypeInfer(Type) ti = newTVar();
-  for (int i = 0; i < sc.numAny; i++) {
+  for (int i = 0; i < sc.numTGen; i++) {
     TIResult(Type) r = runTypeInferP(ti, s);
     s = r.state;
     ts[i] = r.ok;
   }
-  Type t = inst(ts, sc.numAny, sc.type);
+  Type t = inst(ts, sc.numTGen, sc.type);
   return fn_apply(ok, t, s);
 }
 

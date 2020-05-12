@@ -74,14 +74,14 @@ static TypeScheme FUNC_NAME(scheme, Assumption)(List(TypeAssumption) as,
   TypeSubst s = 0;
   int n = 0;
   while (gs) {
-    TypeSubstEntry x = {.tvar = gs->head, .type = T.any((TAny){n})};
+    TypeSubstEntry x = {.tvar = gs->head, .type = T.tgen((TGen){n})};
     s = L.cons(x, s);
     gs = gs->tail;
     n++;
   }
   L.reverse(&s);
   return (TypeScheme){
-      .numAny = n,
+      .numTGen = n,
       .type = S.subst(s, t),
   };
 }

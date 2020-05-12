@@ -26,9 +26,9 @@ typedef struct TCon {
 } TCon;
 
 /* Universal quantified type variable (e.g. ∀a) */
-typedef struct TAny {
+typedef struct TGen {
   int n;
-} TAny;
+} TGen;
 
 enum TypeId {
   /* type variable */
@@ -38,7 +38,7 @@ enum TypeId {
   /* type application */
   TAPPLY,
   /* universal quantified type variable (e.g. ∀a) */
-  TANY,
+  TGEN,
 };
 
 struct Type {
@@ -54,13 +54,13 @@ struct Type {
       Type rhs;
     };
     /* for universal quantified type variable */
-    TAny any;
+    TGen tgen;
   };
 };
 
 trait_Eq(TVar);
 trait_Eq(TCon);
-trait_Eq(TAny);
+trait_Eq(TGen);
 trait_Eq(Type);
 
 // -----------------------------------------------------------------------
@@ -72,7 +72,7 @@ typedef struct TypeT {
   /** type application */
   Type (*tapply)(Type lhs, Type rhs);
   /** create universal quantified type variable */
-  Type (*any)(TAny x);
+  Type (*tgen)(TGen x);
   // ---- helper to create builtin type constructors
   Type (*tcon_bool)(void); /* type constructor `bool` */
   Type (*tcon_int)(void);  /* type constructor `int` */
