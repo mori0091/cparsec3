@@ -10,8 +10,6 @@
 
 #include "Scheme.h"
 
-#include "TypeInfer.h"
-
 #include "Assump.h"
 #include "Unify.h"
 
@@ -30,10 +28,6 @@
 #define t_apply_subst(s, t) GENERIC_TYPES(t).subst(s, t)
 #define t_extract_tvars(t) GENERIC_TYPES(t).tvarsOf(t)
 #define t_union_tvars(tvars1, tvars2) unionTyvars(tvars1, tvars2)
-
-// TypeInfer / TIRunner (type inference monad)
-#define runTypeInferP(ti, st) runAction(ti, st)
-#define runTypeInfer(ti) runAction(ti, ((TIState){.subst = NULL, .i = 0}))
 
 // Scheme / Assump
 #define t_gen(as, type) trait(Assumption).scheme(as, type)
