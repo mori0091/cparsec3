@@ -21,11 +21,6 @@
   GENERIC(t, IDENTITY, TRAIT_TYPES, Type, Scheme, Assump, List(Type),    \
           List(Scheme), List(Assump))
 
-#define TRAIT_TIRUNNER(T) trait(TIRunner(T))
-
-#define GENERIC_TIRUNNER(ti)                                             \
-  GENERIC(ti, TypeInfer, TRAIT_TIRUNNER, TYPE_INFER_RETURN_TYPES())
-
 // Subst
 #define t_empty_subst() trait(Subst).empty
 #define t_create_subst(tvar, type) trait(Subst).create(tvar, type)
@@ -37,8 +32,8 @@
 #define t_union_tvars(tvars1, tvars2) unionTyvars(tvars1, tvars2)
 
 // TypeInfer / TIRunner (type inference monad)
-#define runTypeInferP(ti, st) GENERIC_TIRUNNER(ti).pRunTypeInferP(ti, st)
-#define runTypeInfer(ti) GENERIC_TIRUNNER(ti).pRunTypeInfer(ti)
+#define runTypeInferP(ti, st) runAction(ti, st)
+#define runTypeInfer(ti) runAction(ti, ((TIState){.subst = NULL, .i = 0}))
 
 // Scheme / Assump
 #define t_gen(as, type) trait(Assumption).scheme(as, type)

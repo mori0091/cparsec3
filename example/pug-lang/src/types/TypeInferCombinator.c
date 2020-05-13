@@ -3,51 +3,45 @@
 #include "types/TypeInferCombinator.h"
 
 // -----------------------------------------------------------------------
-fn(getSubstImpl, UnTypeInferArgs(Subst)) {
-  g_bind((s, ok), *args);
-  return fn_apply(ok, s.subst, s);
-}
-
-TypeInfer(Subst) getSubst(void) {
-  return (TypeInfer(Subst)){getSubstImpl()};
-}
-
-// -----------------------------------------------------------------------
-typedef_Fn_r(Type, Type, UnTypeInfer(None));
-fn(unifyImpl, Type, Type, UnTypeInferArgs(None)) {
-  g_bind((t1, t2, s, ok, err), *args);
-  Maybe(Subst) u =
-      t_unifier(t_apply_subst(s.subst, t1), t_apply_subst(s.subst, t2));
-  if (u.none) {
-    Show(Type) S = trait(Show(Type));
-    CharBuff b = {0};
-    mem_printf(&b, "Type mismatch\n  t1 = ");
-    S.toString(&b, t1);
-    mem_printf(&b, "\n  t2 = ");
-    S.toString(&b, t2);
-    TypeError e = {b.data};
-    return fn_apply(err, e, s);
+action(getSubst, Subst) {
+  A_DO() {
+    A_RUN(getState(), s);
+    A_RETURN(s.subst);
   }
-  s.subst = t_composite_subst(u.value, s.subst);
-  return fn_apply(ok, (None){0}, s);
-}
-
-TypeInfer(None) unify(Type t1, Type t2) {
-  __auto_type f = unifyImpl();
-  return (TypeInfer(None)){fn_apply(f, t1, t2)};
 }
 
 // -----------------------------------------------------------------------
-fn(newTVarImpl, UnTypeInferArgs(Type)) {
-  g_bind((s, ok, err), *args);
-  CharBuff b = {0};
-  mem_printf(&b, "#a%d", s.i++);
-  Type t = trait(Type).TVar(b.data, trait(Kind).Star());
-  return fn_apply(ok, t, s);
+action(unify, Type, Type, None) {
+  A_DO_WITH(t1, t2) {
+    A_RUN(getState(), s);
+    Maybe(Subst) u =
+        t_unifier(t_apply_subst(s.subst, t1), t_apply_subst(s.subst, t2));
+    if (u.none) {
+      Show(Type) S = trait(Show(Type));
+      CharBuff b = {0};
+      mem_printf(&b, "Type mismatch\n  t1 = ");
+      S.toString(&b, t1);
+      mem_printf(&b, "\n  t2 = ");
+      S.toString(&b, t2);
+      TypeError e = {b.data};
+      A_FAIL(e);
+    }
+    s.subst = t_composite_subst(u.value, s.subst);
+    A_RUN(putState(s));
+    A_RETURN((None){0});
+  }
 }
 
-TypeInfer(Type) newTVar(void) {
-  return (TypeInfer(Type)){newTVarImpl()};
+// -----------------------------------------------------------------------
+action(newTVar, Type) {
+  A_DO() {
+    A_RUN(getState(), s);
+    CharBuff b = {0};
+    mem_printf(&b, "#a%d", s.i++);
+    Type t = trait(Type).TVar(b.data, trait(Kind).Star());
+    A_RUN(putState(s));
+    A_RETURN(t);
+  }
 }
 
 // -----------------------------------------------------------------------
@@ -62,438 +56,385 @@ static Type inst(Type* ts, size_t n, Type t) {
   }
 }
 
-typedef_Fn_r(Scheme, UnTypeInfer(Type));
-fn(freshInstImpl, Scheme, UnTypeInferArgs(Type)) {
-  g_bind((sc, s, ok, err), *args);
-  if (!sc.numTGen) {
-    return fn_apply(ok, sc.type, s);
+action(freshInst, Scheme, Type) {
+  A_DO_WITH(sc) {
+    if (!sc.numTGen) {
+      A_RETURN(sc.type);
+    }
+    Type ts[sc.numTGen];
+    ACTION(Type) ti = newTVar();
+    for (int i = 0; i < sc.numTGen; i++) {
+      A_RUN(ti, x);
+      ts[i] = x;
+    }
+    Type t = inst(ts, sc.numTGen, sc.type);
+    A_RETURN(t);
   }
-  Type ts[sc.numTGen];
-  TypeInfer(Type) ti = newTVar();
-  for (int i = 0; i < sc.numTGen; i++) {
-    TIResult(Type) r = runTypeInferP(ti, s);
-    s = r.state;
-    ts[i] = r.ok;
-  }
-  Type t = inst(ts, sc.numTGen, sc.type);
-  return fn_apply(ok, t, s);
-}
-
-TypeInfer(Type) freshInst(Scheme sc) {
-  __auto_type f = freshInstImpl();
-  return (TypeInfer(Type)){fn_apply(f, sc)};
 }
 
 // -----------------------------------------------------------------------
-#define TI_UNIQUE_ID_NEW() TI_UNIQUE_ID_NEW0(__COUNTER__)
-#define TI_UNIQUE_ID_NEW0(...) CAT(cparsec_unique_identifier, __VA_ARGS__)
-
-#define TI_RUN(...)                                                      \
-  CAT(TI_RUN, VARIADIC_SIZE(__VA_ARGS__))(TI_UNIQUE_ID_NEW(), __VA_ARGS__)
-
-#define TI_RUN1(_id_, _ti_)                                              \
-  __auto_type _id_ = runTypeInferP(_ti_, s);                             \
-  s = _id_.state;                                                        \
-  do {                                                                   \
-    if (!_id_.success) {                                                 \
-      return fn_apply(err, _id_.err, s);                                 \
-    }                                                                    \
-  } while (0)
-
-#define TI_RUN2(_id_, _ti_, _x_)                                         \
-  TI_RUN1(_id_, _ti_);                                                   \
-  __auto_type _x_ = _id_.ok;
-
-#define TI_RETURN(_x_) return fn_apply(ok, _x_, s)
-
-#define TI_FAIL(_e_) return fn_apply(err, _e_, s)
-
-// -----------------------------------------------------------------------
-typedef_Fn_r(TypeInfer(None), Expr, UnTypeInfer(None));
-fn(ti_labelImpl, TypeInfer(None), Expr, UnTypeInferArgs(None)) {
-  g_bind((ti, e, s, ok, err), *args);
-  TIResult(None) r = runTypeInferP(ti, s);
-  if (r.success) {
-    return fn_apply(ok, r.ok, r.state);
+action(ti_label0, ACTION(None), Expr, None) {
+  A_DO_WITH(ti, e) {
+    A_RUN(getState(), s);
+    A_RESULT(None) r = runAction(ti, s);
+    A_RUN(putState(r.state));
+    if (r.success) {
+      A_RETURN(r.ok);
+    }
+    CharBuff b = {0};
+    mem_printf(&b, "%s\n | %s", r.err.msg, trait(Show(Expr)).show(e));
+    r.err.msg = b.data;
+    A_FAIL(r.err);
   }
-  CharBuff b = {0};
-  mem_printf(&b, "%s\n | %s", r.err.msg, trait(Show(Expr)).show(e));
-  r.err.msg = b.data;
-  return fn_apply(err, r.err, r.state);
 }
 
-TypeInfer(None) ti_label(TypeInfer(None) ti, Expr e) {
+ACTION(None) ti_label(ACTION(None) ti, Expr e) {
   switch (e->id) {
   case SEQ:
   case BLK:
     return ti;
-  default: {
-    __auto_type f = ti_labelImpl();
-    return (TypeInfer(None)){fn_apply(f, ti, e)};
-  }
+  default:
+    return ti_label0(ti, e);
   }
 }
 
 // -----------------------------------------------------------------------
-static TypeInfer(None) typeOf0(List(Assump) as, Expr e, Type t);
+static ACTION(None) typeOf0(List(Assump) as, Expr e, Type t);
 
-typedef_Fn_r(List(Assump), Expr, Fn(Type, UnTypeInfer(None)));
-
-fn(typeOfVar, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  Maybe(Scheme) sc = t_find(e->var, as);
-  if (sc.none) {
-    CharBuff b = {0};
-    mem_printf(&b, "Undefined variable - %s", e->var.ident);
-    TI_FAIL((TypeError){b.data});
+action(typeOfVar, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    Maybe(Scheme) sc = t_find(e->var, as);
+    if (sc.none) {
+      CharBuff b = {0};
+      mem_printf(&b, "Undefined variable - %s", e->var.ident);
+      A_FAIL((TypeError){b.data});
+    }
+    A_RUN(freshInst(sc.value), t2);
+    A_RUN(unify(t2, t), x);
+    A_RETURN(x);
   }
-  TI_RUN(freshInst(sc.value), t2);
-  TI_RUN(unify(t2, t), x);
-  TI_RETURN(x);
 }
 
-fn(typeOfLambda, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  TypeT T = trait(Type);
-  TI_RUN(newTVar(), a);
-  TI_RUN(newTVar(), b);
-  TI_RUN(unify(T.func(a, b), t));
-  Scheme sc = {0, a};
-  as = t_add(e->lhs->var, sc, as);
-  TI_RUN(typeOf0(as, e->rhs, b), x);
-  TI_RETURN(x);
-}
-
-fn(typeOfApply, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  TypeT T = trait(Type);
-  TI_RUN(newTVar(), a);
-  TI_RUN(typeOf0(as, e->lhs, T.func(a, t)));
-  TI_RUN(typeOf0(as, e->rhs, a), x);
-  TI_RETURN(x);
-}
-
-fn(typeOfIfelse, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  Type Bool = trait(Type).tcon_bool();
-  TI_RUN(typeOf0(as, e->lhs, Bool));
-  TI_RUN(newTVar(), a);
-  TI_RUN(typeOf0(as, e->rhs->lhs, a));
-  TI_RUN(typeOf0(as, e->rhs->rhs, a));
-  TI_RUN(getSubst(), sub);
-  TI_RUN(unify(t_apply_subst(sub, a), t), x);
-  TI_RETURN(x);
-}
-
-fn(typeOfBlk, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  TI_RUN(typeOf0(as, e->rhs, t), x);
-  TI_RETURN(x);
-}
-
-fn(typeOfSeq, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  TypeT T = trait(Type);
-  switch (e->lhs->id) {
-  case DECLVAR: {
-    Scheme sc = t_gen(as, e->lhs->rhs->texpr);
-    as = t_add(e->lhs->lhs->var, sc, as);
-    TI_RUN(typeOf0(as, e->rhs, t), x);
-    TI_RETURN(x);
+action(typeOfLambda, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    TypeT T = trait(Type);
+    A_RUN(newTVar(), a);
+    A_RUN(newTVar(), b);
+    A_RUN(unify(T.func(a, b), t));
+    Scheme sc = {0, a};
+    as = t_add(e->lhs->var, sc, as);
+    A_RUN(typeOf0(as, e->rhs, b), x);
+    A_RETURN(x);
   }
-  case LET: {
+}
+
+action(typeOfApply, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    TypeT T = trait(Type);
+    A_RUN(newTVar(), a);
+    A_RUN(typeOf0(as, e->lhs, T.func(a, t)));
+    A_RUN(typeOf0(as, e->rhs, a), x);
+    A_RETURN(x);
+  }
+}
+
+action(typeOfIfelse, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    Type Bool = trait(Type).tcon_bool();
+    A_RUN(typeOf0(as, e->lhs, Bool));
+    A_RUN(newTVar(), a);
+    A_RUN(typeOf0(as, e->rhs->lhs, a));
+    A_RUN(typeOf0(as, e->rhs->rhs, a));
+    A_RUN(getSubst(), sub);
+    A_RUN(unify(t_apply_subst(sub, a), t), x);
+    A_RETURN(x);
+  }
+}
+
+action(typeOfBlk, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    A_RUN(typeOf0(as, e->rhs, t), x);
+    A_RETURN(x);
+  }
+}
+
+action(typeOfSeq, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    TypeT T = trait(Type);
+    switch (e->lhs->id) {
+    case DECLVAR: {
+      Scheme sc = t_gen(as, e->lhs->rhs->texpr);
+      as = t_add(e->lhs->lhs->var, sc, as);
+      A_RUN(typeOf0(as, e->rhs, t), x);
+      A_RETURN(x);
+    }
+    case LET: {
+      Maybe(Scheme) sc = t_find(e->lhs->var, as);
+      if (!sc.none) {
+        A_RUN(freshInst(sc.value), a);
+        A_RUN(typeOf0(as, e->lhs->rhs, a));
+        A_RUN(getSubst(), sub);
+        Scheme sc = t_gen(as, t_apply_subst(sub, a));
+        as = t_add(e->lhs->lhs->var, sc, as);
+        A_RUN(typeOf0(as, e->rhs, t), x);
+        A_RETURN(x);
+      } else {
+        if (e->lhs->rhs->id == LAMBDA) {
+          A_RUN(newTVar(), a);
+          A_RUN(newTVar(), b);
+          A_RUN(newTVar(), f);
+          A_RUN(unify(T.func(a, b), f));
+          Scheme sc = {0, f};
+          as = t_add(e->lhs->lhs->var, sc, as);
+        }
+        A_RUN(newTVar(), a);
+        A_RUN(typeOf0(as, e->lhs->rhs, a));
+        A_RUN(getSubst(), sub);
+        Scheme sc = t_gen(as, t_apply_subst(sub, a));
+        as = t_add(e->lhs->lhs->var, sc, as);
+        A_RUN(typeOf0(as, e->rhs, t), x);
+        A_RETURN(x);
+      }
+    }
+    default: {
+      A_RUN(newTVar(), a);
+      A_RUN(typeOf0(as, e->lhs, a));
+      A_RUN(typeOf0(as, e->rhs, t), x);
+      A_RETURN(x);
+    }
+    }
+  }
+}
+
+action(typeOfDeclvar, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    // TODO what should we do here?
+    A_RUN(unify(e->rhs->texpr, t), x);
+    A_RETURN(x);
+  }
+}
+
+action(typeOfAssign, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    A_RUN(newTVar(), a);
+    A_RUN(typeOf0(as, e->lhs, a));
+    A_RUN(typeOf0(as, e->rhs, a));
+    A_RUN(getSubst(), sub);
+    A_RUN(unify(t_apply_subst(sub, a), t), x);
+    A_RETURN(x);
+  }
+}
+
+action(typeOfLet, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
     Maybe(Scheme) sc = t_find(e->lhs->var, as);
     if (!sc.none) {
-      TI_RUN(freshInst(sc.value), a);
-      TI_RUN(typeOf0(as, e->lhs->rhs, a));
-      TI_RUN(getSubst(), sub);
-      Scheme sc = t_gen(as, t_apply_subst(sub, a));
-      as = t_add(e->lhs->lhs->var, sc, as);
-      TI_RUN(typeOf0(as, e->rhs, t), x);
-      TI_RETURN(x);
+      A_RUN(freshInst(sc.value), a);
+      A_RUN(typeOf0(as, e->rhs, a));
+      A_RUN(unify(a, t), x);
+      A_RETURN(x);
     } else {
-      if (e->lhs->rhs->id == LAMBDA) {
-        TI_RUN(newTVar(), a);
-        TI_RUN(newTVar(), b);
-        TI_RUN(newTVar(), f);
-        TI_RUN(unify(T.func(a, b), f));
+      if (e->rhs->id == LAMBDA) {
+        TypeT T = trait(Type);
+        A_RUN(newTVar(), a);
+        A_RUN(newTVar(), b);
+        A_RUN(newTVar(), f);
+        A_RUN(unify(T.func(a, b), f));
         Scheme sc = {0, f};
-        as = t_add(e->lhs->lhs->var, sc, as);
+        as = t_add(e->lhs->var, sc, as);
       }
-      TI_RUN(newTVar(), a);
-      TI_RUN(typeOf0(as, e->lhs->rhs, a));
-      TI_RUN(getSubst(), sub);
-      Scheme sc = t_gen(as, t_apply_subst(sub, a));
-      as = t_add(e->lhs->lhs->var, sc, as);
-      TI_RUN(typeOf0(as, e->rhs, t), x);
-      TI_RETURN(x);
+      A_RUN(typeOf0(as, e->rhs, t), x);
+      A_RETURN(x);
     }
   }
-  default: {
-    TI_RUN(newTVar(), a);
-    TI_RUN(typeOf0(as, e->lhs, a));
-    TI_RUN(typeOf0(as, e->rhs, t), x);
-    TI_RETURN(x);
+}
+
+action(typeOfOrAnd, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    Type Bool = trait(Type).tcon_bool();
+    A_RUN(typeOf0(as, e->lhs, Bool));
+    A_RUN(typeOf0(as, e->rhs, Bool));
+    A_RUN(unify(Bool, t), x);
+    A_RETURN(x);
   }
+}
+
+action(typeOfComparisson, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    Type Bool = trait(Type).tcon_bool();
+    A_RUN(newTVar(), a);
+    A_RUN(typeOf0(as, e->lhs, a));
+    A_RUN(typeOf0(as, e->rhs, a));
+    A_RUN(unify(Bool, t), x);
+    A_RETURN(x);
   }
 }
 
-fn(typeOfDeclvar, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  // TODO what should we do here?
-  TI_RUN(unify(e->rhs->texpr, t), x);
-  TI_RETURN(x);
+action(typeOfArithmetic, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    Type Int = trait(Type).tcon_int();
+    A_RUN(typeOf0(as, e->lhs, Int));
+    A_RUN(typeOf0(as, e->rhs, Int));
+    A_RUN(unify(Int, t), x);
+    A_RETURN(x);
+  }
 }
 
-fn(typeOfAssign, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  TI_RUN(newTVar(), a);
-  TI_RUN(typeOf0(as, e->lhs, a));
-  TI_RUN(typeOf0(as, e->rhs, a));
-  TI_RUN(getSubst(), sub);
-  TI_RUN(unify(t_apply_subst(sub, a), t), x);
-  TI_RETURN(x);
+action(typeOfNeg, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    Type Int = trait(Type).tcon_int();
+    A_RUN(typeOf0(as, e->rhs, Int));
+    A_RUN(unify(Int, t), x);
+    A_RETURN(x);
+  }
 }
 
-fn(typeOfLet, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  Maybe(Scheme) sc = t_find(e->lhs->var, as);
-  if (!sc.none) {
-    TI_RUN(freshInst(sc.value), a);
-    TI_RUN(typeOf0(as, e->rhs, a));
-    TI_RUN(unify(a, t), x);
-    TI_RETURN(x);
-  } else {
-    if (e->rhs->id == LAMBDA) {
-      TypeT T = trait(Type);
-      TI_RUN(newTVar(), a);
-      TI_RUN(newTVar(), b);
-      TI_RUN(newTVar(), f);
-      TI_RUN(unify(T.func(a, b), f));
-      Scheme sc = {0, f};
-      as = t_add(e->lhs->var, sc, as);
+action(typeOfNot, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    Type Bool = trait(Type).tcon_bool();
+    Type Int = trait(Type).tcon_int();
+    A_RUN(newTVar(), a);
+    A_RUN(typeOf0(as, e->rhs, a));
+    A_RUN(getSubst(), sub);
+    Type b = t_apply_subst(sub, a);
+    Eq(Type) E = trait(Eq(Type));
+    if (E.eq(b, Int) || E.eq(b, Bool)) {
+      A_RUN(unify(b, t), x);
+      A_RETURN(x);
     }
-    TI_RUN(typeOf0(as, e->rhs, t), x);
-    TI_RETURN(x);
+    A_FAIL((TypeError){"Type mismatch"});
   }
 }
 
-fn(typeOfOrAnd, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  Type Bool = trait(Type).tcon_bool();
-  TI_RUN(typeOf0(as, e->lhs, Bool));
-  TI_RUN(typeOf0(as, e->rhs, Bool));
-  TI_RUN(unify(Bool, t), x);
-  TI_RETURN(x);
-}
-
-fn(typeOfComparisson, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  Type Bool = trait(Type).tcon_bool();
-  TI_RUN(newTVar(), a);
-  TI_RUN(typeOf0(as, e->lhs, a));
-  TI_RUN(typeOf0(as, e->rhs, a));
-  TI_RUN(unify(Bool, t), x);
-  TI_RETURN(x);
-}
-
-fn(typeOfArithmetic, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  Type Int = trait(Type).tcon_int();
-  TI_RUN(typeOf0(as, e->lhs, Int));
-  TI_RUN(typeOf0(as, e->rhs, Int));
-  TI_RUN(unify(Int, t), x);
-  TI_RETURN(x);
-}
-
-fn(typeOfNeg, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  Type Int = trait(Type).tcon_int();
-  TI_RUN(typeOf0(as, e->rhs, Int));
-  TI_RUN(unify(Int, t), x);
-  TI_RETURN(x);
-}
-
-fn(typeOfNot, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  Type Bool = trait(Type).tcon_bool();
-  Type Int = trait(Type).tcon_int();
-  TI_RUN(newTVar(), a);
-  TI_RUN(typeOf0(as, e->rhs, a));
-  TI_RUN(getSubst(), sub);
-  Type b = t_apply_subst(sub, a);
-  Eq(Type) E = trait(Eq(Type));
-  if (E.eq(b, Int) || E.eq(b, Bool)) {
-    TI_RUN(unify(b, t), x);
-    TI_RETURN(x);
+action(typeOfNum, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    Type Int = trait(Type).tcon_int();
+    A_RUN(unify(Int, t), x);
+    A_RETURN(x);
   }
-  TI_FAIL((TypeError){"Type mismatch"});
 }
 
-fn(typeOfNum, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  Type Int = trait(Type).tcon_int();
-  TI_RUN(unify(Int, t), x);
-  TI_RETURN(x);
-}
-
-fn(typeOfFalseTrue, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
+action(typeOfFalseTrue, List(Assump), Expr, Type, None) {
   Type Bool = trait(Type).tcon_bool();
-  g_bind((as, e, t, s, ok, err), *args);
-  TI_RUN(unify(Bool, t), x);
-  TI_RETURN(x);
+  A_DO_WITH(as, e, t) {
+    A_RUN(unify(Bool, t), x);
+    A_RETURN(x);
+  }
 }
 
-fn(typeOfUnit, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  Type Unit = trait(Type).tcon_unit();
-  TI_RUN(unify(Unit, t), x);
-  TI_RETURN(x);
+action(typeOfUnit, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    Type Unit = trait(Type).tcon_unit();
+    A_RUN(unify(Unit, t), x);
+    A_RETURN(x);
+  }
 }
 
-fn(typeOfPrint, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  Type Unit = trait(Type).tcon_unit();
-  TI_RUN(newTVar(), a);
-  TI_RUN(typeOf0(as, e->rhs, a)); /* what we should do for `a`? */
-  TI_RUN(unify(Unit, t), x);
-  TI_RETURN(x);
+action(typeOfPrint, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    Type Unit = trait(Type).tcon_unit();
+    A_RUN(newTVar(), a);
+    A_RUN(typeOf0(as, e->rhs, a)); /* what we should do for `a`? */
+    A_RUN(unify(Unit, t), x);
+    A_RETURN(x);
+  }
 }
 
-fn(typeOfCon, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  ExprT E = trait(Expr);
-  TI_RUN(typeOf0(as, E.var((Var){e->con.ident}), t), x);
-  TI_RETURN(x);
+action(typeOfCon, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    ExprT E = trait(Expr);
+    A_RUN(typeOf0(as, E.var((Var){e->con.ident}), t), x);
+    A_RETURN(x);
+  }
 }
 
-fn(typeOfCapply, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  // TODO fix this ; does not work expected.
-  TypeT T = trait(Type);
-  TI_RUN(newTVar(), a);
-  TI_RUN(newTVar(), b);
-  TI_RUN(typeOf0(as, e->rhs, a));
-  TI_RUN(typeOf0(as, e->lhs, T.func(a, b)));
-  TI_RUN(unify(b, t), x);
-  TI_RETURN(x);
+action(typeOfCapply, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    // TODO fix this ; does not work expected.
+    TypeT T = trait(Type);
+    A_RUN(newTVar(), a);
+    A_RUN(newTVar(), b);
+    A_RUN(typeOf0(as, e->rhs, a));
+    A_RUN(typeOf0(as, e->lhs, T.func(a, b)));
+    A_RUN(unify(b, t), x);
+    A_RETURN(x);
 
-  // NOTE the below works as expecetd,
-  // if and only if `e` was `Just x` of `Maybe a` type.
-  // ~~~c
-  // TypeT T = trait(Type);
-  // KindT K = trait(Kind);
-  // TI_RUN(newTVar(), a);
-  // Type b = T.TAp(T.TCon("Maybe", K.Star()), a);
-  // TI_RUN(typeOf0(as, e->rhs, a));
-  // TI_RUN(typeOf0(as, e->lhs, T.func(a, b)));
-  // TI_RUN(unify(b, t), x);
-  // TI_RETURN(x);
-  // ~~~
+    // NOTE the below works as expecetd,
+    // if and only if `e` was `Just x` of `Maybe a` type.
+    // ~~~c
+    // TypeT T = trait(Type);
+    // KindT K = trait(Kind);
+    // A_RUN(newTVar(), a);
+    // Type b = T.TAp(T.TCon("Maybe", K.Star()), a);
+    // A_RUN(typeOf0(as, e->rhs, a));
+    // A_RUN(typeOf0(as, e->lhs, T.func(a, b)));
+    // A_RUN(unify(b, t), x);
+    // A_RETURN(x);
+    // ~~~
+  }
 }
 
-fn(typeOfFail, List(Assump), Expr, Type, UnTypeInferArgs(None)) {
-  g_bind((as, e, t, s, ok, err), *args);
-  TI_FAIL((TypeError){"Invalid expr"});
+action(typeOfFail, List(Assump), Expr, Type, None) {
+  A_DO_WITH(as, e, t) {
+    A_FAIL((TypeError){"Invalid expr"});
+  }
 }
 
-static TypeInfer(None) typeOf0Impl(List(Assump) as, Expr e, Type t) {
+static ACTION(None) typeOf0Impl(List(Assump) as, Expr e, Type t) {
   switch (e->id) {
-  case VAR: {
-    __auto_type f = typeOfVar();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case LAMBDA: {
-    __auto_type f = typeOfLambda();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case APPLY: {
-    __auto_type f = typeOfApply();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case IFELSE: {
-    __auto_type f = typeOfIfelse();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case BLK: {
-    __auto_type f = typeOfBlk();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case SEQ: {
-    __auto_type f = typeOfSeq();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case DECLVAR: {
-    __auto_type f = typeOfDeclvar();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case ASSIGN: {
-    __auto_type f = typeOfAssign();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case LET: {
-    __auto_type f = typeOfLet();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
+  case VAR:
+    return typeOfVar(as, e, t);
+  case LAMBDA:
+    return typeOfLambda(as, e, t);
+  case APPLY:
+    return typeOfApply(as, e, t);
+  case IFELSE:
+    return typeOfIfelse(as, e, t);
+  case BLK:
+    return typeOfBlk(as, e, t);
+  case SEQ:
+    return typeOfSeq(as, e, t);
+  case DECLVAR:
+    return typeOfDeclvar(as, e, t);
+  case ASSIGN:
+    return typeOfAssign(as, e, t);
+  case LET:
+    return typeOfLet(as, e, t);
   case OR:
-  case AND: {
-    __auto_type f = typeOfOrAnd();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
+  case AND:
+    return typeOfOrAnd(as, e, t);
   case EQ:
   case NEQ:
   case LE:
   case LT:
   case GT:
-  case GE: {
-    __auto_type f = typeOfComparisson();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
+  case GE:
+    return typeOfComparisson(as, e, t);
   case ADD:
   case SUB:
   case MUL:
   case DIV:
-  case MOD: {
-    __auto_type f = typeOfArithmetic();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case NEG: {
-    __auto_type f = typeOfNeg();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case NOT: {
-    __auto_type f = typeOfNot();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case NUM: {
-    __auto_type f = typeOfNum();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
+  case MOD:
+    return typeOfArithmetic(as, e, t);
+  case NEG:
+    return typeOfNeg(as, e, t);
+  case NOT:
+    return typeOfNot(as, e, t);
+  case NUM:
+    return typeOfNum(as, e, t);
   case FALSE:
-  case TRUE: {
-    __auto_type f = typeOfFalseTrue();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case UNIT: {
-    __auto_type f = typeOfUnit();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case PRINT: {
-    __auto_type f = typeOfPrint();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case CON: {
-    __auto_type f = typeOfCon();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  case CAPPLY: {
-    __auto_type f = typeOfCapply();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
-  default: {
-    __auto_type f = typeOfFail();
-    return (TypeInfer(None)){fn_apply(f, as, e, t)};
-  }
+  case TRUE:
+    return typeOfFalseTrue(as, e, t);
+  case UNIT:
+    return typeOfUnit(as, e, t);
+  case PRINT:
+    return typeOfPrint(as, e, t);
+  case CON:
+    return typeOfCon(as, e, t);
+  case CAPPLY:
+    return typeOfCapply(as, e, t);
+  default:
+    return typeOfFail(as, e, t);
   }
 }
 
@@ -502,16 +443,11 @@ static TypeInfer(None) typeOf0(List(Assump) as, Expr e, Type t) {
 }
 
 // -----------------------------------------------------------------------
-typedef_Fn_r(List(Assump), Expr, UnTypeInfer(Type));
-fn(typeOfImpl, List(Assump), Expr, UnTypeInferArgs(Type)) {
-  g_bind((as, e, s, ok, err), *args);
-  TI_RUN(newTVar(), a);
-  TI_RUN(typeOf0(as, e, a));
-  TI_RUN(getSubst(), sub);
-  TI_RETURN(t_apply_subst(sub, a));
-}
-
-TypeInfer(Type) typeOf(List(Assump) as, Expr e) {
-  __auto_type f = typeOfImpl();
-  return (TypeInfer(Type)){fn_apply(f, as, e)};
+action(typeOf, List(Assump), Expr, Type) {
+  A_DO_WITH(as, e) {
+    A_RUN(newTVar(), a);
+    A_RUN(typeOf0(as, e, a));
+    A_RUN(getSubst(), sub);
+    A_RETURN(t_apply_subst(sub, a));
+  }
 }
