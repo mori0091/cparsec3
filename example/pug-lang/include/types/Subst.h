@@ -20,6 +20,8 @@ trait_List(SubstEntry);
 
 typedef List(SubstEntry) Subst;
 
+trait_Maybe(Subst);
+
 // -----------------------------------------------------------------------
 // ---- trait Subst
 
@@ -30,6 +32,8 @@ typedef struct SubstT {
   Subst (*create)(Tyvar tvar, Type type);
   /** Composites two type-substitutions. */
   Subst (*composite)(Subst s1, Subst s2);
+  /** Merges two type-substitutions. */
+  Maybe(Subst) (*merge)(Subst s1, Subst s2);
 } SubstT;
 
 SubstT Trait(Subst);

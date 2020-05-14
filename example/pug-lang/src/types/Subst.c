@@ -45,10 +45,35 @@ static Subst FUNC_NAME(composite, Subst)(Subst s1, Subst s2) {
   return s;
 }
 
+static Maybe(Subst) FUNC_NAME(merge, Subst)(Subst s1, Subst s2) {
+  Types(Type) S = trait(Types(Type));
+  TypeT T = trait(Type);
+  for (Subst xs = s1; xs; xs = xs->tail) {
+    Tyvar x = xs->head.tvar;
+    for (Subst ys = s2; ys; ys = ys->tail) {
+      Tyvar y = ys->head.tvar;
+      if (trait(Eq(Tyvar)).eq(x, y)) {
+        Type v = T.TVar(x.ident, x.kind);
+        if (trait(Eq(Type)).neq(S.subst(s1, v), S.subst(s2, v))) {
+          return (Maybe(Subst)){.none = true};
+        }
+      }
+    }
+  }
+  // return s1 ++ s2
+  Subst xs = s1;
+  while (xs->tail) {
+    xs = xs->tail;
+  }
+  xs->tail = s2;
+  return (Maybe(Subst)){.value = s1};
+}
+
 SubstT Trait(Subst) {
   return (SubstT){
       .empty = NULL,
       .create = FUNC_NAME(create, Subst),
       .composite = FUNC_NAME(composite, Subst),
+      .merge = FUNC_NAME(merge, Subst),
   };
 }

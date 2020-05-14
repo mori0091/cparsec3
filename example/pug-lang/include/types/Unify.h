@@ -3,8 +3,6 @@
 
 #include "Subst.h"
 
-trait_Maybe(Subst);
-
 typedef struct Unify {
   /** try to find the most general unifier (MGU) of t1 and t2 */
   Maybe(Subst) (*unifier)(Type t1, Type t2);
