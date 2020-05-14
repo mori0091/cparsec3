@@ -1,6 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 
 #include "types/Unify.h"
+#include "types/TypeSystem.h"
 #include "types/Types.h"
 
 Maybe(Subst) FUNC_NAME(unifier, Unify)(Type t1, Type t2) {
@@ -50,6 +51,10 @@ Maybe(Subst) FUNC_NAME(tbind, Unify)(Tyvar tvar, Type t) {
       }
       xs = xs->tail;
     }
+  }
+  /* Is kind of `tvar` same as kind of `t`? */
+  if (trait(Eq(Kind)).neq(t_kind(tvar), t_kind(t))) {
+    return (Maybe(Subst)){.none = true}; /* error */
   }
   /* otherwise */
   return (Maybe(Subst)){.value = TS.create(tvar, t)};

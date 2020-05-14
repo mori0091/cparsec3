@@ -13,11 +13,19 @@
 #include "Assump.h"
 #include "Unify.h"
 
+#define TRAIT_HASKIND(T) trait(HasKind(T))
+
+#define GENERIC_HASKIND(t)                                               \
+  GENERIC(t, IDENTITY, TRAIT_HASKIND, Tyvar, Tycon, Type)
+
 #define TRAIT_TYPES(T) trait(Types(T))
 
 #define GENERIC_TYPES(t)                                                 \
   GENERIC(t, IDENTITY, TRAIT_TYPES, Type, Scheme, Assump, List(Type),    \
           List(Scheme), List(Assump))
+
+// Type / HasKind
+#define t_kind(t) GENERIC_HASKIND(t).kind(t)
 
 // Subst
 #define t_empty_subst() trait(Subst).empty

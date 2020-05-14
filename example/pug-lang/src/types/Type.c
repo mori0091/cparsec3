@@ -230,8 +230,14 @@ static Kind FUNC_NAME(kind, HasKind(Type))(Type t) {
     return t->tvar.kind;
   case TCON:
     return t->tcon.kind;
-  case TAPPLY:
-    return FUNC_NAME(kind, HasKind(Type))(t->lhs)->rhs;
+  case TAPPLY:;
+    Kind k = FUNC_NAME(kind, HasKind(Type))(t->lhs);
+    if (k->id == KFUN) {
+      return k->rhs;
+    }
+    printf("%s\n", trait(Show(Type)).show(t));
+    assert(0 && "Invalid Type (illformed kind of type)");
+    abort();
   default:
     assert(0 && "Invalid Type");
     abort();

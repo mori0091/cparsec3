@@ -5,12 +5,16 @@
 impl_user_type(Kind);
 
 static bool FUNC_NAME(eq, Eq(Kind))(Kind k1, Kind k2) {
-  assert(k1 && k2 && "Null pointer");
+  assert(k1 && "Null pointer");
+  assert(k2 && "Null pointer");
   if (k1 == k2) {
     return true;
   }
   if (k1->id != k2->id) {
     return false;
+  }
+  if (k1->id == STAR) {
+    return true;
   }
   return FUNC_NAME(eq, Eq(Kind))(k1->lhs, k2->lhs) &&
          FUNC_NAME(eq, Eq(Kind))(k1->rhs, k2->rhs);
@@ -29,8 +33,8 @@ static struct Kind star_star = {
 };
 static struct Kind star_star_star = {
     .id = KFUN,
-    .lhs = &star_star,
-    .rhs = &star,
+    .lhs = &star,
+    .rhs = &star_star,
 };
 
 Kind FUNC_NAME(Star, Kind)(void) {

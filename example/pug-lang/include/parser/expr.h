@@ -43,8 +43,9 @@ C_API_BEGIN
 // declvar = "var" variable type_annotation
 // decltype = "type" simpletype "=" constrs
 //
-// simpletype = qtctor {tvar}
+// simpletype = Identifier {texpr}
 // constrs = constr {"|" constr}
+// constr  = Identifier {texpr}
 //
 // type_annotation = ":" texpr
 // texpr  = tlambda | btype
@@ -54,12 +55,10 @@ C_API_BEGIN
 //        | tvar
 //        | tparen
 //
-// tctor  = "()" | "bool" | "int" | qtctor
-// qtctor = Identifier
+// tctor  = "()" | "bool" | "int" | simpletype
+//
 // tvar   = identifier
 // tparen = "(" texpr ")"
-//
-// constr  = Identifier {texpr}
 //
 // print  = "print" fexpr           (TODO: remove when I/O library ready.)
 // unary  = [("+" | "-" | "!")] fexpr
@@ -74,7 +73,7 @@ C_API_BEGIN
 // literal = number
 // paren   = (" expr ")"
 //
-// varctor       = Identifier
+// varctor     = Identifier
 // variable    = identifier | varsym
 //
 // Identifier  = upper{identLetter}
@@ -159,7 +158,6 @@ PARSER(Type) btype(void);
 PARSER(Type) atype(void);
 PARSER(Type) tlambda(void);
 PARSER(Type) tctor(void);
-PARSER(Type) qtctor(void);
 PARSER(Type) tvar(void);
 PARSER(Type) tparen(void);
 

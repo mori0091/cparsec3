@@ -46,12 +46,18 @@ parsec(simpletype, Type) {
   ArrayT(Type) A = trait(Array(Type));
   TypeT T = trait(Type);
   DO() {
-    SCAN(qtctor(), lhs);       /* Type ; (Tycon t) */
-    SCAN(many(tvar()), tvars); /* Array(Type) ; arrya of (Tyvar v) */
-    for (Type* t = A.begin(tvars); t != A.end(tvars); t++) {
+    SCAN(Identifier(), c);
+    SCAN(many(texpr()), targs);
+    KindT K = trait(Kind);
+    Kind k = K.Star();
+    for (size_t i = 0; i < A.length(targs); ++i) {
+      k = K.Kfun(k, K.Star());
+    }
+    Type lhs = T.TCon(c, k);
+    for (Type* t = A.begin(targs); t != A.end(targs); t++) {
       lhs = T.TAp(lhs, *t);
     }
-    A.free(&tvars);
+    A.free(&targs);
     RETURN(lhs);
   }
 }
@@ -194,16 +200,8 @@ parsec(tctor_int, Type) {
 }
 
 PARSER(Type) tctor(void) {
-  return label("type constructor",
-               choice(tctor_unit(), tctor_bool(), tctor_int(), qtctor()));
-}
-
-// PARSER(Type) qtctor(void);
-parsec(qtctor, Type) {
-  DO() {
-    SCAN(Identifier(), x);
-    RETURN(trait(Type).TCon(x, trait(Kind).Star()));
-  }
+  return label("type constructor", choice(tctor_unit(), tctor_bool(),
+                                          tctor_int(), simpletype()));
 }
 
 parsec(tvar0, Type) {
