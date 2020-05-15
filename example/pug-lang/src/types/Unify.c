@@ -60,9 +60,42 @@ Maybe(Subst) FUNC_NAME(tbind, Unify)(Tyvar tvar, Type t) {
   return (Maybe(Subst)){.value = TS.create(tvar, t)};
 }
 
+Maybe(Subst) FUNC_NAME(match, Unify)(Type t1, Type t2) {
+  SubstT S = trait(Subst);
+  Unify U = trait(Unify);
+
+  /* both t1 and t2 are TAp */
+  if (t1->id == TAPPLY && t2->id == TAPPLY) {
+    Maybe(Subst) sl = U.match(t1->lhs, t2->lhs);
+    if (!sl.none) {
+      Maybe(Subst) sr = U.match(t1->rhs, t2->rhs);
+      if (!sr.none) {
+        return S.merge(sl.value, sr.value);
+      }
+    }
+  }
+  /* t1 was TVar */
+  if (t1->id == TVAR) {
+    Tyvar u = t1->tvar;
+    Type  t = t2;
+    if (trait(Eq(Kind)).eq(t_kind(u), t_kind(t))) {
+      return (Maybe(Subst)){.value = trait(Subst).create(u, t)};
+    }
+  }
+  /* both t1 and t2 are TCon */
+  if (t1->id == TCON && t2->id == TCON) {
+    if (trait(Eq(Tycon)).eq(t1->tcon, t2->tcon)) {
+      return (Maybe(Subst)){.value = NULL};
+    }
+  }
+  /* otherwise */
+  return (Maybe(Subst)){.none = true};
+}
+
 Unify Trait(Unify) {
   return (Unify){
       .unifier = FUNC_NAME(unifier, Unify),
       .tbind = FUNC_NAME(tbind, Unify),
+      .match = FUNC_NAME(match, Unify),
   };
 }

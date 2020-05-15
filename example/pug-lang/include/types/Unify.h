@@ -8,6 +8,8 @@ typedef struct Unify {
   Maybe(Subst) (*unifier)(Type t1, Type t2);
   /** try to bind the type to the type-variable */
   Maybe(Subst) (*tbind)(Tyvar tvar, Type t);
+  /** try to calculate a matching substitutions */
+  Maybe(Subst) (*match)(Type t1, Type t2);
 } Unify;
 
 Unify Trait(Unify);
