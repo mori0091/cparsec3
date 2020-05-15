@@ -10,7 +10,11 @@ typedef struct Assump {
   Scheme scheme;
 } Assump;
 
+trait_Eq(Assump);
+
 trait_List(Assump);
+trait_Eq(List(Assump));
+
 trait_Types(Assump);
 trait_Types(List(Assump));
 

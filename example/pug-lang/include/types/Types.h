@@ -32,7 +32,6 @@ List(Tyvar) unionTyvars(List(Tyvar) as, List(Tyvar) bs);
   END_OF_STATEMENTS
 
 // -----------------------------------------------------------------------
-trait_List(Type);
 trait_Types(Type);
 trait_Types(List(Type));
 

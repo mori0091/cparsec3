@@ -3,6 +3,18 @@
 #include "types/Assump.h"
 
 // -----------------------------------------------------------------------
+// ---- trait Eq(Assump)
+static bool FUNC_NAME(eq, Eq(Assump))(Assump a, Assump b) {
+  return trait(Eq(String)).eq(a.var.ident, b.var.ident) &&
+         trait(Eq(Scheme)).eq(a.scheme, b.scheme);
+}
+instance_Eq(Assump, FUNC_NAME(eq, Eq(Assump)));
+
+// -----------------------------------------------------------------------
+// ---- trait Eq(List(Assump))
+impl_Eq_List(Assump);
+
+// -----------------------------------------------------------------------
 // ---- trait Types(Assump)
 
 static Assump FUNC_NAME(subst, Types(Assump))(Subst s, Assump as) {

@@ -66,6 +66,9 @@ trait_Eq(Tycon);
 trait_Eq(Tygen);
 trait_Eq(Type);
 
+trait_List(Type);
+trait_Eq(List(Type));
+
 // -----------------------------------------------------------------------
 typedef struct TypeT {
   /** create type variable */

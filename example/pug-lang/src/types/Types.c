@@ -87,5 +87,4 @@ Types(Type) Trait(Types(Type)) {
 // -----------------------------------------------------------------------
 // ---- trait Types(List(Type))
 
-impl_List(Type);
 impl_Types_List(Type);

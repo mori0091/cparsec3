@@ -10,6 +10,10 @@ typedef struct Scheme {
   Type type;   ///< type prototype.
 } Scheme;
 
+trait_Eq(Scheme);
+
 trait_List(Scheme);
+trait_Eq(List(Scheme));
+
 trait_Types(Scheme);
 trait_Types(List(Scheme));

@@ -58,6 +58,14 @@ static bool FUNC_NAME(eq, Eq(Type))(Type a, Type b) {
 instance_Eq(Type, FUNC_NAME(eq, Eq(Type)));
 
 // -------------------------------------
+// trait List(Type)
+impl_List(Type);
+
+// -------------------------------------
+// trait Eq(List(Type))
+impl_Eq_List(Type);
+
+// -------------------------------------
 // trait Type
 
 static Type Type_New(void) {
