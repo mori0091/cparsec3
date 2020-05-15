@@ -77,7 +77,7 @@ Maybe(Subst) FUNC_NAME(match, Unify)(Type t1, Type t2) {
   /* t1 was TVar */
   if (t1->id == TVAR) {
     Tyvar u = t1->tvar;
-    Type  t = t2;
+    Type t = t2;
     if (trait(Eq(Kind)).eq(t_kind(u), t_kind(t))) {
       return (Maybe(Subst)){.value = trait(Subst).create(u, t)};
     }
@@ -92,10 +92,26 @@ Maybe(Subst) FUNC_NAME(match, Unify)(Type t1, Type t2) {
   return (Maybe(Subst)){.none = true};
 }
 
+static Maybe(Subst) FUNC_NAME(mguPred, Unify)(Pred p1, Pred p2) {
+  if (trait(Eq(String)).eq(p1.ident, p2.ident)) {
+    return trait(Unify).unifier(p1.type, p2.type);
+  }
+  return (Maybe(Subst)){.none = true};
+}
+
+static Maybe(Subst) FUNC_NAME(matchPred, Unify)(Pred p1, Pred p2) {
+  if (trait(Eq(String)).eq(p1.ident, p2.ident)) {
+    return trait(Unify).match(p1.type, p2.type);
+  }
+  return (Maybe(Subst)){.none = true};
+}
+
 Unify Trait(Unify) {
   return (Unify){
       .unifier = FUNC_NAME(unifier, Unify),
       .tbind = FUNC_NAME(tbind, Unify),
       .match = FUNC_NAME(match, Unify),
+      .mguPred = FUNC_NAME(mguPred, Unify),
+      .matchPred = FUNC_NAME(matchPred, Unify),
   };
 }
