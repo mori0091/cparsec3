@@ -38,7 +38,7 @@ action(newTVar, Type) {
     A_RUN(getState(), s);
     CharBuff b = {0};
     mem_printf(&b, "#a%d", s.i++);
-    Type t = trait(Type).TVar(b.data, trait(Kind).Star());
+    Type t = trait(Type).TVar((Tyvar){b.data, trait(Kind).Star()});
     A_RUN(putState(s));
     A_RETURN(t);
   }

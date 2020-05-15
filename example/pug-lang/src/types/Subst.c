@@ -53,7 +53,7 @@ static Maybe(Subst) FUNC_NAME(merge, Subst)(Subst s1, Subst s2) {
     for (Subst ys = s2; ys; ys = ys->tail) {
       Tyvar y = ys->head.tvar;
       if (trait(Eq(Tyvar)).eq(x, y)) {
-        Type v = T.TVar(x.ident, x.kind);
+        Type v = T.TVar(x);
         if (trait(Eq(Type)).neq(S.subst(s1, v), S.subst(s2, v))) {
           return (Maybe(Subst)){.none = true};
         }

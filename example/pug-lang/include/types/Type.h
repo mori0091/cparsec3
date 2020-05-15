@@ -69,9 +69,9 @@ trait_Eq(Type);
 // -----------------------------------------------------------------------
 typedef struct TypeT {
   /** create type variable */
-  Type (*TVar)(String ident, Kind kind);
+  Type (*TVar)(Tyvar v);
   /** create type constructor */
-  Type (*TCon)(String ident, Kind kind);
+  Type (*TCon)(Tycon c);
   /** type application */
   Type (*TAp)(Type lhs, Type rhs);
   /** create universal quantified type variable */

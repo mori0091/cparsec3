@@ -65,19 +65,19 @@ static Type Type_New(void) {
   return e;
 }
 
-static Type FUNC_NAME(TVar, Type)(String ident, Kind kind) {
+static Type FUNC_NAME(TVar, Type)(Tyvar v) {
+  assert(v.kind && "Null pointer");
   Type e = Type_New();
   e->id = TVAR;
-  e->tvar.ident = ident;
-  e->tvar.kind = kind;
+  e->tvar = v;
   return e;
 }
 
-static Type FUNC_NAME(TCon, Type)(String ident, Kind kind) {
+static Type FUNC_NAME(TCon, Type)(Tycon c) {
+  assert(c.kind && "Null pointer");
   Type e = Type_New();
   e->id = TCON;
-  e->tcon.ident = ident;
-  e->tcon.kind = kind;
+  e->tcon = c;
   return e;
 }
 

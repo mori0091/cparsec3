@@ -53,7 +53,7 @@ parsec(simpletype, Type) {
     for (size_t i = 0; i < A.length(targs); ++i) {
       k = K.Kfun(k, K.Star());
     }
-    Type lhs = T.TCon(c, k);
+    Type lhs = T.TCon((Tycon){c, k});
     for (Type* t = A.begin(targs); t != A.end(targs); t++) {
       lhs = T.TAp(lhs, *t);
     }
@@ -207,7 +207,7 @@ PARSER(Type) tctor(void) {
 parsec(tvar0, Type) {
   DO() {
     SCAN(identifier(), x);
-    RETURN(trait(Type).TVar(x, trait(Kind).Star()));
+    RETURN(trait(Type).TVar((Tyvar){x, trait(Kind).Star()}));
   }
 }
 
