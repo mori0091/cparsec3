@@ -21,6 +21,9 @@ static bool FUNC_NAME(eq, Eq(Kind))(Kind k1, Kind k2) {
 }
 instance_Eq(Kind, FUNC_NAME(eq, Eq(Kind)));
 
+impl_List(Kind);
+impl_Eq_List(Kind);
+
 static struct Kind star = {
     .id = STAR,
     .lhs = 0,

@@ -8,6 +8,9 @@ decl_user_type(Kind);
 
 trait_Eq(Kind);
 
+trait_List(Kind);
+trait_Eq(List(Kind));
+
 enum KindId {
   STAR, // *
   KFUN, // k1 -> k2
