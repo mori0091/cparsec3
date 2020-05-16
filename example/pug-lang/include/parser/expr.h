@@ -38,12 +38,12 @@ C_API_BEGIN
 // stmts  = stmt {";" [stmt]}
 // stmt   = decl | expr
 //
-// decl   = let | declvar | decltype
+// decl   = let | declvar | declADT
 // let    = "let" variable "=" expr0
 // declvar = "var" variable type_annotation
-// decltype = "type" simpletype "=" constrs
+// declADT = "type" simpletype "=" constrs
 //
-// simpletype = Identifier {texpr}
+// simpletype = Identifier {atype}
 // constrs = constr {"|" constr}
 // constr  = Identifier {texpr}
 //
@@ -146,7 +146,7 @@ PARSER(Expr) stmt(void);
 PARSER(Expr) decl(void);
 PARSER(Expr) let(void);
 PARSER(Expr) declvar(void);
-PARSER(Expr) decltype(void);
+PARSER(Expr) declADT(void);
 PARSER(Type) simpletype(void);
 PARSER(Expr) constrs(Type datatype);
 PARSER(Expr) constr(Type datatype);

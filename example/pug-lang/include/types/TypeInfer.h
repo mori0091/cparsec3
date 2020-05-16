@@ -21,9 +21,14 @@ typedef struct TypeError {
   String msg;
 } TypeError;
 
+typedef_Tuple(List(Pred), Type);               // ([Pred], Type)
+typedef_Tuple(List(Pred), List(Assump), Type); // ([Pred], [Assump], Type)
+
 #define A_STATE_TYPE TIState
 #define A_ERROR_TYPE TypeError
-#define A_RETURN_TYPES Type, Subst, Scheme, Qual(Type)
+#define A_RETURN_TYPES                                                   \
+  Type, Subst, Scheme, Qual(Type), Tuple(List(Pred), Type),              \
+      Tuple(List(Pred), List(Assump), Type)
 
 #include "../monad/Action.h"
 
@@ -67,12 +72,15 @@ TypeInfer(Qual(Type)) freshInst(Scheme sc);
 /**
  * Creates TypeInfer monad that infers type of expression `e`.
  */
-TypeInfer(Type) typeOf(List(Assump) as, Expr e);
+// TypeInfer(Type) typeOf(List(Assump) as, Expr e);
+TypeInfer(Tuple(List(Pred), Type)) typeOf(List(Assump) as, Expr e);
 
-static inline TIResult(Type) testInferP(List(Assump) as, Expr e) {
+// -----------------------------------------------------------------------
+static inline TIResult(Tuple(List(Pred), Type))
+    testInferP(List(Assump) as, Expr e) {
   return runTypeInfer(typeOf(as, e));
 }
 
-static inline TIResult(Type) testInfer(Expr e) {
+static inline TIResult(Tuple(List(Pred), Type)) testInfer(Expr e) {
   return testInferP(NULL, e);
 }

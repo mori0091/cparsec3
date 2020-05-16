@@ -3,7 +3,7 @@
 #include "parser/expr.h"
 
 PARSER(Expr) decl(void) {
-  return choice(let(), declvar(), decltype());
+  return choice(let(), declvar(), declADT());
 }
 
 // PARSER(Expr) let(void);
@@ -30,8 +30,8 @@ parsec(declvar, Expr) {
   }
 }
 
-// PARSER(Expr) decltype(void);
-parsec(decltype, Expr) {
+// PARSER(Expr) declADT(void);
+parsec(declADT, Expr) {
   DO() {
     SCAN(lexme(keyword("type")));
     SCAN(simpletype(), lhs);
@@ -47,11 +47,11 @@ parsec(simpletype, Type) {
   TypeT T = trait(Type);
   DO() {
     SCAN(Identifier(), c);
-    SCAN(many(texpr()), targs);
+    SCAN(many(atype()), targs);
     KindT K = trait(Kind);
     Kind k = K.Star();
-    for (size_t i = 0; i < A.length(targs); ++i) {
-      k = K.Kfun(k, K.Star());
+    for (size_t n = A.length(targs); n;  n--) {
+      k = K.Kfun(K.Star(), k);
     }
     Type lhs = T.TCon((Tycon){c, k});
     for (Type* t = A.begin(targs); t != A.end(targs); t++) {
