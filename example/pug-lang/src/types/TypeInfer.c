@@ -11,6 +11,16 @@ action(getSubst, Subst) {
 }
 
 // -----------------------------------------------------------------------
+action(extSubst, Subst, None) {
+  A_DO_WITH(sub) {
+    A_RUN(getState(), s);
+    s.subst = t_composite_subst(sub, s.subst);
+    A_RUN(putState(s));
+    A_RETURN((None){0});
+  }
+}
+
+// -----------------------------------------------------------------------
 action(unify, Type, Type, None) {
   A_DO_WITH(t1, t2) {
     A_RUN(getState(), s);
@@ -26,49 +36,37 @@ action(unify, Type, Type, None) {
       TypeError e = {b.data};
       A_FAIL(e);
     }
-    s.subst = t_composite_subst(u.value, s.subst);
-    A_RUN(putState(s));
+    A_RUN(extSubst(u.value));
     A_RETURN((None){0});
   }
 }
 
 // -----------------------------------------------------------------------
-action(newTVar, Type) {
-  A_DO() {
+action(newTVar, Kind, Type) {
+  A_DO_WITH(k) {
     A_RUN(getState(), s);
     CharBuff b = {0};
     mem_printf(&b, "#a%d", s.i++);
-    Type t = trait(Type).TVar((Tyvar){b.data, trait(Kind).Star()});
+    Type t = trait(Type).TVar((Tyvar){b.data, k});
     A_RUN(putState(s));
     A_RETURN(t);
   }
 }
 
 // -----------------------------------------------------------------------
-static Type inst(Type* ts, size_t n, Type t) {
-  switch (t->id) {
-  case TAPPLY:
-    return trait(Type).TAp(inst(ts, n, t->lhs), inst(ts, n, t->rhs));
-  case TGEN:
-    return ts[t->tgen.n];
-  default:
-    return t;
-  }
-}
-
-action(freshInst, Scheme, Type) {
+action(freshInst, Scheme, Qual(Type)) {
   A_DO_WITH(sc) {
-    if (!sc.numTGen) {
-      A_RETURN(sc.type);
+    List(Type) ts = NULL;
+    if (sc.ks) {
+      ListT(Type) L = trait(List(Type));
+      for (List(Kind) ks = sc.ks; ks; ks = ks->tail) {
+        A_RUN(newTVar(ks->head), x);
+        ts = L.cons(x, ts);
+      }
+      L.reverse(&ts);
     }
-    Type ts[sc.numTGen];
-    ACTION(Type) ti = newTVar();
-    for (int i = 0; i < sc.numTGen; i++) {
-      A_RUN(ti, x);
-      ts[i] = x;
-    }
-    Type t = inst(ts, sc.numTGen, sc.type);
-    A_RETURN(t);
+    Instantiate(Qual(Type)) I = trait(Instantiate(Qual(Type)));
+    A_RETURN(I.inst(ts, sc.qt));
   }
 }
 
@@ -109,7 +107,8 @@ action(typeOfVar, List(Assump), Expr, Type, None) {
       mem_printf(&b, "Undefined variable - %s", e->var.ident);
       A_FAIL((TypeError){b.data});
     }
-    A_RUN(freshInst(sc.value), t2);
+    A_RUN(freshInst(sc.value), qt2);
+    Type t2 = qt2.t;            // TODO !?
     A_RUN(unify(t2, t), x);
     A_RETURN(x);
   }
@@ -118,10 +117,10 @@ action(typeOfVar, List(Assump), Expr, Type, None) {
 action(typeOfLambda, List(Assump), Expr, Type, None) {
   A_DO_WITH(as, e, t) {
     TypeT T = trait(Type);
-    A_RUN(newTVar(), a);
-    A_RUN(newTVar(), b);
+    A_RUN(newTVar(trait(Kind).Star()), a);
+    A_RUN(newTVar(trait(Kind).Star()), b);
     A_RUN(unify(T.func(a, b), t));
-    Scheme sc = {0, a};
+    Scheme sc = toScheme(a);    // TODO !?
     as = t_add(e->lhs->var, sc, as);
     A_RUN(typeOf0(as, e->rhs, b), x);
     A_RETURN(x);
@@ -131,7 +130,7 @@ action(typeOfLambda, List(Assump), Expr, Type, None) {
 action(typeOfApply, List(Assump), Expr, Type, None) {
   A_DO_WITH(as, e, t) {
     TypeT T = trait(Type);
-    A_RUN(newTVar(), a);
+    A_RUN(newTVar(trait(Kind).Star()), a);
     A_RUN(typeOf0(as, e->lhs, T.func(a, t)));
     A_RUN(typeOf0(as, e->rhs, a), x);
     A_RETURN(x);
@@ -142,7 +141,7 @@ action(typeOfIfelse, List(Assump), Expr, Type, None) {
   A_DO_WITH(as, e, t) {
     Type Bool = trait(Type).tcon_bool();
     A_RUN(typeOf0(as, e->lhs, Bool));
-    A_RUN(newTVar(), a);
+    A_RUN(newTVar(trait(Kind).Star()), a);
     A_RUN(typeOf0(as, e->rhs->lhs, a));
     A_RUN(typeOf0(as, e->rhs->rhs, a));
     A_RUN(getSubst(), sub);
@@ -171,7 +170,8 @@ action(typeOfSeq, List(Assump), Expr, Type, None) {
     case LET: {
       Maybe(Scheme) sc = t_find(e->lhs->var, as);
       if (!sc.none) {
-        A_RUN(freshInst(sc.value), a);
+        A_RUN(freshInst(sc.value), qa);
+        Type a = qa.t;          // TODO !?
         A_RUN(typeOf0(as, e->lhs->rhs, a));
         A_RUN(getSubst(), sub);
         Scheme sc = t_gen(as, t_apply_subst(sub, a));
@@ -180,14 +180,14 @@ action(typeOfSeq, List(Assump), Expr, Type, None) {
         A_RETURN(x);
       } else {
         if (e->lhs->rhs->id == LAMBDA) {
-          A_RUN(newTVar(), a);
-          A_RUN(newTVar(), b);
-          A_RUN(newTVar(), f);
+          A_RUN(newTVar(trait(Kind).Star()), a);
+          A_RUN(newTVar(trait(Kind).Star()), b);
+          A_RUN(newTVar(trait(Kind).Star()), f);
           A_RUN(unify(T.func(a, b), f));
-          Scheme sc = {0, f};
+          Scheme sc = toScheme(f); // TODO !?
           as = t_add(e->lhs->lhs->var, sc, as);
         }
-        A_RUN(newTVar(), a);
+        A_RUN(newTVar(trait(Kind).Star()), a);
         A_RUN(typeOf0(as, e->lhs->rhs, a));
         A_RUN(getSubst(), sub);
         Scheme sc = t_gen(as, t_apply_subst(sub, a));
@@ -197,7 +197,7 @@ action(typeOfSeq, List(Assump), Expr, Type, None) {
       }
     }
     default: {
-      A_RUN(newTVar(), a);
+      A_RUN(newTVar(trait(Kind).Star()), a);
       A_RUN(typeOf0(as, e->lhs, a));
       A_RUN(typeOf0(as, e->rhs, t), x);
       A_RETURN(x);
@@ -216,7 +216,7 @@ action(typeOfDeclvar, List(Assump), Expr, Type, None) {
 
 action(typeOfAssign, List(Assump), Expr, Type, None) {
   A_DO_WITH(as, e, t) {
-    A_RUN(newTVar(), a);
+    A_RUN(newTVar(trait(Kind).Star()), a);
     A_RUN(typeOf0(as, e->lhs, a));
     A_RUN(typeOf0(as, e->rhs, a));
     A_RUN(getSubst(), sub);
@@ -229,18 +229,19 @@ action(typeOfLet, List(Assump), Expr, Type, None) {
   A_DO_WITH(as, e, t) {
     Maybe(Scheme) sc = t_find(e->lhs->var, as);
     if (!sc.none) {
-      A_RUN(freshInst(sc.value), a);
+      A_RUN(freshInst(sc.value), qa);
+      Type a = qa.t;            // TODO !?
       A_RUN(typeOf0(as, e->rhs, a));
       A_RUN(unify(a, t), x);
       A_RETURN(x);
     } else {
       if (e->rhs->id == LAMBDA) {
         TypeT T = trait(Type);
-        A_RUN(newTVar(), a);
-        A_RUN(newTVar(), b);
-        A_RUN(newTVar(), f);
+        A_RUN(newTVar(trait(Kind).Star()), a);
+        A_RUN(newTVar(trait(Kind).Star()), b);
+        A_RUN(newTVar(trait(Kind).Star()), f);
         A_RUN(unify(T.func(a, b), f));
-        Scheme sc = {0, f};
+        Scheme sc = toScheme(f); // TODO !?
         as = t_add(e->lhs->var, sc, as);
       }
       A_RUN(typeOf0(as, e->rhs, t), x);
@@ -262,7 +263,7 @@ action(typeOfOrAnd, List(Assump), Expr, Type, None) {
 action(typeOfComparisson, List(Assump), Expr, Type, None) {
   A_DO_WITH(as, e, t) {
     Type Bool = trait(Type).tcon_bool();
-    A_RUN(newTVar(), a);
+    A_RUN(newTVar(trait(Kind).Star()), a);
     A_RUN(typeOf0(as, e->lhs, a));
     A_RUN(typeOf0(as, e->rhs, a));
     A_RUN(unify(Bool, t), x);
@@ -293,7 +294,7 @@ action(typeOfNot, List(Assump), Expr, Type, None) {
   A_DO_WITH(as, e, t) {
     Type Bool = trait(Type).tcon_bool();
     Type Int = trait(Type).tcon_int();
-    A_RUN(newTVar(), a);
+    A_RUN(newTVar(trait(Kind).Star()), a);
     A_RUN(typeOf0(as, e->rhs, a));
     A_RUN(getSubst(), sub);
     Type b = t_apply_subst(sub, a);
@@ -333,7 +334,7 @@ action(typeOfUnit, List(Assump), Expr, Type, None) {
 action(typeOfPrint, List(Assump), Expr, Type, None) {
   A_DO_WITH(as, e, t) {
     Type Unit = trait(Type).tcon_unit();
-    A_RUN(newTVar(), a);
+    A_RUN(newTVar(trait(Kind).Star()), a);
     A_RUN(typeOf0(as, e->rhs, a)); /* what we should do for `a`? */
     A_RUN(unify(Unit, t), x);
     A_RETURN(x);
@@ -352,8 +353,8 @@ action(typeOfCapply, List(Assump), Expr, Type, None) {
   A_DO_WITH(as, e, t) {
     // TODO fix this ; does not work expected.
     TypeT T = trait(Type);
-    A_RUN(newTVar(), a);
-    A_RUN(newTVar(), b);
+    A_RUN(newTVar(trait(Kind).Star()), a);
+    A_RUN(newTVar(trait(Kind).Star()), b);
     A_RUN(typeOf0(as, e->rhs, a));
     A_RUN(typeOf0(as, e->lhs, T.func(a, b)));
     A_RUN(unify(b, t), x);
@@ -364,7 +365,7 @@ action(typeOfCapply, List(Assump), Expr, Type, None) {
     // ~~~c
     // TypeT T = trait(Type);
     // KindT K = trait(Kind);
-    // A_RUN(newTVar(), a);
+    // A_RUN(newTVar(trait(Kind).Star()), a);
     // Type b = T.TAp(T.TCon("Maybe", K.Star()), a);
     // A_RUN(typeOf0(as, e->rhs, a));
     // A_RUN(typeOf0(as, e->lhs, T.func(a, b)));
@@ -445,7 +446,7 @@ static TypeInfer(None) typeOf0(List(Assump) as, Expr e, Type t) {
 // -----------------------------------------------------------------------
 action(typeOf, List(Assump), Expr, Type) {
   A_DO_WITH(as, e) {
-    A_RUN(newTVar(), a);
+    A_RUN(newTVar(trait(Kind).Star()), a);
     A_RUN(typeOf0(as, e, a));
     A_RUN(getSubst(), sub);
     A_RETURN(t_apply_subst(sub, a));

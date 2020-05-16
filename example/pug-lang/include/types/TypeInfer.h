@@ -4,6 +4,7 @@
 #include <cparsec3/base/base_generics.h>
 
 #include "Assump.h"
+#include "Instantiate.h"
 #include "Scheme.h"
 #include "Subst.h"
 #include "Type.h"
@@ -22,7 +23,7 @@ typedef struct TypeError {
 
 #define A_STATE_TYPE TIState
 #define A_ERROR_TYPE TypeError
-#define A_RETURN_TYPES Type, Subst, Scheme
+#define A_RETURN_TYPES Type, Subst, Scheme, Qual(Type)
 
 #include "../monad/Action.h"
 
@@ -39,6 +40,11 @@ typedef struct TypeError {
 TypeInfer(Subst) getSubst(void);
 
 /**
+ * Creates TypeInfer monad that extends current type-substitution.
+ */
+TypeInfer(None) extSubst(Subst sub);
+
+/**
  * Creates TypeInfer monad that extends current type-substitution by the
  * most general unifier of t1 and t2.
  */
@@ -47,7 +53,7 @@ TypeInfer(None) unify(Type t1, Type t2);
 /**
  * Creates TypeInfer monad that creates new type-variable.
  */
-TypeInfer(Type) newTVar(void);
+TypeInfer(Type) newTVar(Kind k);
 
 /**
  * Creates TypeInfer monad that creates new type from type-scheme.
@@ -56,7 +62,7 @@ TypeInfer(Type) newTVar(void);
  * will be for example `(t1,t2,t2,c)`; where `t1` and `t2` are new unique
  * type variables.
  */
-TypeInfer(Type) freshInst(Scheme sc);
+TypeInfer(Qual(Type)) freshInst(Scheme sc);
 
 /**
  * Creates TypeInfer monad that infers type of expression `e`.

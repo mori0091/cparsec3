@@ -2,6 +2,9 @@
 
 #include "types/Qual.h"
 
+#include "types/Scheme.h"
+#include "types/Assump.h"
+
 #define impl_Qual(T)                                                     \
   static Qual(T) FUNC_NAME(create, Qual(T))(List(Pred) ps, T t) {        \
     return (Qual(T)){ps, t};                                             \

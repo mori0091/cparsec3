@@ -72,25 +72,17 @@ List(Tyvar) subtractTyvars(List(Tyvar) a, List(Tyvar) b) {
 }
 
 static Scheme FUNC_NAME(scheme, Assumption)(List(Assump) as, Type t) {
+  // ---- vs = tv t `subtract` tv as
   Types(Type) S = trait(Types(Type));
   Types(List(Assump)) SA = trait(Types(List(Assump)));
-  List(Tyvar) gs = subtractTyvars(S.tvarsOf(t), SA.tvarsOf(as));
-  // int n = trait(List(Tyvar)).length(gs);
-  TypeT T = trait(Type);
-  ListT(SubstEntry) L = trait(List(SubstEntry));
-  Subst s = 0;
-  int n = 0;
-  while (gs) {
-    SubstEntry x = {.tvar = gs->head, .type = T.TGen(n)};
-    s = L.cons(x, s);
-    gs = gs->tail;
-    n++;
-  }
-  L.reverse(&s);
-  return (Scheme){
-      .numTGen = n,
-      .type = S.subst(s, t),
-  };
+  List(Tyvar) vs = subtractTyvars(S.tvarsOf(t), SA.tvarsOf(as));
+  // ---- ks = map kind vs
+  List(Kind) ks = mapKind(vs);
+  // ---- s = zip vs (map TGen [0..])
+  Subst s = toSubst(vs);
+  // ---- Forall ks (apply s qt)
+  Qual(Type) qt = trait(Qual(Type)).create(NULL, t);
+  return Forall(ks, trait(Types(Qual(Type))).subst(s, qt));
 }
 
 static Maybe(Scheme)

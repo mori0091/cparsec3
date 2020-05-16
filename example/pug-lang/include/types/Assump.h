@@ -4,6 +4,7 @@
 #include "Expr.h"
 #include "Scheme.h"
 #include "Types.h"
+#include "Qual.h"
 
 typedef struct Assump {
   Var var;
@@ -17,6 +18,11 @@ trait_Eq(List(Assump));
 
 trait_Types(Assump);
 trait_Types(List(Assump));
+
+trait_Qual(Assump);
+trait_Qual(List(Assump));
+trait_Types(Qual(Assump));
+trait_Types(Qual(List(Assump)));
 
 trait_Maybe(Scheme);
 
