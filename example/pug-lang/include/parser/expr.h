@@ -29,8 +29,8 @@ C_API_BEGIN
 //        | print
 //        | unary
 //
-// lambda = "|" pat {pat} "|" expr0
-// pat    = variable
+// lambda = "|" pvar {pvar} "|" expr0
+// pvar   = variable
 //
 // ifelse = "if" expr0 "{" stmts "}" "else" (if_expr | "{" stmts "}")
 //
@@ -45,7 +45,7 @@ C_API_BEGIN
 //
 // simpletype = Identifier {atype}
 // constrs = constr {"|" constr}
-// constr  = Identifier {texpr}
+// constr  = Identifier {atype}
 //
 // type_annotation = ":" texpr
 // texpr  = tlambda | btype
@@ -135,7 +135,7 @@ PARSER(char) symbol(void);
 PARSER(String) keyword(String s);
 
 PARSER(Expr) lambda(void);
-PARSER(Expr) pat(void);
+PARSER(Expr) pvar(void);
 
 PARSER(Expr) ifelse(void);
 

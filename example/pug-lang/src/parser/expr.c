@@ -303,7 +303,7 @@ parsec(lambda, Expr) {
   PARSER(Expr) body = expr();
   DO() {
     SCAN(open_pats);
-    SCAN(some(pat()), ps);
+    SCAN(some(pvar()), ps);
     SCAN(close_pats);
     SCAN(body, rhs);
     for (Expr* p = A.end(ps); p != A.begin(ps);) {
@@ -314,7 +314,7 @@ parsec(lambda, Expr) {
   }
 }
 
-PARSER(Expr) pat(void) {
+PARSER(Expr) pvar(void) {
   return variable();
 }
 
