@@ -159,13 +159,13 @@ bool pug_parseTest(String input) {
   }
 
   {
-    TIResult(Tuple(List(Pred), Type)) r = testInfer(result.ok);
+    TIResult(Infered(Type)) r = testInfer(result.ok);
     if (!r.success) {
       eprintf(BOLD RED, "type error:");
       printf(" %s\n\n", r.err.msg);
       return false;
     } else {
-      eprintf(BOLD CYAN, ">> : %s\n", trait(Show(Type)).show(r.ok.e2));
+      eprintf(BOLD CYAN, ">> : %s\n", trait(Show(Type)).show(r.ok.t));
     }
   }
 
