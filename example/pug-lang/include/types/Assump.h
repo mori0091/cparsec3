@@ -7,7 +7,7 @@
 #include "Qual.h"
 
 typedef struct Assump {
-  Var var;
+  Id ident;
   Scheme scheme;
 } Assump;
 
@@ -41,13 +41,13 @@ typedef struct Assumption {
    */
   Scheme (*scheme)(List(Assump) as, Type t);
   /**
-   * Finds a scheme bounded to a variable `var` within the list `as`.
+   * Finds a scheme bounded to an identifier `ident` within the list `as`.
    */
-  Maybe(Scheme) (*lookup)(Var var, List(Assump) as);
+  Maybe(Scheme) (*lookup)(Id ident, List(Assump) as);
   /**
    * Adds new (var, scheme) assumption to the list `as`.
    */
-  List(Assump) (*add)(Var var, Scheme sc, List(Assump) as);
+  List(Assump) (*add)(Id ident, Scheme sc, List(Assump) as);
 } Assumption;
 
 Assumption Trait(Assumption);

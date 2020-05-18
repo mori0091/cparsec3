@@ -4,9 +4,9 @@
 #include "Expr.h"
 
 typedef struct MapEntry {
-  String ident; ///< the name of the variable
-  Type type;    ///< type of the variable, or NULL if undetermined.
-  Expr e;       ///< the expression bound to the variable
+  Id ident;  ///< the name of the variable
+  Type type; ///< type of the variable, or NULL if undetermined.
+  Expr e;    ///< the expression bound to the variable
 } MapEntry;
 
 trait_List(MapEntry);
@@ -25,16 +25,16 @@ typedef struct ContextT {
     /**
      * lookup variable in the given context.
      */
-    MapEntry* (*lookup_local)(Context ctx, String ident);
+    MapEntry* (*lookup_local)(Context ctx, Id ident);
     /**
      * lookup variable in the given context or in outer context
      * recursively.
      */
-    MapEntry* (*lookup)(Context ctx, String ident);
+    MapEntry* (*lookup)(Context ctx, Id ident);
     /**
      * add variable to the given context.
      */
-    void (*put)(Context ctx, String ident, Type type, Expr e);
+    void (*put)(Context ctx, Id ident, Type type, Expr e);
   } map;
 } ContextT;
 

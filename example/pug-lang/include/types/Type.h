@@ -3,6 +3,7 @@
 
 #include "user_type.h"
 
+#include "Id.h"
 #include "Kind.h"
 
 #define TYPE(T) TYPE_##T()
@@ -18,13 +19,13 @@ decl_user_type(Type);
 // -----------------------------------------------------------------------
 /* Type variable */
 typedef struct Tyvar {
-  String ident;
+  Id ident;
   Kind kind;
 } Tyvar;
 
 /* Type constructor */
 typedef struct Tycon {
-  String ident;
+  Id ident;
   Kind kind;
 } Tycon;
 

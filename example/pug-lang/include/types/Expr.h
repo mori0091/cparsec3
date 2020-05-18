@@ -3,6 +3,7 @@
 
 #include "user_type.h"
 
+#include "Id.h"
 #include "Type.h"
 
 typedef struct Context* Context;
@@ -14,13 +15,6 @@ typedef struct Num {
   int64_t value;
 } Num;
 
-typedef struct Var {
-  String ident;
-} Var;
-
-typedef struct Con {
-  String ident;
-} Con;
 
 enum ExprId {
   /* print statement (for debug purpose) */
@@ -103,9 +97,8 @@ struct Expr {
       Expr rhs;
     };
     Num num;
-    Var var;
+    Id ident;
     Type texpr;
-    Con con;
   };
 };
 
@@ -139,11 +132,11 @@ typedef struct ExprT {
   Expr (*neg)(Expr rhs);                  /* arithmetic negation */
   Expr (*not)(Expr rhs);   /* logical not / bitwise complement */
   Expr (*num)(Num x);      /* number */
-  Expr (*var)(Var x);      /* variable */
+  Expr (*var)(Id x);       /* variable */
   Expr (*boolean)(bool b); /* true / false */
   Expr (*unit)(void);      /* () */
   Expr (*type)(Type t);    /* type annotation */
-  Expr (*con)(Con c);      /* constructor */
+  Expr (*con)(Id c);       /* constructor */
   Expr (*capply)(Expr lhs, Expr rhs); /* constructor application */
 } ExprT;
 

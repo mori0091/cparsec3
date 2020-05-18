@@ -282,7 +282,7 @@ parsec(paren, Expr) {
 parsec(varctor, Expr) {
   DO() {
     SCAN(lexme(Identifier()), x);
-    RETURN(trait(Expr).var((Var){x}));
+    RETURN(trait(Expr).var(x));
   }
 }
 
@@ -290,7 +290,7 @@ parsec(varctor, Expr) {
 parsec(variable, Expr) {
   DO() {
     SCAN(lexme(either(identifier(), varsym())), x);
-    RETURN(trait(Expr).var((Var){x}));
+    RETURN(trait(Expr).var(x));
   }
 }
 

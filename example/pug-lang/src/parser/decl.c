@@ -87,8 +87,8 @@ parsec(constr, Type, Expr) {
   DO() WITH(datatype) {
     SCAN(Identifier(), name);
     SCAN(many(atype()), args);
-    Expr x = E.var((Var){name});
-    Expr c = E.con((Con){name});
+    Expr x = E.var(name);
+    Expr c = E.con(name);
     // ---- nullary constructor
     if (A.null(args)) {
       RETURN(E.seq(E.declvar(x, E.type(datatype)), E.let(x, c)));
@@ -105,7 +105,7 @@ parsec(constr, Type, Expr) {
     for (size_t i = 0; i < n; ++i) {
       CharBuff b = {0};
       mem_printf(&b, "a%zu", i);
-      vars[i] = E.var((Var){b.data});
+      vars[i] = E.var(b.data);
     }
     // function's body
     Expr body = c;

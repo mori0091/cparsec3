@@ -118,10 +118,10 @@ TI(Infered(Type)) ti_label(TI(Infered(Type)) ti, Expr e) {
 // -----------------------------------------------------------------------
 action(typeOfVar, List(Assump), Expr, Infered(Type)) {
   A_DO_WITH(as, e) {
-    Maybe(Scheme) sc = t_find(e->var, as);
+    Maybe(Scheme) sc = t_find(e->ident, as);
     if (sc.none) {
       CharBuff b = {0};
-      mem_printf(&b, "Undefined variable - %s", e->var.ident);
+      mem_printf(&b, "Undefined variable - %s", e->ident);
       A_FAIL((TypeError){b.data});
     }
     A_RUN(freshInst(sc.value), qt);
@@ -137,7 +137,7 @@ action(typeOfLambda, List(Assump), Expr, Infered(Type)) {
     A_RUN(newTVar(trait(Kind).Star()), f);
     A_RUN(unify(T.func(a, b), f));
     Scheme sc = toScheme(a); // TODO !?
-    as = t_add(e->lhs->var, sc, as);
+    as = t_add(e->lhs->ident, sc, as);
     A_RUN(typeOf(as, e->rhs), c);
     A_RUN(unify(c.t, b));
     A_RETURN(InferedType(NULL, f));
@@ -182,17 +182,17 @@ action(typeOfSeq, List(Assump), Expr, Infered(Type)) {
     switch (e->lhs->id) {
     case DECLVAR: {
       Scheme sc = t_gen(as, e->lhs->rhs->texpr);
-      as = t_add(e->lhs->lhs->var, sc, as);
+      as = t_add(e->lhs->lhs->ident, sc, as);
       A_RUN(typeOf(as, e->rhs), x);
       A_RETURN(x);
     }
     case LET: {
-      Maybe(Scheme) sc = t_find(e->lhs->lhs->var, as);
+      Maybe(Scheme) sc = t_find(e->lhs->lhs->ident, as);
       if (!sc.none) {
         A_RUN(typeOf(as, e->lhs->rhs), a);
         A_RUN(getSubst(), sub);
         Scheme sc = t_gen(as, t_apply_subst(sub, a.t));
-        as = t_add(e->lhs->lhs->var, sc, as);
+        as = t_add(e->lhs->lhs->ident, sc, as);
         A_RUN(typeOf(as, e->rhs), x);
         List(Pred) ps = appendPreds(a.ps, x.ps);
         A_RETURN(InferedType(ps, x.t));
@@ -203,12 +203,12 @@ action(typeOfSeq, List(Assump), Expr, Infered(Type)) {
           A_RUN(newTVar(trait(Kind).Star()), f);
           A_RUN(unify(T.func(a, b), f));
           Scheme sc = toScheme(f); // TODO !?
-          as = t_add(e->lhs->lhs->var, sc, as);
+          as = t_add(e->lhs->lhs->ident, sc, as);
         }
         A_RUN(typeOf(as, e->lhs->rhs), a);
         A_RUN(getSubst(), sub);
         Scheme sc = t_gen(as, t_apply_subst(sub, a.t));
-        as = t_add(e->lhs->lhs->var, sc, as);
+        as = t_add(e->lhs->lhs->ident, sc, as);
         A_RUN(typeOf(as, e->rhs), x);
         A_RETURN(x);
       }
@@ -241,7 +241,7 @@ action(typeOfAssign, List(Assump), Expr, Infered(Type)) {
 
 action(typeOfLet, List(Assump), Expr, Infered(Type)) {
   A_DO_WITH(as, e) {
-    Maybe(Scheme) sc = t_find(e->lhs->var, as);
+    Maybe(Scheme) sc = t_find(e->lhs->ident, as);
     if (!sc.none) {
       A_RUN(freshInst(sc.value), qt);
       A_RUN(typeOf(as, e->rhs), a);
@@ -256,7 +256,7 @@ action(typeOfLet, List(Assump), Expr, Infered(Type)) {
         A_RUN(newTVar(trait(Kind).Star()), f);
         A_RUN(unify(T.func(a, b), f));
         Scheme sc = toScheme(f); // TODO !?
-        as = t_add(e->lhs->var, sc, as);
+        as = t_add(e->lhs->ident, sc, as);
       }
       A_RUN(typeOf(as, e->rhs), x);
       A_RETURN(x);
@@ -358,7 +358,7 @@ action(typeOfPrint, List(Assump), Expr, Infered(Type)) {
 action(typeOfCon, List(Assump), Expr, Infered(Type)) {
   A_DO_WITH(as, e) {
     ExprT E = trait(Expr);
-    A_RUN(typeOf(as, E.var((Var){e->con.ident})), t);
+    A_RUN(typeOf(as, E.var(e->ident)), t);
     A_RETURN(t);
   }
 }

@@ -94,7 +94,7 @@ static EvalResult eval_apply(Context ctx, Expr x) {
   ContextT C = trait(Context);
   Context c = C.branch(f.ok->ctx);
   ExprT E = trait(Expr);
-  C.map.put(c, v->var.ident, NULL, E.thunk(ctx, x->rhs));
+  C.map.put(c, v->ident, NULL, E.thunk(ctx, x->rhs));
   RETURN_DEFERED(c, body);
 }
 
@@ -130,17 +130,17 @@ static EvalResult eval_let(Context ctx, Expr x) {
   ContextT C = trait(Context);
   ExprT E = trait(Expr);
   assert(x->lhs->id == VAR);
-  MapEntry* m = C.map.lookup_local(ctx, x->lhs->var.ident);
+  MapEntry* m = C.map.lookup_local(ctx, x->lhs->ident);
   if (m && m->type && !m->e) {
     // if the variable is locally declared but not defined yet, type
     // must be same.
     REQUIRE_TYPE_EQ(m->type, x->rhs->type);
     // if the previous definiton exists (in outer context), it will be
     // shadowed.
-    C.map.put(ctx, x->lhs->var.ident, m->type, E.thunk(ctx, x->rhs));
+    C.map.put(ctx, x->lhs->ident, m->type, E.thunk(ctx, x->rhs));
   } else {
     // if the previous definiton exists, it will be shadowed.
-    C.map.put(ctx, x->lhs->var.ident, x->rhs->type, E.thunk(ctx, x->rhs));
+    C.map.put(ctx, x->lhs->ident, x->rhs->type, E.thunk(ctx, x->rhs));
   }
   RETURN_OK(x->rhs);
 }
@@ -150,7 +150,7 @@ static EvalResult eval_declvar(Context ctx, Expr x) {
   assert(x->lhs->id == VAR);
   assert(x->rhs->id == TYPE);
   // if the previous definiton exists, it will be shadowed.
-  C.map.put(ctx, x->lhs->var.ident, x->rhs->texpr, NULL);
+  C.map.put(ctx, x->lhs->ident, x->rhs->texpr, NULL);
   RETURN_OK(x->rhs);
 }
 
@@ -163,7 +163,7 @@ static EvalResult eval_assign(Context ctx, Expr x) {
   // types must be same with previous definition
   REQUIRE_TYPE_EQ(lhs.ok->type, rhs.ok->type);
   // the previous definiton will be shadowed.
-  C.map.put(ctx, x->lhs->var.ident, rhs.ok->type, E.thunk(ctx, rhs.ok));
+  C.map.put(ctx, x->lhs->ident, rhs.ok->type, E.thunk(ctx, rhs.ok));
   RETURN_OK(rhs.ok);
 }
 
@@ -209,7 +209,7 @@ static EvalResult eval_not(Context ctx, Expr x) {
 
 static EvalResult eval_var(Context ctx, Expr x) {
   ContextT C = trait(Context);
-  MapEntry* m = C.map.lookup(ctx, x->var.ident);
+  MapEntry* m = C.map.lookup(ctx, x->ident);
   if (!m || !m->e) {
     RETURN_ERR("Undefined variable");
   }

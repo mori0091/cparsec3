@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------
 // ---- trait Eq(Assump)
 static bool FUNC_NAME(eq, Eq(Assump))(Assump a, Assump b) {
-  return trait(Eq(String)).eq(a.var.ident, b.var.ident) &&
+  return trait(Eq(String)).eq(a.ident, b.ident) &&
          trait(Eq(Scheme)).eq(a.scheme, b.scheme);
 }
 instance_Eq(Assump, FUNC_NAME(eq, Eq(Assump)));
@@ -86,9 +86,9 @@ static Scheme FUNC_NAME(scheme, Assumption)(List(Assump) as, Type t) {
 }
 
 static Maybe(Scheme)
-    FUNC_NAME(lookup, Assumption)(Var var, List(Assump) as) {
+    FUNC_NAME(lookup, Assumption)(Id ident, List(Assump) as) {
   while (as) {
-    if (trait(Eq(String)).eq(var.ident, as->head.var.ident)) {
+    if (trait(Eq(String)).eq(ident, as->head.ident)) {
       return (Maybe(Scheme)){.value = as->head.scheme};
     }
     as = as->tail;
@@ -97,8 +97,8 @@ static Maybe(Scheme)
 }
 
 static List(Assump)
-    FUNC_NAME(add, Assumption)(Var var, Scheme sc, List(Assump) as) {
-  Assump c = {.var = var, .scheme = sc};
+    FUNC_NAME(add, Assumption)(Id ident, Scheme sc, List(Assump) as) {
+  Assump c = {.ident = ident, .scheme = sc};
   as = trait(List(Assump)).cons(c, as);
   return as;
 }

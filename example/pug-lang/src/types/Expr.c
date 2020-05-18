@@ -128,10 +128,10 @@ static Expr FUNC_NAME(neg, Expr)(Expr rhs) {
 static Expr FUNC_NAME(not, Expr)(Expr rhs) {
   return Expr_Unary(NOT, rhs);
 }
-static Expr FUNC_NAME(var, Expr)(Var x) {
+static Expr FUNC_NAME(var, Expr)(Id x) {
   Expr e = Expr_New();
   e->id = VAR;
-  e->var = x;
+  e->ident = x;
   return e;
 }
 static Expr FUNC_NAME(num, Expr)(Num x) {
@@ -159,10 +159,10 @@ static Expr FUNC_NAME(type, Expr)(Type t) {
   e->texpr = t;
   return e;
 }
-static Expr FUNC_NAME(con, Expr)(Con c) {
+static Expr FUNC_NAME(con, Expr)(Id c) {
   Expr e = Expr_New();
   e->id = CON;
-  e->con = c;
+  e->ident = c;
   return e;
 }
 static Expr FUNC_NAME(capply, Expr)(Expr lhs, Expr rhs) {
@@ -308,7 +308,7 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     Expr_showUnary(b, "Not", x->rhs);
     break;
   case VAR:
-    mem_printf(b, "(Var %s)", x->var.ident);
+    mem_printf(b, "(Var %s)", x->ident);
     break;
   case NUM:
     mem_printf(b, "%" PRId64, x->num.value);
@@ -328,7 +328,7 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     mem_printf(b, ")");
     break;
   case CON:
-    mem_printf(b, "(Con %s)", x->con.ident);
+    mem_printf(b, "(Con %s)", x->ident);
     break;
   case CAPPLY:
     Expr_showBinary(b, "Capply", x->lhs, x->rhs);
