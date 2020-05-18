@@ -134,23 +134,11 @@ static Expr FUNC_NAME(var, Expr)(Id x) {
   e->ident = x;
   return e;
 }
-static Expr FUNC_NAME(num, Expr)(Num x) {
+static Expr FUNC_NAME(literal, Expr)(Literal x) {
   Expr e = Expr_New();
-  e->type = TYPE(int);
-  e->id = NUM;
-  e->num = x;
+  e->id = LITERAL;
+  e->literal = x;
   return e;
-}
-static Expr FUNC_NAME(boolean, Expr)(bool b) {
-  static struct Expr T = {.id = TRUE};
-  static struct Expr F = {.id = FALSE};
-  T.type = F.type = TYPE(bool);
-  return (b ? &T : &F);
-}
-static Expr FUNC_NAME(unit, Expr)(void) {
-  static struct Expr e = {.id = UNIT};
-  e.type = TYPE(unit);
-  return &e;
 }
 static Expr FUNC_NAME(type, Expr)(Type t) {
   Expr e = Expr_New();
@@ -167,6 +155,20 @@ static Expr FUNC_NAME(con, Expr)(Id c) {
 }
 static Expr FUNC_NAME(capply, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(CAPPLY, lhs, rhs);
+}
+static Expr FUNC_NAME(num, Expr)(Num x) {
+  return FUNC_NAME(literal, Expr)(LitInt(x.value));
+}
+static Expr FUNC_NAME(boolean, Expr)(bool b) {
+  static struct Expr T = {.id = LITERAL, .literal.id = LIT_TRUE};
+  static struct Expr F = {.id = LITERAL, .literal.id = LIT_FALSE};
+  T.type = F.type = TYPE(bool);
+  return (b ? &T : &F);
+}
+static Expr FUNC_NAME(unit, Expr)(void) {
+  static struct Expr e = {.id = LITERAL, .literal.id = LIT_UNIT};
+  e.type = TYPE(unit);
+  return &e;
 }
 
 ExprT Trait(Expr) {
@@ -199,12 +201,14 @@ ExprT Trait(Expr) {
       .neg = FUNC_NAME(neg, Expr),
       .not = FUNC_NAME(not, Expr),
       .var = FUNC_NAME(var, Expr),
-      .num = FUNC_NAME(num, Expr),
-      .boolean = FUNC_NAME(boolean, Expr),
-      .unit = FUNC_NAME(unit, Expr),
+      .literal = FUNC_NAME(literal, Expr),
       .type = FUNC_NAME(type, Expr),
       .con = FUNC_NAME(con, Expr),
       .capply = FUNC_NAME(capply, Expr),
+      /* for convenience */
+      .num = FUNC_NAME(num, Expr),
+      .boolean = FUNC_NAME(boolean, Expr),
+      .unit = FUNC_NAME(unit, Expr),
   };
 }
 
@@ -310,17 +314,8 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
   case VAR:
     mem_printf(b, "(Var %s)", x->ident);
     break;
-  case NUM:
-    mem_printf(b, "%" PRId64, x->num.value);
-    break;
-  case TRUE:
-    mem_printf(b, "true");
-    break;
-  case FALSE:
-    mem_printf(b, "false");
-    break;
-  case UNIT:
-    mem_printf(b, "()");
+  case LITERAL:
+    trait(Show(Literal)).toString(b, x->literal);
     break;
   case TYPE:
     mem_printf(b, "(Type ");

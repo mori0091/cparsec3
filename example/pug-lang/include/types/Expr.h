@@ -4,6 +4,7 @@
 #include "user_type.h"
 
 #include "Id.h"
+#include "Literal.h"
 #include "Type.h"
 
 typedef struct Context* Context;
@@ -11,10 +12,6 @@ typedef struct Expr* Expr;
 decl_user_type(Expr);
 
 // -----------------------------------------------------------------------
-typedef struct Num {
-  int64_t value;
-} Num;
-
 
 enum ExprId {
   /* print statement (for debug purpose) */
@@ -66,13 +63,8 @@ enum ExprId {
   NOT,
   /* variable */
   VAR,
-  /* number */
-  NUM,
-  /* false, true */
-  FALSE,
-  TRUE,
-  /* () */
-  UNIT,
+  /* literal */
+  LITERAL,
   /* constructor */
   CON,
   /* constructor application */
@@ -96,7 +88,7 @@ struct Expr {
       Expr lhs;
       Expr rhs;
     };
-    Num num;
+    Literal literal;
     Id ident;
     Type texpr;
   };
@@ -130,14 +122,16 @@ typedef struct ExprT {
   Expr (*div)(Expr lhs, Expr rhs);        /* arithmetic division */
   Expr (*mod)(Expr lhs, Expr rhs);        /* arithmetic reminder */
   Expr (*neg)(Expr rhs);                  /* arithmetic negation */
-  Expr (*not)(Expr rhs);   /* logical not / bitwise complement */
+  Expr (*not )(Expr rhs);     /* logical not / bitwise complement */
+  Expr (*var)(Id x);          /* variable */
+  Expr (*literal)(Literal x); /* literal */
+  Expr (*type)(Type t);       /* type annotation */
+  Expr (*con)(Id c);          /* constructor */
+  Expr (*capply)(Expr lhs, Expr rhs); /* constructor application */
+  /* for convenience */
   Expr (*num)(Num x);      /* number */
-  Expr (*var)(Id x);       /* variable */
   Expr (*boolean)(bool b); /* true / false */
   Expr (*unit)(void);      /* () */
-  Expr (*type)(Type t);    /* type annotation */
-  Expr (*con)(Id c);       /* constructor */
-  Expr (*capply)(Expr lhs, Expr rhs); /* constructor application */
 } ExprT;
 
 ExprT Trait(Expr);

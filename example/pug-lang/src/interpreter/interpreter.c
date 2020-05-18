@@ -29,20 +29,26 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
     EVAL(_ctx_, _b_, rhs);                                               \
     REQUIRE_TYPE_EQ(lhs.ok->type, rhs.ok->type);                         \
     switch (lhs.ok->id) {                                                \
-    case NUM: {                                                          \
-      bool x = lhs.ok->num.value _op_ rhs.ok->num.value;                 \
-      RETURN_OK(trait(Expr).boolean(x));                                 \
-    }                                                                    \
-    case FALSE:                                                          \
-    case TRUE:                                                           \
-    case UNIT: {                                                         \
-      bool x = lhs.ok->id _op_ rhs.ok->id;                               \
-      RETURN_OK(trait(Expr).boolean(x));                                 \
+    case LITERAL: {                                                      \
+      switch (lhs.ok->literal.id) {                                      \
+      case LIT_INTEGER: {                                                \
+        int64_t x = lhs.ok->literal.num.value;                           \
+        int64_t y = rhs.ok->literal.num.value;                           \
+        RETURN_OK(trait(Expr).boolean(x _op_ y));                        \
+      }                                                                  \
+      case LIT_FALSE:                                                    \
+      case LIT_TRUE:                                                     \
+      case LIT_UNIT: {                                                   \
+        enum LiteralId x = lhs.ok->literal.id;                           \
+        enum LiteralId y = rhs.ok->literal.id;                           \
+        RETURN_OK(trait(Expr).boolean(x _op_ y));                        \
+      }                                                                  \
+      }                                                                  \
     }                                                                    \
     case CLOSURE:                                                        \
     case CON: {                                                          \
-      bool x = lhs.ok _op_ rhs.ok;                                       \
-      RETURN_OK(trait(Expr).boolean(x));                                 \
+      bool b = lhs.ok _op_ rhs.ok;                                       \
+      RETURN_OK(trait(Expr).boolean(b));                                 \
     }                                                                    \
     default:                                                             \
       RETURN_ERR("Type error");                                          \
@@ -55,8 +61,9 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
     EVAL(_ctx_, _b_, rhs);                                               \
     REQUIRE_TYPE_EQ(lhs.ok->type, TYPE(int));                            \
     REQUIRE_TYPE_EQ(rhs.ok->type, TYPE(int));                            \
-    int64_t x = lhs.ok->num.value _op_ rhs.ok->num.value;                \
-    RETURN_OK(trait(Expr).num((Num){x}));                                \
+    int64_t x = lhs.ok->literal.num.value;                               \
+    int64_t y = rhs.ok->literal.num.value;                               \
+    RETURN_OK(trait(Expr).num((Num){x _op_ y}));                         \
   } while (0)
 
 #define DIV_MOD_OP(_ctx_, _op_, _a_, _b_)                                \
@@ -65,11 +72,12 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
     EVAL(_ctx_, _b_, rhs);                                               \
     REQUIRE_TYPE_EQ(lhs.ok->type, TYPE(int));                            \
     REQUIRE_TYPE_EQ(rhs.ok->type, TYPE(int));                            \
-    if (rhs.ok->num.value == 0) {                                        \
+    int64_t x = lhs.ok->literal.num.value;                               \
+    int64_t y = rhs.ok->literal.num.value;                               \
+    if (y == 0) {                                                        \
       RETURN_ERR("Division by zero");                                    \
     }                                                                    \
-    int64_t x = lhs.ok->num.value _op_ rhs.ok->num.value;                \
-    RETURN_OK(trait(Expr).num((Num){x}));                                \
+    RETURN_OK(trait(Expr).num((Num){x _op_ y}));                         \
   } while (0)
 
 #if 1
@@ -113,7 +121,11 @@ static EvalResult eval_ifelse(Context ctx, Expr x) {
   Expr then_blk = x->rhs->lhs;
   Expr else_blk = x->rhs->rhs;
   // REQUIRE_TYPE_EQ(then_blk->type, else_blk->type);
-  RETURN_DEFERED(c, (cond.ok->id == TRUE ? then_blk : else_blk));
+  if (cond.ok->literal.id == LIT_TRUE) {
+    RETURN_DEFERED(c, then_blk);
+  } else {
+    RETURN_DEFERED(c, else_blk);
+  }
 }
 
 static EvalResult eval_block(Context ctx, Expr x) {
@@ -170,7 +182,8 @@ static EvalResult eval_assign(Context ctx, Expr x) {
 static EvalResult eval_logical_AND_OR(Context ctx, Expr x) {
   EVAL(ctx, x->lhs, lhs);
   REQUIRE_TYPE_EQ(lhs.ok->type, TYPE(bool));
-  if (lhs.ok->id == (x->id == OR ? TRUE : FALSE)) {
+  assert(lhs.ok->id == LITERAL);
+  if (lhs.ok->literal.id == (x->id == OR ? LIT_TRUE : LIT_FALSE)) {
     RETURN_OK(lhs.ok);
   }
   EVAL(ctx, x->rhs, rhs);
@@ -195,12 +208,13 @@ static EvalResult eval_negate(Context ctx, Expr x) {
 static EvalResult eval_not(Context ctx, Expr x) {
   ExprT E = trait(Expr);
   EVAL(ctx, x->rhs, rhs);
-  switch (rhs.ok->id) {
-  case NUM:
-    RETURN_OK(E.num((Num){~rhs.ok->num.value}));
-  case TRUE:
+  assert(rhs.ok->id == LITERAL);
+  switch (rhs.ok->literal.id) {
+  case LIT_INTEGER:
+    RETURN_OK(E.num((Num){~rhs.ok->literal.num.value}));
+  case LIT_TRUE:
     RETURN_OK(E.boolean(false));
-  case FALSE:
+  case LIT_FALSE:
     RETURN_OK(E.boolean(true));
   default:
     RETURN_ERR("Type error");
@@ -268,10 +282,7 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
     return eval_not(ctx, x);
   case VAR:
     return eval_var(ctx, x);
-  case NUM:
-  case TRUE:
-  case FALSE:
-  case UNIT:
+  case LITERAL:
   case CLOSURE:
   case THUNK:
     RETURN_OK(x);

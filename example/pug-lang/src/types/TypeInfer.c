@@ -326,24 +326,20 @@ action(typeOfNot, List(Assump), Expr, Infered(Type)) {
   }
 }
 
-action(typeOfNum, List(Assump), Expr, Infered(Type)) {
+action(typeOfLiteral, List(Assump), Expr, Infered(Type)) {
   A_DO_WITH(as, e) {
-    Type Int = trait(Type).tcon_int();
-    A_RETURN(InferedType(NULL, Int));
-  }
-}
-
-action(typeOfFalseTrue, List(Assump), Expr, Infered(Type)) {
-  A_DO_WITH(as, e) {
-    Type Bool = trait(Type).tcon_bool();
-    A_RETURN(InferedType(NULL, Bool));
-  }
-}
-
-action(typeOfUnit, List(Assump), Expr, Infered(Type)) {
-  A_DO_WITH(as, e) {
-    Type Unit = trait(Type).tcon_unit();
-    A_RETURN(InferedType(NULL, Unit));
+    TypeT T = trait(Type);
+    switch (e->literal.id) {
+    case LIT_INTEGER:
+      A_RETURN(InferedType(NULL, T.tcon_int()));
+    case LIT_UNIT:
+      A_RETURN(InferedType(NULL, T.tcon_unit()));
+    case LIT_TRUE:
+    case LIT_FALSE:
+      A_RETURN(InferedType(NULL, T.tcon_bool()));
+    default:
+      A_FAIL((TypeError){"Illegal Literal"});
+    }
   }
 }
 
@@ -421,13 +417,8 @@ static ACTION(Infered(Type)) typeOf0Impl(List(Assump) as, Expr e) {
     return typeOfNeg(as, e);
   case NOT:
     return typeOfNot(as, e);
-  case NUM:
-    return typeOfNum(as, e);
-  case FALSE:
-  case TRUE:
-    return typeOfFalseTrue(as, e);
-  case UNIT:
-    return typeOfUnit(as, e);
+  case LITERAL:
+    return typeOfLiteral(as, e);
   case PRINT:
     return typeOfPrint(as, e);
   case CON:
