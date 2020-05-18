@@ -159,7 +159,7 @@ bool pug_parseTest(String input) {
   }
 
   {
-    TIResult(Infered(Type)) r = testInfer(result.ok);
+    TIResult(Tup(List(Pred), Type)) r = testInfer(result.ok);
     if (!r.success) {
       eprintf(BOLD RED, "type error:");
       printf(" %s\n\n", r.err.msg);

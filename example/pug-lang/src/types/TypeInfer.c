@@ -3,27 +3,6 @@
 #include "types/TypeInfer.h"
 
 // -----------------------------------------------------------------------
-Infered(Type) InferedType(List(Pred) ps, Type t) {
-  return (Infered(Type)){.ps = ps, .t = t};
-}
-
-// -----------------------------------------------------------------------
-List(Pred) appendPreds(List(Pred) ps1, List(Pred) ps2) {
-  if (!ps1) {
-    return ps2;
-  }
-  if (!ps2) {
-    return ps1;
-  }
-  List(Pred) xs = ps1;
-  while (xs->tail) {
-    xs = xs->tail;
-  }
-  xs->tail = ps2;
-  return ps1;
-}
-
-// -----------------------------------------------------------------------
 action(getSubst, Subst) {
   A_DO() {
     A_RUN(getState(), s);

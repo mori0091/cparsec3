@@ -5,13 +5,22 @@
 #include "TypeInfer.h"
 
 // -----------------------------------------------------------------------
-// high level type-inference monads
+// middle level type-inference monads
 // -----------------------------------------------------------------------
+
+/**
+ * Creates type-inference monad that infers type of literal `lit`.
+ */
+TI(Tup(List(Pred), Type)) tiLiteral(List(Assump) as, Literal lit);
 
 /**
  * Creates type-inference monad that infers type of expression `e`.
  */
-TI(Infered(Type)) tiExpr(List(Assump) as, Expr e);
+TI(Tup(List(Pred), Type)) tiExpr(List(Assump) as, Expr e);
+
+// -----------------------------------------------------------------------
+// high level type-inference monads
+// -----------------------------------------------------------------------
 
 /**
  * Creates type-inference monad that infers type of program `e`.
@@ -21,15 +30,15 @@ TI(Infered(Type)) tiExpr(List(Assump) as, Expr e);
  * provide a partial judgement. ("partial" means that it needs to apply
  * substitution just once more.)
  */
-TI(Infered(Type)) tiProgram(ClassEnv ce, List(Assump) as, Expr e);
+TI(Tup(List(Pred), Type)) tiProgram(ClassEnv ce, List(Assump) as, Expr e);
 
 // -----------------------------------------------------------------------
-static inline TIResult(Infered(Type))
+static inline TIResult(Tup(List(Pred), Type))
     testInferP(ClassEnv ce, List(Assump) as, Expr e) {
   return runTI(tiProgram(ce, as, e), ((TIState){0}));
 }
 
-static inline TIResult(Infered(Type)) testInfer(Expr e) {
+static inline TIResult(Tup(List(Pred), Type)) testInfer(Expr e) {
   ClassEnv ce = initialEnv();
   return testInferP(ce, NULL, e);
 }

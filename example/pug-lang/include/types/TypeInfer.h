@@ -21,26 +21,26 @@ typedef struct TypeError {
   String msg;
 } TypeError;
 
-#define Infered(...) TYPE_NAME(Infered, __VA_ARGS__)
+#define Tup(...) TYPE_NAME(Tup, __VA_ARGS__)
 
-typedef struct Infered(Type) {
+typedef struct Tup(List(Pred), Type) {
   List(Pred) ps;
   Type t;
 }
-Infered(Type);
+Tup(List(Pred), Type);
 
-typedef struct Infered(List(Assump), Type) {
+typedef struct Tup(List(Pred), List(Assump), Type) {
   List(Pred) ps;
   List(Assump) as;
   Type t;
 }
-Infered(List(Assump), Type);
+Tup(List(Pred), List(Assump), Type);
 
 #define A_STATE_TYPE TIState
 #define A_ERROR_TYPE TypeError
 #define A_RETURN_TYPES                                                   \
-  Type, Subst, Scheme, Qual(Type), Infered(Type),                        \
-      Infered(List(Assump), Type)
+  Type, Subst, Scheme, Qual(Type), Tup(List(Pred), Type),                \
+      Tup(List(Pred), List(Assump), Type)
 
 #include "../monad/Action.h"
 
@@ -90,20 +90,3 @@ TI(Type) newTVar(Kind k);
  * type variables.
  */
 TI(Qual(Type)) freshInst(Scheme sc);
-
-// -----------------------------------------------------------------------
-// middle level type-inference monads
-// -----------------------------------------------------------------------
-
-/**
- * Creates type-inference monad that infers type of literal `lit`.
- */
-TI(Infered(Type)) tiLiteral(List(Assump) as, Literal lit);
-
-// -----------------------------------------------------------------------
-// utility functions
-// -----------------------------------------------------------------------
-
-Infered(Type) InferedType(List(Pred) ps, Type t);
-
-List(Pred) appendPreds(List(Pred) ps1, List(Pred) ps2);
