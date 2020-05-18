@@ -326,23 +326,6 @@ action(tiExprNot, List(Assump), Expr, Infered(Type)) {
   }
 }
 
-action(tiExprLiteral, List(Assump), Expr, Infered(Type)) {
-  A_DO_WITH(as, e) {
-    TypeT T = trait(Type);
-    switch (e->literal.id) {
-    case LIT_INTEGER:
-      A_RETURN(InferedType(NULL, T.tcon_int()));
-    case LIT_UNIT:
-      A_RETURN(InferedType(NULL, T.tcon_unit()));
-    case LIT_TRUE:
-    case LIT_FALSE:
-      A_RETURN(InferedType(NULL, T.tcon_bool()));
-    default:
-      A_FAIL((TypeError){"Illegal Literal"});
-    }
-  }
-}
-
 action(tiExprPrint, List(Assump), Expr, Infered(Type)) {
   A_DO_WITH(as, e) {
     Type Unit = trait(Type).tcon_unit();
@@ -370,6 +353,23 @@ action(tiExprCapply, List(Assump), Expr, Infered(Type)) {
 action(tiExprFail, List(Assump), Expr, Infered(Type)) {
   A_DO_WITH(as, e) {
     A_FAIL((TypeError){"Invalid expr"});
+  }
+}
+
+action(tiLiteral, List(Assump), Literal, Infered(Type)) {
+  A_DO_WITH(as, lit) {
+    TypeT T = trait(Type);
+    switch (lit.id) {
+    case LIT_INTEGER:
+      A_RETURN(InferedType(NULL, T.tcon_int()));
+    case LIT_UNIT:
+      A_RETURN(InferedType(NULL, T.tcon_unit()));
+    case LIT_TRUE:
+    case LIT_FALSE:
+      A_RETURN(InferedType(NULL, T.tcon_bool()));
+    default:
+      A_FAIL((TypeError){"Illegal Literal"});
+    }
   }
 }
 
@@ -414,7 +414,7 @@ static ACTION(Infered(Type)) tiExpr0(List(Assump) as, Expr e) {
   case NOT:
     return tiExprNot(as, e);
   case LITERAL:
-    return tiExprLiteral(as, e);
+    return tiLiteral(as, e->literal);
   case PRINT:
     return tiExprPrint(as, e);
   case CON:

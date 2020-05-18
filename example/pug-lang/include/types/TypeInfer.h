@@ -57,6 +57,9 @@ Infered(List(Assump), Type);
  */
 #define runTI(ti, st) runAction(ti, st)
 
+// -----------------------------------------------------------------------
+// low level type-inference monads
+
 /**
  * Creates type-inference monad that gets current type-substitution.
  */
@@ -86,6 +89,15 @@ TI(Type) newTVar(Kind k);
  * type variables.
  */
 TI(Qual(Type)) freshInst(Scheme sc);
+
+
+// -----------------------------------------------------------------------
+// high level type-inference monads
+
+/**
+ * Creates type-inference monad that infers type of literal `lit`.
+ */
+TI(Infered(Type)) tiLiteral(List(Assump) as, Literal lit);
 
 /**
  * Creates type-inference monad that infers type of expression `e`.
