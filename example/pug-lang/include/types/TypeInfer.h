@@ -90,12 +90,22 @@ TI(Qual(Type)) freshInst(Scheme sc);
 /**
  * Creates type-inference monad that infers type of expression `e`.
  */
-TI(Infered(Type)) typeOf(List(Assump) as, Expr e);
+TI(Infered(Type)) tiExpr(List(Assump) as, Expr e);
+
+/**
+ * Creates type-inference monad that infers type of program `e`.
+ *
+ * NOTE: Only `tiProgram` can provide final judgement of type-inference.
+ * Any other type-inference monads are part of `tiProgram` and they
+ * provide a partial judgement. ("partial" means that it needs to apply
+ * substitution just once more.)
+ */
+TI(Infered(Type)) tiProgram(List(Assump) as, Expr e);
 
 // -----------------------------------------------------------------------
 static inline TIResult(Infered(Type))
     testInferP(List(Assump) as, Expr e) {
-  return runTI(typeOf(as, e), ((TIState){0}));
+  return runTI(tiProgram(as, e), ((TIState){0}));
 }
 
 static inline TIResult(Infered(Type)) testInfer(Expr e) {
