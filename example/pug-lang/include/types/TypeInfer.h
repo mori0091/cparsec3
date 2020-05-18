@@ -59,6 +59,7 @@ Infered(List(Assump), Type);
 
 // -----------------------------------------------------------------------
 // low level type-inference monads
+// -----------------------------------------------------------------------
 
 /**
  * Creates type-inference monad that gets current type-substitution.
@@ -90,36 +91,19 @@ TI(Type) newTVar(Kind k);
  */
 TI(Qual(Type)) freshInst(Scheme sc);
 
-
 // -----------------------------------------------------------------------
-// high level type-inference monads
+// middle level type-inference monads
+// -----------------------------------------------------------------------
 
 /**
  * Creates type-inference monad that infers type of literal `lit`.
  */
 TI(Infered(Type)) tiLiteral(List(Assump) as, Literal lit);
 
-/**
- * Creates type-inference monad that infers type of expression `e`.
- */
-TI(Infered(Type)) tiExpr(List(Assump) as, Expr e);
-
-/**
- * Creates type-inference monad that infers type of program `e`.
- *
- * NOTE: Only `tiProgram` can provide final judgement of type-inference.
- * Any other type-inference monads are part of `tiProgram` and they
- * provide a partial judgement. ("partial" means that it needs to apply
- * substitution just once more.)
- */
-TI(Infered(Type)) tiProgram(List(Assump) as, Expr e);
-
 // -----------------------------------------------------------------------
-static inline TIResult(Infered(Type))
-    testInferP(List(Assump) as, Expr e) {
-  return runTI(tiProgram(as, e), ((TIState){0}));
-}
+// utility functions
+// -----------------------------------------------------------------------
 
-static inline TIResult(Infered(Type)) testInfer(Expr e) {
-  return testInferP(NULL, e);
-}
+Infered(Type) InferedType(List(Pred) ps, Type t);
+
+List(Pred) appendPreds(List(Pred) ps1, List(Pred) ps2);

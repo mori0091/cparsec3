@@ -134,7 +134,7 @@ void pug_help(String arg0) {
 // -----------------------------------------------------------------------
 #define PARSE_RESULT(T) ParseResult(CPARSEC_STREAM_TYPE, T)
 
-#include "types/TypeInfer.h"
+#include "types/Infer.h"
 
 bool pug_parseTest(String input) {
   // Establishes a "scoped" memory allocation context. All memory
