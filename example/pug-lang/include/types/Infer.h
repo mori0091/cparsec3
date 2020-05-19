@@ -11,7 +11,7 @@
 /**
  * Creates type-inference monad that infers type of literal `lit`.
  */
-TI(Tup(List(Pred), Type)) tiLiteral(List(Assump) as, Literal lit);
+TI(Tup(List(Pred), Type)) tiLiteral(Literal lit);
 
 /**
  * Creates type-inference monad that infers type of expression `e`.

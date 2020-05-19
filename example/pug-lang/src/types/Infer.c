@@ -5,8 +5,11 @@
 // -----------------------------------------------------------------------
 // utility functions
 // -----------------------------------------------------------------------
-static inline Tup(List(Pred), Type) tupPredsType(List(Pred) ps, Type t) {
-  return (Tup(List(Pred), Type)){.ps = ps, .t = t};
+static inline Tup(List(Pred), Type) tupPsT(List(Pred) ps, Type t) {
+  return (Tup(List(Pred), Type)){
+      .ps = ps,
+      .t = t,
+  };
 }
 
 static List(Pred) appendPreds(List(Pred) ps1, List(Pred) ps2) {
@@ -75,17 +78,17 @@ TI(Tup(List(Pred), Type)) tiExpr(List(Assump) as, Expr e) {
   return ti_label(tiExpr0(as, e), e);
 }
 
-action(tiLiteral, List(Assump), Literal, Tup(List(Pred), Type)) {
-  A_DO_WITH(as, lit) {
+action(tiLiteral, Literal, Tup(List(Pred), Type)) {
+  A_DO_WITH(lit) {
     TypeT T = trait(Type);
     switch (lit.id) {
     case LIT_INTEGER:
-      A_RETURN(tupPredsType(NULL, T.tcon_int()));
+      A_RETURN(tupPsT(NULL, T.tcon_int()));
     case LIT_UNIT:
-      A_RETURN(tupPredsType(NULL, T.tcon_unit()));
+      A_RETURN(tupPsT(NULL, T.tcon_unit()));
     case LIT_TRUE:
     case LIT_FALSE:
-      A_RETURN(tupPredsType(NULL, T.tcon_bool()));
+      A_RETURN(tupPsT(NULL, T.tcon_bool()));
     default:
       A_FAIL((TypeError){"Illegal Literal"});
     }
@@ -102,7 +105,7 @@ action(tiExprVar, List(Assump), Expr, Tup(List(Pred), Type)) {
       A_FAIL((TypeError){b.data});
     }
     A_RUN(freshInst(sc.value), qt);
-    A_RETURN(tupPredsType(qt.ps, qt.t));
+    A_RETURN(tupPsT(qt.ps, qt.t));
   }
 }
 
@@ -117,7 +120,7 @@ action(tiExprLambda, List(Assump), Expr, Tup(List(Pred), Type)) {
     as = t_add(e->lhs->ident, sc, as);
     A_RUN(tiExpr(as, e->rhs), c);
     A_RUN(unify(c.t, b));
-    A_RETURN(tupPredsType(NULL, f));
+    A_RETURN(tupPsT(NULL, f));
   }
 }
 
@@ -129,7 +132,7 @@ action(tiExprApply, List(Assump), Expr, Tup(List(Pred), Type)) {
     A_RUN(newTVar(trait(Kind).Star()), t);
     A_RUN(unify(T.func(b.t, t), a.t));
     List(Pred) ps = appendPreds(a.ps, b.ps);
-    A_RETURN(tupPredsType(ps, t));
+    A_RETURN(tupPsT(ps, t));
   }
 }
 
@@ -142,7 +145,7 @@ action(tiExprIfelse, List(Assump), Expr, Tup(List(Pred), Type)) {
     A_RUN(tiExpr(as, e->rhs->rhs), b);
     A_RUN(unify(a.t, b.t));
     List(Pred) ps = appendPreds(a.ps, b.ps);
-    A_RETURN(tupPredsType(ps, a.t));
+    A_RETURN(tupPsT(ps, a.t));
   }
 }
 
@@ -172,7 +175,7 @@ action(tiExprSeq, List(Assump), Expr, Tup(List(Pred), Type)) {
         as = t_add(e->lhs->lhs->ident, sc, as);
         A_RUN(tiExpr(as, e->rhs), x);
         List(Pred) ps = appendPreds(a.ps, x.ps);
-        A_RETURN(tupPredsType(ps, x.t));
+        A_RETURN(tupPsT(ps, x.t));
       } else {
         if (e->lhs->rhs->id == LAMBDA) {
           A_RUN(newTVar(trait(Kind).Star()), a);
@@ -202,7 +205,7 @@ action(tiExprSeq, List(Assump), Expr, Tup(List(Pred), Type)) {
 action(tiExprDeclvar, List(Assump), Expr, Tup(List(Pred), Type)) {
   A_DO_WITH(as, e) {
     // TODO what should we do here?
-    A_RETURN(tupPredsType(NULL, e->rhs->texpr));
+    A_RETURN(tupPsT(NULL, e->rhs->texpr));
   }
 }
 
@@ -212,7 +215,7 @@ action(tiExprAssign, List(Assump), Expr, Tup(List(Pred), Type)) {
     A_RUN(tiExpr(as, e->rhs), b);
     A_RUN(unify(a.t, b.t));
     List(Pred) ps = appendPreds(a.ps, b.ps);
-    A_RETURN(tupPredsType(ps, a.t));
+    A_RETURN(tupPsT(ps, a.t));
   }
 }
 
@@ -224,7 +227,7 @@ action(tiExprLet, List(Assump), Expr, Tup(List(Pred), Type)) {
       A_RUN(tiExpr(as, e->rhs), a);
       A_RUN(unify(qt.t, a.t));
       List(Pred) ps = appendPreds(qt.ps, a.ps);
-      A_RETURN(tupPredsType(ps, a.t));
+      A_RETURN(tupPsT(ps, a.t));
     } else {
       if (e->rhs->id == LAMBDA) {
         TypeT T = trait(Type);
@@ -250,7 +253,7 @@ action(tiExprOrAnd, List(Assump), Expr, Tup(List(Pred), Type)) {
     A_RUN(unify(Bool, b.t));
     A_RUN(newTVar(trait(Kind).Star()), t);
     A_RUN(unify(Bool, t));
-    A_RETURN(tupPredsType(NULL, t));
+    A_RETURN(tupPsT(NULL, t));
   }
 }
 
@@ -262,7 +265,7 @@ action(tiExprComparisson, List(Assump), Expr, Tup(List(Pred), Type)) {
     A_RUN(unify(a.t, b.t));
     A_RUN(newTVar(trait(Kind).Star()), t);
     A_RUN(unify(Bool, t));
-    A_RETURN(tupPredsType(NULL, t));
+    A_RETURN(tupPsT(NULL, t));
   }
 }
 
@@ -275,7 +278,7 @@ action(tiExprArithmetic, List(Assump), Expr, Tup(List(Pred), Type)) {
     A_RUN(unify(Int, b.t));
     A_RUN(newTVar(trait(Kind).Star()), t);
     A_RUN(unify(Int, t));
-    A_RETURN(tupPredsType(NULL, t));
+    A_RETURN(tupPsT(NULL, t));
   }
 }
 
@@ -307,7 +310,7 @@ action(tiExprPrint, List(Assump), Expr, Tup(List(Pred), Type)) {
   A_DO_WITH(as, e) {
     Type Unit = trait(Type).tcon_unit();
     A_RUN(tiExpr(as, e->rhs));
-    A_RETURN(tupPredsType(NULL, Unit));
+    A_RETURN(tupPsT(NULL, Unit));
   }
 }
 
@@ -374,7 +377,7 @@ static ACTION(Tup(List(Pred), Type)) tiExpr0(List(Assump) as, Expr e) {
   case NOT:
     return tiExprNot(as, e);
   case LITERAL:
-    return tiLiteral(as, e->literal);
+    return tiLiteral(e->literal);
   case PRINT:
     return tiExprPrint(as, e);
   case CON:
