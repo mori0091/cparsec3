@@ -29,8 +29,8 @@ C_API_BEGIN
 //        | print
 //        | unary
 //
-// lambda = "|" pat {pat} "|" expr0
-// pat    = variable
+// lambda = "|" pvar {pvar} "|" expr0
+// pvar   = variable
 //
 // ifelse = "if" expr0 "{" stmts "}" "else" (if_expr | "{" stmts "}")
 //
@@ -38,9 +38,14 @@ C_API_BEGIN
 // stmts  = stmt {";" [stmt]}
 // stmt   = decl | expr
 //
-// decl   = let | declvar
+// decl   = let | declvar | declADT
 // let    = "let" variable "=" expr0
 // declvar = "var" variable type_annotation
+// declADT = "type" simpletype "=" constrs
+//
+// simpletype = Identifier {atype}
+// constrs = constr {"|" constr}
+// constr  = Identifier {atype}
 //
 // type_annotation = ":" texpr
 // texpr  = tlambda | btype
@@ -50,8 +55,8 @@ C_API_BEGIN
 //        | tvar
 //        | tparen
 //
-// tctor  = "()" | "bool" | "int" | qtctor
-// qtctor = Identifier
+// tctor  = "()" | "bool" | "int" | simpletype
+//
 // tvar   = identifier
 // tparen = "(" texpr ")"
 //
@@ -64,10 +69,11 @@ C_API_BEGIN
 //        | paren
 //
 // qvar    = variable
-// ctor    = "()" | "true" | "false"
+// ctor    = "()" | "true" | "false" | varctor
 // literal = number
 // paren   = (" expr ")"
 //
+// varctor     = Identifier
 // variable    = identifier | varsym
 //
 // Identifier  = upper{identLetter}
@@ -113,6 +119,7 @@ PARSER(Expr) ctor(void); /* data constructor */
 PARSER(Expr) literal(void);
 PARSER(Expr) paren(void);
 
+PARSER(Expr) varctor(void);
 PARSER(Expr) variable(void);
 
 /* an identifer start w/ uppercase letter */
@@ -128,7 +135,7 @@ PARSER(char) symbol(void);
 PARSER(String) keyword(String s);
 
 PARSER(Expr) lambda(void);
-PARSER(Expr) pat(void);
+PARSER(Expr) pvar(void);
 
 PARSER(Expr) ifelse(void);
 
@@ -139,6 +146,10 @@ PARSER(Expr) stmt(void);
 PARSER(Expr) decl(void);
 PARSER(Expr) let(void);
 PARSER(Expr) declvar(void);
+PARSER(Expr) declADT(void);
+PARSER(Type) simpletype(void);
+PARSER(Expr) constrs(Type datatype);
+PARSER(Expr) constr(Type datatype);
 
 PARSER(Expr) type_annotation(void);
 
@@ -147,625 +158,7 @@ PARSER(Type) btype(void);
 PARSER(Type) atype(void);
 PARSER(Type) tlambda(void);
 PARSER(Type) tctor(void);
-PARSER(Type) qtctor(void);
 PARSER(Type) tvar(void);
 PARSER(Type) tparen(void);
-
-// -----------------------------------------------------------------------
-#if defined(CPARSEC_CONFIG_IMPLEMENT)
-
-static String KEYWORDS[] = {
-    "let",   "var", "if",   "else", "false", "true",
-    "print", "()",  "bool", "int",  "Fn",
-};
-
-static String RESERVED_OP[] = {
-    "!", "|", "-", "=", ";", ":", "::",
-};
-
-#define IS_RESERVED(name, tbl)                                           \
-  (is_reserved(name, tbl, sizeof(tbl) / sizeof(tbl[0])))
-
-static bool is_reserved(String s, String* tbl, size_t n) {
-  for (size_t i = 0; i < n; ++i) {
-    if (trait(Eq(String)).eq(s, tbl[i])) {
-      return true;
-    }
-  }
-  return false;
-}
-static bool is_a_keyword(String s) {
-  return IS_RESERVED(s, KEYWORDS);
-}
-
-static bool is_a_reserved_op(String s) {
-  return IS_RESERVED(s, RESERVED_OP);
-}
-
-PARSER(Expr) expr(void) {
-  return assign();
-}
-
-// PARSER(Expr) assign(void);
-parsec(assign, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(Expr) p = expr0();
-  PARSER(char) op = lexme(char1('='));
-  DO() {
-    SCAN(p, lhs);
-    if (lhs->kind != VAR) {
-      RETURN(lhs);
-    }
-    SCAN(optional(op), m);
-    if (m.none) {
-      RETURN(lhs);
-    }
-    SCAN(p, rhs);
-    RETURN(E.assign(lhs, rhs));
-  }
-}
-
-PARSER(Expr) expr0(void) {
-  return expr1();
-}
-PARSER(Expr) expr1(void) {
-  return expr2();
-}
-PARSER(Expr) expr2(void) {
-  return logic_or();
-}
-PARSER(Expr) expr3(void) {
-  return logic_and();
-}
-PARSER(Expr) expr4(void) {
-  return comparison();
-}
-PARSER(Expr) expr5(void) {
-  return expr6();
-}
-PARSER(Expr) expr6(void) {
-  return addsub();
-}
-PARSER(Expr) expr7(void) {
-  return muldiv();
-}
-PARSER(Expr) expr8(void) {
-  return expr9();
-}
-PARSER(Expr) expr9(void) {
-  return expr10();
-}
-PARSER(Expr) expr10(void) {
-  return choice(lambda(), ifelse(), block(), print(), unary());
-}
-
-// PARSER(Expr) logic_or(void);
-parsec(logic_or, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(Expr) p = expr3();
-  PARSER(String) op = lexme(string1("||"));
-  DO() {
-    SCAN(p, lhs);
-    for (;;) {
-      SCAN(optional(op), m);
-      if (m.none) {
-        break;
-      }
-      /* SCAN(p, rhs); */
-      SCAN(expr2(), rhs);
-      lhs = E.logic_or(lhs, rhs);
-    }
-    RETURN(lhs);
-  }
-}
-
-// PARSER(Expr) logic_and(void);
-parsec(logic_and, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(Expr) p = expr4();
-  PARSER(String) op = lexme(string1("&&"));
-  DO() {
-    SCAN(p, lhs);
-    for (;;) {
-      SCAN(optional(op), m);
-      if (m.none) {
-        break;
-      }
-      /* SCAN(p, rhs); */
-      SCAN(expr3(), rhs);
-      lhs = E.logic_and(lhs, rhs);
-    }
-    RETURN(lhs);
-  }
-}
-
-// PARSER(Expr) comparison(void);
-parsec(comparison, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(Expr) p = expr5();
-  PARSER(String)
-  op = lexme(choice(string1("=="), string1("!="), /* eq, neq */
-                    string1("<="), string1(">="), /* le, ge */
-                    string1("<"), string1(">"))   /* lt, gt */
-  );
-  DO() {
-    SCAN(p, lhs);
-    SCAN(optional(op), m);
-    if (m.none) {
-      RETURN(lhs);
-    }
-    SCAN(p, rhs);
-    if (g_eq("==", m.value)) {
-      RETURN(E.eq(lhs, rhs));
-    }
-    if (g_eq("!=", m.value)) {
-      RETURN(E.neq(lhs, rhs));
-    }
-    if (!m.value[1]) {
-      RETURN(((m.value[0] == '<') ? E.lt : E.gt)(lhs, rhs));
-    } else {
-      RETURN(((m.value[0] == '<') ? E.le : E.ge)(lhs, rhs));
-    }
-  }
-}
-
-// PARSER(Expr) addsub(void);
-parsec(addsub, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(Expr) p = expr7();
-  PARSER(char) op = lexme(either(char1('+'), char1('-')));
-  DO() {
-    SCAN(p, lhs);
-    for (;;) {
-      SCAN(optional(op), m);
-      if (m.none) {
-        break;
-      }
-      SCAN(p, rhs);
-      lhs = ((m.value == '+') ? E.add : E.sub)(lhs, rhs);
-    }
-    RETURN(lhs);
-  }
-}
-
-// PARSER(Expr) muldiv(void);
-parsec(muldiv, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(Expr) p = expr8();
-  PARSER(char) op = lexme(choice(char1('*'), char1('/'), char1('%')));
-  DO() {
-    SCAN(p, lhs);
-    for (;;) {
-      SCAN(optional(op), m);
-      if (m.none) {
-        break;
-      }
-      SCAN(p, rhs);
-      switch (m.value) {
-      case '*':
-        lhs = E.mul(lhs, rhs);
-        break;
-      case '/':
-        lhs = E.div(lhs, rhs);
-        break;
-      case '%':
-        lhs = E.mod(lhs, rhs);
-        break;
-      default:
-        FAIL("Unexpected behaviour");
-        break;
-      }
-    }
-    RETURN(lhs);
-  }
-}
-
-// PARSER(Expr) print(void);
-parsec(print, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(String) f = lexme(keyword("print"));
-  PARSER(Expr) p = fexpr();
-  DO() {
-    SCAN(f);
-    SCAN(p, rhs);
-    RETURN(E.print(rhs));
-  }
-}
-
-// PARSER(Expr) unary(void);
-parsec(unary, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(Expr) p = fexpr();
-  PARSER(char) op = lexme(choice(char1('+'), char1('-'), char1('!')));
-  DO() {
-    SCAN(optional(op), m);
-    if (m.none) {
-      SCAN(p, rhs);
-      RETURN(rhs);
-    }
-    SCAN(unary(), rhs);
-    switch (m.value) {
-    case '+':
-      RETURN(rhs);
-    case '-':
-      RETURN(E.neg(rhs));
-    case '!':
-      RETURN(E.not(rhs));
-    default:
-      FAIL("Unexpected behaviour");
-    }
-  }
-}
-
-// PARSER(Expr) fexpr(void)
-parsec(fexpr, Expr) {
-  ExprT E = trait(Expr);
-  ArrayT(Expr) A = trait(Array(Expr));
-  PARSER(Expr) p = aexpr();
-  DO() {
-    SCAN(some(p), xs);
-    Expr* e = A.begin(xs);
-    Expr lhs = *e++;
-    while (e != A.end(xs)) {
-      lhs = E.apply(lhs, *e++);
-    }
-    A.free(&xs);
-    RETURN(lhs);
-  }
-}
-
-// PARSER(Expr) aexpr(void);
-parsec(aexpr, Expr) {
-  DO() {
-    SCAN(choice(qvar(), ctor(), literal(), paren()), x);
-    SCAN(blank());
-    RETURN(x);
-  }
-}
-
-PARSER(Expr) qvar(void) {
-  return variable();
-}
-
-// PARSER(Expr) ctor0(String symbol, Expr e);
-parsec(ctor0, String, Expr, Expr) {
-  DO() WITH(s, e) {
-    SCAN(keyword(s));
-    RETURN(e);
-  }
-}
-
-PARSER(Expr) ctor(void) {
-  ExprT E = trait(Expr);
-  return choice(ctor0("()", E.unit()),           /* () */
-                ctor0("true", E.boolean(true)),  /* true */
-                ctor0("false", E.boolean(false)) /* false */
-  );
-}
-
-PARSER(Expr) literal(void) {
-  return number();
-}
-
-// PARSER(Expr) paren(void);
-parsec(paren, Expr) {
-  DO() {
-    SCAN(lexme(char1('(')));
-    SCAN(expr(), x);
-    SCAN(lexme(char1(')')));
-    RETURN(x);
-  }
-}
-
-// PARSER(Expr) variable(void);
-parsec(variable, Expr) {
-  DO() {
-    SCAN(lexme(either(identifier(), varsym())), x);
-    RETURN(trait(Expr).var((Var){x}));
-  }
-}
-
-// PARSER(String) identifier0(PARSER(char), PARSER(char));
-parsec(identifier0, PARSER(char), PARSER(char), String) {
-  DO() WITH(idStart, idLetter) {
-    SCAN(idStart, x);
-    SCAN(many(idLetter), xs);
-    SCAN(blank());
-    size_t len = 1 + xs.length;
-    char* cs = mem_malloc(len + 1);
-    cs[0] = x;
-    memmove(cs + 1, xs.data, xs.length);
-    cs[len] = 0;
-    g_free(xs);
-    if (is_a_keyword(cs)) {
-      FAIL("keyword");
-    }
-    RETURN(cs);
-  }
-}
-
-PARSER(String) identifier(void) {
-  return label("identifier",
-               tryp(identifier0(identStart(), identLetter())));
-}
-
-PARSER(String) Identifier(void) {
-  return label("Identifier", tryp(identifier0(upper(), identLetter())));
-}
-
-PARSER(char) identStart(void) {
-  return either(char1('_'), letter());
-}
-
-PARSER(char) identLetter(void) {
-  return either(char1('_'), alphaNum());
-}
-
-parsec(varsym0, String) {
-  DO() {
-    SCAN(lexme(char1('(')));
-    SCAN(some(symbol()), xs);
-    SCAN(blank());
-    SCAN(lexme(char1(')')));
-    char* cs = mem_realloc(xs.data, xs.length + 1);
-    cs[xs.length] = '\0';
-    if (is_a_reserved_op(cs)) {
-      FAIL("reserved operator");
-    }
-    RETURN(cs);
-  }
-}
-
-PARSER(String) varsym(void) {
-  return label("operator symbol", tryp(varsym0()));
-}
-
-PARSER(char) symbol(void) {
-  return choice(char1('!'), char1('%'), char1('&'), char1('='),
-                char1('~'), char1(','), char1('-'), char1('^'),
-                char1('+'), char1('*'), char1('<'), char1('>'),
-                char1('/'), char1('?'));
-}
-
-// PARSER(String) keyword0(String s);
-parsec(keyword0, String, String) {
-  DO() WITH(s) {
-    SCAN(string1(s));
-    SCAN(optional(identLetter()), m);
-    if (!m.none) {
-      FAIL("?");
-    }
-    RETURN(s);
-  }
-}
-
-PARSER(String) keyword(String s) {
-  return tryp(keyword0(s));
-}
-
-// PARSER(Expr) lambda(void);
-parsec(lambda, Expr) {
-  ExprT E = trait(Expr);
-  ArrayT(Expr) A = trait(Array(Expr));
-  PARSER(char) open_pats = lexme(char1('|'));
-  PARSER(char) close_pats = open_pats;
-  PARSER(Expr) body = expr();
-  DO() {
-    SCAN(open_pats);
-    SCAN(some(pat()), ps);
-    SCAN(close_pats);
-    SCAN(body, rhs);
-    for (Expr* p = A.end(ps); p != A.begin(ps);) {
-      rhs = E.lambda(*--p, rhs);
-    }
-    A.free(&ps);
-    RETURN(rhs);
-  }
-}
-
-PARSER(Expr) pat(void) {
-  return variable();
-}
-
-// PARSER(Expr) braces(PARSER(Expr) p);
-parsec(braces, PARSER(Expr), Expr) {
-  PARSER(char) open_brace = lexme(char1('{'));
-  PARSER(char) close_brace = lexme(char1('}'));
-  DO() WITH(p) {
-    SCAN(open_brace);
-    SCAN(p, x);
-    SCAN(close_brace);
-    RETURN(x);
-  }
-}
-
-// PARSER(Expr) ifelse(void);
-parsec(ifelse, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(String) if_ = lexme(keyword("if"));
-  PARSER(String) else_ = lexme(keyword("else"));
-  PARSER(Expr) blk = block();
-  DO() {
-    SCAN(if_);
-    SCAN(expr0(), x);
-    SCAN(blk, y);
-    SCAN(else_);
-    SCAN(either(blk, ifelse()), z);
-    RETURN(E.ifelse(x, y, z));
-  }
-}
-
-// PARSER(Expr) block(void);
-parsec(block, Expr) {
-  ExprT E = trait(Expr);
-  DO() {
-    SCAN(braces(stmts()), x);
-    RETURN(E.block(x));
-  }
-}
-
-// PARSER(Expr) stmts(void);
-parsec(stmts, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(char) semi = lexme(char1(';'));
-  DO() {
-    SCAN(stmt(), lhs);
-    SCAN(optional(semi), m);
-    if (m.none) {
-      RETURN(lhs);
-    }
-    SCAN(optional(stmts()), rhs);
-    if (rhs.none) {
-      RETURN(lhs);
-    }
-    RETURN(E.seq(lhs, rhs.value));
-  }
-}
-
-PARSER(Expr) stmt(void) {
-  return choice(decl(), expr());
-}
-
-PARSER(Expr) decl(void) {
-  return either(let(), declvar());
-}
-
-// PARSER(Expr) let(void);
-parsec(let, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(char) op = lexme(char1('='));
-  DO() {
-    SCAN(lexme(keyword("let")));
-    SCAN(variable(), lhs);
-    SCAN(op);
-    SCAN(expr0(), rhs);
-    RETURN(E.let(lhs, rhs));
-  }
-}
-
-// PARSER(Expr) declvar(void);
-parsec(declvar, Expr) {
-  ExprT E = trait(Expr);
-  DO() {
-    SCAN(lexme(keyword("var")));
-    SCAN(variable(), lhs);
-    SCAN(type_annotation(), rhs);
-    RETURN(E.declvar(lhs, rhs));
-  }
-}
-
-// PARSER(Expr) type_annotation(void);
-parsec(type_annotation, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(char) op = lexme(char1(':'));
-  DO() {
-    SCAN(op);
-    SCAN(texpr(), ty);
-    RETURN(E.type(ty));
-  }
-}
-
-PARSER(Type) texpr(void) {
-  return either(tlambda(), btype());
-}
-
-// PARSER(Type) tlambda(void);
-parsec(tlambda, Type) {
-  TypeT t = trait(Type);
-  ArrayT(Type) A = trait(Array(Type));
-  PARSER(char) open_pats = lexme(char1('|'));
-  PARSER(char) close_pats = open_pats;
-  PARSER(Type) arg = atype();
-  PARSER(Type) body = texpr();
-  DO() {
-    SCAN(open_pats);
-    SCAN(some(arg), ps);
-    SCAN(close_pats);
-    SCAN(body, rhs);
-    for (Type* p = A.end(ps); p != A.begin(ps);) {
-      rhs = t.funcType(*--p, rhs);
-    }
-    A.free(&ps);
-    RETURN(rhs);
-  }
-}
-
-// PARSER(Type) btype(void);
-parsec(btype, Type) {
-  TypeT t = trait(Type);
-  ArrayT(Type) A = trait(Array(Type));
-  PARSER(Type) p = atype();
-  DO() {
-    SCAN(some(p), xs);
-    Type* e = A.begin(xs);
-    Type lhs = *e++;
-    while (e != A.end(xs)) {
-      lhs = t.tapply(lhs, *e++);
-    }
-    A.free(&xs);
-    RETURN(lhs);
-  }
-}
-
-PARSER(Type) atype(void) {
-  return choice(tctor(), tvar(), tparen());
-}
-
-parsec(tctor_unit, Type) {
-  DO() {
-    SCAN(lexme(keyword("()")));
-    RETURN(trait(Type).tcon_unit());
-  }
-}
-
-parsec(tctor_bool, Type) {
-  DO() {
-    SCAN(lexme(keyword("bool")));
-    RETURN(trait(Type).tcon_bool());
-  }
-}
-
-parsec(tctor_int, Type) {
-  DO() {
-    SCAN(lexme(keyword("int")));
-    RETURN(trait(Type).tcon_int());
-  }
-}
-
-PARSER(Type) tctor(void) {
-  return label("type constructor",
-               choice(tctor_unit(), tctor_bool(), tctor_int(), qtctor()));
-}
-
-// PARSER(Type) qtctor(void);
-parsec(qtctor, Type) {
-  DO() {
-    SCAN(Identifier(), x);
-    RETURN(trait(Type).tcon((TCon){x}));
-  }
-}
-
-parsec(tvar0, Type) {
-  DO() {
-    SCAN(identifier(), x);
-    RETURN(trait(Type).tvar((TVar){x}));
-  }
-}
-
-PARSER(Type) tvar(void) {
-  return label("type variable", tvar0());
-}
-
-// PARSER(Type) tparen(void);
-parsec(tparen, Type) {
-  DO() {
-    SCAN(lexme(char1('(')));
-    SCAN(texpr(), x);
-    SCAN(lexme(char1(')')));
-    RETURN(x);
-  }
-}
-
-#endif
 
 C_API_END

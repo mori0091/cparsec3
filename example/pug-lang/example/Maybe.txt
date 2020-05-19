@@ -1,11 +1,17 @@
 // -*- coding: utf-8-unix -*-
 
+var undefined : a;
+var _ : a;
+
 // -----------------------------------------------------------------------
 // `Maybe a` can be implemented by using just lambda expression.
 
 // data Maybe a = Nothing | Just a ;
 let Nothing = |_| undefined;
 let Just    = |a| |_| a;
+
+// unwrap m = case m of {Just a -> a; Nothing -> undefined};
+let unwrap = |m| m _;
 
 let option = |default ma|
   if ma == Nothing {
@@ -14,9 +20,6 @@ let option = |default ma|
     unwrap ma
   }
 ;
-
-// unwrap m = case m of {Just a -> a; Nothing -> undefined};
-let unwrap = |m| m _;
 
 let (==) = |ma mb|
   if ma == Nothing {
