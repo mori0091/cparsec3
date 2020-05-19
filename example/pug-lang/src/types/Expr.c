@@ -65,6 +65,13 @@ static Expr FUNC_NAME(apply, Expr)(Expr lhs, Expr rhs) {
 static Expr FUNC_NAME(lambda, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(LAMBDA, lhs, rhs);
 }
+static Expr FUNC_NAME(match, Expr)(Expr arg, List(Alt) alts) {
+  Expr e = Expr_New();
+  e->id = MATCH;
+  e->match_arg = arg;
+  e->alts = alts;
+  return e;
+}
 static Expr FUNC_NAME(ifelse, Expr)(Expr c, Expr t, Expr e) {
   return Expr_Binary(IFELSE, c, Expr_Binary(-1, t, e));
 }
@@ -179,6 +186,7 @@ ExprT Trait(Expr) {
       .closure = FUNC_NAME(closure, Expr),
       .apply = FUNC_NAME(apply, Expr),
       .lambda = FUNC_NAME(lambda, Expr),
+      .match = FUNC_NAME(match, Expr),
       .ifelse = FUNC_NAME(ifelse, Expr),
       .block = FUNC_NAME(block, Expr),
       .seq = FUNC_NAME(seq, Expr),
@@ -241,6 +249,13 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     break;
   case LAMBDA:
     Expr_showBinary(b, "Lambda", x->lhs, x->rhs);
+    break;
+  case MATCH:
+    mem_printf(b, "(Match ");
+    s.toString(b, x->match_arg);
+    mem_printf(b, " ");
+    mem_printf(b, "{...}");     /* TODO */
+    mem_printf(b, ")");
     break;
   case IFELSE:
     mem_printf(b, "(Ifelse ");

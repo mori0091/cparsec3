@@ -25,12 +25,29 @@ C_API_BEGIN
 // expr9  = expr10
 // expr10 = lambda
 //        | ifelse
+//        | match
 //        | block
 //        | print
 //        | unary
 //
 // lambda = "|" pvar {pvar} "|" expr0
-// pvar   = variable
+//
+// match  = "match" expr0 "{" alts "}"
+// alts   = alt {";" alt} [";"]
+// alt    = pat "=>" expr0
+//
+// pat    = apat
+// apat   = pvar
+//        | pctor
+//        | literal
+//        | wildcard
+//        | pparen
+//
+// pvar     = variable
+// pctor    =  "()" | "true" | "false" | pconstr
+// pconstr  = Identifier {pat}
+// wildcard = "_"
+// pparen   = "(" pat ")"
 //
 // ifelse = "if" expr0 "{" stmts "}" "else" (if_expr | "{" stmts "}")
 //

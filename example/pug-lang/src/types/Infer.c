@@ -12,6 +12,24 @@ static inline Tup(List(Pred), Type) tupPsT(List(Pred) ps, Type t) {
   };
 }
 
+static inline Tup(List(Pred), List(Assump), Type)
+    tupPsAsT(List(Pred) ps, List(Assump) as, Type t) {
+  return (Tup(List(Pred), List(Assump), Type)){
+      .ps = ps,
+      .as = as,
+      .t = t,
+  };
+}
+
+static inline Tup(List(Pred), List(Assump), List(Type))
+    tupPsAsTs(List(Pred) ps, List(Assump) as, List(Type) ts) {
+  return (Tup(List(Pred), List(Assump), List(Type))){
+      .ps = ps,
+      .as = as,
+      .ts = ts,
+  };
+}
+
 static List(Pred) appendPreds(List(Pred) ps1, List(Pred) ps2) {
   if (!ps1) {
     return ps2;
@@ -95,6 +113,40 @@ action(tiLiteral, Literal, Tup(List(Pred), Type)) {
   }
 }
 
+action(tiPat, Pat, Tup(List(Pred), List(Assump), Type)) {
+  A_DO_WITH(pat) {
+    KindT K = trait(Kind);
+    Assumption A = trait(Assumption);
+    switch (pat->id) {
+    case PWILDCARD: {
+      A_RUN(newTVar(K.Star()), v);
+      A_RETURN(tupPsAsT(NULL, NULL, v));
+    }
+    case PVAR: {
+      A_RUN(newTVar(K.Star()), v);
+      List(Assump) as = A.add(pat->ident, toScheme(v), NULL);
+      A_RETURN(tupPsAsT(NULL, as, v));
+    }
+    case PLITERAL: {
+      A_RUN(tiLiteral(pat->literal), a);
+      A_RETURN(tupPsAsT(a.ps, NULL, a.t));
+    }
+    case PCON:
+      A_FAIL((TypeError){"tiPat(PCon i): Not implemented yet"});
+    case PCAPPLY:
+      A_FAIL((TypeError){"tiPat(PCAp lhs rhs): Not implemented yet"});
+    default:
+      A_FAIL((TypeError){"Illegal Pat"});
+    }
+  }
+}
+
+action(tiPats, List(Pat), Tup(List(Pred), List(Assump), List(Type))) {
+  A_DO_WITH(pats) {
+    A_FAIL((TypeError){"tiPats: Not implemented yet"});
+  }
+}
+
 // -----------------------------------------------------------------------
 action(tiExprVar, List(Assump), Expr, Tup(List(Pred), Type)) {
   A_DO_WITH(as, e) {
@@ -133,6 +185,12 @@ action(tiExprApply, List(Assump), Expr, Tup(List(Pred), Type)) {
     A_RUN(unify(T.func(b.t, t), a.t));
     List(Pred) ps = appendPreds(a.ps, b.ps);
     A_RETURN(tupPsT(ps, t));
+  }
+}
+
+action(tiExprMatch, List(Assump), Expr, Tup(List(Pred), Type)) {
+  A_DO_WITH(as, e) {
+    A_FAIL((TypeError){"not implemented yet"});
   }
 }
 
@@ -344,6 +402,8 @@ static ACTION(Tup(List(Pred), Type)) tiExpr0(List(Assump) as, Expr e) {
     return tiExprLambda(as, e);
   case APPLY:
     return tiExprApply(as, e);
+  case MATCH:
+    return tiExprMatch(as, e);
   case IFELSE:
     return tiExprIfelse(as, e);
   case BLK:

@@ -14,6 +14,16 @@
 TI(Tup(List(Pred), Type)) tiLiteral(Literal lit);
 
 /**
+ * Creates type-inference monad that infers type of pattern `pat`.
+ */
+TI(Tup(List(Pred), List(Assump), Type)) tiPat(Pat pat);
+
+/**
+ * Creates type-inference monad that infers type of list of pattern `pats`.
+ */
+TI(Tup(List(Pred), List(Assump), List(Type))) tiPats(List(Pat) pats);
+
+/**
  * Creates type-inference monad that infers type of expression `e`.
  */
 TI(Tup(List(Pred), Type)) tiExpr(List(Assump) as, Expr e);

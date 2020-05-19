@@ -3,8 +3,10 @@
 
 #include "user_type.h"
 
+#include "Alt.h"
 #include "Id.h"
 #include "Literal.h"
+#include "Pat.h"
 #include "Type.h"
 
 typedef struct Context* Context;
@@ -12,7 +14,6 @@ typedef struct Expr* Expr;
 decl_user_type(Expr);
 
 // -----------------------------------------------------------------------
-
 enum ExprId {
   /* print statement (for debug purpose) */
   /* NOTE: it's tentative and will be removed when I/O library ready. */
@@ -26,6 +27,8 @@ enum ExprId {
   APPLY,
   /* lambda abstraction */
   LAMBDA,
+  /* match */
+  MATCH,
   /* if else */
   IFELSE,
   /* block */
@@ -85,6 +88,10 @@ struct Expr {
       };
     };
     struct {
+      Expr match_arg;
+      List(Alt) alts;
+    };
+    struct {
       Expr lhs;
       Expr rhs;
     };
@@ -98,30 +105,31 @@ struct Expr {
 typedef struct ExprT {
   Expr (*print)(Expr rhs); /* print statement for debug purpose */
   // ----
-  Expr (*thunk)(Context ctx, Expr rhs);   /* thunk */
-  Expr (*closure)(Context ctx, Expr rhs); /* closure */
-  Expr (*apply)(Expr lhs, Expr rhs);      /* function application */
-  Expr (*lambda)(Expr lhs, Expr rhs);     /* lambda abstraction */
-  Expr (*ifelse)(Expr c, Expr t, Expr e); /* if then else */
-  Expr (*block)(Expr rhs);                /* block */
-  Expr (*seq)(Expr lhs, Expr rhs);        /* list of statements */
-  Expr (*declvar)(Expr lhs, Expr rhs);    /* variable declaration */
-  Expr (*let)(Expr lhs, Expr rhs);        /* variable definition */
-  Expr (*assign)(Expr lhs, Expr rhs);     /* assignment */
-  Expr (*logic_or)(Expr lhs, Expr rhs);   /* logical or */
-  Expr (*logic_and)(Expr lhs, Expr rhs);  /* logical and */
-  Expr (*eq)(Expr lhs, Expr rhs);         /* equality */
-  Expr (*neq)(Expr lhs, Expr rhs);        /* nonequality */
-  Expr (*le)(Expr lhs, Expr rhs);         /* less than or equal to */
-  Expr (*lt)(Expr lhs, Expr rhs);         /* less than */
-  Expr (*gt)(Expr lhs, Expr rhs);         /* greater than */
-  Expr (*ge)(Expr lhs, Expr rhs);         /* greater than or equal to */
-  Expr (*add)(Expr lhs, Expr rhs);        /* arithmetic addition */
-  Expr (*sub)(Expr lhs, Expr rhs);        /* arithmetic subtraction */
-  Expr (*mul)(Expr lhs, Expr rhs);        /* arithmetic multiplication */
-  Expr (*div)(Expr lhs, Expr rhs);        /* arithmetic division */
-  Expr (*mod)(Expr lhs, Expr rhs);        /* arithmetic reminder */
-  Expr (*neg)(Expr rhs);                  /* arithmetic negation */
+  Expr (*thunk)(Context ctx, Expr rhs);    /* thunk */
+  Expr (*closure)(Context ctx, Expr rhs);  /* closure */
+  Expr (*apply)(Expr lhs, Expr rhs);       /* function application */
+  Expr (*lambda)(Expr lhs, Expr rhs);      /* lambda abstraction */
+  Expr (*match)(Expr arg, List(Alt) alts); /* match (case ~ of ...) */
+  Expr (*ifelse)(Expr c, Expr t, Expr e);  /* if then else */
+  Expr (*block)(Expr rhs);                 /* block */
+  Expr (*seq)(Expr lhs, Expr rhs);         /* list of statements */
+  Expr (*declvar)(Expr lhs, Expr rhs);     /* variable declaration */
+  Expr (*let)(Expr lhs, Expr rhs);         /* variable definition */
+  Expr (*assign)(Expr lhs, Expr rhs);      /* assignment */
+  Expr (*logic_or)(Expr lhs, Expr rhs);    /* logical or */
+  Expr (*logic_and)(Expr lhs, Expr rhs);   /* logical and */
+  Expr (*eq)(Expr lhs, Expr rhs);          /* equality */
+  Expr (*neq)(Expr lhs, Expr rhs);         /* nonequality */
+  Expr (*le)(Expr lhs, Expr rhs);          /* less than or equal to */
+  Expr (*lt)(Expr lhs, Expr rhs);          /* less than */
+  Expr (*gt)(Expr lhs, Expr rhs);          /* greater than */
+  Expr (*ge)(Expr lhs, Expr rhs);          /* greater than or equal to */
+  Expr (*add)(Expr lhs, Expr rhs);         /* arithmetic addition */
+  Expr (*sub)(Expr lhs, Expr rhs);         /* arithmetic subtraction */
+  Expr (*mul)(Expr lhs, Expr rhs);         /* arithmetic multiplication */
+  Expr (*div)(Expr lhs, Expr rhs);         /* arithmetic division */
+  Expr (*mod)(Expr lhs, Expr rhs);         /* arithmetic reminder */
+  Expr (*neg)(Expr rhs);                   /* arithmetic negation */
   Expr (*not )(Expr rhs);     /* logical not / bitwise complement */
   Expr (*var)(Id x);          /* variable */
   Expr (*literal)(Literal x); /* literal */
