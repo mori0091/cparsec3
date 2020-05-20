@@ -188,6 +188,54 @@
   fn(FUNC_NAME(impl, name), ActionEnv(name), UnActionArgs(S, E, R))
 
 // -----------------------------------------------------------------------
+#define def_action5(S, E, name, T1, T2, T3, T4, R)                       \
+  typedef struct {                                                       \
+    T1 e1;                                                               \
+    T2 e2;                                                               \
+    T3 e3;                                                               \
+    T4 e4;                                                               \
+  } ActionEnv(name);                                                     \
+  typedef_Fn(ActionEnv(name), UnAction(S, E, R));                        \
+  static Fn(ActionEnv(name), UnAction(S, E, R))                          \
+      FUNC_NAME(impl, name)(void);                                       \
+  Action(S, E, R) name(T1 x1, T2 x2, T3 x3, T4 x4) {                     \
+    Fn(ActionEnv(name), UnAction(S, E, R)) f = FUNC_NAME(impl, name)();  \
+    ActionEnv(name) par = {                                              \
+        .e1 = x1,                                                        \
+        .e2 = x2,                                                        \
+        .e3 = x3,                                                        \
+        .e4 = x4,                                                        \
+    };                                                                   \
+    return (Action(S, E, R)){fn_apply(f, par)};                          \
+  }                                                                      \
+  fn(FUNC_NAME(impl, name), ActionEnv(name), UnActionArgs(S, E, R))
+
+// -----------------------------------------------------------------------
+#define def_action6(S, E, name, T1, T2, T3, T4, T5, R)                   \
+  typedef struct {                                                       \
+    T1 e1;                                                               \
+    T2 e2;                                                               \
+    T3 e3;                                                               \
+    T4 e4;                                                               \
+    T5 e5;                                                               \
+  } ActionEnv(name);                                                     \
+  typedef_Fn(ActionEnv(name), UnAction(S, E, R));                        \
+  static Fn(ActionEnv(name), UnAction(S, E, R))                          \
+      FUNC_NAME(impl, name)(void);                                       \
+  Action(S, E, R) name(T1 x1, T2 x2, T3 x3, T4 x4, T5 x5) {              \
+    Fn(ActionEnv(name), UnAction(S, E, R)) f = FUNC_NAME(impl, name)();  \
+    ActionEnv(name) par = {                                              \
+        .e1 = x1,                                                        \
+        .e2 = x2,                                                        \
+        .e3 = x3,                                                        \
+        .e4 = x4,                                                        \
+        .e5 = x5,                                                        \
+    };                                                                   \
+    return (Action(S, E, R)){fn_apply(f, par)};                          \
+  }                                                                      \
+  fn(FUNC_NAME(impl, name), ActionEnv(name), UnActionArgs(S, E, R))
+
+// -----------------------------------------------------------------------
 #define A_UNIQUE_ID_NEW() A_UNIQUE_ID_NEW0(__COUNTER__)
 #define A_UNIQUE_ID_NEW0(...) CAT(act_unique_identifier, __VA_ARGS__)
 
