@@ -3,6 +3,7 @@
 
 #include "user_type.h"
 
+#include "Assump.h"
 #include "Id.h"
 #include "Literal.h"
 
@@ -15,34 +16,30 @@ enum PatId {
   PLITERAL,
   /* constructor */
   PCON,
-  /* constructor application */
-  PCAPPLY,
 };
 
 typedef struct Pat* Pat;
+decl_user_type(Pat);
+trait_List(Pat);
+
 struct Pat {
   enum PatId id;
   union {
-    struct {
-      Pat lhs;
-      Pat rhs;
+    Id ident;          // for PVAR
+    Literal literal;   // for PLit
+    struct {           // for PCon
+      Assump a;        // identifier and type-scheme of constructor
+      Array(Pat) pats; // argument patterns of constructor
     };
-    Literal literal;
-    Id ident; // for PVAR, PCON
   };
 };
-
-decl_user_type(Pat);
-
-trait_List(Pat);
 
 typedef struct PatT PatT;
 struct PatT {
   Pat (*PWildcard)(void);
   Pat (*PVar)(Id ident);
   Pat (*PLit)(Literal lit);
-  Pat (*PCon)(Id ident);
-  Pat (*PCAp)(Pat lhs, Pat rhs);
+  Pat (*PCon)(Assump a, Array(Pat) pats);
 };
 
 PatT Trait(Pat);

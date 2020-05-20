@@ -6,10 +6,7 @@
 
 // -----------------------------------------------------------------------
 #define CPARSEC_CONFIG_USER_TYPES Expr, Type, Pat, Alt, List(Alt)
-#include "types/Alt.h"
 #include "types/Expr.h"
-#include "types/Pat.h"
-#include "types/Type.h"
 
 // -----------------------------------------------------------------------
 // #define CPARSEC_CONFIG_DATA_SOURCE String

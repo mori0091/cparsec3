@@ -5,7 +5,6 @@
 
 #include "Assump.h"
 #include "Instantiate.h"
-#include "Pat.h"
 #include "Scheme.h"
 #include "Subst.h"
 #include "Type.h"

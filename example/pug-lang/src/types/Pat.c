@@ -17,13 +17,11 @@ show_user_type(Pat)(CharBuff* b, Pat pat) {
     trait(Show(Literal)).toString(b, pat->literal);
     break;
   case PCON:
-    mem_printf(b, "%s", pat->ident);
-    break;
-  case PCAPPLY:
-    mem_printf(b, "(PCAp ");
-    S.toString(b, pat->lhs);
-    mem_printf(b, " ");
-    S.toString(b, pat->rhs);
+    mem_printf(b, "(%s", pat->a.ident);
+    for (size_t i = 0; i < pat->pats.length; i++) {
+      mem_printf(b, " ");
+      S.toString(b, pat->pats.data[i]);
+    }
     mem_printf(b, ")");
     break;
   default:
@@ -58,18 +56,11 @@ static Pat FUNC_NAME(PLit, Pat)(Literal lit) {
   return p;
 }
 
-static Pat FUNC_NAME(PCon, Pat)(Id ident) {
+static Pat FUNC_NAME(PCon, Pat)(Assump a, Array(Pat) pats) {
   Pat p = Pat_New();
   p->id = PCON;
-  p->ident = ident;
-  return p;
-}
-
-static Pat FUNC_NAME(PCAp, Pat)(Pat lhs, Pat rhs) {
-  Pat p = Pat_New();
-  p->id = PCAPPLY;
-  p->lhs = lhs;
-  p->rhs = rhs;
+  p->a = a;
+  p->pats = pats;
   return p;
 }
 
@@ -79,6 +70,5 @@ PatT Trait(Pat) {
       .PVar = FUNC_NAME(PVar, Pat),
       .PLit = FUNC_NAME(PLit, Pat),
       .PCon = FUNC_NAME(PCon, Pat),
-      .PCAp = FUNC_NAME(PCAp, Pat),
   };
 }

@@ -132,9 +132,7 @@ action(tiPat, Pat, Tup(List(Pred), List(Assump), Type)) {
       A_RETURN(tupPsAsT(a.ps, NULL, a.t));
     }
     case PCON:
-      A_FAIL((TypeError){"tiPat(PCon i): Not implemented yet"});
-    case PCAPPLY:
-      A_FAIL((TypeError){"tiPat(PCAp lhs rhs): Not implemented yet"});
+      A_FAIL((TypeError){"tiPat(PCon Assump [Pat]): Not implemented yet"});
     default:
       A_FAIL((TypeError){"Illegal Pat"});
     }

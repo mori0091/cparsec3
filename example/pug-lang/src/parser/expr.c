@@ -414,14 +414,24 @@ parsec(pconstr, Pat) {
   PatT P = trait(Pat);
   DO() {
     SCAN(lexme(Identifier()), ident);
-    Pat p = P.PCon(ident);
-    for (;;) {
-      SCAN(optional(pat()), m);
-      if (m.none) {
-        break;
-      }
-      p = P.PCAp(p, m.value);
+    SCAN(many(pat()), pats);
+    /* TODO */
+    ArrayT(Pat) A = trait(Array(Pat));
+    KindT K = trait(Kind);
+    Kind k = K.Star();
+    for (size_t n = A.length(pats); n; n--) {
+      k = K.Kfun(K.Star(), k);
     }
+    TypeT T = trait(Type);
+    Type t = T.TCon((Tycon){ident, k});
+    for (size_t i = 0; i < A.length(pats); i++) {
+      CharBuff b = {0};
+      mem_printf(&b, "#p%zu", i);
+      Tyvar tyvar = {.ident = b.data, .kind = K.Star()};
+      t = T.TAp(t, T.TVar(tyvar));
+    }
+    Assump a = {.ident = ident, .scheme = toScheme(t)};
+    Pat p = P.PCon(a, pats);
     RETURN(p);
   }
 }

@@ -4,9 +4,6 @@
 #include "user_type.h"
 
 #include "Alt.h"
-#include "Id.h"
-#include "Literal.h"
-#include "Pat.h"
 #include "Type.h"
 
 typedef struct Context* Context;
