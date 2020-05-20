@@ -1,6 +1,8 @@
 /* -*- coding: utf-8-unix -*- */
 #pragma once
 
+#include "user_type.h"
+
 #include "Id.h"
 #include "Literal.h"
 
@@ -29,6 +31,8 @@ struct Pat {
     Id ident; // for PVAR, PCON
   };
 };
+
+decl_user_type(Pat);
 
 trait_List(Pat);
 

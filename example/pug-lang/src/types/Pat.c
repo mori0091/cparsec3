@@ -2,6 +2,36 @@
 
 #include "types/Pat.h"
 
+impl_user_type(Pat);
+
+show_user_type(Pat)(CharBuff* b, Pat pat) {
+  Show(Pat) S = trait(Show(Pat));
+  switch (pat->id) {
+  case PWILDCARD:
+    mem_printf(b, "_");
+    break;
+  case PVAR:
+    mem_printf(b, "(PVar %s)", pat->ident);
+    break;
+  case PLITERAL:
+    trait(Show(Literal)).toString(b, pat->literal);
+    break;
+  case PCON:
+    mem_printf(b, "%s", pat->ident);
+    break;
+  case PCAPPLY:
+    mem_printf(b, "(PCAp ");
+    S.toString(b, pat->lhs);
+    mem_printf(b, " ");
+    S.toString(b, pat->rhs);
+    mem_printf(b, ")");
+    break;
+  default:
+    assert(0 && "Illegal Pat");
+    break;
+  }
+}
+
 impl_List(Pat);
 
 static Pat Pat_New(void) {

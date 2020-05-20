@@ -3,12 +3,12 @@
 #include "parser/expr.h"
 
 static String KEYWORDS[] = {
-    "let",   "var", "if",   "else", "false", "true",
-    "print", "()",  "bool", "int",  "Fn",    "type",
+    "let",   "var", "match", "if",  "else", "false", "true",
+    "print", "()",  "bool",  "int", "Fn",   "type",
 };
 
 static String RESERVED_OP[] = {
-    "!", "|", "-", "=", ";", ":", "::",
+    "!", "|", "-", "=", "=>", ";", ":", "::",
 };
 
 #define IS_RESERVED(name, tbl)                                           \
@@ -59,7 +59,7 @@ PARSER(String) Identifier(void) {
 }
 
 PARSER(char) identStart(void) {
-  return either(char1('_'), letter());
+  return either(char1('_'), lower());
 }
 
 PARSER(char) identLetter(void) {

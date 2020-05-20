@@ -12,4 +12,7 @@ typedef struct Alt {
   Expr e;
 } Alt;
 
+decl_user_type(Alt);
+
 trait_List(Alt);
+decl_user_type(List(Alt));

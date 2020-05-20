@@ -30,7 +30,7 @@ C_API_BEGIN
 //        | print
 //        | unary
 //
-// lambda = "|" pvar {pvar} "|" expr0
+// lambda = "|" qvar {qvar} "|" expr0
 //
 // match  = "match" expr0 "{" alts "}"
 // alts   = alt {";" alt} [";"]
@@ -39,7 +39,7 @@ C_API_BEGIN
 // pat    = apat
 // apat   = pvar
 //        | pctor
-//        | literal
+//        | pliteral
 //        | wildcard
 //        | pparen
 //
@@ -152,7 +152,20 @@ PARSER(char) symbol(void);
 PARSER(String) keyword(String s);
 
 PARSER(Expr) lambda(void);
-PARSER(Expr) pvar(void);
+
+PARSER(Expr) match(void);
+PARSER(List(Alt)) alts(void);
+PARSER(Alt) alt(void);
+
+PARSER(Pat) pat(void);
+
+PARSER(Pat) apat(void);
+PARSER(Pat) pvar(void);
+PARSER(Pat) pctor(void);
+PARSER(Pat) pconstr(void);
+PARSER(Pat) pliteral(void);
+PARSER(Pat) wildcard(void);
+PARSER(Pat) pparen(void);
 
 PARSER(Expr) ifelse(void);
 

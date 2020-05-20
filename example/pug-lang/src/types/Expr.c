@@ -254,7 +254,7 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     mem_printf(b, "(Match ");
     s.toString(b, x->match_arg);
     mem_printf(b, " ");
-    mem_printf(b, "{...}");     /* TODO */
+    trait(Show(List(Alt))).toString(b, x->alts);
     mem_printf(b, ")");
     break;
   case IFELSE:
