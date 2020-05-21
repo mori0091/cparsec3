@@ -12,19 +12,56 @@ static inline Tup(List(Pred), Type) tupPsT(List(Pred) ps, Type t) {
   };
 }
 
+static inline Tup(List(Pred), List(Assump), Type)
+    tupPsAsT(List(Pred) ps, List(Assump) as, Type t) {
+  return (Tup(List(Pred), List(Assump), Type)){
+      .ps = ps,
+      .as = as,
+      .t = t,
+  };
+}
+
+static inline Tup(List(Pred), List(Assump), List(Type))
+    tupPsAsTs(List(Pred) ps, List(Assump) as, List(Type) ts) {
+  return (Tup(List(Pred), List(Assump), List(Type))){
+      .ps = ps,
+      .as = as,
+      .ts = ts,
+  };
+}
+
+#define impl_append(T)                                                   \
+  static List(T) FUNC_NAME(append, List(T))(List(T) ps1, List(T) ps2) {  \
+    if (!ps1) {                                                          \
+      return ps2;                                                        \
+    }                                                                    \
+    if (!ps2) {                                                          \
+      return ps1;                                                        \
+    }                                                                    \
+    List(T) xs = ps1;                                                    \
+    while (xs->tail) {                                                   \
+      xs = xs->tail;                                                     \
+    }                                                                    \
+    xs->tail = ps2;                                                      \
+    return ps1;                                                          \
+  }                                                                      \
+  END_OF_STATEMENTS
+
+impl_append(Pred);
 static List(Pred) appendPreds(List(Pred) ps1, List(Pred) ps2) {
-  if (!ps1) {
-    return ps2;
+  return FUNC_NAME(append, List(Pred))(ps1, ps2);
+}
+
+impl_append(Assump);
+static List(Assump) appendAssumps(List(Assump) ps1, List(Assump) ps2) {
+  return FUNC_NAME(append, List(Assump))(ps1, ps2);
+}
+
+static Type foldrFn(Type t, List(Type) ts) {
+  if (!ts) {
+    return t;
   }
-  if (!ps2) {
-    return ps1;
-  }
-  List(Pred) xs = ps1;
-  while (xs->tail) {
-    xs = xs->tail;
-  }
-  xs->tail = ps2;
-  return ps1;
+  return trait(Type).func(ts->head, foldrFn(t, ts->tail));
 }
 
 // -----------------------------------------------------------------------
@@ -69,6 +106,51 @@ action(tiProgram, ClassEnv, List(Assump), Expr, Tup(List(Pred), Type)) {
   }
 }
 
+action(fixPats, List(Assump), List(Pat), None) {
+  A_DO_WITH(as, pats) {
+    for (List(Pat) ps = pats; ps; ps = ps->tail) {
+      Pat p = ps->head;
+      if (p->id == PCON) {
+        Maybe(Scheme) sc = t_find(p->a.ident, as);
+        if (sc.none) {
+          CharBuff b = {0};
+          mem_printf(&b, "Undefined constructor - %s", p->a.ident);
+          A_FAIL((TypeError){b.data});
+        }
+        A_RUN(fixPats(as, p->pats));
+        p->a.scheme = sc.value;
+      }
+    }
+    A_RETURN((None){0});
+  }
+}
+
+action(tiAlt, ClassEnv, List(Assump), Alt, Tup(List(Pred), Type)) {
+  A_DO_WITH(, as, alt) { /* ClassEnv is unused yet */
+    /* check and correct each constructor pattern in `alt.pats` */
+    A_RUN(fixPats(as, alt.pats));
+    /* ---- */
+    A_RUN(tiPats(alt.pats), psasts);
+    A_RUN(tiExpr(appendAssumps(psasts.as, as), alt.e), pst);
+    List(Pred) ps = appendPreds(psasts.ps, pst.ps);
+    Type t = foldrFn(pst.t, psasts.ts);
+    A_RETURN(tupPsT(ps, t));
+  }
+}
+
+action(tiAlts, ClassEnv, List(Assump), List(Alt), Type, List(Pred)) {
+  A_DO_WITH(ce, as, alts, t) {
+    List(Pred) ps = NULL;
+    while (alts) {
+      A_RUN(tiAlt(ce, as, alts->head), pst);
+      ps = appendPreds(ps, pst.ps);
+      A_RUN(unify(t, pst.t));
+      alts = alts->tail;
+    }
+    A_RETURN(ps);
+  }
+}
+
 // -----------------------------------------------------------------------
 // middle level type-inference monads
 // -----------------------------------------------------------------------
@@ -92,6 +174,56 @@ action(tiLiteral, Literal, Tup(List(Pred), Type)) {
     default:
       A_FAIL((TypeError){"Illegal Literal"});
     }
+  }
+}
+
+action(tiPat, Pat, Tup(List(Pred), List(Assump), Type)) {
+  A_DO_WITH(pat) {
+    KindT K = trait(Kind);
+    Assumption A = trait(Assumption);
+    switch (pat->id) {
+    case PWILDCARD: {
+      A_RUN(newTVar(K.Star()), v);
+      A_RETURN(tupPsAsT(NULL, NULL, v));
+    }
+    case PVAR: {
+      A_RUN(newTVar(K.Star()), v);
+      List(Assump) as = A.add(pat->ident, toScheme(v), NULL);
+      A_RETURN(tupPsAsT(NULL, as, v));
+    }
+    case PLITERAL: {
+      A_RUN(tiLiteral(pat->literal), a);
+      A_RETURN(tupPsAsT(a.ps, NULL, a.t));
+    }
+    case PCON: {
+      A_RUN(tiPats(pat->pats), psasts);
+      A_RUN(newTVar(K.Star()), t2);
+      A_RUN(freshInst(pat->a.scheme), qt);
+      A_RUN(unify(qt.t, foldrFn(t2, psasts.ts)));
+      List(Pred) ps = appendPreds(psasts.ps, qt.ps);
+      List(Assump) as = psasts.as;
+      A_RETURN(tupPsAsT(ps, as, t2));
+    }
+    default:
+      A_FAIL((TypeError){"Illegal Pat"});
+    }
+  }
+}
+
+action(tiPats, List(Pat), Tup(List(Pred), List(Assump), List(Type))) {
+  A_DO_WITH(pats) {
+    List(Pred) ps = NULL;
+    List(Assump) as = NULL;
+    List(Type) ts = NULL;
+    while (pats) {
+      A_RUN(tiPat(pats->head), psast);
+      ps = appendPreds(ps, psast.ps);
+      as = appendAssumps(as, psast.as);
+      ts = trait(List(Type)).cons(psast.t, ts);
+      pats = pats->tail;
+    }
+    trait(List(Type)).reverse(&ts);
+    A_RETURN(tupPsAsTs(ps, as, ts));
   }
 }
 
@@ -133,6 +265,19 @@ action(tiExprApply, List(Assump), Expr, Tup(List(Pred), Type)) {
     A_RUN(unify(T.func(b.t, t), a.t));
     List(Pred) ps = appendPreds(a.ps, b.ps);
     A_RETURN(tupPsT(ps, t));
+  }
+}
+
+action(tiExprMatch, List(Assump), Expr, Tup(List(Pred), Type)) {
+  A_DO_WITH(as, e) {
+    ClassEnv ce = initialEnv(); /* not used yet */
+    A_RUN(newTVar(trait(Kind).Star()), f);
+    A_RUN(tiAlts(ce, as, e->alts, f), ps);
+    TypeT T = trait(Type);
+    A_RUN(tiExpr(as, e->match_arg), pst);
+    A_RUN(newTVar(trait(Kind).Star()), t);
+    A_RUN(unify(T.func(pst.t, t), f));
+    A_RETURN(tupPsT(appendPreds(pst.ps, ps), t));
   }
 }
 
@@ -344,6 +489,8 @@ static ACTION(Tup(List(Pred), Type)) tiExpr0(List(Assump) as, Expr e) {
     return tiExprLambda(as, e);
   case APPLY:
     return tiExprApply(as, e);
+  case MATCH:
+    return tiExprMatch(as, e);
   case IFELSE:
     return tiExprIfelse(as, e);
   case BLK:

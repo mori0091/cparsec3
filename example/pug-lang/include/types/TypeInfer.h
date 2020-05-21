@@ -36,11 +36,23 @@ typedef struct Tup(List(Pred), List(Assump), Type) {
 }
 Tup(List(Pred), List(Assump), Type);
 
+typedef struct Tup(List(Pred), List(Assump), List(Type)) {
+  List(Pred) ps;
+  List(Assump) as;
+  List(Type) ts;
+}
+Tup(List(Pred), List(Assump), List(Type));
+
+// clang-format off
 #define A_STATE_TYPE TIState
 #define A_ERROR_TYPE TypeError
-#define A_RETURN_TYPES                                                   \
-  Type, Subst, Scheme, Qual(Type), Tup(List(Pred), Type),                \
-      Tup(List(Pred), List(Assump), Type)
+#define A_RETURN_TYPES                          \
+  Type, Subst, Scheme, Qual(Type),              \
+    List(Pred),                                 \
+    Tup(List(Pred), Type),                      \
+    Tup(List(Pred), List(Assump), Type),        \
+    Tup(List(Pred), List(Assump), List(Type))
+// clang-format on
 
 #include "../monad/Action.h"
 

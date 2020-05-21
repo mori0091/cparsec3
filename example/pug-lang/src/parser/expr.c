@@ -56,7 +56,7 @@ PARSER(Expr) expr9(void) {
   return expr10();
 }
 PARSER(Expr) expr10(void) {
-  return choice(lambda(), ifelse(), block(), print(), unary());
+  return choice(lambda(), match(), ifelse(), block(), print(), unary());
 }
 
 // PARSER(Expr) logic_or(void);
@@ -303,7 +303,7 @@ parsec(lambda, Expr) {
   PARSER(Expr) body = expr();
   DO() {
     SCAN(open_pats);
-    SCAN(some(pvar()), ps);
+    SCAN(some(qvar()), ps);
     SCAN(close_pats);
     SCAN(body, rhs);
     for (Expr* p = A.end(ps); p != A.begin(ps);) {
@@ -314,8 +314,167 @@ parsec(lambda, Expr) {
   }
 }
 
-PARSER(Expr) pvar(void) {
-  return variable();
+// PARSER(Expr) match(void);
+parsec(match, Expr) {
+  ExprT E = trait(Expr);
+  PARSER(String) match_ = lexme(keyword("match"));
+  PARSER(char) open_brace = lexme(char1('{'));
+  PARSER(char) close_brace = lexme(char1('}'));
+  DO() {
+    SCAN(match_);
+    SCAN(expr0(), e);
+    SCAN(open_brace);
+    SCAN(alts(), as);
+    SCAN(close_brace);
+    RETURN(E.match(e, as));
+  }
+}
+
+// PARSER(List(Alt)) alts(void);
+parsec(alts, List(Alt)) {
+  ListT(Alt) L = trait(List(Alt));
+  PARSER(char) semi = lexme(char1(';'));
+  DO() {
+    SCAN(alt(), a);
+    List(Alt) as = L.cons(a, L.empty);
+    List(Alt) bs = as;
+    for (;;) {
+      SCAN(optional(semi), m);
+      if (m.none) {
+        break;
+      }
+      SCAN(optional(alt()), a);
+      if (a.none) {
+        break;
+      }
+      bs = bs->tail = L.cons(a.value, L.empty);
+    }
+    RETURN(as);
+  }
+}
+
+// PARSER(Alt) alt(void);
+parsec(alt, Alt) {
+  PARSER(String) arrow = lexme(string1("=>"));
+  DO() {
+    SCAN(pat(), p);
+    SCAN(arrow);
+    SCAN(expr0(), e);
+    Alt alt = {
+        .pats = trait(List(Pat)).cons(p, NULL),
+        .e = e,
+    };
+    RETURN(alt);
+  }
+}
+
+PARSER(Pat) pat(void) {
+  return either(pconstr(), apat());
+}
+
+// PARSER(Pat) apat(void);
+parsec(apat, Pat) {
+  DO() {
+    SCAN(choice(wildcard(), pvar(), pctor(), pliteral(), pparen()), x);
+    SCAN(blank());
+    RETURN(x);
+  }
+}
+
+// PARSER(Pat) pvar(void);
+parsec(pvar, Pat) {
+  DO() {
+    SCAN(lexme(identifier()), ident);
+    RETURN(trait(Pat).PVar(ident));
+  }
+}
+
+// PARSER(Pat) wildcard(void);
+parsec(wildcard, Pat) {
+  DO() {
+    SCAN(lexme(char1('_')));
+    RETURN(trait(Pat).PWildcard());
+  }
+}
+
+// PARSER(Pat) pctor0(String symbol, Pat p);
+parsec(pctor0, String, Pat, Pat) {
+  DO() WITH(s, e) {
+    SCAN(keyword(s));
+    RETURN(e);
+  }
+}
+
+PARSER(Pat) pctor(void) {
+  PatT P = trait(Pat);
+  return choice(pctor0("()", P.PLit(LitUnit())),     /* () */
+                pctor0("true", P.PLit(LitTrue())),   /* true */
+                pctor0("false", P.PLit(LitFalse())), /* false */
+                pconstr0()                           /* ADT (arity = 0) */
+  );
+}
+
+static List(Pat) toListPat(Array(Pat) pa) {
+  ArrayT(Pat) A = trait(Array(Pat));
+  ListT(Pat) P = trait(List(Pat));
+  List(Pat) pats = P.empty;
+  for (Pat* p = A.end(pa); p != A.begin(pa);) {
+    pats = P.cons(*(--p), pats);
+  }
+  return pats;
+}
+
+// PARSER(Pat) pconstr0(void);
+parsec(pconstr0, Pat) {
+  PatT P = trait(Pat);
+  DO() {
+    SCAN(lexme(Identifier()), ident);
+    // NOTE: parser cannot check nor determine name and its type-scheme of
+    // constructor pattern. These are checked and corrected by type system
+    // after.
+    Assump a = {.ident = ident, .scheme = {0}};
+    RETURN(P.PCon(a, NULL));
+  }
+}
+
+// PARSER(Pat) pconstr(void);
+parsec(pconstr_, Pat) {
+  PatT P = trait(Pat);
+  DO() {
+    SCAN(lexme(Identifier()), ident);
+    SCAN(some(apat()), pa);
+    ArrayT(Pat) A = trait(Array(Pat));
+    // NOTE: parser cannot check nor determine name and its type-scheme of
+    // constructor pattern. These are checked and corrected by type system
+    // after.
+    Assump a = {.ident = ident, .scheme = {0}};
+    List(Pat) pats = toListPat(pa);
+    A.free(&pa);
+    RETURN(P.PCon(a, pats));
+  }
+}
+
+PARSER(Pat) pconstr(void) {
+  return tryp(pconstr_());
+}
+
+// PARSER(Pat) pliteral(void);
+parsec(pliteral, Pat) {
+  PatT P = trait(Pat);
+  DO() {
+    SCAN(number(), e); /* TODO */
+    RETURN(P.PLit(e->literal));
+  }
+}
+
+// PARSER(Pat) pparen(void);
+parsec(pparen, Pat) {
+  DO() {
+    SCAN(lexme(char1('(')));
+    SCAN(pat(), x);
+    SCAN(lexme(char1(')')));
+    RETURN(x);
+  }
 }
 
 // PARSER(Expr) braces(PARSER(Expr) p);

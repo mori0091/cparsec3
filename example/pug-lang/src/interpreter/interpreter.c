@@ -112,6 +112,10 @@ static EvalResult eval_lambda(Context ctx, Expr x) {
   RETURN_OK(E.closure(C.nested(ctx), x));
 }
 
+static EvalResult eval_match(Context ctx, Expr x) {
+  RETURN_ERR("not implemented yet");
+}
+
 static EvalResult eval_ifelse(Context ctx, Expr x) {
   ContextT C = trait(Context);
   // make implicit block scope that encloses whole if~else block
@@ -239,6 +243,8 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
     return eval_apply(ctx, x);
   case LAMBDA:
     return eval_lambda(ctx, x);
+  case MATCH:
+    return eval_match(ctx, x);
   case IFELSE:
     return eval_ifelse(ctx, x);
   case BLK:

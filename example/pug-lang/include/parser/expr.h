@@ -25,12 +25,33 @@ C_API_BEGIN
 // expr9  = expr10
 // expr10 = lambda
 //        | ifelse
+//        | match
 //        | block
 //        | print
 //        | unary
 //
-// lambda = "|" pvar {pvar} "|" expr0
-// pvar   = variable
+// lambda = "|" qvar {qvar} "|" expr0
+//
+// match  = "match" expr0 "{" alts "}"
+// alts   = alt {";" alt} [";"]
+// alt    = pat "=>" expr0
+//
+// pat    = apat
+//        | pconstr
+//
+// apat   = pvar
+//        | pctor
+//        | pliteral
+//        | wildcard
+//        | pparen
+//
+// pconstr  = Identifier apat {apat}
+//
+// pvar     = variable
+// pctor    =  "()" | "true" | "false" | pconstr0
+// pconstr0 = Identifier
+// wildcard = "_"
+// pparen   = "(" pat ")"
 //
 // ifelse = "if" expr0 "{" stmts "}" "else" (if_expr | "{" stmts "}")
 //
@@ -135,7 +156,21 @@ PARSER(char) symbol(void);
 PARSER(String) keyword(String s);
 
 PARSER(Expr) lambda(void);
-PARSER(Expr) pvar(void);
+
+PARSER(Expr) match(void);
+PARSER(List(Alt)) alts(void);
+PARSER(Alt) alt(void);
+
+PARSER(Pat) pat(void);
+
+PARSER(Pat) apat(void);
+PARSER(Pat) pconstr(void);
+PARSER(Pat) pvar(void);
+PARSER(Pat) pctor(void);
+PARSER(Pat) pconstr0(void);
+PARSER(Pat) pliteral(void);
+PARSER(Pat) wildcard(void);
+PARSER(Pat) pparen(void);
 
 PARSER(Expr) ifelse(void);
 
