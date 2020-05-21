@@ -21,7 +21,8 @@ TI(Tup(List(Pred), Type)) tiLiteral(Literal lit);
 TI(Tup(List(Pred), List(Assump), Type)) tiPat(Pat pat);
 
 /**
- * Creates type-inference monad that infers type of list of pattern `pats`.
+ * Creates type-inference monad that infers type of list of pattern
+ * `pats`.
  */
 TI(Tup(List(Pred), List(Assump), List(Type))) tiPats(List(Pat) pats);
 
@@ -33,6 +34,19 @@ TI(Tup(List(Pred), Type)) tiExpr(List(Assump) as, Expr e);
 // -----------------------------------------------------------------------
 // high level type-inference monads
 // -----------------------------------------------------------------------
+
+/**
+ * Creates type-inference monad that infers type of alternative `alt`.
+ */
+TI(Tup(List(Pred), Type)) tiAlt(ClassEnv ce, List(Assump) as, Alt alt);
+
+/**
+ * Creates type-inference monad that infers over a list of alternatives
+ * `alts` and check that thre returned type in each case agrees with some
+ * known type `t`.
+ */
+TI(List(Pred))
+tiAlts(ClassEnv ce, List(Assump) as, List(Alt) alts, Type t);
 
 /**
  * Creates type-inference monad that infers type of program `e`.

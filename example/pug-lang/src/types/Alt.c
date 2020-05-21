@@ -8,7 +8,7 @@ impl_user_type(Alt);
 show_user_type(Alt)(CharBuff* b, Alt x) {
   Show(Pat) S = trait(Show(Pat));
   mem_printf(b, "(");
-  for (List(Pat) ps = x.ps; ps; ps = ps->tail) {
+  for (List(Pat) ps = x.pats; ps; ps = ps->tail) {
     S.toString(b, ps->head);
     mem_printf(b, " ");
   }

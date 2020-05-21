@@ -37,15 +37,19 @@ C_API_BEGIN
 // alt    = pat "=>" expr0
 //
 // pat    = apat
+//        | pconstr
+//
 // apat   = pvar
 //        | pctor
 //        | pliteral
 //        | wildcard
 //        | pparen
 //
+// pconstr  = Identifier apat {apat}
+//
 // pvar     = variable
-// pctor    =  "()" | "true" | "false" | pconstr
-// pconstr  = Identifier {pat}
+// pctor    =  "()" | "true" | "false" | pconstr0
+// pconstr0 = Identifier
 // wildcard = "_"
 // pparen   = "(" pat ")"
 //
@@ -160,9 +164,10 @@ PARSER(Alt) alt(void);
 PARSER(Pat) pat(void);
 
 PARSER(Pat) apat(void);
+PARSER(Pat) pconstr(void);
 PARSER(Pat) pvar(void);
 PARSER(Pat) pctor(void);
-PARSER(Pat) pconstr(void);
+PARSER(Pat) pconstr0(void);
 PARSER(Pat) pliteral(void);
 PARSER(Pat) wildcard(void);
 PARSER(Pat) pparen(void);

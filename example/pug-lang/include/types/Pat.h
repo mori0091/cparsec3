@@ -25,11 +25,11 @@ trait_List(Pat);
 struct Pat {
   enum PatId id;
   union {
-    Id ident;          // for PVAR
-    Literal literal;   // for PLit
-    struct {           // for PCon
-      Assump a;        // identifier and type-scheme of constructor
-      Array(Pat) pats; // argument patterns of constructor
+    Id ident;         // for PVAR
+    Literal literal;  // for PLit
+    struct {          // for PCon
+      Assump a;       // identifier and type-scheme of constructor
+      List(Pat) pats; // argument patterns of constructor
     };
   };
 };
@@ -39,7 +39,7 @@ struct PatT {
   Pat (*PWildcard)(void);
   Pat (*PVar)(Id ident);
   Pat (*PLit)(Literal lit);
-  Pat (*PCon)(Assump a, Array(Pat) pats);
+  Pat (*PCon)(Assump a, List(Pat) pats);
 };
 
 PatT Trait(Pat);

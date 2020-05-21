@@ -8,7 +8,7 @@
 typedef struct Expr* Expr;
 
 typedef struct Alt {
-  List(Pat) ps;
+  List(Pat) pats;
   Expr e;
 } Alt;
 

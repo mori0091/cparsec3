@@ -336,15 +336,20 @@ parsec(alts, List(Alt)) {
   PARSER(char) semi = lexme(char1(';'));
   DO() {
     SCAN(alt(), a);
-    SCAN(optional(semi), m);
-    if (m.none) {
-      RETURN(L.cons(a, NULL));
+    List(Alt) as = L.cons(a, L.empty);
+    List(Alt) bs = as;
+    for (;;) {
+      SCAN(optional(semi), m);
+      if (m.none) {
+        break;
+      }
+      SCAN(optional(alt()), a);
+      if (a.none) {
+        break;
+      }
+      bs = bs->tail = L.cons(a.value, L.empty);
     }
-    SCAN(optional(alts()), as);
-    if (as.none) {
-      RETURN(L.cons(a, NULL));
-    }
-    RETURN(L.cons(a, as.value));
+    RETURN(as);
   }
 }
 
@@ -356,7 +361,7 @@ parsec(alt, Alt) {
     SCAN(arrow);
     SCAN(expr0(), e);
     Alt alt = {
-        .ps = trait(List(Pat)).cons(p, NULL),
+        .pats = trait(List(Pat)).cons(p, NULL),
         .e = e,
     };
     RETURN(alt);
@@ -364,7 +369,7 @@ parsec(alt, Alt) {
 }
 
 PARSER(Pat) pat(void) {
-  return apat();
+  return either(pconstr(), apat());
 }
 
 // PARSER(Pat) apat(void);
@@ -405,35 +410,52 @@ PARSER(Pat) pctor(void) {
   return choice(pctor0("()", P.PLit(LitUnit())),     /* () */
                 pctor0("true", P.PLit(LitTrue())),   /* true */
                 pctor0("false", P.PLit(LitFalse())), /* false */
-                pconstr()                            /* ADT */
+                pconstr0()                           /* ADT (arity = 0) */
   );
 }
 
-// PARSER(Pat) pconstr(void);
-parsec(pconstr, Pat) {
+static List(Pat) toListPat(Array(Pat) pa) {
+  ArrayT(Pat) A = trait(Array(Pat));
+  ListT(Pat) P = trait(List(Pat));
+  List(Pat) pats = P.empty;
+  for (Pat* p = A.end(pa); p != A.begin(pa);) {
+    pats = P.cons(*(--p), pats);
+  }
+  return pats;
+}
+
+// PARSER(Pat) pconstr0(void);
+parsec(pconstr0, Pat) {
   PatT P = trait(Pat);
   DO() {
     SCAN(lexme(Identifier()), ident);
-    SCAN(many(pat()), pats);
-    /* TODO */
-    ArrayT(Pat) A = trait(Array(Pat));
-    KindT K = trait(Kind);
-    Kind k = K.Star();
-    for (size_t n = A.length(pats); n; n--) {
-      k = K.Kfun(K.Star(), k);
-    }
-    TypeT T = trait(Type);
-    Type t = T.TCon((Tycon){ident, k});
-    for (size_t i = 0; i < A.length(pats); i++) {
-      CharBuff b = {0};
-      mem_printf(&b, "#p%zu", i);
-      Tyvar tyvar = {.ident = b.data, .kind = K.Star()};
-      t = T.TAp(t, T.TVar(tyvar));
-    }
-    Assump a = {.ident = ident, .scheme = toScheme(t)};
-    Pat p = P.PCon(a, pats);
-    RETURN(p);
+    // NOTE: parser cannot check nor determine name and its type-scheme of
+    // constructor pattern. These are checked and corrected by type system
+    // after.
+    Assump a = {.ident = ident, .scheme = {0}};
+    RETURN(P.PCon(a, NULL));
   }
+}
+
+// PARSER(Pat) pconstr(void);
+parsec(pconstr_, Pat) {
+  PatT P = trait(Pat);
+  DO() {
+    SCAN(lexme(Identifier()), ident);
+    SCAN(some(apat()), pa);
+    ArrayT(Pat) A = trait(Array(Pat));
+    // NOTE: parser cannot check nor determine name and its type-scheme of
+    // constructor pattern. These are checked and corrected by type system
+    // after.
+    Assump a = {.ident = ident, .scheme = {0}};
+    List(Pat) pats = toListPat(pa);
+    A.free(&pa);
+    RETURN(P.PCon(a, pats));
+  }
+}
+
+PARSER(Pat) pconstr(void) {
+  return tryp(pconstr_());
 }
 
 // PARSER(Pat) pliteral(void);

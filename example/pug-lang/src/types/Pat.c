@@ -18,9 +18,9 @@ show_user_type(Pat)(CharBuff* b, Pat pat) {
     break;
   case PCON:
     mem_printf(b, "(%s", pat->a.ident);
-    for (size_t i = 0; i < pat->pats.length; i++) {
+    for (List(Pat) pats = pat->pats; pats; pats = pats->tail) {
       mem_printf(b, " ");
-      S.toString(b, pat->pats.data[i]);
+      S.toString(b, pats->head);
     }
     mem_printf(b, ")");
     break;
@@ -56,7 +56,7 @@ static Pat FUNC_NAME(PLit, Pat)(Literal lit) {
   return p;
 }
 
-static Pat FUNC_NAME(PCon, Pat)(Assump a, Array(Pat) pats) {
+static Pat FUNC_NAME(PCon, Pat)(Assump a, List(Pat) pats) {
   Pat p = Pat_New();
   p->id = PCON;
   p->a = a;

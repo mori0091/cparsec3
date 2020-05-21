@@ -5,10 +5,10 @@
 
 C_API_BEGIN
 
+#define OPTIONAL_PARSER_RETURN_TYPES() None, char, String, Expr, Pat, Alt
 #define GENERIC_OPTIONAL(T) FUNC_NAME(optional, T)
 #define optional(p)                                                      \
-  GENERIC(p, PARSER, GENERIC_OPTIONAL, None, char, String, Expr,         \
-          Pat, List(Alt))                                                \
+  GENERIC(p, PARSER, GENERIC_OPTIONAL, OPTIONAL_PARSER_RETURN_TYPES())   \
   (p)
 
 #define decl_optional(T)                                                 \
@@ -19,7 +19,7 @@ decl_optional(char);
 decl_optional(String);
 decl_optional(Expr);
 decl_optional(Pat);
-decl_optional(List(Alt));
+decl_optional(Alt);
 
 // -----------------------------------------------------------------------
 #if defined(CPARSEC_CONFIG_IMPLEMENT)
@@ -43,7 +43,7 @@ impl_optional(char);
 impl_optional(String);
 impl_optional(Expr);
 impl_optional(Pat);
-impl_optional(List(Alt));
+impl_optional(Alt);
 
 #endif
 
