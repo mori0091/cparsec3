@@ -50,7 +50,7 @@ parsec(simpletype, Type) {
     SCAN(many(atype()), targs);
     KindT K = trait(Kind);
     Kind k = K.Star();
-    for (size_t n = A.length(targs); n;  n--) {
+    for (size_t n = A.length(targs); n; n--) {
       k = K.Kfun(K.Star(), k);
     }
     Type lhs = T.TCon((Tycon){c, k});
@@ -88,10 +88,10 @@ parsec(constr, Type, Expr) {
     SCAN(Identifier(), name);
     SCAN(many(atype()), args);
     Expr x = E.var(name);
-    Expr c = E.con(name);
     // ---- nullary constructor
     if (A.null(args)) {
-      RETURN(E.seq(E.declvar(x, E.type(datatype)), E.let(x, c)));
+      RETURN(E.seq(E.declvar(x, E.type(datatype)),
+                   E.let(x, E.con(name, NULL))));
     }
     // ---- n-ary constructor
     // type of constructor (function type)
@@ -108,10 +108,11 @@ parsec(constr, Type, Expr) {
       vars[i] = E.var(b.data);
     }
     // function's body
-    Expr body = c;
-    for (size_t i = 0; i < n; ++i) {
-      body = E.capply(body, vars[i]);
+    List(Expr) es = NULL;
+    for (size_t i = n; 0 < i; --i) {
+      es = trait(List(Expr)).cons(vars[i-1], es);
     }
+    Expr body = E.con(name, es);
     // function
     Expr f = body;
     while (n) {

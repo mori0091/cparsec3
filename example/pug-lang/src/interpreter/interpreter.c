@@ -112,8 +112,66 @@ static EvalResult eval_lambda(Context ctx, Expr x) {
   RETURN_OK(E.closure(C.nested(ctx), x));
 }
 
+static EvalResult eval_con(Context ctx, Expr x) {
+  ExprT E = trait(Expr);
+  RETURN_OK(E.ccon(ctx, x));
+}
+
+static bool match(Context c, Expr x, Pat pat) {
+  ContextT C = trait(Context);
+  switch (pat->id) {
+  case PWILDCARD:
+    return true;
+  case PVAR:
+    C.map.put(c, pat->ident, NULL, x);
+    return true;
+  case PLITERAL:
+    if (x->id != LITERAL) {
+      return false;
+    }
+    return trait(Eq(Literal)).eq(pat->literal, x->literal);
+  case PCON:
+    if (x->id == CON) {
+      EvalResult r = eval_expr(c, x);
+      if (!r.success) {
+        return false;
+      }
+      x = r.ok;
+    }
+    if (x->id != CCON) {
+      return false;
+    }
+    if (trait(Eq(String)).neq(pat->a.ident, x->con->ident)) {
+      return false;
+    }
+    List(Expr) args = x->con->args;
+    for (List(Pat) pats = pat->pats; pats; pats = pats->tail) {
+      EvalResult r = eval_expr(x->ctx, args->head);
+      if (!r.success) {
+        return false;
+      }
+      if (!match(c, r.ok, pats->head)) {
+        return false;
+      }
+      args = args->tail;
+    }
+    return true;
+  default:
+    return false;
+  }
+}
+
 static EvalResult eval_match(Context ctx, Expr x) {
-  RETURN_ERR("not implemented yet");
+  EVAL(ctx, x->match_arg, arg);
+  Context c = trait(Context).branch(ctx);
+  for (List(Alt) alts = x->alts; alts; alts = alts->tail) {
+    Alt alt = alts->head;
+    /* TODO what should we do for pats->tail? */
+    if (match(c, arg.ok, alt.pats->head)) {
+      RETURN_DEFERED(c, alt.e);
+    }
+  }
+  RETURN_ERR("pattern matching failed");
 }
 
 static EvalResult eval_ifelse(Context ctx, Expr x) {
@@ -297,14 +355,9 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
   case TYPE:
     RETURN_OK(x); /* TODO */
   case CON:
+    return eval_con(ctx, x);
+  case CCON:
     RETURN_OK(x);
-  case CAPPLY: {
-    ExprT E = trait(Expr);
-    EVAL(ctx, x->lhs, lhs);
-    EVAL(ctx, x->rhs, rhs);
-    x = E.capply(lhs.ok, rhs.ok);
-    RETURN_OK(x);
-  }
   default:
     RETURN_ERR("Illegal Expr");
   }

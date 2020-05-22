@@ -462,15 +462,11 @@ action(tiExprPrint, List(Assump), Expr, Tup(List(Pred), Type)) {
 action(tiExprCon, List(Assump), Expr, Tup(List(Pred), Type)) {
   A_DO_WITH(as, e) {
     ExprT E = trait(Expr);
-    A_RUN(tiExpr(as, E.var(e->ident)), t);
-    A_RETURN(t);
-  }
-}
-
-action(tiExprCapply, List(Assump), Expr, Tup(List(Pred), Type)) {
-  A_DO_WITH(as, e) {
-    ExprT E = trait(Expr);
-    A_RUN(tiExpr(as, E.apply(e->lhs, e->rhs)), t);
+    Expr x = E.var(e->ident);
+    for (List(Expr) es = e->args; es; es = es->tail) {
+      x = E.apply(x, es->head);
+    }
+    A_RUN(tiExpr(as, x), t);
     A_RETURN(t);
   }
 }
@@ -529,8 +525,8 @@ static ACTION(Tup(List(Pred), Type)) tiExpr0(List(Assump) as, Expr e) {
     return tiExprPrint(as, e);
   case CON:
     return tiExprCon(as, e);
-  case CAPPLY:
-    return tiExprCapply(as, e);
+  case CCON:
+    return tiExprCon(as, e->con);
   default:
     return tiExprFail(as, e);
   }

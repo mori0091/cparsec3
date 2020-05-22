@@ -23,3 +23,15 @@ show_user_type(Literal)(CharBuff* b, Literal x) {
     break;
   }
 }
+
+static bool FUNC_NAME(eq, Eq(Literal))(Literal a, Literal b) {
+  if (a.id != b.id) {
+    return false;
+  }
+  if (a.id == LIT_INTEGER) {
+    return a.num.value == b.num.value;
+  } else {
+    return true;
+  }
+}
+instance_Eq(Literal, FUNC_NAME(eq, Eq(Literal)));
