@@ -154,14 +154,19 @@ static Expr FUNC_NAME(type, Expr)(Type t) {
   e->texpr = t;
   return e;
 }
-static Expr FUNC_NAME(con, Expr)(Id c) {
+static Expr FUNC_NAME(con, Expr)(Id c, List(Expr) args) {
   Expr e = Expr_New();
   e->id = CON;
   e->ident = c;
+  e->args = args;
   return e;
 }
-static Expr FUNC_NAME(capply, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(CAPPLY, lhs, rhs);
+static Expr FUNC_NAME(ccon, Expr)(Context ctx, Expr rhs) {
+  Expr e = Expr_New();
+  e->id = CCON;
+  e->ctx = ctx;
+  e->lambda = rhs;
+  return e;
 }
 static Expr FUNC_NAME(num, Expr)(Num x) {
   return FUNC_NAME(literal, Expr)(LitInt(x.value));
@@ -212,7 +217,7 @@ ExprT Trait(Expr) {
       .literal = FUNC_NAME(literal, Expr),
       .type = FUNC_NAME(type, Expr),
       .con = FUNC_NAME(con, Expr),
-      .capply = FUNC_NAME(capply, Expr),
+      .ccon = FUNC_NAME(ccon, Expr),
       /* for convenience */
       .num = FUNC_NAME(num, Expr),
       .boolean = FUNC_NAME(boolean, Expr),
@@ -338,10 +343,17 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     mem_printf(b, ")");
     break;
   case CON:
-    mem_printf(b, "(Con %s)", x->ident);
+    mem_printf(b, "(Con %s", x->ident);
+    for (List(Expr) es = x->args; es; es = es->tail) {
+      mem_printf(b, " ");
+      s.toString(b, es->head);
+    }
+    mem_printf(b, ")");
     break;
-  case CAPPLY:
-    Expr_showBinary(b, "Capply", x->lhs, x->rhs);
+  case CCON:
+    mem_printf(b, "(CCon <%p> ", (void*)(x->ctx));
+    s.toString(b, x->con);
+    mem_printf(b, ")");
     break;
   default:
     assert(0 && "Illegal Expr");

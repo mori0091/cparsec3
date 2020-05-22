@@ -66,10 +66,10 @@ enum ExprId {
   VAR,
   /* literal */
   LITERAL,
-  /* constructor */
+  /* constructor (abstraction of ADT data)*/
   CON,
-  /* constructor application */
-  CAPPLY,
+  /* constructor (closure of ADT data) */
+  CCON,
 };
 
 struct Expr {
@@ -83,18 +83,25 @@ struct Expr {
         Expr expr;
         /* for CLOSURE */
         Expr lambda;
+        /* for CCON */
+        Expr con;
       };
     };
+    /* for `match` expression */
     struct {
       Expr match_arg;
       List(Alt) alts;
+    };
+    /* for VAR and CON (abstraction of ADT data) */
+    struct {
+      Id ident;                 /* name of variable or constructor */
+      List(Expr) args;          /* arguments of constructor */
     };
     struct {
       Expr lhs;
       Expr rhs;
     };
     Literal literal;
-    Id ident;
     Type texpr;
   };
 };
@@ -132,8 +139,8 @@ typedef struct ExprT {
   Expr (*var)(Id x);          /* variable */
   Expr (*literal)(Literal x); /* literal */
   Expr (*type)(Type t);       /* type annotation */
-  Expr (*con)(Id c);          /* constructor */
-  Expr (*capply)(Expr lhs, Expr rhs); /* constructor application */
+  Expr (*con)(Id c, List(Expr) args);  /* abstraction of ADT data */
+  Expr (*ccon)(Context ctx, Expr rhs); /* closure of ADT data */
   /* for convenience */
   Expr (*num)(Num x);      /* number */
   Expr (*boolean)(bool b); /* true / false */

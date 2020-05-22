@@ -112,6 +112,11 @@ static EvalResult eval_lambda(Context ctx, Expr x) {
   RETURN_OK(E.closure(C.nested(ctx), x));
 }
 
+static EvalResult eval_con(Context ctx, Expr x) {
+  ExprT E = trait(Expr);
+  RETURN_OK(E.ccon(ctx, x));
+}
+
 static bool match(Context c, Expr x, Pat pat) {
   ContextT C = trait(Context);
   switch (pat->id) {
@@ -126,20 +131,26 @@ static bool match(Context c, Expr x, Pat pat) {
     }
     return trait(Eq(Literal)).eq(pat->literal, x->literal);
   case PCON:
-    if (x->id != CAPPLY && x->id != CON) {
+    if (x->id == CON) {
+      EvalResult r = eval_expr(c, x);
+      if (!r.success) {
+        return false;
+      }
+      x = r.ok;
+    }
+    if (x->id != CCON) {
       return false;
     }
-    List(Expr) args = NULL;
-    while (x->id == CAPPLY) {
-      args = trait(List(Expr)).cons(x->rhs, args);
-      x = x->lhs;
-    }
-    assert(x->id == CON);
-    if (trait(Eq(String)).neq(pat->a.ident, x->ident)) {
+    if (trait(Eq(String)).neq(pat->a.ident, x->con->ident)) {
       return false;
     }
+    List(Expr) args = x->con->args;
     for (List(Pat) pats = pat->pats; pats; pats = pats->tail) {
-      if (!match(c, args->head, pats->head)) {
+      EvalResult r = eval_expr(x->ctx, args->head);
+      if (!r.success) {
+        return false;
+      }
+      if (!match(c, r.ok, pats->head)) {
         return false;
       }
       args = args->tail;
@@ -344,14 +355,9 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
   case TYPE:
     RETURN_OK(x); /* TODO */
   case CON:
+    return eval_con(ctx, x);
+  case CCON:
     RETURN_OK(x);
-  case CAPPLY: {
-    ExprT E = trait(Expr);
-    EVAL(ctx, x->lhs, lhs);
-    EVAL(ctx, x->rhs, rhs);
-    x = E.capply(lhs.ok, rhs.ok);
-    RETURN_OK(x);
-  }
   default:
     RETURN_ERR("Illegal Expr");
   }
