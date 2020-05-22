@@ -9,6 +9,7 @@
 typedef struct Context* Context;
 typedef struct Expr* Expr;
 decl_user_type(Expr);
+trait_List(Expr);
 
 // -----------------------------------------------------------------------
 enum ExprId {

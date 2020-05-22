@@ -348,3 +348,5 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     break;
   }
 }
+
+impl_List(Expr);

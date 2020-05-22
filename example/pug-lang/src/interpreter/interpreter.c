@@ -112,8 +112,55 @@ static EvalResult eval_lambda(Context ctx, Expr x) {
   RETURN_OK(E.closure(C.nested(ctx), x));
 }
 
+static bool match(Context c, Expr x, Pat pat) {
+  ContextT C = trait(Context);
+  switch (pat->id) {
+  case PWILDCARD:
+    return true;
+  case PVAR:
+    C.map.put(c, pat->ident, NULL, x);
+    return true;
+  case PLITERAL:
+    if (x->id != LITERAL) {
+      return false;
+    }
+    return trait(Eq(Literal)).eq(pat->literal, x->literal);
+  case PCON:
+    if (x->id != CAPPLY && x->id != CON) {
+      return false;
+    }
+    List(Expr) args = NULL;
+    while (x->id == CAPPLY) {
+      args = trait(List(Expr)).cons(x->rhs, args);
+      x = x->lhs;
+    }
+    assert(x->id == CON);
+    if (trait(Eq(String)).neq(pat->a.ident, x->ident)) {
+      return false;
+    }
+    for (List(Pat) pats = pat->pats; pats; pats = pats->tail) {
+      if (!match(c, args->head, pats->head)) {
+        return false;
+      }
+      args = args->tail;
+    }
+    return true;
+  default:
+    return false;
+  }
+}
+
 static EvalResult eval_match(Context ctx, Expr x) {
-  RETURN_ERR("not implemented yet");
+  EVAL(ctx, x->match_arg, arg);
+  Context c = trait(Context).branch(ctx);
+  for (List(Alt) alts = x->alts; alts; alts = alts->tail) {
+    Alt alt = alts->head;
+    /* TODO what should we do for pats->tail? */
+    if (match(c, arg.ok, alt.pats->head)) {
+      RETURN_DEFERED(c, alt.e);
+    }
+  }
+  RETURN_ERR("pattern matching failed");
 }
 
 static EvalResult eval_ifelse(Context ctx, Expr x) {
