@@ -1,5 +1,54 @@
 # Pug programming language Syntax
 
+## Common syntax rules
+- list of statements described in top-level are seperated with `;`.
+- list of statements described in top-level may or may not ends with `;`.
+
+- list of statements enclosed in `{` and `}` are seperated with `;`.
+- list of statements enclosed in `{` and `}` may or may not ends with `;`.
+
+- empty statement are not permitted.
+  - i.e. ` `, `;`, `{}`, `{;}`, `...;;`, `{...;;}` are not permitted.
+
+For example:
+~~~rust
+expr;              // ok
+expr;              // ok
+expr;              // ok
+~~~
+
+~~~rust
+expr;              // ok
+expr;              // ok
+expr               // ok: last `;` may be omitted.
+~~~
+
+~~~rust
+{ expr; expr }     // ok
+~~~
+
+~~~rust
+{ expr; expr; }    // ok
+~~~
+
+~~~rust
+{ expr; expr; ; }  // syntax error: empty statement is not permitted.
+~~~
+
+~~~rust
+{ expr; expr };    // ok (note that `;` is needed after `}`)
+{ expr; expr; }    // ok
+~~~
+
+~~~rust
+{ expr; expr };    // ok (note that `;` is needed after `}`)
+{ expr; expr; };   // ok (note that `;` is needed after `}`)
+
+expr;              // ok
+;                  // syntax error: empty statement is not permitted.
+
+~~~
+
 ## Comments
 
 | Example | Explanation                                                               |
@@ -15,18 +64,25 @@
 
 ## Declaratons
 
-| Example         | Explanation          |
-| --------------- | -------------------- |
-| `var x : type`  | variable declaration |
-| `let x = expr`  | variable definition  |
+| Example                                                                     | Explanation                                 |
+| --------------------------------------------------------------------------- | ------------------------------------------- |
+| `var x : type`                                                              | variable declaration                        |
+| `let x = expr`                                                              | variable definition                         |
+| <code>type Bool = True &#124; False</code>                                  | type definition (enum type `Bool`)          |
+| <code>type Suits = Spades &#124; Diamonds &#124; Hearts &#124; Clubs</code> | type definition (enum type `Suits`)         |
+| <code>type Color a = RGB a a a &#124; HSV a a a</code>                      | type definition (generic type `Color a`)    |
+| <code>type Maybe a = Just a &#124; Nothing</code>                           | type definition (generic type `Maybe a`)    |
+| <code>type Result a e = Ok a &#124; Err e</code>                            | type definition (generic type `Result a e`) |
+| <code>type List a = Cons a (List a) &#124; Nil</code>                       | type definition (generic type `List a`)     |
 
-## Block, lambda expression
+## Block, if, match, and lambda expression
 
 | Example                                                   | Explanation                                           |
 | --------------------------------------------------------- | ----------------------------------------------------- |
 | `{ stmts }`                                               | block (enclosed list of statements)                   |
 | `if expr { stmts } else { stmts }`                        | if block                                              |
 | `if expr { stmts } else if expr { stmts } else { stmts }` | if block                                              |
+| `match expr { pat1 => expr1 ; pat2 => expr2 ... }`        | pattern match                                         |
 | <code>&#124;x&#124; expr</code>                           | lambda (i.e. function object, closure)                |
 | <code>&#124;x y ...&#124; expr</code>                     | lambda (i.e. function object, closure)                |
 | <code>&#124;x&#124; &#124;y&#124; ... expr</code>         | lambda (i.e. function object, closure)                |
