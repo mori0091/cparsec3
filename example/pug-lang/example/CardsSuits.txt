@@ -4,30 +4,16 @@
 // `enum` can be implemented by using just lambda expression.
 
 // data Suits = Spades | Diamonds | Hearts | Clubs ;
-let Spades   = |_| Spades;
-let Diamonds = |_| Diamonds;
-let Hearts   = |_| Hearts;
-let Clubs    = |_| Clubs;
+type Suits = Spades | Diamonds | Hearts | Clubs ;
 
 // data CardNumber = Ace | Two | ... | King ;
-let Ace   = |_| Ace;
-let Two   = |_| Two;
-let Three = |_| Three;
-let Four  = |_| Four;
-let Five  = |_| Five;
-let Six   = |_| Six;
-let Seven = |_| Seven;
-let Eight = |_| Eight;
-let Nine  = |_| Nine;
-let Ten   = |_| Ten;
-let Jack  = |_| Jack;
-let Queen = |_| Queen;
-let King  = |_| King;
+type CardNumber = Ace | Two | Three | Four | Five | Six | Seven | Eight |
+                  Nine | Ten | Jack | Queen | King ;
 
 // data Card = Card { suitOf :: Suits, numberOf :: CardNumber } ;
-let Card     = |suit number| |f| f suit number;
-let suitOf   = |c| c (|s _| s);
-let numberOf = |c| c (|_ n| n);
+type Card Suits CardNumber = Card s n;
+let suitOf   = |c| match c { Card s _ => s };
+let numberOf = |c| match c { Card _ n => n };
 
 let (==) = |ca cb| {
   (suitOf ca) == (suitOf cb) && (numberOf ca) == (numberOf cb)
