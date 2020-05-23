@@ -370,11 +370,39 @@ void pug_self_test(void) {
                        "var x: bool;"
                        "let x = true;")); /* true */
 
-  /* TODO type check for function is not implemented yet */
-  // assert(pug_parseTest("var f : |int| int; let f = |x| x;"));
-  /* -> This should be okay but type mismatch. fix it. */
+  /* type check / type inference for function */
+  assert(pug_parseTest("var f : |int| int; let f = |x| x;"));
 
-  /* TODO type inference is not implemented yet */
-  // assert(pug_parseTest("var f : |a| a; let f = |x| x;"));
-  /* -> This should be okay but type mismatch. fix it. */
+  /* type check / type inference for generic function */
+  assert(pug_parseTest("var f : |a| a; let f = |x| x;"));
+
+  /* match expression */
+  assert(pug_parseTest("match 1 { 1 => true; _ => false }"));
+  // -> true
+  assert(!pug_parseTest("match () { 1 => true; _ => false }"));
+  // -> type error
+  assert(!pug_parseTest("match 1 { () => true; _ => false }"));
+  // -> type error
+  assert(!pug_parseTest("match 1 { true => true; _ => false }"));
+  // -> type error
+  assert(pug_parseTest("type Maybe a = Just a | Nothing;\n"
+                       "let unwrap = |m| match m {Just x => x};\n"
+                       "unwrap (Just 2) == 2;"
+                       ));
+  // -> true
+  assert(!pug_parseTest("type Maybe a = Just a | Nothing;\n"
+                        "let unwrap = |m| match m {Just x => x};\n"
+                        "unwrap Nothing; // -> runtime error\n"
+                        ));
+  // -> runtime error
+  assert(pug_parseTest("type Maybe a = Just a | Nothing;\n"
+                       "let unwrap = |m| match m {Just x => x};\n"
+                       "let f = |m| match m {\n"
+                       "  Just x  => Just (2*x);\n"
+                       "  Nothing => Nothing\n"
+                       "};\n"
+                       "f Nothing == Nothing;\n"
+                       "unwrap (f (Just 10)) == 20;\n"
+                       ));
+  // -> true
 }
