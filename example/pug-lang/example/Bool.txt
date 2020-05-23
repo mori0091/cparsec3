@@ -1,0 +1,32 @@
+// -*- coding: utf-8-unix -*-
+
+// -----------------------------------------------------------------------
+// Bool - boolean type as an algebraic data type
+
+type Bool = True | False;
+let or  = |x y| match x { True  => True;  _ => y };
+let and = |x y| match x { False => False; _ => y };
+let not = |x|   match x { True  => False; _ => True };
+
+print (and True True);          // True
+print (and True False);         // False
+print (and False True);         // False
+print (and False False);        // False
+
+print (or True True);           // True
+print (or True False);          // True
+print (or False True);          // True
+print (or False False);         // False
+
+print (not True);               // False
+print (not False);              // True
+
+print (True == True);           // true
+print (True == False);          // false
+print (False == True);          // false
+print (False == False);         // true
+
+print (True != True);           // false
+print (True != False);          // true
+print (False != True);          // true
+print (False != False);         // false

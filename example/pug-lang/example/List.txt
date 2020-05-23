@@ -1,66 +1,32 @@
 // -*- coding: utf-8-unix -*-
 
 // -----------------------------------------------------------------------
-// Bool can be implemented by using just lambda expression.
+// List a - list type as an algebraic data type
 
-let False = |_ F| F;
-let True  = |T _| T;
-
-// print (True == True);           // true
-// print (True == False);          // false
-// print (False == True);          // false
-// print (False == False);         // true
-
-let and = |p q| p q p;
-let or  = |p q| p p q;
-let not = |p| p False True;
-
-print (and True True);          // True
-print (and True False);         // False
-print (and False True);         // False
-print (and False False);        // False
-
-print (or True True);           // True
-print (or True False);          // True
-print (or False True);          // True
-print (or False False);         // False
-
-print (not True);               // False
-print (not False);              // True
-
-// -----------------------------------------------------------------------
-// List can be implemented by using just lambda expression.
-
-let Cons = |x xs| |f| f x xs;
-let Nil  = |_| True;
-let head = |xs| xs True;
-let tail = |xs| xs False;
-let null = |xs| xs (|x y| False);
+type List a = Cons a (List a) | Nil;
+let head = |xs| match xs { Cons x xs => x };
+let tail = |xs| match xs { Cons x xs => xs };
+let null = |xs| match xs { Nil => true; _ => false };
 
 let xs = Cons 1 (Cons 2 (Cons 3 Nil));
 
-print (null xs);                // False
-print (null Nil);               // True
+print (null xs);                // false
+print (null Nil);               // true
 
 print (head xs);                // 1
 print (head (tail xs));         // 2
 print (head (tail (tail xs)));  // 3
 print (tail (tail (tail xs)));  // Nil
 
-// print (null xs true false);     // false
-// print (null Nil true false);    // true
+print (null xs);                // false
+print (null Nil);               // true
 
 
 // -----------------------------------------------------------------------
-// let foldr = |f a xs| (null xs) a (f (head xs) (foldr f a (tail xs)));
-// let foldl = |f a xs| (null xs) a (foldl f (f a (head xs)) (tail xs));
-//
-// NOTE: The above code ought to be okay but currently not.
-// This is an issue regarding evaluation strategy of function application.
-// (i.e. strict evaluation vs lazy evaluation)
+// folding functions
 
 let foldr = |f a xs|
-  if null xs == True {
+  if null xs {
     a
   } else {
     // force strict evaluation of `a` for avoiding stack overflow
@@ -70,7 +36,7 @@ let foldr = |f a xs|
 ;
 
 let foldl = |f a xs|
-  if null xs == True {
+  if null xs {
     a
   } else {
     // force strict evaluation of `a` for avoiding stack overflow
@@ -90,6 +56,8 @@ print (foldl (+) 0 xs);         // 6  (((0 + 1) + 2) + 3)
 print (foldr sub 0 xs);         // 2  (1 - (2 - (3 - 0)))
 print (foldl sub 0 xs);         // -6 (((0 - 1) - 2) - 3)
 
+// -----------------------------------------------------------------------
+
 // take leading `n` elements from list
 let take = |n xs|
   if n <= 0 {
@@ -108,6 +76,7 @@ let drop = |n xs|
   }
 ;
 
+// functions that constructs an infinite list.
 let repeat   = |x| Cons x (repeat x);
 let sequence = |x| Cons x (sequence (x+1));
 
@@ -115,7 +84,7 @@ print (foldl (+) 0 (take 1000 (repeat 1)));   // 1000
 print (foldl (+) 0 (take 1000 (sequence 1))); // 500500
 
 let zipWith = |f xs ys|
-  if or (null xs) (null ys) == True {
+  if (null xs) || (null ys) {
     Nil
   } else {
     Cons (f (head xs) (head ys)) (zipWith f (tail xs) (tail ys))
@@ -123,11 +92,13 @@ let zipWith = |f xs ys|
 ;
 
 // sequence of fibonacci numbers
+var fib : List a;
 let fib = Cons 0 (Cons 1 (zipWith (+) fib (tail fib)));
+// NOTE: In this case,`var` declaration (type-annotation) is needed.
 
 // print each element of list
 let printList = |xs|
-  if null xs == True {
+  if null xs {
     ()
   } else {
     print (head xs);

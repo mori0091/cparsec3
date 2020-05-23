@@ -64,17 +64,33 @@ void pug_self_test(void) {
   /* defining the same variable, the previous one will be shadowed. */
   assert(pug_parseTest("let a = 100; let a = 2")); /* 2 */
 
-  /* defining the same variable of different type is permitted. the
-   * previous one will be shadowed. */
-  assert(pug_parseTest("let a = 100; let a = true")); /* true */
-  /* TODO Should this be disallowed in the same local scope? */
+  /* defining the same variable of different type is NOT permitted. */
+  assert(!pug_parseTest("let a = 100; let a = true"));
+  /* -> type error: Type mismatch */
+  assert(!pug_parseTest("let a = 100; {let a = true}"));
+  /* -> type error: Type mismatch */
+
+  /* In different scope,
+   * defining the same variable of different type is permitted. */
+  assert(pug_parseTest("let a = 100; |x|{let a = true; a}"));
+  /* -> ok */
+  assert(pug_parseTest("let a = 100; (|x|{let a = true; a}) ()"));
+  /* -> true */
+
+  /* TODO what's happened!? */
+  assert(!pug_parseTest("let a = 100; |x|{let a = true}"));
+  /* -> type error: Type mismatch */
+  assert(!pug_parseTest("let a = 100; |x|{x; let a = true}"));
+  /* -> type error: Type mismatch */
 
   /* evaluating a variable results its value. */
   assert(pug_parseTest("let a = 100; a")); /* 100 */
 
   /* evaluating an undefined variable is not permitted. */
-  assert(!pug_parseTest("a"));        /* Undefined variable */
-  assert(pug_parseTest("let a = a")); /* -> (Var a) */
+  assert(!pug_parseTest("a")); /* Undefined variable */
+  assert(!pug_parseTest("let a = a"));
+  /* -> type error: Undefined variable */
+  assert(pug_parseTest("var a : a; let a = a")); /* -> (Var a) */
   /* NOTE right-hand side is not evaluated. */
 
   /* assignment expression results the value assigned. */
@@ -178,7 +194,9 @@ void pug_self_test(void) {
    */
   assert(!pug_parseTest("{z}; let z = 2"));
   // -> Undefined variable
-  assert(pug_parseTest("{let y = z}; let z = 2")); /* 2 */
+  assert(!pug_parseTest("{let y = z}; let z = 2"));
+  // -> Undefined variable
+  assert(pug_parseTest("var z:a; {let y = z}; let z = 2")); /* 2 */
   // NOTE `z` in the block is never evaluated
 
   /*
@@ -235,8 +253,12 @@ void pug_self_test(void) {
    * any variables defined in outer scope are accessible even if the
    * variable was not defined before the lambda.
    * (because closure's scope is a **nested scope**)
+   * However it must be declared before at least.
    */
-  assert(pug_parseTest("let f = |x| y; let y = 2; (f 1) == 2"));
+  assert(!pug_parseTest("let f = |x| y; let y = 2; (f 1) == 2"));
+  /* -> type error: Undefined variable - y */
+  assert(pug_parseTest("var y:a; let f = |x| y; let y = 2; (f 1) == 2"));
+  /* -> true */
 
   /* Recursive function is also available.
    * (because closure's scope is a **nested scope**)
@@ -245,32 +267,32 @@ void pug_self_test(void) {
                        "f 5 == 120"));
 
   /* logical or (short circuit)
-   * | `a || b` results one the following:
+   * | `a || b` results one of the following:
+   * | - an error, if either `a` or `b` was not a `bool`.
    * | - `true` if `a` was `true`. (`b` is never evaluated)
-   * | - `b` if `a` was `false` and `b` was a bool type.
-   * | - an error, otherwise
+   * | - `b` if `a` was `false`
    */
   assert(pug_parseTest("false || false == false"));
   assert(pug_parseTest("false || true  == true"));
-  assert(!pug_parseTest("false || 1")); /* Type mismatch */
   assert(pug_parseTest("true  || false == true"));
   assert(pug_parseTest("true  || true  == true"));
-  assert(pug_parseTest("true  || 1     == true"));
+  assert(!pug_parseTest("false || 1")); /* Type mismatch */
+  assert(!pug_parseTest("true || 1"));  /* Type mismatch */
   assert(!pug_parseTest("1 || false")); /* Type mismatch */
   assert(!pug_parseTest("1 || true"));  /* Type mismatch */
   assert(!pug_parseTest("1 || 1"));     /* Type mismatch */
 
   /* logical and (short circuit)
-   * | `a && b` results one the following:
+   * | `a && b` results one of the following:
+   * | - an error, if either `a` or `b` was not a `bool`.
    * | - `false` if `a` was `false`. (`b` is never evaluated)
-   * | - `b` if `a` was `true` and `b` was a bool type.
-   * | - an error, otherwise
+   * | - `b` if `a` was `true`.
    */
   assert(pug_parseTest("false && false == false"));
   assert(pug_parseTest("false && true  == false"));
-  assert(pug_parseTest("false && 1     == false"));
   assert(pug_parseTest("true  && false == false"));
   assert(pug_parseTest("true  && true  == true"));
+  assert(!pug_parseTest("false && 1")); /* Type mismatch */
   assert(!pug_parseTest("true  && 1")); /* Type mismatch */
   assert(!pug_parseTest("1 && false")); /* Type mismatch */
   assert(!pug_parseTest("1 && true"));  /* Type mismatch */
@@ -348,11 +370,39 @@ void pug_self_test(void) {
                        "var x: bool;"
                        "let x = true;")); /* true */
 
-  /* TODO type check for function is not implemented yet */
-  // assert(pug_parseTest("var f : |int| int; let f = |x| x;"));
-  /* -> This should be okay but type mismatch. fix it. */
+  /* type check / type inference for function */
+  assert(pug_parseTest("var f : |int| int; let f = |x| x;"));
 
-  /* TODO type inference is not implemented yet */
-  // assert(pug_parseTest("var f : |a| a; let f = |x| x;"));
-  /* -> This should be okay but type mismatch. fix it. */
+  /* type check / type inference for generic function */
+  assert(pug_parseTest("var f : |a| a; let f = |x| x;"));
+
+  /* match expression */
+  assert(pug_parseTest("match 1 { 1 => true; _ => false }"));
+  // -> true
+  assert(!pug_parseTest("match () { 1 => true; _ => false }"));
+  // -> type error
+  assert(!pug_parseTest("match 1 { () => true; _ => false }"));
+  // -> type error
+  assert(!pug_parseTest("match 1 { true => true; _ => false }"));
+  // -> type error
+  assert(pug_parseTest("type Maybe a = Just a | Nothing;\n"
+                       "let unwrap = |m| match m {Just x => x};\n"
+                       "unwrap (Just 2) == 2;"
+                       ));
+  // -> true
+  assert(!pug_parseTest("type Maybe a = Just a | Nothing;\n"
+                        "let unwrap = |m| match m {Just x => x};\n"
+                        "unwrap Nothing; // -> runtime error\n"
+                        ));
+  // -> runtime error
+  assert(pug_parseTest("type Maybe a = Just a | Nothing;\n"
+                       "let unwrap = |m| match m {Just x => x};\n"
+                       "let f = |m| match m {\n"
+                       "  Just x  => Just (2*x);\n"
+                       "  Nothing => Nothing\n"
+                       "};\n"
+                       "f Nothing == Nothing;\n"
+                       "unwrap (f (Just 10)) == 20;\n"
+                       ));
+  // -> true
 }

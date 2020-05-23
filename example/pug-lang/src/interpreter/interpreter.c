@@ -28,20 +28,27 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
     EVAL(_ctx_, _a_, lhs);                                               \
     EVAL(_ctx_, _b_, rhs);                                               \
     REQUIRE_TYPE_EQ(lhs.ok->type, rhs.ok->type);                         \
-    switch (lhs.ok->kind) {                                              \
-    case NUM: {                                                          \
-      bool x = lhs.ok->num.value _op_ rhs.ok->num.value;                 \
-      RETURN_OK(trait(Expr).boolean(x));                                 \
+    switch (lhs.ok->id) {                                                \
+    case LITERAL: {                                                      \
+      switch (lhs.ok->literal.id) {                                      \
+      case LIT_INTEGER: {                                                \
+        int64_t x = lhs.ok->literal.num.value;                           \
+        int64_t y = rhs.ok->literal.num.value;                           \
+        RETURN_OK(trait(Expr).boolean(x _op_ y));                        \
+      }                                                                  \
+      case LIT_FALSE:                                                    \
+      case LIT_TRUE:                                                     \
+      case LIT_UNIT: {                                                   \
+        enum LiteralId x = lhs.ok->literal.id;                           \
+        enum LiteralId y = rhs.ok->literal.id;                           \
+        RETURN_OK(trait(Expr).boolean(x _op_ y));                        \
+      }                                                                  \
+      }                                                                  \
     }                                                                    \
-    case FALSE:                                                          \
-    case TRUE:                                                           \
-    case UNIT: {                                                         \
-      bool x = lhs.ok->kind _op_ rhs.ok->kind;                           \
-      RETURN_OK(trait(Expr).boolean(x));                                 \
-    }                                                                    \
-    case CLOSURE: {                                                      \
-      bool x = lhs.ok _op_ rhs.ok;                                       \
-      RETURN_OK(trait(Expr).boolean(x));                                 \
+    case CLOSURE:                                                        \
+    case CCON: {                                                         \
+      bool b = lhs.ok _op_ rhs.ok;                                       \
+      RETURN_OK(trait(Expr).boolean(b));                                 \
     }                                                                    \
     default:                                                             \
       RETURN_ERR("Type error");                                          \
@@ -54,8 +61,9 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
     EVAL(_ctx_, _b_, rhs);                                               \
     REQUIRE_TYPE_EQ(lhs.ok->type, TYPE(int));                            \
     REQUIRE_TYPE_EQ(rhs.ok->type, TYPE(int));                            \
-    int64_t x = lhs.ok->num.value _op_ rhs.ok->num.value;                \
-    RETURN_OK(trait(Expr).num((Num){x}));                                \
+    int64_t x = lhs.ok->literal.num.value;                               \
+    int64_t y = rhs.ok->literal.num.value;                               \
+    RETURN_OK(trait(Expr).num((Num){x _op_ y}));                         \
   } while (0)
 
 #define DIV_MOD_OP(_ctx_, _op_, _a_, _b_)                                \
@@ -64,24 +72,29 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
     EVAL(_ctx_, _b_, rhs);                                               \
     REQUIRE_TYPE_EQ(lhs.ok->type, TYPE(int));                            \
     REQUIRE_TYPE_EQ(rhs.ok->type, TYPE(int));                            \
-    if (rhs.ok->num.value == 0) {                                        \
+    int64_t x = lhs.ok->literal.num.value;                               \
+    int64_t y = rhs.ok->literal.num.value;                               \
+    if (y == 0) {                                                        \
       RETURN_ERR("Division by zero");                                    \
     }                                                                    \
-    int64_t x = lhs.ok->num.value _op_ rhs.ok->num.value;                \
-    RETURN_OK(trait(Expr).num((Num){x}));                                \
+    RETURN_OK(trait(Expr).num((Num){x _op_ y}));                         \
   } while (0)
 
+#if 1
+#define REQUIRE_TYPE_EQ(lhs, rhs)
+#else
 #define REQUIRE_TYPE_EQ(lhs, rhs)                                        \
   do {                                                                   \
     if (trait(Eq(Type)).neq(lhs, rhs)) {                                 \
       RETURN_ERR("Type mismatch");                                       \
     }                                                                    \
   } while (0)
+#endif
 
 // -----------------------------------------------------------------------
 static EvalResult eval_apply(Context ctx, Expr x) {
   EVAL(ctx, x->lhs, f);
-  if (f.ok->kind != CLOSURE) {
+  if (f.ok->id != CLOSURE) {
     RETURN_ERR("function application");
   }
   Expr v = f.ok->lambda->lhs;    // (Var v)
@@ -89,7 +102,7 @@ static EvalResult eval_apply(Context ctx, Expr x) {
   ContextT C = trait(Context);
   Context c = C.branch(f.ok->ctx);
   ExprT E = trait(Expr);
-  C.map.put(c, v->var.ident, NULL, E.thunk(ctx, x->rhs));
+  C.map.put(c, v->ident, NULL, E.thunk(ctx, x->rhs));
   RETURN_DEFERED(c, body);
 }
 
@@ -97,6 +110,68 @@ static EvalResult eval_lambda(Context ctx, Expr x) {
   ContextT C = trait(Context);
   ExprT E = trait(Expr);
   RETURN_OK(E.closure(C.nested(ctx), x));
+}
+
+static EvalResult eval_con(Context ctx, Expr x) {
+  ExprT E = trait(Expr);
+  RETURN_OK(E.ccon(ctx, x));
+}
+
+static bool match(Context c, Expr x, Pat pat) {
+  ContextT C = trait(Context);
+  switch (pat->id) {
+  case PWILDCARD:
+    return true;
+  case PVAR:
+    C.map.put(c, pat->ident, NULL, x);
+    return true;
+  case PLITERAL:
+    if (x->id != LITERAL) {
+      return false;
+    }
+    return trait(Eq(Literal)).eq(pat->literal, x->literal);
+  case PCON:
+    if (x->id == CON) {
+      EvalResult r = eval_expr(c, x);
+      if (!r.success) {
+        return false;
+      }
+      x = r.ok;
+    }
+    if (x->id != CCON) {
+      return false;
+    }
+    if (trait(Eq(String)).neq(pat->a.ident, x->con->ident)) {
+      return false;
+    }
+    List(Expr) args = x->con->args;
+    for (List(Pat) pats = pat->pats; pats; pats = pats->tail) {
+      EvalResult r = eval_expr(x->ctx, args->head);
+      if (!r.success) {
+        return false;
+      }
+      if (!match(c, r.ok, pats->head)) {
+        return false;
+      }
+      args = args->tail;
+    }
+    return true;
+  default:
+    return false;
+  }
+}
+
+static EvalResult eval_match(Context ctx, Expr x) {
+  EVAL(ctx, x->match_arg, arg);
+  Context c = trait(Context).branch(ctx);
+  for (List(Alt) alts = x->alts; alts; alts = alts->tail) {
+    Alt alt = alts->head;
+    /* TODO what should we do for pats->tail? */
+    if (match(c, arg.ok, alt.pats->head)) {
+      RETURN_DEFERED(c, alt.e);
+    }
+  }
+  RETURN_ERR("pattern matching failed");
 }
 
 static EvalResult eval_ifelse(Context ctx, Expr x) {
@@ -108,7 +183,11 @@ static EvalResult eval_ifelse(Context ctx, Expr x) {
   Expr then_blk = x->rhs->lhs;
   Expr else_blk = x->rhs->rhs;
   // REQUIRE_TYPE_EQ(then_blk->type, else_blk->type);
-  RETURN_DEFERED(c, (cond.ok->kind == TRUE ? then_blk : else_blk));
+  if (cond.ok->literal.id == LIT_TRUE) {
+    RETURN_DEFERED(c, then_blk);
+  } else {
+    RETURN_DEFERED(c, else_blk);
+  }
 }
 
 static EvalResult eval_block(Context ctx, Expr x) {
@@ -124,48 +203,49 @@ static EvalResult eval_seq(Context ctx, Expr x) {
 static EvalResult eval_let(Context ctx, Expr x) {
   ContextT C = trait(Context);
   ExprT E = trait(Expr);
-  assert(x->lhs->kind == VAR);
-  MapEntry* m = C.map.lookup_local(ctx, x->lhs->var.ident);
+  assert(x->lhs->id == VAR);
+  MapEntry* m = C.map.lookup_local(ctx, x->lhs->ident);
   if (m && m->type && !m->e) {
     // if the variable is locally declared but not defined yet, type
     // must be same.
     REQUIRE_TYPE_EQ(m->type, x->rhs->type);
     // if the previous definiton exists (in outer context), it will be
     // shadowed.
-    C.map.put(ctx, x->lhs->var.ident, m->type, E.thunk(ctx, x->rhs));
+    C.map.put(ctx, x->lhs->ident, m->type, E.thunk(ctx, x->rhs));
   } else {
     // if the previous definiton exists, it will be shadowed.
-    C.map.put(ctx, x->lhs->var.ident, x->rhs->type, E.thunk(ctx, x->rhs));
+    C.map.put(ctx, x->lhs->ident, x->rhs->type, E.thunk(ctx, x->rhs));
   }
   RETURN_OK(x->rhs);
 }
 
 static EvalResult eval_declvar(Context ctx, Expr x) {
   ContextT C = trait(Context);
-  assert(x->lhs->kind == VAR);
-  assert(x->rhs->kind == TYPE);
+  assert(x->lhs->id == VAR);
+  assert(x->rhs->id == TYPE);
   // if the previous definiton exists, it will be shadowed.
-  C.map.put(ctx, x->lhs->var.ident, x->rhs->texpr, NULL);
+  C.map.put(ctx, x->lhs->ident, x->rhs->texpr, NULL);
   RETURN_OK(x->rhs);
 }
 
 static EvalResult eval_assign(Context ctx, Expr x) {
   ContextT C = trait(Context);
   ExprT E = trait(Expr);
-  assert(x->lhs->kind == VAR);
+  assert(x->lhs->id == VAR);
   EVAL(ctx, x->rhs, rhs);
   EVAL(ctx, x->lhs, lhs);
   // types must be same with previous definition
   REQUIRE_TYPE_EQ(lhs.ok->type, rhs.ok->type);
   // the previous definiton will be shadowed.
-  C.map.put(ctx, x->lhs->var.ident, NULL, E.thunk(ctx, rhs.ok));
+  C.map.put(ctx, x->lhs->ident, rhs.ok->type, E.thunk(ctx, rhs.ok));
   RETURN_OK(rhs.ok);
 }
 
 static EvalResult eval_logical_AND_OR(Context ctx, Expr x) {
   EVAL(ctx, x->lhs, lhs);
   REQUIRE_TYPE_EQ(lhs.ok->type, TYPE(bool));
-  if (lhs.ok->kind == (x->kind == OR ? TRUE : FALSE)) {
+  assert(lhs.ok->id == LITERAL);
+  if (lhs.ok->literal.id == (x->id == OR ? LIT_TRUE : LIT_FALSE)) {
     RETURN_OK(lhs.ok);
   }
   EVAL(ctx, x->rhs, rhs);
@@ -190,12 +270,13 @@ static EvalResult eval_negate(Context ctx, Expr x) {
 static EvalResult eval_not(Context ctx, Expr x) {
   ExprT E = trait(Expr);
   EVAL(ctx, x->rhs, rhs);
-  switch (rhs.ok->kind) {
-  case NUM:
-    RETURN_OK(E.num((Num){~rhs.ok->num.value}));
-  case TRUE:
+  assert(rhs.ok->id == LITERAL);
+  switch (rhs.ok->literal.id) {
+  case LIT_INTEGER:
+    RETURN_OK(E.num((Num){~rhs.ok->literal.num.value}));
+  case LIT_TRUE:
     RETURN_OK(E.boolean(false));
-  case FALSE:
+  case LIT_FALSE:
     RETURN_OK(E.boolean(true));
   default:
     RETURN_ERR("Type error");
@@ -204,7 +285,7 @@ static EvalResult eval_not(Context ctx, Expr x) {
 
 static EvalResult eval_var(Context ctx, Expr x) {
   ContextT C = trait(Context);
-  MapEntry* m = C.map.lookup(ctx, x->var.ident);
+  MapEntry* m = C.map.lookup(ctx, x->ident);
   if (!m || !m->e) {
     RETURN_ERR("Undefined variable");
   }
@@ -215,11 +296,13 @@ static EvalResult eval_var(Context ctx, Expr x) {
 
 // -----------------------------------------------------------------------
 static EvalResult eval_expr1(Context ctx, Expr x) {
-  switch (x->kind) {
+  switch (x->id) {
   case APPLY:
     return eval_apply(ctx, x);
   case LAMBDA:
     return eval_lambda(ctx, x);
+  case MATCH:
+    return eval_match(ctx, x);
   case IFELSE:
     return eval_ifelse(ctx, x);
   case BLK:
@@ -263,10 +346,7 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
     return eval_not(ctx, x);
   case VAR:
     return eval_var(ctx, x);
-  case NUM:
-  case TRUE:
-  case FALSE:
-  case UNIT:
+  case LITERAL:
   case CLOSURE:
   case THUNK:
     RETURN_OK(x);
@@ -274,6 +354,10 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
     return eval_declvar(ctx, x);
   case TYPE:
     RETURN_OK(x); /* TODO */
+  case CON:
+    return eval_con(ctx, x);
+  case CCON:
+    RETURN_OK(x);
   default:
     RETURN_ERR("Illegal Expr");
   }
@@ -284,7 +368,7 @@ static inline bool is_defered(EvalResult r) {
 }
 
 static inline bool is_thunk(EvalResult r) {
-  return r.success && r.ok->kind == THUNK;
+  return r.success && r.ok->id == THUNK;
 }
 
 static EvalResult eval_expr(Context ctx, Expr x) {

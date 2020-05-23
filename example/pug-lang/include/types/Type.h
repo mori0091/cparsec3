@@ -3,24 +3,36 @@
 
 #include "user_type.h"
 
+#include "Id.h"
+#include "Kind.h"
+
 #define TYPE(T) TYPE_##T()
 #define TYPE_int() trait(Type).tcon_int()
 #define TYPE_bool() trait(Type).tcon_bool()
 #define TYPE_unit() trait(Type).tcon_unit()
+
+C_API_BEGIN
 
 typedef struct Type* Type;
 decl_user_type(Type);
 
 // -----------------------------------------------------------------------
 /* Type variable */
-typedef struct TVar {
-  String ident;
-} TVar;
+typedef struct Tyvar {
+  Id ident;
+  Kind kind;
+} Tyvar;
 
 /* Type constructor */
-typedef struct TCon {
-  String ident;
-} TCon;
+typedef struct Tycon {
+  Id ident;
+  Kind kind;
+} Tycon;
+
+/* Universal quantified type variable (e.g. ∀a) */
+typedef struct Tygen {
+  int n;
+} Tygen;
 
 enum TypeId {
   /* type variable */
@@ -29,154 +41,78 @@ enum TypeId {
   TCON,
   /* type application */
   TAPPLY,
+  /* universal quantified type variable (e.g. ∀a) */
+  TGEN,
 };
 
 struct Type {
-  enum TypeId kind;
+  enum TypeId id;
   union {
     /* for type variable */
-    TVar tvar;
+    Tyvar tvar;
     /* for type constructor */
-    TCon tcon;
-    /* for type function application*/
+    Tycon tcon;
+    /* for type application*/
     struct {
       Type lhs;
       Type rhs;
     };
+    /* for universal quantified type variable */
+    Tygen tgen;
   };
 };
 
+trait_Eq(Tyvar);
+trait_Eq(Tycon);
+trait_Eq(Tygen);
 trait_Eq(Type);
+
+trait_List(Type);
+trait_Eq(List(Type));
 
 // -----------------------------------------------------------------------
 typedef struct TypeT {
-  Type (*tvar)(TVar x);               /* create type variable */
-  Type (*tcon)(TCon x);               /* create type constructor */
-  Type (*tapply)(Type lhs, Type rhs); /* type application */
+  /** create type variable */
+  Type (*TVar)(Tyvar v);
+  /** create type constructor */
+  Type (*TCon)(Tycon c);
+  /** type application */
+  Type (*TAp)(Type lhs, Type rhs);
+  /** create universal quantified type variable */
+  Type (*TGen)(int n);
   // ---- helper to create builtin type constructors
-  Type (*tcon_bool)(void); /* type constructor `bool` */
-  Type (*tcon_int)(void);  /* type constructor `int` */
-  Type (*tcon_unit)(void); /* type constructor `()` */
-  Type (*tcon_Fn)(void);   /* type constructor `Fn` */
-  // ---- helper to create type of a function
-  Type (*funcType)(Type arg, Type ret);
+  Type (*tcon_bool)(void);   /* type constructor `bool` */
+  Type (*tcon_int)(void);    /* type constructor `int` */
+  Type (*tcon_unit)(void);   /* type constructor `()` */
+  Type (*tcon_Fn)(void);     /* type constructor `Fn` */
+  Type (*tcon_List)(void);   /* type constructor `[,]` */
+  Type (*tcon_Tuple2)(void); /* type constructor `(,)` */
+  // ---- helper to create type of a function, list, and 2-tuple
+  Type (*func)(Type arg, Type ret);
+  Type (*list)(Type arg);
+  Type (*pair)(Type a, Type b);
 } TypeT;
 
 TypeT Trait(Type);
 
+C_API_END
+
 // -----------------------------------------------------------------------
-#if defined(CPARSEC_CONFIG_IMPLEMENT)
+#define HasKind(T) TYPE_NAME(HasKind, T)
 
-static bool FUNC_NAME(eq, Eq(Type))(Type a, Type b) {
-  if (a == b) {
-    return true;
-  }
-  if (!a || !b) {
-    return false; // type of either `a` or `b` is undetermined
-  }
-  if (a->kind != b->kind) {
-    return false;
-  }
-  if (a->kind == TVAR) {
-    return (a->tvar.ident == b->tvar.ident) ||
-           trait(Eq(String)).eq(a->tvar.ident, b->tvar.ident);
-  }
-  if (a->kind == TCON) {
-    return (a->tcon.ident == b->tcon.ident) ||
-           trait(Eq(String)).eq(a->tcon.ident, b->tcon.ident);
-  }
-  return FUNC_NAME(eq, Eq(Type))(a->lhs, b->lhs) &&
-         FUNC_NAME(eq, Eq(Type))(a->rhs, b->rhs);
-}
-instance_Eq(Type, FUNC_NAME(eq, Eq(Type)));
+#define trait_HasKind(T)                                                 \
+  C_API_BEGIN                                                            \
+                                                                         \
+  typedef struct HasKind(T) {                                            \
+    Kind (*kind)(T t);                                                   \
+  }                                                                      \
+  HasKind(T);                                                            \
+                                                                         \
+  HasKind(T) Trait(HasKind(T));                                          \
+                                                                         \
+  C_API_END                                                              \
+  END_OF_STATEMENTS
 
-static Type Type_New(void) {
-  Type e = (Type)mem_malloc(sizeof(struct Type));
-  return e;
-}
-
-static Type FUNC_NAME(tvar, Type)(TVar x) {
-  Type e = Type_New();
-  e->kind = TVAR;
-  e->tvar = x;
-  return e;
-}
-
-static Type FUNC_NAME(tcon, Type)(TCon x) {
-  Type e = Type_New();
-  e->kind = TCON;
-  e->tcon = x;
-  return e;
-}
-
-static Type FUNC_NAME(tapply, Type)(Type lhs, Type rhs) {
-  Type e = Type_New();
-  e->kind = TAPPLY;
-  e->lhs = lhs;
-  e->rhs = rhs;
-  return e;
-}
-
-static Type FUNC_NAME(tcon_bool, Type)(void) {
-  static struct Type e = {.kind = TCON, .tcon = {"bool"}};
-  return &e;
-}
-
-static Type FUNC_NAME(tcon_int, Type)(void) {
-  static struct Type e = {.kind = TCON, .tcon = {"int"}};
-  return &e;
-}
-
-static Type FUNC_NAME(tcon_unit, Type)(void) {
-  static struct Type e = {.kind = TCON, .tcon = {"()"}};
-  return &e;
-}
-
-static Type FUNC_NAME(tcon_Fn, Type)(void) {
-  static struct Type e = {.kind = TCON, .tcon = {"Fn"}};
-  return &e;
-}
-
-static Type FUNC_NAME(funcType, Type)(Type arg, Type ret) {
-  TypeT t = trait(Type);
-  return t.tapply(t.tapply(t.tcon_Fn(), arg), ret);
-}
-
-TypeT Trait(Type) {
-  return (TypeT){
-      .tvar = FUNC_NAME(tvar, Type),
-      .tcon = FUNC_NAME(tcon, Type),
-      .tapply = FUNC_NAME(tapply, Type),
-      .tcon_bool = FUNC_NAME(tcon_bool, Type),
-      .tcon_int = FUNC_NAME(tcon_int, Type),
-      .tcon_unit = FUNC_NAME(tcon_unit, Type),
-      .tcon_Fn = FUNC_NAME(tcon_Fn, Type),
-      .funcType = FUNC_NAME(funcType, Type),
-  };
-}
-
-impl_user_type(Type);
-
-show_user_type(Type)(CharBuff* b, Type x) {
-  Show(Type) s = trait(Show(Type));
-  switch (x->kind) {
-  case TVAR:
-    mem_printf(b, "(TVar %s)", x->tvar.ident);
-    break;
-  case TCON:
-    mem_printf(b, "%s", x->tcon.ident);
-    break;
-  case TAPPLY:
-    mem_printf(b, "(TApply ");
-    s.toString(b, x->lhs);
-    mem_printf(b, " ");
-    s.toString(b, x->rhs);
-    mem_printf(b, ")");
-    break;
-  default:
-    assert(0 && "Illegal Type");
-    break;
-  }
-}
-
-#endif
+trait_HasKind(Tyvar);
+trait_HasKind(Tycon);
+trait_HasKind(Type);

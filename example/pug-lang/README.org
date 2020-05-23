@@ -26,15 +26,17 @@ library.
 - Function is represented as a *lambda expression*. (lambda abstraction)
 - All function is *curried*. (i.e. ~f x y z~ = ~((f x) y) z~)
 - Partial *function application* is ofcourse supported.
-- there is no special syntax for defining a named function.\\
+- There is no special syntax for defining a named function.\\
   Defining a named function is *defining a variable whose value is a lambda*.
+- *[NEW]* Statically type checking and *type inference* are supported.
+- *[NEW]* Defining *algebraic data type* is supported.
+- *[NEW]* *Pattern matching* syntax is supported.
 
 - [[file:docs/syntax.md][Syntax]] :: Declaratons, Expressions, Operators syntax.
 
 * How to build
 To build the ~Pug~ interpreter, do as follows :
 - *NOTE* Suppose that the leading '*$*' is a shell prompt.
-- *NOTE* Suppose that the '*#*' follows words are comment.
 
 #+begin_src shell
 $ make
@@ -42,11 +44,16 @@ $ make
 
 * Usage
 See the help that appears by the following command.
+- *NOTE* Suppose that the leading '*$*' is a shell prompt.
+
 #+begin_src shell
 $ ./bin/pug --help
 #+end_src
 
 To run a script, use ~-e SCRIPT~ option:
+- *NOTE* Suppose that the leading '*$*' is a shell prompt.
+- *NOTE* Any other lines are output of the previous command.
+
 #+begin_src shell
 $ ./bin/pug -e '1 + 2'
 > 1 + 2
@@ -106,8 +113,15 @@ let fact = |x| {
 See also sample code in the [[file:example/][example]] folder.
 - [[file:example/fact.txt][factorial function]]
 - [[file:example/fib.txt][fibonacci number]]
-- [[file:example/list.txt][list and folding functions]]
-- [[file:example/lambda_calculus.txt][bool and list (implemented using just lambda expression)]]
+- [[file:example/CardsSuits.txt][Cards suits (how to define an `enum` type)]]
+- [[file:example/Bool.txt][boolean type ~Bool~ - as an `enum` type]]
+- [[file:example/List.txt][generic list type ~List a~, folding functions, and infinite list]]
+  - definiton of ~List a~ type
+  - ~head xs~, ~tail xs~, and ~null xs~ functions
+  - ~foldl f x xs~ and ~foldr f x xs~ functions
+  - ~take n xs~ and ~drop n xs~ functions
+  - ~repeat n~ and ~sequence n~ functions (makes an inifinite list)
+  - ~zipWith f xs ys~ function
+  - ~fib~ - an infinite list of fibonacci number sequence
 - [[file:example/Maybe.txt][Haskell's ~Maybe a~ (a.k.a Rust's ~Option<T>~)]]
-- [[file:example/CardsSuits.txt][Cards suits (how to define constuctors of `enum`)]]
-
+- [[file:example/Result.txt][Haskell's ~Either e a~ (a.k.a Rust's ~Result<T, E>~)]]
