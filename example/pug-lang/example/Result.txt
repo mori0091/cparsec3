@@ -1,0 +1,26 @@
+// -*- coding: utf-8-unix -*-
+
+// -----------------------------------------------------------------------
+// `Result a e` - as an algebraic data type
+
+// data Result a e = Ok a | Err e ;
+type Result a e = Ok a | Err e;
+
+let isOk  = |r| match r { Ok a => true; _ => false };
+let isErr = |r| !(isOk r);
+
+let id = |x| x;
+
+let unwrapOk  = |r| match r { Ok a => a };
+let unwrapErr = |r| match r { Err e => e };
+
+let x = Ok 10;
+let e = Err (-1);
+print (isOk x);                 // true
+print (isOk e);                 // false
+print (isErr x);                // false
+print (isErr e);                // true
+print (unwrapOk x);             // 10
+print (unwrapErr e);            // -1
+// print (unwrapOk e);             // runtime error
+// print (unwrapErr x);            // runtime error
