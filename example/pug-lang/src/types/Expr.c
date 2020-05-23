@@ -165,7 +165,7 @@ static Expr FUNC_NAME(ccon, Expr)(Context ctx, Expr rhs) {
   Expr e = Expr_New();
   e->id = CCON;
   e->ctx = ctx;
-  e->lambda = rhs;
+  e->con = rhs;
   return e;
 }
 static Expr FUNC_NAME(num, Expr)(Num x) {
