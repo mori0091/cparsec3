@@ -46,7 +46,7 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
       }                                                                  \
     }                                                                    \
     case CLOSURE:                                                        \
-    case CON: {                                                          \
+    case CCON: {                                                         \
       bool b = lhs.ok _op_ rhs.ok;                                       \
       RETURN_OK(trait(Expr).boolean(b));                                 \
     }                                                                    \
