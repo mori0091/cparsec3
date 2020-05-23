@@ -99,7 +99,7 @@ struct Options pug_getopts(int argc, char** argv) {
                 argv[i]);
         exit(2);
       }
-      mem_printf(&opt.script, "%s", argv[++i]);
+      mem_printf(&opt.script, "%s\n", argv[++i]);
     } else {
       fprintf(stderr, "%s: invalid option -- '%s'\n", arg0, argv[i]);
       exit(2);
