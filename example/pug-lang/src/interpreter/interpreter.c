@@ -200,17 +200,6 @@ static EvalResult eval_declvar(Context ctx, Expr x) {
   RETURN_OK(x->rhs);
 }
 
-static EvalResult eval_assign(Context ctx, Expr x) {
-  ContextT C = trait(Context);
-  ExprT E = trait(Expr);
-  assert(x->lhs->id == VAR);
-  EVAL(ctx, x->rhs, rhs);
-  EVAL(ctx, x->lhs, lhs);
-  // the previous definiton will be shadowed.
-  C.map.put(ctx, x->lhs->ident, E.thunk(ctx, rhs.ok));
-  RETURN_OK(rhs.ok);
-}
-
 static EvalResult eval_logical_AND_OR(Context ctx, Expr x) {
   EVAL(ctx, x->lhs, lhs);
   assert(lhs.ok->id == LITERAL);
@@ -279,8 +268,6 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
     return eval_seq(ctx, x);
   case LET:
     return eval_let(ctx, x);
-  case ASSIGN:
-    return eval_assign(ctx, x);
   case OR:
   case AND:
     return eval_logical_AND_OR(ctx, x);

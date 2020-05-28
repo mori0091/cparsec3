@@ -39,8 +39,6 @@ enum ExprId {
   TYPE,
   /* let (define a variable) */
   LET,
-  /* assignment */
-  ASSIGN,
   /* logical and/or */
   OR,
   AND,
@@ -119,7 +117,6 @@ typedef struct ExprT {
   Expr (*seq)(Expr lhs, Expr rhs);         /* list of statements */
   Expr (*declvar)(Expr lhs, Expr rhs);     /* variable declaration */
   Expr (*let)(Expr lhs, Expr rhs);         /* variable definition */
-  Expr (*assign)(Expr lhs, Expr rhs);      /* assignment */
   Expr (*logic_or)(Expr lhs, Expr rhs);    /* logical or */
   Expr (*logic_and)(Expr lhs, Expr rhs);   /* logical and */
   Expr (*eq)(Expr lhs, Expr rhs);          /* equality */

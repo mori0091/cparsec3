@@ -93,12 +93,6 @@ void pug_self_test(void) {
   assert(pug_parseTest("var a : a; let a = a")); /* -> (Var a) */
   /* NOTE right-hand side is not evaluated. */
 
-  /* assignment expression results the value assigned. */
-  assert(pug_parseTest("let a = 1; a = 100")); /* 100 */
-
-  /* assignment of different type is not permitted. */
-  assert(!pug_parseTest("let a = 1; a = ()")); /* Type mismatch */
-
   /* comparison operators results `true` or `false` */
   assert(pug_parseTest("1 == 1"));                     /* true */
   assert(pug_parseTest("0 == 1"));                     /* false */
@@ -175,8 +169,6 @@ void pug_self_test(void) {
   assert(pug_parseTest("let a = 1; let b = 2; b"));     /* 2 */
 
   /* a block establishes new **branch** of lexical scope. */
-  assert(pug_parseTest("let x = 1; {x = 2}"));        /* 2 */
-  assert(pug_parseTest("let x = 1; {x = 2}; x"));     /* 1 */
   assert(pug_parseTest("let x = 1; {let x = 2}"));    /* 2 */
   assert(pug_parseTest("let x = 1; {let x = 2}; x")); /* 1 */
 
@@ -241,7 +233,7 @@ void pug_self_test(void) {
    */
   assert(pug_parseTest("let y = 10;\n"
                        "let g = |x| x*y;\n"
-                       "let f = |x| {y = 2; y*y + g x};\n"
+                       "let f = |x| {let y = 2; y*y + g x};\n"
                        "f 3 == 34"));
   // -> true
   // NOTE: (f 3) shall be 10 if dynamic scoping.
