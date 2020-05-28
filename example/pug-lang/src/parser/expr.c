@@ -3,26 +3,7 @@
 #include "parser/expr.h"
 
 PARSER(Expr) expr(void) {
-  return assign();
-}
-
-// PARSER(Expr) assign(void);
-parsec(assign, Expr) {
-  ExprT E = trait(Expr);
-  PARSER(Expr) p = expr0();
-  PARSER(char) op = lexme(char1('='));
-  DO() {
-    SCAN(p, lhs);
-    if (lhs->id != VAR) {
-      RETURN(lhs);
-    }
-    SCAN(optional(op), m);
-    if (m.none) {
-      RETURN(lhs);
-    }
-    SCAN(p, rhs);
-    RETURN(E.assign(lhs, rhs));
-  }
+  return expr0();
 }
 
 PARSER(Expr) expr0(void) {

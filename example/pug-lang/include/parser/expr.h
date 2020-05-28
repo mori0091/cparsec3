@@ -11,8 +11,7 @@
 
 C_API_BEGIN
 
-// expr   = assign
-// assign = expr0 {"=" expr0}
+// expr   = expr0
 // expr0  = expr1
 // expr1  = expr2
 // expr2  = expr3 {"||" expr3}
@@ -108,8 +107,6 @@ C_API_BEGIN
 //             | "/" | "?"
 
 PARSER(Expr) expr(void);
-PARSER(Expr) assign(void);
-
 PARSER(Expr) expr0(void);
 PARSER(Expr) expr1(void);
 PARSER(Expr) expr2(void);
