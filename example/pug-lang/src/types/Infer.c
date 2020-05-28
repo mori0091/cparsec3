@@ -312,16 +312,8 @@ action(tiExprSeq, List(Assump), Expr, Tup(List(Pred), Type)) {
       A_RETURN(x);
     }
     case LET: {
-      Maybe(Scheme) sc = t_find(e->lhs->lhs->ident, as);
-      if (!sc.none) {
-        A_RUN(tiExpr(as, e->lhs->rhs), a);
-        A_RUN(getSubst(), sub);
-        Scheme sc = t_gen(as, t_apply_subst(sub, a.t));
-        as = t_add(e->lhs->lhs->ident, sc, as);
-        A_RUN(tiExpr(as, e->rhs), x);
-        List(Pred) ps = appendPreds(a.ps, x.ps);
-        A_RETURN(tupPsT(ps, x.t));
-      } else {
+      Maybe(Scheme) m = t_find(e->lhs->lhs->ident, as);
+      if (m.none) {
         if (e->lhs->rhs->id == LAMBDA) {
           A_RUN(newTVar(trait(Kind).Star()), a);
           A_RUN(newTVar(trait(Kind).Star()), b);
@@ -330,13 +322,14 @@ action(tiExprSeq, List(Assump), Expr, Tup(List(Pred), Type)) {
           Scheme sc = toScheme(f); // TODO !?
           as = t_add(e->lhs->lhs->ident, sc, as);
         }
-        A_RUN(tiExpr(as, e->lhs->rhs), a);
-        A_RUN(getSubst(), sub);
-        Scheme sc = t_gen(as, t_apply_subst(sub, a.t));
-        as = t_add(e->lhs->lhs->ident, sc, as);
-        A_RUN(tiExpr(as, e->rhs), x);
-        A_RETURN(x);
       }
+      A_RUN(tiExpr(as, e->lhs->rhs), a);
+      A_RUN(getSubst(), sub);
+      Scheme sc = t_gen(as, t_apply_subst(sub, a.t));
+      as = t_add(e->lhs->lhs->ident, sc, as);
+      A_RUN(tiExpr(as, e->rhs), x);
+      List(Pred) ps = appendPreds(a.ps, x.ps);
+      A_RETURN(tupPsT(ps, x.t));
     }
     default: {
       A_RUN(tiExpr(as, e->lhs));
