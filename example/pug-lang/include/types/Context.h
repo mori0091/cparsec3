@@ -5,7 +5,6 @@
 
 typedef struct MapEntry {
   Id ident;  ///< the name of the variable
-  Type type; ///< type of the variable, or NULL if undetermined.
   Expr e;    ///< the expression bound to the variable
 } MapEntry;
 
@@ -34,7 +33,7 @@ typedef struct ContextT {
     /**
      * add variable to the given context.
      */
-    void (*put)(Context ctx, Id ident, Type type, Expr e);
+    void (*put)(Context ctx, Id ident, Expr e);
   } map;
 } ContextT;
 

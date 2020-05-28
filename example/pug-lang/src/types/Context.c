@@ -50,9 +50,8 @@ static MapEntry* FUNC_NAME(lookup, Context)(Context ctx, String ident) {
   return NULL;
 }
 
-static void FUNC_NAME(put, Context)(Context ctx, String ident, Type type,
-                                    Expr e) {
-  MapEntry entry = {.ident = ident, .type = type, .e = e};
+static void FUNC_NAME(put, Context)(Context ctx, String ident, Expr e) {
+  MapEntry entry = {.ident = ident, .e = e};
   ctx->map = trait(List(MapEntry)).cons(entry, ctx->map);
 }
 

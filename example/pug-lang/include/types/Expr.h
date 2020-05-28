@@ -73,7 +73,6 @@ enum ExprId {
 };
 
 struct Expr {
-  Type type;
   enum ExprId id;
   union {
     struct {

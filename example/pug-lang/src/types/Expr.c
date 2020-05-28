@@ -4,7 +4,6 @@
 
 static Expr Expr_New(void) {
   Expr e = (Expr)mem_malloc(sizeof(struct Expr));
-  e->type = 0;
   return e;
 }
 
@@ -149,7 +148,6 @@ static Expr FUNC_NAME(literal, Expr)(Literal x) {
 }
 static Expr FUNC_NAME(type, Expr)(Type t) {
   Expr e = Expr_New();
-  e->type = 0; /* TODO: what should be set? */
   e->id = TYPE;
   e->texpr = t;
   return e;
@@ -174,12 +172,10 @@ static Expr FUNC_NAME(num, Expr)(Num x) {
 static Expr FUNC_NAME(boolean, Expr)(bool b) {
   static struct Expr T = {.id = LITERAL, .literal.id = LIT_TRUE};
   static struct Expr F = {.id = LITERAL, .literal.id = LIT_FALSE};
-  T.type = F.type = TYPE(bool);
   return (b ? &T : &F);
 }
 static Expr FUNC_NAME(unit, Expr)(void) {
   static struct Expr e = {.id = LITERAL, .literal.id = LIT_UNIT};
-  e.type = TYPE(unit);
   return &e;
 }
 
