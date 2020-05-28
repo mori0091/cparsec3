@@ -347,16 +347,6 @@ action(tiExprDeclvar, List(Assump), Expr, Tup(List(Pred), Type)) {
   }
 }
 
-action(tiExprAssign, List(Assump), Expr, Tup(List(Pred), Type)) {
-  A_DO_WITH(as, e) {
-    A_RUN(tiExpr(as, e->lhs), a);
-    A_RUN(tiExpr(as, e->rhs), b);
-    A_RUN(unify(a.t, b.t));
-    List(Pred) ps = appendPreds(a.ps, b.ps);
-    A_RETURN(tupPsT(ps, a.t));
-  }
-}
-
 action(tiExprLet, List(Assump), Expr, Tup(List(Pred), Type)) {
   A_DO_WITH(as, e) {
     Maybe(Scheme) sc = t_find(e->lhs->ident, as);
@@ -488,8 +478,6 @@ static ACTION(Tup(List(Pred), Type)) tiExpr0(List(Assump) as, Expr e) {
     return tiExprSeq(as, e);
   case DECLVAR:
     return tiExprDeclvar(as, e);
-  case ASSIGN:
-    return tiExprAssign(as, e);
   case LET:
     return tiExprLet(as, e);
   case OR:

@@ -91,7 +91,6 @@ expr;              // ok
 
 | Operator                  | Associativity     | Example                             | Explanation                         |
 | ------------------------- | ----------------- | ----------------------------------- | ----------------------------------- |
-| `=`                       | non-associative   | `x = expr`                          | assignment                          |
 | <code>&#124;&#124;</code> | right-associative | <code>expr &#124;&#124; expr</code> | logical OR                          |
 | `&&`                      | right-associative | `expr && expr`                      | logical AND                         |
 | `==`                      | non-associative   | `expr == expr`                      | equality comparison                 |

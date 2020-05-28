@@ -86,9 +86,6 @@ static Expr FUNC_NAME(declvar, Expr)(Expr lhs, Expr rhs) {
 static Expr FUNC_NAME(let, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(LET, lhs, rhs);
 }
-static Expr FUNC_NAME(assign, Expr)(Expr lhs, Expr rhs) {
-  return Expr_Binary(ASSIGN, lhs, rhs);
-}
 static Expr FUNC_NAME(logic_or, Expr)(Expr lhs, Expr rhs) {
   return Expr_Binary(OR, lhs, rhs);
 }
@@ -193,7 +190,6 @@ ExprT Trait(Expr) {
       .seq = FUNC_NAME(seq, Expr),
       .declvar = FUNC_NAME(declvar, Expr),
       .let = FUNC_NAME(let, Expr),
-      .assign = FUNC_NAME(assign, Expr),
       .logic_or = FUNC_NAME(logic_or, Expr),
       .logic_and = FUNC_NAME(logic_and, Expr),
       .eq = FUNC_NAME(eq, Expr),
@@ -278,9 +274,6 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     break;
   case LET:
     Expr_showBinary(b, "Let", x->lhs, x->rhs);
-    break;
-  case ASSIGN:
-    Expr_showBinary(b, "Assign", x->lhs, x->rhs);
     break;
   case OR:
     Expr_showBinary(b, "Or", x->lhs, x->rhs);
