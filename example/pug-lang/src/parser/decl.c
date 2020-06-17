@@ -29,6 +29,22 @@ parsec(declvar, Expr) {
     RETURN(E.declvar(lhs, rhs));
   }
 }
+static Type makeSimpleType(Id ident, Array(Type) targs) {
+  ArrayT(Type) A = trait(Array(Type));
+  TypeT T = trait(Type);
+  KindT K = trait(Kind);
+  Kind k = K.Star();
+  for (size_t n = A.length(targs); n; n--) {
+    k = K.Kfun(K.Star(), k);
+  }
+  Type lhs = T.TCon((Tycon){ident, k});
+  for (Type* t = A.begin(targs); t != A.end(targs); t++) {
+    lhs = T.TAp(lhs, *t);
+  }
+  // A.free(&targs);
+  return lhs;
+}
+
 
 // PARSER(Expr) declADT(void);
 parsec(declADT, Expr) {
@@ -44,25 +60,16 @@ parsec(declADT, Expr) {
 // PARSER(Type) simpletype(void);
 parsec(simpletype, Type) {
   ArrayT(Type) A = trait(Array(Type));
-  TypeT T = trait(Type);
   DO() {
     SCAN(Identifier(), c);
     SCAN(many(atype()), targs);
-    KindT K = trait(Kind);
-    Kind k = K.Star();
-    for (size_t n = A.length(targs); n; n--) {
-      k = K.Kfun(K.Star(), k);
-    }
-    Type lhs = T.TCon((Tycon){c, k});
-    for (Type* t = A.begin(targs); t != A.end(targs); t++) {
-      lhs = T.TAp(lhs, *t);
-    }
+    Type lhs = makeSimpleType(c, targs);
     A.free(&targs);
     RETURN(lhs);
   }
 }
 
-// PARSER(Expr) constrs(Expr datatype);
+// PARSER(Expr) constrs(Type datatype);
 parsec(constrs, Type, Expr) {
   ExprT E = trait(Expr);
   PARSER(Maybe(char)) sep = optional(lexme(char1('|')));
@@ -79,7 +86,7 @@ parsec(constrs, Type, Expr) {
   }
 }
 
-// PARSER(Expr) constr(Expr datatype);
+// PARSER(Expr) constr(Type datatype);
 parsec(constr, Type, Expr) {
   TypeT T = trait(Type);
   ArrayT(Type) A = trait(Array(Type));
@@ -110,7 +117,7 @@ parsec(constr, Type, Expr) {
     // function's body
     List(Expr) es = NULL;
     for (size_t i = n; 0 < i; --i) {
-      es = trait(List(Expr)).cons(vars[i-1], es);
+      es = trait(List(Expr)).cons(vars[i - 1], es);
     }
     Expr body = E.con(name, es);
     // function
