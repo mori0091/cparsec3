@@ -59,7 +59,7 @@ enum ExprId {
   MOD,
   /* unary */
   NEG,
-  NOT,
+  COMPLEMENT,
   /* variable */
   VAR,
   /* literal */
@@ -91,8 +91,8 @@ struct Expr {
     };
     /* for VAR and CON (abstraction of ADT data) */
     struct {
-      Id ident;                 /* name of variable or constructor */
-      List(Expr) args;          /* arguments of constructor */
+      Id ident;        /* name of variable or constructor */
+      List(Expr) args; /* arguments of constructor */
     };
     struct {
       Expr lhs;
@@ -131,16 +131,17 @@ typedef struct ExprT {
   Expr (*div)(Expr lhs, Expr rhs);         /* arithmetic division */
   Expr (*mod)(Expr lhs, Expr rhs);         /* arithmetic reminder */
   Expr (*neg)(Expr rhs);                   /* arithmetic negation */
-  Expr (*not )(Expr rhs);     /* logical not / bitwise complement */
-  Expr (*var)(Id x);          /* variable */
-  Expr (*literal)(Literal x); /* literal */
-  Expr (*type)(Type t);       /* type annotation */
+  Expr (*complement)(Expr rhs); /* logical not / bitwise complement */
+  Expr (*var)(Id x);            /* variable */
+  Expr (*literal)(Literal x);   /* literal */
+  Expr (*type)(Type t);         /* type annotation */
   Expr (*con)(Id c, List(Expr) args);  /* abstraction of ADT data */
   Expr (*ccon)(Context ctx, Expr rhs); /* closure of ADT data */
   /* for convenience */
   Expr (*num)(Num x);      /* number */
   Expr (*boolean)(bool b); /* true / false */
   Expr (*unit)(void);      /* () */
+  Expr (*append)(Expr a, Expr b);
 } ExprT;
 
 ExprT Trait(Expr);

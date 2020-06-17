@@ -128,8 +128,8 @@ static Expr FUNC_NAME(mod, Expr)(Expr lhs, Expr rhs) {
 static Expr FUNC_NAME(neg, Expr)(Expr rhs) {
   return Expr_Unary(NEG, rhs);
 }
-static Expr FUNC_NAME(not, Expr)(Expr rhs) {
-  return Expr_Unary(NOT, rhs);
+static Expr FUNC_NAME(complement, Expr)(Expr rhs) {
+  return Expr_Unary(COMPLEMENT, rhs);
 }
 static Expr FUNC_NAME(var, Expr)(Id x) {
   Expr e = Expr_New();
@@ -175,6 +175,24 @@ static Expr FUNC_NAME(unit, Expr)(void) {
   static struct Expr e = {.id = LITERAL, .literal.id = LIT_UNIT};
   return &e;
 }
+static Expr FUNC_NAME(append, Expr)(Expr a, Expr b) {
+  ExprT E = trait(Expr);
+  if (!a) {
+    return b;
+  }
+  if (!b) {
+    return a;
+  }
+  if (a->id != SEQ) {
+    return E.seq(a, b);
+  }
+  Expr x = a;
+  while (x->rhs->id == SEQ) {
+    x = x->rhs;
+  }
+  x->rhs = E.seq(x->rhs, b);
+  return a;
+}
 
 ExprT Trait(Expr) {
   return (ExprT){
@@ -204,7 +222,7 @@ ExprT Trait(Expr) {
       .div = FUNC_NAME(div, Expr),
       .mod = FUNC_NAME(mod, Expr),
       .neg = FUNC_NAME(neg, Expr),
-      .not = FUNC_NAME(not, Expr),
+      .complement = FUNC_NAME(complement, Expr),
       .var = FUNC_NAME(var, Expr),
       .literal = FUNC_NAME(literal, Expr),
       .type = FUNC_NAME(type, Expr),
@@ -214,6 +232,7 @@ ExprT Trait(Expr) {
       .num = FUNC_NAME(num, Expr),
       .boolean = FUNC_NAME(boolean, Expr),
       .unit = FUNC_NAME(unit, Expr),
+      .append = FUNC_NAME(append, Expr),
   };
 }
 
@@ -317,8 +336,8 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
   case NEG:
     Expr_showUnary(b, "Neg", x->rhs);
     break;
-  case NOT:
-    Expr_showUnary(b, "Not", x->rhs);
+  case COMPLEMENT:
+    Expr_showUnary(b, "Complement", x->rhs);
     break;
   case VAR:
     mem_printf(b, "(Var %s)", x->ident);
@@ -327,7 +346,7 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     trait(Show(Literal)).toString(b, x->literal);
     break;
   case TYPE:
-    mem_printf(b, "(Type ");
+    mem_printf(b, "(type ");
     trait(Show(Type)).toString(b, x->texpr);
     mem_printf(b, ")");
     break;
