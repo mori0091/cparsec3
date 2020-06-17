@@ -12,19 +12,4 @@ C_API_BEGIN
 
 PARSER(Expr) program(void);
 
-// -----------------------------------------------------------------------
-#if defined(CPARSEC_CONFIG_IMPLEMENT)
-
-// PARSER(Expr) program(void);
-parsec(program, Expr) {
-  DO() {
-    SCAN(blank());
-    SCAN(stmts(), x);
-    SCAN(eof());
-    RETURN(x);
-  }
-}
-
-#endif
-
 C_API_END
