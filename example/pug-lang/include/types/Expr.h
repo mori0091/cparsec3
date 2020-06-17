@@ -141,6 +141,7 @@ typedef struct ExprT {
   Expr (*num)(Num x);      /* number */
   Expr (*boolean)(bool b); /* true / false */
   Expr (*unit)(void);      /* () */
+  Expr (*append)(Expr a, Expr b);
 } ExprT;
 
 ExprT Trait(Expr);

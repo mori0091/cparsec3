@@ -175,6 +175,24 @@ static Expr FUNC_NAME(unit, Expr)(void) {
   static struct Expr e = {.id = LITERAL, .literal.id = LIT_UNIT};
   return &e;
 }
+static Expr FUNC_NAME(append, Expr)(Expr a, Expr b) {
+  ExprT E = trait(Expr);
+  if (!a) {
+    return b;
+  }
+  if (!b) {
+    return a;
+  }
+  if (a->id != SEQ) {
+    return E.seq(a, b);
+  }
+  Expr x = a;
+  while (x->rhs->id == SEQ) {
+    x = x->rhs;
+  }
+  x->rhs = E.seq(x->rhs, b);
+  return a;
+}
 
 ExprT Trait(Expr) {
   return (ExprT){
@@ -214,6 +232,7 @@ ExprT Trait(Expr) {
       .num = FUNC_NAME(num, Expr),
       .boolean = FUNC_NAME(boolean, Expr),
       .unit = FUNC_NAME(unit, Expr),
+      .append = FUNC_NAME(append, Expr),
   };
 }
 
