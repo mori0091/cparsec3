@@ -191,7 +191,7 @@ parsec(unary, Expr) {
     case '-':
       RETURN(E.neg(rhs));
     case '!':
-      RETURN(E.not(rhs));
+      RETURN(E.complement(rhs));
     default:
       FAIL("Unexpected behaviour");
     }

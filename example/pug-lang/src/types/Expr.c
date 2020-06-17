@@ -128,8 +128,8 @@ static Expr FUNC_NAME(mod, Expr)(Expr lhs, Expr rhs) {
 static Expr FUNC_NAME(neg, Expr)(Expr rhs) {
   return Expr_Unary(NEG, rhs);
 }
-static Expr FUNC_NAME(not, Expr)(Expr rhs) {
-  return Expr_Unary(NOT, rhs);
+static Expr FUNC_NAME(complement, Expr)(Expr rhs) {
+  return Expr_Unary(COMPLEMENT, rhs);
 }
 static Expr FUNC_NAME(var, Expr)(Id x) {
   Expr e = Expr_New();
@@ -222,7 +222,7 @@ ExprT Trait(Expr) {
       .div = FUNC_NAME(div, Expr),
       .mod = FUNC_NAME(mod, Expr),
       .neg = FUNC_NAME(neg, Expr),
-      .not = FUNC_NAME(not, Expr),
+      .complement = FUNC_NAME(complement, Expr),
       .var = FUNC_NAME(var, Expr),
       .literal = FUNC_NAME(literal, Expr),
       .type = FUNC_NAME(type, Expr),
@@ -336,8 +336,8 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
   case NEG:
     Expr_showUnary(b, "Neg", x->rhs);
     break;
-  case NOT:
-    Expr_showUnary(b, "Not", x->rhs);
+  case COMPLEMENT:
+    Expr_showUnary(b, "Complement", x->rhs);
     break;
   case VAR:
     mem_printf(b, "(Var %s)", x->ident);

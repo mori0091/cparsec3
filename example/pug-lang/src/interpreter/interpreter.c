@@ -224,7 +224,7 @@ static EvalResult eval_negate(Context ctx, Expr x) {
   RETURN_OK(rhs.ok);
 }
 
-static EvalResult eval_not(Context ctx, Expr x) {
+static EvalResult eval_complement(Context ctx, Expr x) {
   ExprT E = trait(Expr);
   EVAL(ctx, x->rhs, rhs);
   assert(rhs.ok->id == LITERAL);
@@ -297,8 +297,8 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
     return eval_print(ctx, x);
   case NEG:
     return eval_negate(ctx, x);
-  case NOT:
-    return eval_not(ctx, x);
+  case COMPLEMENT:
+    return eval_complement(ctx, x);
   case VAR:
     return eval_var(ctx, x);
   case LITERAL:
