@@ -419,7 +419,7 @@ action(tiExprNeg, List(Assump), Expr, Tup(List(Pred), Type)) {
   }
 }
 
-action(tiExprNot, List(Assump), Expr, Tup(List(Pred), Type)) {
+action(tiExprComplement, List(Assump), Expr, Tup(List(Pred), Type)) {
   A_DO_WITH(as, e) {
     Type Bool = trait(Type).tcon_bool();
     Type Int = trait(Type).tcon_int();
@@ -498,8 +498,8 @@ static ACTION(Tup(List(Pred), Type)) tiExpr0(List(Assump) as, Expr e) {
     return tiExprArithmetic(as, e);
   case NEG:
     return tiExprNeg(as, e);
-  case NOT:
-    return tiExprNot(as, e);
+  case COMPLEMENT:
+    return tiExprComplement(as, e);
   case LITERAL:
     return tiLiteral(e->literal);
   case PRINT:

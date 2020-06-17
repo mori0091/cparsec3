@@ -42,6 +42,8 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
         enum LiteralId y = rhs.ok->literal.id;                           \
         RETURN_OK(trait(Expr).boolean(x _op_ y));                        \
       }                                                                  \
+      default:                                                           \
+        RETURN_ERR("Invalid literal");                                   \
       }                                                                  \
     }                                                                    \
     case CLOSURE:                                                        \
@@ -210,6 +212,50 @@ static EvalResult eval_logical_AND_OR(Context ctx, Expr x) {
   RETURN_OK(rhs.ok);
 }
 
+static EvalResult eval_eq(Context ctx, Expr x) {
+  INFIX_COMPARISON_OP(ctx, ==, x->lhs, x->rhs);
+}
+
+static EvalResult eval_neq(Context ctx, Expr x) {
+  INFIX_COMPARISON_OP(ctx, !=, x->lhs, x->rhs);
+}
+
+static EvalResult eval_le(Context ctx, Expr x) {
+  INFIX_COMPARISON_OP(ctx, <=, x->lhs, x->rhs);
+}
+
+static EvalResult eval_lt(Context ctx, Expr x) {
+  INFIX_COMPARISON_OP(ctx, <, x->lhs, x->rhs);
+}
+
+static EvalResult eval_gt(Context ctx, Expr x) {
+  INFIX_COMPARISON_OP(ctx, >, x->lhs, x->rhs);
+}
+
+static EvalResult eval_ge(Context ctx, Expr x) {
+  INFIX_COMPARISON_OP(ctx, >=, x->lhs, x->rhs);
+}
+
+static EvalResult eval_add(Context ctx, Expr x) {
+  INFIX_OP(ctx, +, x->lhs, x->rhs);
+}
+
+static EvalResult eval_sub(Context ctx, Expr x) {
+  INFIX_OP(ctx, -, x->lhs, x->rhs);
+}
+
+static EvalResult eval_mul(Context ctx, Expr x) {
+  INFIX_OP(ctx, *, x->lhs, x->rhs);
+}
+
+static EvalResult eval_div(Context ctx, Expr x) {
+  DIV_MOD_OP(ctx, /, x->lhs, x->rhs);
+}
+
+static EvalResult eval_mod(Context ctx, Expr x) {
+  DIV_MOD_OP(ctx, %, x->lhs, x->rhs);
+}
+
 static EvalResult eval_print(Context ctx, Expr x) {
   ExprT E = trait(Expr);
   EVAL(ctx, x->rhs, rhs);
@@ -224,7 +270,7 @@ static EvalResult eval_negate(Context ctx, Expr x) {
   RETURN_OK(rhs.ok);
 }
 
-static EvalResult eval_not(Context ctx, Expr x) {
+static EvalResult eval_complement(Context ctx, Expr x) {
   ExprT E = trait(Expr);
   EVAL(ctx, x->rhs, rhs);
   assert(rhs.ok->id == LITERAL);
@@ -272,33 +318,33 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
   case AND:
     return eval_logical_AND_OR(ctx, x);
   case EQ:
-    INFIX_COMPARISON_OP(ctx, ==, x->lhs, x->rhs);
+    return eval_eq(ctx, x);
   case NEQ:
-    INFIX_COMPARISON_OP(ctx, !=, x->lhs, x->rhs);
+    return eval_neq(ctx, x);
   case LE:
-    INFIX_COMPARISON_OP(ctx, <=, x->lhs, x->rhs);
+    return eval_le(ctx, x);
   case LT:
-    INFIX_COMPARISON_OP(ctx, <, x->lhs, x->rhs);
+    return eval_lt(ctx, x);
   case GT:
-    INFIX_COMPARISON_OP(ctx, >, x->lhs, x->rhs);
+    return eval_gt(ctx, x);
   case GE:
-    INFIX_COMPARISON_OP(ctx, >=, x->lhs, x->rhs);
+    return eval_ge(ctx, x);
   case ADD:
-    INFIX_OP(ctx, +, x->lhs, x->rhs);
+    return eval_add(ctx, x);
   case SUB:
-    INFIX_OP(ctx, -, x->lhs, x->rhs);
+    return eval_sub(ctx, x);
   case MUL:
-    INFIX_OP(ctx, *, x->lhs, x->rhs);
+    return eval_mul(ctx, x);
   case DIV:
-    DIV_MOD_OP(ctx, /, x->lhs, x->rhs);
+    return eval_div(ctx, x);
   case MOD:
-    DIV_MOD_OP(ctx, %, x->lhs, x->rhs);
+    return eval_mod(ctx, x);
   case PRINT:
     return eval_print(ctx, x);
   case NEG:
     return eval_negate(ctx, x);
-  case NOT:
-    return eval_not(ctx, x);
+  case COMPLEMENT:
+    return eval_complement(ctx, x);
   case VAR:
     return eval_var(ctx, x);
   case LITERAL:
