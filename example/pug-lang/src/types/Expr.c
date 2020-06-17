@@ -327,7 +327,7 @@ show_user_type(Expr)(CharBuff* b, Expr x) {
     trait(Show(Literal)).toString(b, x->literal);
     break;
   case TYPE:
-    mem_printf(b, "(Type ");
+    mem_printf(b, "(type ");
     trait(Show(Type)).toString(b, x->texpr);
     mem_printf(b, ")");
     break;
