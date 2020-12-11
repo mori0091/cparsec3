@@ -13,34 +13,19 @@
   CAT(def_parsec, VARIADIC_SIZE(__VA_ARGS__))(S, name, __VA_ARGS__)
 
 #define def_parsec1(S, name, R)                                          \
-  typedef struct {                                                       \
-    struct {                                                             \
-      Stream(S) stream;                                                  \
-      ParseErrorT(S) parse_error;                                        \
-      ErrorItemT(S) error_item;                                          \
-    } traits;                                                            \
-  } ParsecEnv(name);                                                     \
+  typedef None ParsecEnv(name);                                          \
   typedef_Fn(ParsecEnv(name), UnParser(S, R));                           \
   static Fn(ParsecEnv(name), UnParser(S, R))                             \
       FUNC_NAME(impl, name)(void);                                       \
   Parsec(S, R) name(void) {                                              \
     Fn(ParsecEnv(name), UnParser(S, R)) f = FUNC_NAME(impl, name)();     \
-    ParsecEnv(name) par = {                                              \
-        .traits.stream = trait(Stream(S)),                               \
-        .traits.parse_error = trait(ParseError(S)),                      \
-        .traits.error_item = trait(ErrorItem(S)),                        \
-    };                                                                   \
+    ParsecEnv(name) par = {0};                                           \
     return (Parsec(S, R)){fn_apply(f, par)};                             \
   }                                                                      \
   fn(FUNC_NAME(impl, name), ParsecEnv(name), UnParserArgs(S, R))
 
 #define def_parsec2(S, name, T1, R)                                      \
   typedef struct {                                                       \
-    struct {                                                             \
-      Stream(S) stream;                                                  \
-      ParseErrorT(S) parse_error;                                        \
-      ErrorItemT(S) error_item;                                          \
-    } traits;                                                            \
     T1 e1;                                                               \
   } ParsecEnv(name);                                                     \
   typedef_Fn(ParsecEnv(name), UnParser(S, R));                           \
@@ -49,9 +34,6 @@
   Parsec(S, R) name(T1 x1) {                                             \
     Fn(ParsecEnv(name), UnParser(S, R)) f = FUNC_NAME(impl, name)();     \
     ParsecEnv(name) par = {                                              \
-        .traits.stream = trait(Stream(S)),                               \
-        .traits.parse_error = trait(ParseError(S)),                      \
-        .traits.error_item = trait(ErrorItem(S)),                        \
         .e1 = x1,                                                        \
     };                                                                   \
     return (Parsec(S, R)){fn_apply(f, par)};                             \
@@ -60,11 +42,6 @@
 
 #define def_parsec3(S, name, T1, T2, R)                                  \
   typedef struct {                                                       \
-    struct {                                                             \
-      Stream(S) stream;                                                  \
-      ParseErrorT(S) parse_error;                                        \
-      ErrorItemT(S) error_item;                                          \
-    } traits;                                                            \
     T1 e1;                                                               \
     T2 e2;                                                               \
   } ParsecEnv(name);                                                     \
@@ -74,9 +51,6 @@
   Parsec(S, R) name(T1 x1, T2 x2) {                                      \
     Fn(ParsecEnv(name), UnParser(S, R)) f = FUNC_NAME(impl, name)();     \
     ParsecEnv(name) par = {                                              \
-        .traits.stream = trait(Stream(S)),                               \
-        .traits.parse_error = trait(ParseError(S)),                      \
-        .traits.error_item = trait(ErrorItem(S)),                        \
         .e1 = x1,                                                        \
         .e2 = x2,                                                        \
     };                                                                   \
@@ -86,11 +60,6 @@
 
 #define def_parsec4(S, name, T1, T2, T3, R)                              \
   typedef struct {                                                       \
-    struct {                                                             \
-      Stream(S) stream;                                                  \
-      ParseErrorT(S) parse_error;                                        \
-      ErrorItemT(S) error_item;                                          \
-    } traits;                                                            \
     T1 e1;                                                               \
     T2 e2;                                                               \
     T3 e3;                                                               \
@@ -101,9 +70,6 @@
   Parsec(S, R) name(T1 x1, T2 x2, T3 x3) {                               \
     Fn(ParsecEnv(name), UnParser(S, R)) f = FUNC_NAME(impl, name)();     \
     ParsecEnv(name) par = {                                              \
-        .traits.stream = trait(Stream(S)),                               \
-        .traits.parse_error = trait(ParseError(S)),                      \
-        .traits.error_item = trait(ErrorItem(S)),                        \
         .e1 = x1,                                                        \
         .e2 = x2,                                                        \
         .e3 = x3,                                                        \
@@ -124,30 +90,36 @@
 
 #define DO_WITH(...) DO() WITH(__VA_ARGS__)
 
-#define SCAN(...)                                                        \
-  CAT(SCAN, VARIADIC_SIZE(__VA_ARGS__))(UNIQUE_ID_NEW(), __VA_ARGS__)
+#define SCAN(...) SCAN0(CPARSEC_STREAM_TYPE, __VA_ARGS__)
 
-#define SCAN1(_id_, _p_)                                                 \
+#define FAIL(_msg_) FAIL0(CPARSEC_STREAM_TYPE, _msg_)
+
+#define RETURN(_x_) RETURN0(CPARSEC_STREAM_TYPE, _x_)
+
+#define SCAN0(S, ...)                                                    \
+  CAT(SCAN, VARIADIC_SIZE(__VA_ARGS__))(S, UNIQUE_ID_NEW(), __VA_ARGS__)
+
+#define SCAN1(S, _id_, _p_)                                              \
   __auto_type _id_ = runParsec(_p_, _s_);                                \
   _s_ = _id_.result.state;                                               \
   do {                                                                   \
     if (!_id_.result.success) {                                          \
-      __auto_type SS = _par_.traits.stream;                              \
+      __auto_type SS = trait(Stream(S));                                 \
       __auto_type _err_ =                                                \
           (SS.offsetOf(_s0_) < SS.offsetOf(_s_) ? _cerr_ : _eerr_);      \
       return fn_apply(_err_, _id_.result.err, _s_);                      \
     }                                                                    \
   } while (0)
 
-#define SCAN2(_id_, _p_, _x_)                                            \
-  SCAN1(_id_, _p_);                                                      \
+#define SCAN2(S, _id_, _p_, _x_)                                         \
+  SCAN1(S, _id_, _p_);                                                   \
   __auto_type _x_ = _id_.result.ok;
 
-#define FAIL(_msg_)                                                      \
+#define FAIL0(S, _msg_)                                                  \
   do {                                                                   \
-    __auto_type SS = _par_.traits.stream;                                \
-    __auto_type PE = _par_.traits.parse_error;                           \
-    __auto_type EI = _par_.traits.error_item;                            \
+    __auto_type SS = trait(Stream(S));                                   \
+    __auto_type PE = trait(ParseError(S));                               \
+    __auto_type EI = trait(ErrorItem(S));                                \
     __auto_type _err_ =                                                  \
         (SS.offsetOf(_s0_) < SS.offsetOf(_s_) ? _cerr_ : _eerr_);        \
     return fn_apply(                                                     \
@@ -156,10 +128,10 @@
         _s_);                                                            \
   } while (0)
 
-#define RETURN(_x_)                                                      \
+#define RETURN0(S, _x_)                                                  \
   do {                                                                   \
-    __auto_type SS = _par_.traits.stream;                                \
-    __auto_type EI = _par_.traits.error_item;                            \
+    __auto_type SS = trait(Stream(S));                                   \
+    __auto_type EI = trait(ErrorItem(S));                                \
     __auto_type _ok_ =                                                   \
         (SS.offsetOf(_s0_) < SS.offsetOf(_s_) ? _cok_ : _eok_);          \
     return fn_apply(_ok_, _x_, _s_, EI.emptyHints());                    \
