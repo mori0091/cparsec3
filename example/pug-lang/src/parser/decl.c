@@ -45,7 +45,6 @@ static Type makeSimpleType(Id ident, Array(Type) targs) {
   return lhs;
 }
 
-
 // PARSER(Expr) declADT(void);
 parsec(declADT, Expr) {
   DO() {
@@ -141,7 +140,7 @@ parsec(type_annotation, Expr) {
 }
 
 PARSER(Type) texpr(void) {
-  return either(tlambda(), btype());
+  return choice(simpletype(), tlambda(), btype());
 }
 
 // PARSER(Type) tlambda(void);
@@ -182,8 +181,18 @@ parsec(btype, Type) {
   }
 }
 
+// PARSER(Type) simpletype0(void);
+parsec(simpletype0, Type) {
+  ArrayT(Type) A = trait(Array(Type));
+  DO() {
+    SCAN(Identifier(), c);
+    Type lhs = makeSimpleType(c, A.empty);
+    RETURN(lhs);
+  }
+}
+
 PARSER(Type) atype(void) {
-  return choice(tctor(), tvar(), tparen());
+  return choice(tctor(), tvar(), tparen(), simpletype0());
 }
 
 parsec(tctor_unit, Type) {
@@ -208,8 +217,8 @@ parsec(tctor_int, Type) {
 }
 
 PARSER(Type) tctor(void) {
-  return label("type constructor", choice(tctor_unit(), tctor_bool(),
-                                          tctor_int(), simpletype()));
+  return label("type constructor",
+               choice(tctor_unit(), tctor_bool(), tctor_int()));
 }
 
 parsec(tvar0, Type) {
