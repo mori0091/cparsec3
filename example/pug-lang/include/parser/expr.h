@@ -63,19 +63,21 @@ C_API_BEGIN
 // declvar = "var" variable type_annotation
 // declADT = "type" simpletype "=" constrs
 //
-// simpletype = Identifier {atype}
+// simpletype0 = Identifier
+// simpletype  = Identifier {atype}
 // constrs = constr {"|" constr}
 // constr  = Identifier {atype}
 //
 // type_annotation = ":" texpr
-// texpr  = tlambda | btype
-// tlambda = "|" atype {atype} "|" atype
+// texpr  = simpletype | tlambda | btype
+// tlambda = "|" atype {atype} "|" texpr
 // btype  = [btype] atype
 // atype  = tctor
 //        | tvar
 //        | tparen
+//        | simpletype0
 //
-// tctor  = "()" | "bool" | "int" | simpletype
+// tctor  = "()" | "bool" | "int"
 //
 // tvar   = identifier
 // tparen = "(" texpr ")"
