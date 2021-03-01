@@ -1,6 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 
 #include "interpreter/interpreter.h"
+#include "cparsec3/base/base_generics.h"
 
 // -----------------------------------------------------------------------
 static EvalResult eval_expr1(Context ctx, Expr x);
@@ -43,6 +44,8 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
         enum LiteralId y = rhs.ok->literal.id;                           \
         RETURN_OK(trait(Expr).boolean(x _op_ y));                        \
       }                                                                  \
+      case LIT_STRING:                                                   \
+        RETURN_ERR("String comparison (" #_op_ ") is not implemented");  \
       default:                                                           \
         RETURN_ERR("Invalid literal");                                   \
       }                                                                  \
@@ -260,7 +263,15 @@ static EvalResult eval_mod(Context ctx, Expr x) {
 static EvalResult eval_print(Context ctx, Expr x) {
   ExprT E = trait(Expr);
   EVAL(ctx, x->rhs, rhs);
-  printf("%s\n", trait(Show(Expr)).show(rhs.ok));
+  if (rhs.ok->id == LITERAL && rhs.ok->literal.id == LIT_STRING) {
+    Array(char) str = rhs.ok->literal.str;
+    for (char* p = g_begin(str); p != g_end(str); ) {
+      printf("%c", (int)(unsigned char)*p++);
+    }
+    printf("\n");
+  } else {
+    printf("%s\n", trait(Show(Expr)).show(rhs.ok));
+  }
   RETURN_OK(E.unit());
 }
 

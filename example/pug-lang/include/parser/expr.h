@@ -8,6 +8,7 @@
 #include "optional.h"
 
 #include "number.h"
+#include "string.h"
 
 C_API_BEGIN
 
@@ -92,7 +93,7 @@ C_API_BEGIN
 //
 // qvar    = variable
 // ctor    = "()" | "true" | "false" | varctor
-// literal = number
+// literal = number | string_literal
 // paren   = (" expr ")"
 //
 // varctor     = Identifier

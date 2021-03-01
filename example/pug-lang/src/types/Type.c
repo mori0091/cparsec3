@@ -158,6 +158,15 @@ static Type FUNC_NAME(tcon_Tuple2, Type)(void) {
   return &e;
 }
 
+static Type FUNC_NAME(tcon_String, Type)(void) {
+  static struct Type e = {
+    .id = TCON,
+    .tcon.ident = "String",
+  };
+  e.tcon.kind = trait(Kind).Star();
+  return &e;
+}
+
 static Type FUNC_NAME(func, Type)(Type arg, Type ret) {
   TypeT t = trait(Type);
   return t.TAp(t.TAp(t.tcon_Fn(), arg), ret);
@@ -185,6 +194,7 @@ TypeT Trait(Type) {
       .tcon_Fn = FUNC_NAME(tcon_Fn, Type),
       .tcon_List = FUNC_NAME(tcon_List, Type),
       .tcon_Tuple2 = FUNC_NAME(tcon_Tuple2, Type),
+      .tcon_String = FUNC_NAME(tcon_String, Type),
       .func = FUNC_NAME(func, Type),
       .list = FUNC_NAME(list, Type),
       .pair = FUNC_NAME(pair, Type),
