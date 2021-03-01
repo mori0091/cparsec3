@@ -424,13 +424,12 @@ action(tiExprComplement, List(Assump), Expr, Tup(List(Pred), Type)) {
     Type Bool = trait(Type).tcon_bool();
     Type Int = trait(Type).tcon_int();
     A_RUN(tiExpr(as, e->rhs), a);
-    A_RUN(getSubst(), sub);
-    Type b = t_apply_subst(sub, a.t);
-    Eq(Type) E = trait(Eq(Type));
-    if (E.eq(b, Int) || E.eq(b, Bool)) {
-      A_RETURN(a);
+    A_RUN(getState(), st);
+    __auto_type r = runTI(unify(Bool, a.t), st);
+    if (!r.success) {
+      A_RUN(unify(Int, a.t));
     }
-    A_FAIL((TypeError){"Type mismatch"});
+    A_RETURN(a);
   }
 }
 
