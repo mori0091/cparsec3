@@ -128,17 +128,16 @@
 // -----------------------------------------------------------------------
 #define impl_Ord_Array(T)                                                \
   static int FUNC_NAME(cmp, Ord(Array(T)))(Array(T) a, Array(T) b) {     \
-    if (a.data == b.data) {                                              \
-      return trait(Ord(size_t)).cmp(a.length, b.length);                 \
-    }                                                                    \
-    size_t n = (a.length <= b.length ? a.length : b.length);             \
-    for (size_t i = 0; i < n; ++i) {                                     \
-      int o = trait(Ord(T)).cmp(a.data[i], b.data[i]);                   \
-      if (o) {                                                           \
-        return o;                                                        \
+    if (a.data != b.data) {                                              \
+      size_t n = (a.length <= b.length ? a.length : b.length);           \
+      for (size_t i = 0; i < n; ++i) {                                   \
+        int o = trait(Ord(T)).cmp(a.data[i], b.data[i]);                 \
+        if (o) {                                                         \
+          return o;                                                      \
+        }                                                                \
       }                                                                  \
     }                                                                    \
-    return (a.length < b.length ? -1 : 1);                               \
+    return trait(Ord(size_t)).cmp(a.length, b.length);                   \
   }                                                                      \
   instance_Ord(Array(T), FUNC_NAME(cmp, Ord(Array(T))));                 \
   END_OF_STATEMENTS
