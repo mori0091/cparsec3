@@ -1,9 +1,9 @@
 /* -*- coding: utf-8-unix -*- */
 
-#include <ctype.h>
-#include "cparsec3/base/base_generics.h"
-
 #include "types/Literal.h"
+
+#include "cparsec3/base/base_generics.h"
+#include <ctype.h>
 
 impl_user_type(Literal);
 
@@ -70,7 +70,6 @@ show_user_type(Literal)(CharBuff* b, Literal x) {
     mem_printf(b, "false");
     break;
   case LIT_STRING:
-    // mem_printf(b, "%.*s", x.str.length, x.str.data);
     quote(b, x.str);
     break;
   default:
@@ -84,10 +83,10 @@ static bool FUNC_NAME(eq, Eq(Literal))(Literal a, Literal b) {
     return false;
   }
   if (a.id == LIT_INTEGER) {
-    return a.num.value == b.num.value;
+    return g_eq(a.num.value, b.num.value);
   }
   if (a.id == LIT_STRING) {
-    return trait(Eq(Array(char))).eq(a.str, b.str);
+    return g_eq(a.str, b.str);
   }
   return true;
 }
@@ -96,6 +95,9 @@ instance_Eq(Literal, FUNC_NAME(eq, Eq(Literal)));
 static bool FUNC_NAME(le, Ord(Literal))(Literal a, Literal b) {
   if (a.id == LIT_INTEGER && b.id == LIT_INTEGER) {
     return a.num.value <= b.num.value;
+  }
+  if (a.id == LIT_STRING && b.id == LIT_STRING) {
+    return g_le(a.str, b.str);
   }
   if (a.id == b.id) {
     return true;

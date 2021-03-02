@@ -25,35 +25,36 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
   RETURN_OK(trait(Expr).thunk(_ctx_, _x_))
 #define RETURN_ERR(_msg_) return EVAL_RESULT_ERR(_msg_)
 
+#define LIT_OP(_op_) LIT_OP0(_op_)
+#define LIT_OP0(_op_) LIT_OP_##_op_
+#define LIT_OP_EQ trait(Eq(Literal)).eq
+#define LIT_OP_NEQ trait(Eq(Literal)).neq
+#define LIT_OP_LE trait(Ord(Literal)).le
+#define LIT_OP_LT trait(Ord(Literal)).lt
+#define LIT_OP_GE trait(Ord(Literal)).ge
+#define LIT_OP_GT trait(Ord(Literal)).gt
+
+#define OP(_op_) OP0(_op_)
+#define OP0(_op_) OP_##_op_
+#define OP_EQ(_a_, _b_) ((_a_) == (_b_))
+#define OP_NEQ(_a_, _b_) ((_a_) != (_b_))
+#define OP_LE(_a_, _b_) ((_a_) <= (_b_))
+#define OP_LT(_a_, _b_) ((_a_) < (_b_))
+#define OP_GE(_a_, _b_) ((_a_) >= (_b_))
+#define OP_GT(_a_, _b_) ((_a_) > (_b_))
+
 #define INFIX_COMPARISON_OP(_ctx_, _op_, _a_, _b_)                       \
   do {                                                                   \
     EVAL(_ctx_, _a_, lhs);                                               \
     EVAL(_ctx_, _b_, rhs);                                               \
     switch (lhs.ok->id) {                                                \
     case LITERAL: {                                                      \
-      switch (lhs.ok->literal.id) {                                      \
-      case LIT_INTEGER: {                                                \
-        int64_t x = lhs.ok->literal.num.value;                           \
-        int64_t y = rhs.ok->literal.num.value;                           \
-        RETURN_OK(trait(Expr).boolean(x _op_ y));                        \
-      }                                                                  \
-      case LIT_FALSE:                                                    \
-      case LIT_TRUE:                                                     \
-      case LIT_UNIT: {                                                   \
-        enum LiteralId x = lhs.ok->literal.id;                           \
-        enum LiteralId y = rhs.ok->literal.id;                           \
-        RETURN_OK(trait(Expr).boolean(x _op_ y));                        \
-      }                                                                  \
-      case LIT_STRING:                                                   \
-        RETURN_ERR("String comparison (" #_op_ ") is not implemented");  \
-      default:                                                           \
-        RETURN_ERR("Invalid literal");                                   \
-      }                                                                  \
+      bool b = LIT_OP(_op_)(lhs.ok->literal, rhs.ok->literal);           \
+      RETURN_OK(trait(Expr).boolean(b));                                 \
     }                                                                    \
     case CLOSURE:                                                        \
     case CCON: {                                                         \
-      bool b = lhs.ok _op_ rhs.ok;                                       \
-      RETURN_OK(trait(Expr).boolean(b));                                 \
+      RETURN_OK(trait(Expr).boolean(OP(_op_)(lhs.ok, rhs.ok)));          \
     }                                                                    \
     default:                                                             \
       RETURN_ERR("Type error");                                          \
@@ -217,27 +218,27 @@ static EvalResult eval_logical_AND_OR(Context ctx, Expr x) {
 }
 
 static EvalResult eval_eq(Context ctx, Expr x) {
-  INFIX_COMPARISON_OP(ctx, ==, x->lhs, x->rhs);
+  INFIX_COMPARISON_OP(ctx, EQ, x->lhs, x->rhs);
 }
 
 static EvalResult eval_neq(Context ctx, Expr x) {
-  INFIX_COMPARISON_OP(ctx, !=, x->lhs, x->rhs);
+  INFIX_COMPARISON_OP(ctx, NEQ, x->lhs, x->rhs);
 }
 
 static EvalResult eval_le(Context ctx, Expr x) {
-  INFIX_COMPARISON_OP(ctx, <=, x->lhs, x->rhs);
+  INFIX_COMPARISON_OP(ctx, LE, x->lhs, x->rhs);
 }
 
 static EvalResult eval_lt(Context ctx, Expr x) {
-  INFIX_COMPARISON_OP(ctx, <, x->lhs, x->rhs);
+  INFIX_COMPARISON_OP(ctx, LT, x->lhs, x->rhs);
 }
 
 static EvalResult eval_gt(Context ctx, Expr x) {
-  INFIX_COMPARISON_OP(ctx, >, x->lhs, x->rhs);
+  INFIX_COMPARISON_OP(ctx, GT, x->lhs, x->rhs);
 }
 
 static EvalResult eval_ge(Context ctx, Expr x) {
-  INFIX_COMPARISON_OP(ctx, >=, x->lhs, x->rhs);
+  INFIX_COMPARISON_OP(ctx, GE, x->lhs, x->rhs);
 }
 
 static EvalResult eval_add(Context ctx, Expr x) {
@@ -265,7 +266,7 @@ static EvalResult eval_print(Context ctx, Expr x) {
   EVAL(ctx, x->rhs, rhs);
   if (rhs.ok->id == LITERAL && rhs.ok->literal.id == LIT_STRING) {
     Array(char) str = rhs.ok->literal.str;
-    for (char* p = g_begin(str); p != g_end(str); ) {
+    for (char* p = g_begin(str); p != g_end(str);) {
       printf("%c", (int)(unsigned char)*p++);
     }
     printf("\n");
