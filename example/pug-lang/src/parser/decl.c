@@ -1,6 +1,7 @@
 /* -*- coding: utf-8-unix -*- */
 
 #include "parser/expr.h"
+#include "constructs.h"
 
 PARSER(Expr) decl(void) {
   return choice(let(), declvar(), declADT());
@@ -28,21 +29,6 @@ parsec(declvar, Expr) {
     SCAN(type_annotation(), rhs);
     RETURN(E.declvar(lhs, rhs));
   }
-}
-static Type makeSimpleType(Id ident, Array(Type) targs) {
-  ArrayT(Type) A = trait(Array(Type));
-  TypeT T = trait(Type);
-  KindT K = trait(Kind);
-  Kind k = K.Star();
-  for (size_t n = A.length(targs); n; n--) {
-    k = K.Kfun(K.Star(), k);
-  }
-  Type lhs = T.TCon((Tycon){ident, k});
-  for (Type* t = A.begin(targs); t != A.end(targs); t++) {
-    lhs = T.TAp(lhs, *t);
-  }
-  // A.free(&targs);
-  return lhs;
 }
 
 // PARSER(Expr) declADT(void);
@@ -87,44 +73,13 @@ parsec(constrs, Type, Expr) {
 
 // PARSER(Expr) constr(Type datatype);
 parsec(constr, Type, Expr) {
-  TypeT T = trait(Type);
   ArrayT(Type) A = trait(Array(Type));
-  ExprT E = trait(Expr);
   DO() WITH(datatype) {
     SCAN(Identifier(), name);
     SCAN(many(atype()), args);
-    Expr x = E.var(name);
-    // ---- nullary constructor
-    if (A.null(args)) {
-      RETURN(E.seq(E.declvar(x, E.type(datatype)),
-                   E.let(x, E.con(name, NULL))));
-    }
-    // ---- n-ary constructor
-    // type of constructor (function type)
-    for (Type* t = A.end(args); t != A.begin(args);) {
-      datatype = T.func(*(--t), datatype);
-    }
-    size_t n = A.length(args);
+    Expr e = defineConstructor(name, args, datatype);
     A.free(&args);
-    // function's arguments
-    Expr vars[n];
-    for (size_t i = 0; i < n; ++i) {
-      CharBuff b = {0};
-      mem_printf(&b, "a%zu", i);
-      vars[i] = E.var(b.data);
-    }
-    // function's body
-    List(Expr) es = NULL;
-    for (size_t i = n; 0 < i; --i) {
-      es = trait(List(Expr)).cons(vars[i - 1], es);
-    }
-    Expr body = E.con(name, es);
-    // function
-    Expr f = body;
-    while (n) {
-      f = E.lambda(vars[--n], f);
-    }
-    RETURN(E.seq(E.declvar(x, E.type(datatype)), E.let(x, f)));
+    RETURN(e);
   }
 }
 
@@ -145,7 +100,6 @@ PARSER(Type) texpr(void) {
 
 // PARSER(Type) tlambda(void);
 parsec(tlambda, Type) {
-  TypeT t = trait(Type);
   ArrayT(Type) A = trait(Array(Type));
   PARSER(char) open_pats = lexme(char1('|'));
   PARSER(char) close_pats = open_pats;
@@ -156,9 +110,7 @@ parsec(tlambda, Type) {
     SCAN(some(arg), ps);
     SCAN(close_pats);
     SCAN(body, rhs);
-    for (Type* p = A.end(ps); p != A.begin(ps);) {
-      rhs = t.func(*--p, rhs);
-    }
+    rhs = makeTypeSig(ps, rhs);
     A.free(&ps);
     RETURN(rhs);
   }
