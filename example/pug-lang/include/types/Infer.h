@@ -57,14 +57,3 @@ tiAlts(ClassEnv ce, List(Assump) as, List(Alt) alts, Type t);
  * substitution just once more.)
  */
 TI(Tup(List(Pred), Type)) tiProgram(ClassEnv ce, List(Assump) as, Expr e);
-
-// -----------------------------------------------------------------------
-static inline TIResult(Tup(List(Pred), Type))
-    testInferP(ClassEnv ce, List(Assump) as, Expr e) {
-  return runTI(tiProgram(ce, as, e), ((TIState){0}));
-}
-
-static inline TIResult(Tup(List(Pred), Type)) testInfer(Expr e) {
-  ClassEnv ce = initialEnv();
-  return testInferP(ce, NULL, e);
-}
