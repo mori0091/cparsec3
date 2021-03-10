@@ -311,7 +311,7 @@ BIND_FOR(trait_Action, A_STATE_TYPE, CPARSEC_ACTION_RETURN_TYPES);
 #define ACTION_NAME(name) FUNC_NAME(name, A_STATE_TYPE, A_ERROR_TYPE)
 #define getState() ACTION_NAME(getState)()
 #define putState(s) ACTION_NAME(putState)(s)
-#define fail(e) ACTION_NAME(faile)(e)
+#define fail(e) ACTION_NAME(fail)(e)
 
 ACTION(A_STATE_TYPE) ACTION_NAME(getState)(void);
 ACTION(None) ACTION_NAME(putState)(A_STATE_TYPE s);
