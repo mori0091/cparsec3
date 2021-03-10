@@ -17,13 +17,6 @@
       .err.msg = _msg_,                                                  \
   })
 
-#define EVAL_RESULT_DEFERED(_ctx_, _x_)                                  \
-  ((EvalResult){                                                         \
-      .success = true,                                                   \
-      .ok = _x_,                                                         \
-      .ctx = _ctx_,                                                      \
-  })
-
 typedef struct RuntimeError {
   String msg;
 } RuntimeError;
@@ -31,11 +24,7 @@ typedef struct RuntimeError {
 typedef struct EvalResult {
   bool success;
   union {
-    struct {
-      Expr ok;
-      /** non-null if evaluation was defered. */
-      Context ctx;
-    };
+    Expr ok;
     RuntimeError err;
   };
 } EvalResult;
