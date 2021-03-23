@@ -35,3 +35,22 @@ static bool FUNC_NAME(eq, Eq(Literal))(Literal a, Literal b) {
   }
 }
 instance_Eq(Literal, FUNC_NAME(eq, Eq(Literal)));
+
+static bool FUNC_NAME(le, Ord(Literal))(Literal a, Literal b) {
+  if (a.id == LIT_INTEGER && b.id == LIT_INTEGER) {
+    return a.num.value <= b.num.value;
+  }
+  if (a.id == b.id) {
+    return true;
+  }
+  if (a.id == LIT_FALSE && b.id == LIT_TRUE) {
+    return true;
+  }
+  if (a.id == LIT_TRUE && b.id == LIT_FALSE) {
+    return false;
+  }
+  assert(0 && "Illegal Literal");
+  return false;
+}
+instance_Ord(Literal, FUNC_NAME(le, Ord(Literal)),
+             FUNC_NAME(eq, Eq(Literal)));

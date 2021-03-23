@@ -20,7 +20,8 @@ Interpreter(Expr) Trait(Interpreter(Expr)) {
   }
 
 #define RETURN_OK(_x_) return EVAL_RESULT_OK(_x_)
-#define RETURN_DEFERED(_ctx_, _x_) return EVAL_RESULT_DEFERED(_ctx_, _x_)
+#define RETURN_DEFERED(_ctx_, _x_)                                       \
+  RETURN_OK(trait(Expr).thunk(_ctx_, _x_))
 #define RETURN_ERR(_msg_) return EVAL_RESULT_ERR(_msg_)
 
 #define INFIX_COMPARISON_OP(_ctx_, _op_, _a_, _b_)                       \
@@ -364,27 +365,15 @@ static EvalResult eval_expr1(Context ctx, Expr x) {
   }
 }
 
-static inline bool is_defered(EvalResult r) {
-  return r.ctx != 0;
-}
-
 static inline bool is_thunk(EvalResult r) {
   return r.success && r.ok->id == THUNK;
 }
 
 static EvalResult eval_expr(Context ctx, Expr x) {
   EvalResult r = eval_expr1(ctx, x);
-  while (is_defered(r) || is_thunk(r)) {
-    if (is_defered(r)) {
-      r = eval_expr1(r.ctx, r.ok);
-    }
-    if (is_thunk(r)) {
-      Expr thunk = r.ok;
-      r = eval_expr1(thunk->ctx, thunk->expr);
-      if (r.success) {
-        thunk->expr = r.ok;
-      }
-    }
+  while (is_thunk(r)) {
+    Expr thunk = r.ok;
+    r = eval_expr1(thunk->ctx, thunk->expr);
   }
   return r;
 }

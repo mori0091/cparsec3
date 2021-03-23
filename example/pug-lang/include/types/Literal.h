@@ -29,6 +29,7 @@ struct Literal {
 
 decl_user_type(Literal);
 trait_Eq(Literal);
+trait_Ord(Literal);
 
 static inline Literal LitInt(int x) {
   return (Literal){

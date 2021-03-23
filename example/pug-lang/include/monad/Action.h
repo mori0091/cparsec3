@@ -308,28 +308,33 @@
 
 BIND_FOR(trait_Action, A_STATE_TYPE, CPARSEC_ACTION_RETURN_TYPES);
 
-ACTION(A_STATE_TYPE) getState(void);
-ACTION(None) putState(A_STATE_TYPE s);
-ACTION(None) fail(A_ERROR_TYPE e);
+#define ACTION_NAME(name) FUNC_NAME(name, A_STATE_TYPE, A_ERROR_TYPE)
+#define getState() ACTION_NAME(getState)()
+#define putState(s) ACTION_NAME(putState)(s)
+#define fail(e) ACTION_NAME(fail)(e)
 
-#ifdef CPARSEC_CONFIG_IMPLEMENT
+ACTION(A_STATE_TYPE) ACTION_NAME(getState)(void);
+ACTION(None) ACTION_NAME(putState)(A_STATE_TYPE s);
+ACTION(None) ACTION_NAME(fail)(A_ERROR_TYPE e);
+
+#ifdef CPARSEC_CONFIG_ACTION_IMPLEMENT
 
 BIND_FOR(impl_Action, A_STATE_TYPE, CPARSEC_ACTION_RETURN_TYPES);
 
-action(getState, A_STATE_TYPE) {
+action(ACTION_NAME(getState), A_STATE_TYPE) {
   A_DO() {
     A_RETURN(_s_);
   }
 }
 
-action(putState, A_STATE_TYPE, None) {
+action(ACTION_NAME(putState), A_STATE_TYPE, None) {
   A_DO_WITH(s) {
     _s_ = s;
     A_RETURN((None){0});
   }
 }
 
-action(fail, A_ERROR_TYPE, None) {
+action(ACTION_NAME(fail), A_ERROR_TYPE, None) {
   A_DO_WITH(e) {
     A_FAIL(e);
   }
@@ -345,7 +350,7 @@ action(fail, A_ERROR_TYPE, None) {
 // #define A_ERROR_TYPE String
 // #define A_RETURN_TYPES int
 //
-// #define CPARSEC_CONFIG_IMPLEMENT
+// #define CPARSEC_CONFIG_ACTION_IMPLEMENT
 // #include "monad/Action.h"
 //
 // // ACTION(int) plus(int x, int y);

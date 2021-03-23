@@ -134,8 +134,6 @@ void pug_help(String arg0) {
 // -----------------------------------------------------------------------
 #define PARSE_RESULT(T) ParseResult(CPARSEC_STREAM_TYPE, T)
 
-#include "types/Infer.h"
-
 bool pug_parseTest(String input) {
   // Establishes a "scoped" memory allocation context. All memory
   // allocated within this scope (by calling `mem_malloc()` explicitly or
@@ -158,27 +156,28 @@ bool pug_parseTest(String input) {
     eprintf(BOLD CYAN, ">> %s\n", s.show(result));
   }
 
+  // runs type-checker all over the AST.
   {
-    TIResult(Tup(List(Pred), Type)) r = testInfer(result.ok);
+    Result(Type, String) r = typeOf(result.ok);
     if (!r.success) {
-      eprintf(BOLD RED, "type error:");
-      printf(" %s\n\n", r.err.msg);
+      eprintf(BOLD RED, "type error: ");
+      printf("%s\n\n", r.err);
       return false;
-    } else {
-      eprintf(BOLD CYAN, ">> : %s\n", trait(Show(Type)).show(r.ok.t));
     }
+    // show type of output of the program
+    eprintf(BOLD CYAN, ">> : %s\n", trait(Show(Type)).show(r.ok));
   }
 
   // evaluate the AST
-  Context ctx = trait(Context).create();
-  EvalResult result2 = trait(Interpreter(Expr)).eval(ctx, result.ok);
   {
-    if (!result2.success) {
+    Result(Expr, String) r = eval(result.ok);
+    if (!r.success) {
       eprintf(BOLD RED, "runtime error: ");
-      printf("%s\n\n", result2.err.msg);
+      printf("%s\n\n", r.err);
       return false;
     }
-    eprintf(BOLD GREEN, "%s\n\n", trait(Show(Expr)).show(result2.ok));
+    // show value of output of the program
+    eprintf(BOLD GREEN, "%s\n\n", trait(Show(Expr)).show(r.ok));
     return true;
   }
 }
