@@ -1,0 +1,69 @@
+// -*- coding: utf-8-unix -*-
+
+type List a
+    = Nil
+    | Cons a (List a)
+    ;
+
+var append : |(List a) (List a)| List a;
+let append = |xs ys| match xs {
+    Nil        => ys;
+    Cons x xs1 => Cons x (append xs1 ys);
+};
+
+type Pair a
+    = MkPair a a
+    ;
+
+var filter : |(|a| bool) (List a)| Pair (List a);
+let filter = |pred xs| {
+    let f = |xs ls rs| match xs {
+        Nil       => MkPair ls rs;
+        Cons y ys => match pred y {
+            true  => f ys ls (Cons y rs);
+            false => f ys (Cons y ls) rs;
+        };
+    };
+    f xs Nil Nil;
+};
+
+var qsort : |(|a a| bool) (List a)| List a;
+let qsort = |cmp| {
+    let sort = |xs| match xs {
+        Nil       => Nil;
+        Cons y ys => match filter (cmp y) ys {
+            MkPair ls rs => append (sort ls) (Cons y (sort rs));
+        };
+    };
+    sort;
+};
+
+var le : |a a| bool;
+let le = |x y| x <= y;
+
+var ge : |a a| bool;
+let ge = |x y| x >= y;
+
+var printList : |(List a)| ();
+let printList = |xs| match xs {
+    Nil       => ();
+    Cons y ys => {
+        print y;
+        printList ys;
+    };
+};
+
+let test = |xs| {
+    print "a list 'xs' :";
+    printList(xs);
+
+    print "qsort <= xs :";
+    printList(qsort le xs);
+    print "qsort >= xs :";
+    printList(qsort ge xs);
+
+    print "";
+};
+
+test (Cons 10 (Cons 2 (Cons 4 (Cons 9 (Cons 1 (Cons (-5) Nil))))));
+test (Cons "a" (Cons "c" (Cons "ab" (Cons "xyz" (Cons "ac" (Cons "bc" Nil))))));

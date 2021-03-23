@@ -126,11 +126,16 @@ expr;              // ok
 | `1`, `10`, `-100` | decimal integer                       |
 | `false`, `true`   | boolean                               |
 | `()`              | the singleton value of the unit type. |
+| `"Hello\nWorld"`  | string                                |
 
 ## Basic Type
 
-| Example | Explanation  |
-| ------- | ------------ |
-| `()`    | unit type    |
-| `bool`  | boolean type |
-| `int`   | integer type |
+| Example                                        | Explanation                        |
+| -------                                        | ------------                       |
+| `()`                                           | unit type                          |
+| `bool`                                         | boolean type                       |
+| `int`                                          | integer type                       |
+| `String`                                       | string type                        |
+| <code>&#124;A&#124; B</code>                   | function type (A -> B)             |
+| <code>&#124;A B ...&#124; C</code>             | function type (A -> B -> ... -> C) |
+| <code>&#124;A&#124; &#124;B&#124; ... C</code> | function type (A -> B -> ... -> C) |

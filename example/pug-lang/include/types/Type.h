@@ -87,6 +87,7 @@ typedef struct TypeT {
   Type (*tcon_Fn)(void);     /* type constructor `Fn` */
   Type (*tcon_List)(void);   /* type constructor `[,]` */
   Type (*tcon_Tuple2)(void); /* type constructor `(,)` */
+  Type (*tcon_String)(void); /* type constructor `String` */
   // ---- helper to create type of a function, list, and 2-tuple
   Type (*func)(Type arg, Type ret);
   Type (*list)(Type arg);

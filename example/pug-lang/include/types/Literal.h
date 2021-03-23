@@ -17,6 +17,8 @@ enum LiteralId {
   LIT_TRUE,
   /* `false` */
   LIT_FALSE,
+  /* string */
+  LIT_STRING,
 };
 
 typedef struct Literal Literal;
@@ -24,6 +26,7 @@ struct Literal {
   enum LiteralId id;
   union {
     Num num;
+    Array(char) str;
   };
 };
 
@@ -53,5 +56,12 @@ static inline Literal LitTrue(void) {
 static inline Literal LitFalse(void) {
   return (Literal){
       .id = LIT_FALSE,
+  };
+}
+
+static inline Literal LitString(Array(char) s) {
+  return (Literal){
+    .id = LIT_STRING,
+    .str = s,
   };
 }
