@@ -171,6 +171,8 @@ action(tiLiteral, Literal, Tup(List(Pred), Type)) {
     case LIT_TRUE:
     case LIT_FALSE:
       A_RETURN(tupPsT(NULL, T.tcon_bool()));
+    case LIT_STRING:
+      A_RETURN(tupPsT(NULL, T.tcon_String()));
     default:
       A_FAIL((TypeError){"Illegal Literal"});
     }

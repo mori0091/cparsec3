@@ -245,8 +245,16 @@ PARSER(Expr) ctor(void) {
   );
 }
 
+parsec(string_literal, Expr) {
+  ExprT E = trait(Expr);
+  DO() {
+    SCAN(double_quoted_string(), s);
+    RETURN(E.literal(LitString(s)));
+  }
+}
+
 PARSER(Expr) literal(void) {
-  return number();
+  return either(number(), string_literal());
 }
 
 // PARSER(Expr) paren(void);
