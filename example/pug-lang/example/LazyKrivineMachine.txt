@@ -1,0 +1,268 @@
+// -*- coding: utf-8-unix -*-
+
+// ---- natural numbers
+type Nat
+    = Zero
+    | Suc Nat
+    ;
+
+var toInt : |Nat| int;
+let toInt = |n| match n {
+    Zero  => 0;
+    Suc n => 1 + (toInt n);
+};
+
+var toNat : |int| Nat;
+let toNat = |x| {
+    if x <= 0 {
+        Zero
+    } else {
+        Suc (toNat (x - 1))
+    }
+};
+
+// ---- result (either Ok or Err)
+type Result a e
+    = Ok a
+    | Err e
+    ;
+
+// ---- pair of a and b
+type Pair a b
+    = Pair a b
+    ;
+
+var fst : |(Pair a b)| a;
+let fst = |p| match p { Pair a _ => a };
+
+var snd : |(Pair a b)| b;
+let snd = |p| match p { Pair _ b => b };
+
+// ---- list of a
+type List a
+    = Nil
+    | Cons a (List a)
+    ;
+
+var head : |(List a)| a;
+let head = |xs| match xs {
+    Cons y _ => y;
+};
+
+var tail : |(List a)| List a;
+let tail = |xs| match xs {
+    Cons _ ys => ys;
+};
+
+var take : |int (List a)| List a;
+let take = |n xs| {
+    if (n <= 0) {
+        Nil
+    } else {
+        match xs {
+            Cons y ys => Cons y (take (n - 1) ys);
+        }
+    }
+};
+
+var drop : |int (List a)| List a;
+let drop = |n xs| {
+    if (n <= 0) {
+        xs
+    } else {
+        match xs {
+            Cons y ys => drop (n - 1) ys;
+        }
+    }
+};
+
+var append : |(List a) (List a)| List a;
+let append = |xs ys| match xs {
+    Nil       => ys;
+    Cons x zs => Cons x (append zs ys);
+};
+
+// ---- term (λ-term)
+type Term
+    = Var Nat
+    | Lam Term
+    | App Term Term
+    | Lit int                   // Lit x : integer literal `x`
+    | Fn2 (|int int| int)       // Fn2 f : primitive binary function `f`
+    ;
+
+type Error
+    = VariableNotFound int
+    | InvalidTerm Term
+    ;
+
+var printTerm : |Term| ();
+let printTerm = |c| match c {
+    Var n   => print (toInt n);
+    Lam t   => print c;
+    App s u => print c;
+    Lit x   => print x;
+    Fn2 f   => print c;
+    _       => {print (InvalidTerm c); print c};
+};
+
+// ---- closure ; a pair of term and environment.
+type Closure
+    = Closure Term (List int)
+    ;
+
+// ---- heap memory ;
+// ---- a collection of indexed cells. each cell holds a closure.
+type Heap
+    = Heap int (List Closure)
+    ;
+
+var heapNew : |Heap Closure| Pair int Heap;
+let heapNew = |h c| match h {
+    Heap n cs => Pair n (Heap (n+1) (Cons c cs));
+};
+
+var heapUpdate : |Heap int Closure| Heap;
+let heapUpdate = |h a c| match h {
+    Heap n cs => {
+        if (a < 0 || n <= a) {           // out of range
+            h
+        } else {
+            let xs = take (n - a - 1) cs;
+            let ys = drop (n - a) cs;
+            Heap n (append xs (Cons c ys))
+        }
+    }
+};
+
+var heapAt : |Heap int| Closure;
+let heapAt = |h a| match h {
+    Heap n cs => {
+        head (drop (n - a - 1) cs)
+    }
+};
+
+// ---- state of Lazy Krivine Machine ;
+// ---- a state consists of the following:
+// ----   - c@<t,es> : closure `c` a pair of λ-term `t` and environment `es`.
+// ----   - as : argument stack
+// ----   - us : update stack
+// ----   - h  : heap
+type State
+    = State
+        Closure                       // c@<t,es> : closure
+        (List int)                    // as : argument stack
+        (List (Pair (List int) int))  // us : update stack
+        Heap                          // h  : heap
+    ;
+
+// ---- runState : process single step state transition.
+var runState : |State| State;
+let runState = |s| match s {
+    State (Closure (App m n) es) as us h => {
+        let x = heapNew h (Closure n es);
+        let a = fst x;      // index of the new cell that holds `(Closure n es)`
+        let h2 = snd x;     // resulting heap memory
+        State (Closure m es) (Cons a as) us h2
+    };
+    State (Closure (Lam m) es) (Cons a as) us h => {
+        State (Closure m (Cons a es)) as us h
+    };
+    State (Closure (Var Zero) (Cons a es)) as us h => {
+        let c = heapAt h a;
+        State c Nil (Cons (Pair as a) us) h
+    };
+    State (Closure (Var (Suc n)) (Cons a es)) as us h => {
+        State (Closure (Var n) es) as us h
+    };
+    // State (Closure (Lam m) es) Nil (Cons (Pair as a) us) h => {
+    //     let h2 = heapUpdate h a (Closure (Lam m) es);
+    //     State (Closure (Lam m) es) as us h2
+    // };
+    State c Nil (Cons (Pair as a) us) h => {
+        let h2 = heapUpdate h a c;
+        State c as us h2
+    };
+};
+
+var var0 : Term;
+let var0 = Var (toNat 0);
+
+var var1 : Term;
+let var1 = Var (toNat 1);
+
+var var2 : Term;
+let var2 = Var (toNat 2);
+
+// ---- eval : evaluate a term ;
+// ---- process term reduction to Weak Head Normal Form (WHNF)
+// ---- by repeating "runState" (single step state transition).
+var eval : |State| Result Term Error;
+let eval = |s| match s {
+    State (Closure (Var n) Nil) as us h => {
+        Err (VariableNotFound (toInt n));
+    };
+    State (Closure (Fn2 f) es) as us h => {
+        match eval (State (Closure var0 es) as us h) {
+            Err e => Err e;
+            Ok (Lit rhs) => match eval (State (Closure var1 es) as us h) {
+                Err e => Err e;
+                Ok (Lit lhs) => Ok (Lit (f lhs rhs));
+            };
+        };
+    };
+    State (Closure (Lam m) es) Nil Nil h => {
+        Ok (Lam m);
+    };
+    State (Closure (Lit x) es) as Nil h => {
+        Ok (Lit x);
+    };
+    _ => eval (runState s);
+};
+
+// ---- run : evaluate the given term with initial state,
+// ---- then print the result.
+var run : |Term| ();
+let run = |t| {
+    match eval (State (Closure t Nil) Nil Nil (Heap 0 Nil)) {
+        Ok t2 => {
+            printTerm t2;
+        };
+        Err e => {
+            print e;
+        };
+    }
+};
+
+// ----
+
+// // t = (λ 0) (λ 0)
+// let lam0 = Lam (Var Zero);
+// let t = App lam0 lam0;
+// run t;
+
+// // t = (λ 0 0) (λ 0)
+// let lam00 = Lam (App (Var Zero) (Var Zero));
+// let lam0 = Lam (Var Zero);
+// let t = App lam00 lam0;
+// run t;
+
+// // t = ((λ 0) (λ 0)) (λ 0)
+// let lam0 = Lam (Var Zero);
+// let t = App (App lam0 lam0) lam0;
+// run t;
+
+let add = Lam (Lam (Fn2 (|a b| a+b)));
+let x = Lit 10;
+let y = Lit 5;
+// (|a b| a+b) 10 5
+let t = App (App add x) y;
+run t;
+
+let letIn = |v body| App (Lam body) v;
+// add = |a b| a+b;
+// x = 10;
+// y = 5;
+// add x y
+let t = letIn add (letIn x (letIn y (App (App var2 var1) var0)));
+run t;

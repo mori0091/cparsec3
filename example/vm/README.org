@@ -1,0 +1,30 @@
+# -*- coding: utf-8-unix -*-
+#+STARTUP: showall indent
+
+* VM - a stack based process virtual machine
+
+An implementation of /the lazy Krivine machine/ 
+
+Based on the description in chapter 3 of the following paper.
+
+#+begin_quote
+Frederic Lang. "Explaining the lazy Krivine machine using explicit substitution
+and addresses". Higher-Order and Symbolic Computation, Springer Verlag, 2007.
+ffinria-00198756 [[https://hal.inria.fr/inria-00198756]]
+#+end_quote
+
+* How to build
+To build, do as follows :
+- *NOTE* Suppose that the leading '*$*' is a shell prompt.
+
+#+begin_src shell
+$ make
+#+end_src
+
+
+To run tests:
+
+#+begin_src shell
+$ make test
+#+end_src
+
