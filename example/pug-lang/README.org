@@ -126,3 +126,5 @@ See also sample code in the [[file:example/][example]] folder.
 - [[file:example/Maybe.txt][Haskell's ~Maybe a~ (a.k.a Rust's ~Option<T>~)]]
 - [[file:example/Result.txt][Haskell's ~Either e a~ (a.k.a Rust's ~Result<T, E>~)]]
 - [[file:example/qsort.txt][quick sort]]
+- [[file:example/LazyKrivineMachine.txt][the lazy Krivine machine]]
+  - An implementation of the lazy Krivine machine.
