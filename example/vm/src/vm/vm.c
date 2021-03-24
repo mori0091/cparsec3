@@ -4,7 +4,6 @@
 
 #include "vm/vm.h"
 
-// impl_List(Adr);
 impl_List(Update);
 impl_Mem(Closure);
 impl_Array(Closure);
@@ -28,13 +27,13 @@ static Adr nth(size_t n, Env es) {
   return 0;
 }
 
-/** push (for Env and AStack) */
-static inline List(Adr) push(Adr a, List(Adr) as) {
+/** push (for AStack) */
+static inline AStack push(Adr a, AStack as) {
   return trait(List(Adr)).cons(a, as);
 }
 
-/** move head of `*src` to `*dst` ; <es, a::as> -> <a::es, as> */
-static inline void moveHead(List(Adr) * dst, List(Adr) * src) {
+/** move head of AStack to Env ; <es, a::as> -> <a::es, as> */
+static inline void moveHead(Env * dst, AStack * src) {
   assert(dst && src && "null pointer");
   assert(*src && "empty list / stack underflow");
   List(Adr) es = *src;
@@ -51,12 +50,12 @@ static inline UStack save(AStack as, Adr a, UStack us) {
 
 /** pop/restore (for UStack) */
 static inline UStack restore(AStack* asref, Adr* aref, UStack us) {
-  if (!us)
+  assert(asref && aref && "null pointer");
+  if (!us) {
     panic("empty list / stack underflow");
-  if (asref)
-    *asref = us->head.as;
-  if (aref)
-    *aref = us->head.a;
+  }
+  *asref = us->head.as;
+  *aref = us->head.a;
   return trait(List(Update)).drop(1, us);
 }
 
@@ -184,8 +183,6 @@ VMState evalWHNF(VMState s) {
   }
 }
 
-#include "cparsec3/base/base_generics.h"
-
 inline static void printTerm(Term t) {
   switch (t.tag) {
   case VM_UNDEFINED:
@@ -217,6 +214,8 @@ inline static void printTerm(Term t) {
     break;
   }
 }
+
+#include <cparsec3/base/base_generics.h>
 
 Term testVM(Term t) {
   g_scoped(MemCtx) _ = mem_ctx_begin();
