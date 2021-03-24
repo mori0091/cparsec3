@@ -32,8 +32,12 @@ See [[file:docs/how_to_build.org][build-instruction]] contents for the below:
 Here is a sample application powered by /CPARSEC3/.
 
 - [[file:example/pug-lang][pug-lang]] :: 
-     /The Pug programming language/ interpreter.\\
-     That is one of the best usecase of /CPARSEC3/ *Parsec* library.
+  /The Pug programming language/ interpreter.\\
+  That is one of the best usecase of /CPARSEC3/ *Parsec* library.
+
+- [[file:example/vm][VM]]       :: 
+  A Virtual Machine based on the lazy Krivine machine.\\
+  That is also a usecase of /CPARSEC3/ *Base* library.
 
 * API references
 
