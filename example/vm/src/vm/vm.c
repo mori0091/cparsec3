@@ -3,13 +3,14 @@
 #include <assert.h>
 
 #include "vm/vm.h"
+#include "vm/debug.h"
 
 impl_List(Update);
 impl_Mem(Closure);
 impl_Array(Closure);
 
 /** panic! */
-static inline void panic(String msg) {
+void panic(String msg) {
   printf("panic: %s\n", msg);
   abort();
 }
@@ -33,7 +34,7 @@ static inline AStack push(Adr a, AStack as) {
 }
 
 /** move head of AStack to Env ; <es, a::as> -> <a::es, as> */
-static inline void moveHead(Env * dst, AStack * src) {
+static inline void moveHead(Env* dst, AStack* src) {
   assert(dst && src && "null pointer");
   assert(*src && "empty list / stack underflow");
   List(Adr) es = *src;
@@ -59,35 +60,36 @@ static inline UStack restore(AStack* asref, Adr* aref, UStack us) {
   return trait(List(Update)).drop(1, us);
 }
 
+static inline void runGC(void) {
+  // GC is not implemented yet.
+  panic("heap memory exhausted");
+}
+
 static inline Adr heapNew(Heap* href, Closure c) {
   assert(href && "null pointer");
-  assert(c.t.tag != VM_UNDEFINED);
-  for (size_t a = 0; a < href->length; ++a) {
-    if (href->data[a].t.tag == VM_UNDEFINED) {
-      href->data[a] = c;
-      return (Adr)a;
-    }
+  if (href->size >= href->array.length) {
+    // heap memory is full! now start GC!
+    runGC();
   }
-  panic("heap memory exhausted");
-  /* never reach */
-  return 0;
+  size_t a = href->size++;
+  href->array.data[a] = c;
+  return (Adr)a;
 }
 
 static inline Closure heapAt(Heap* href, Adr a) {
   assert(href && "null pointer");
-  if (href->length <= a) {
+  if (href->size <= a) {
     panic("index out of bounds");
   }
-  return href->data[(size_t)a];
+  return href->array.data[(size_t)a];
 }
 
 static inline void heapUpdate(Heap* href, Adr a, Closure c) {
   assert(href && "null pointer");
-  assert(c.t.tag != VM_UNDEFINED);
-  if (href->length <= a) {
+  if (href->size <= a) {
     panic("index out of bounds");
   }
-  href->data[(size_t)a] = c;
+  href->array.data[(size_t)a] = c;
 }
 
 static inline VMState runApp(VMState s) {
@@ -122,8 +124,6 @@ static inline VMState runUpdate(VMState s) {
 
 VMState runState(VMState s) {
   switch (s.c.t.tag) {
-  case VM_UNDEFINED:
-    break;
   case VM_APP:
     return runApp(s);
   case VM_VAR:
@@ -163,6 +163,7 @@ inline static VMState runFn2(VMState s) {
 
 VMState evalWHNF(VMState s) {
   for (;;) {
+    dumpVMState(s);
     switch (s.c.t.tag) {
     case VM_FN2:
       return runFn2(s);
@@ -183,45 +184,13 @@ VMState evalWHNF(VMState s) {
   }
 }
 
-inline static void printTerm(Term t) {
-  switch (t.tag) {
-  case VM_UNDEFINED:
-    printf("tag: VM_UNDEFINED\n");
-    break;
-  case VM_APP:
-    printf("tag: VM_APP\n");
-    printf("  t1: %p\n", (void*)t.t1);
-    printf("  t2: %p\n", (void*)t.t2);
-    break;
-  case VM_LAM:
-    printf("tag: VM_LAM\n");
-    printf("  t: %p\n", (void*)t.t);
-    break;
-  case VM_VAR:
-    printf("tag: VM_VAR\n");
-    printf("  n: %zu\n", t.n);
-    break;
-  case VM_LIT:
-    printf("tag: VM_LIT\n");
-    printf("  i: %d\n", t.i);
-    break;
-  case VM_FN2:
-    printf("tag: VM_FN2\n");
-    printf("  f: %p\n", (void*)(intptr_t)t.f);
-    break;
-  default:
-    panic("** unknown term **");
-    break;
-  }
-}
-
 #include <cparsec3/base/base_generics.h>
 
 Term testVM(Term t) {
   g_scoped(MemCtx) _ = mem_ctx_begin();
-  Heap heap = trait(Heap).create(1024);
+  Heap heap = {.array = trait(Array(Closure)).create(1024), .size = 0};
   VMState s = {.c = {t, NULL}, .as = NULL, .us = NULL, .h = heap};
   s = evalWHNF(s);
-  // printTerm(s.c.t);
+  dumpVMState(s);
   return s.c.t;
 }

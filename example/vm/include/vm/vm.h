@@ -43,12 +43,9 @@ typedef struct Update {
 trait_List(Update);
 
 /**
- * Type `Heap` represents a memory / storage that holds all living
- * closures. Closures are identified by the corresponding value of type
- * `Adr`.
+ * Type `Closure` represents a closure that is a pair of expression /
+ * term and environment (scope of accessible variables).
  */
-#define Heap Array(Closure)
-
 typedef struct Closure {
   Term t; // an expression / term that is evaluable of the closure.
   Env es; // environment of the closure
@@ -56,6 +53,16 @@ typedef struct Closure {
 
 trait_Mem(Closure);
 trait_Array(Closure);
+
+/**
+ * Type `Heap` represents a memory / storage that holds all living
+ * closures. Closures are identified by the corresponding value of type
+ * `Adr`.
+ */
+typedef struct Heap {
+  Array(Closure) array; // used + unused memory block
+  size_t size;          // size of used area
+} Heap;
 
 /**
  * Type `VMState` represents a computation state of virtual machine.
@@ -83,3 +90,5 @@ VMState evalWHNF(VMState s);
  * (i.e. evaluates with empty environment / arguments / heap)
  */
 Term testVM(Term t);
+
+void panic(String msg);
