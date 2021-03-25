@@ -2,12 +2,11 @@
 #pragma once
 
 enum TermTag {
-  VM_UNDEFINED = 0, // invalid term
-  VM_APP,           // App M N
-  VM_LAM,           // Lam E
-  VM_VAR,           // Var n
-  VM_LIT,           // Lit i
-  VM_FN2,           // Fn2 (int x int -> int)
+  VM_APP, // App M N
+  VM_LAM, // Lam E
+  VM_VAR, // Var n
+  VM_LIT, // Lit i
+  VM_FN2, // Fn2 (int x int -> int)
 };
 
 typedef struct Term Term;
