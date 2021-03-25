@@ -28,21 +28,21 @@ static Term test1(int (*F)(int, int), int LHS, int RHS) {
   Term prg[16] = {0};
   // let f = lam lam F in ...
   prg[0] = (Term){.tag = VM_APP, .t1 = &prg[4], .t2 = &prg[1]};
-  // lam lam F
+  // lam lam isub
   prg[1] = (Term){.tag = VM_LAM, .t = &prg[2]};
   prg[2] = (Term){.tag = VM_LAM, .t = &prg[3]};
   prg[3] = (Term){.tag = VM_FN2, .f = F};
   // in ...
   prg[4] = (Term){.tag = VM_LAM, .t = &prg[5]};
-  // let x = LHS in ...
+  // let x = 10 in ...
   prg[5] = (Term){.tag = VM_APP, .t1 = &prg[7], .t2 = &prg[6]};
-  // LHS
+  // 10
   prg[6] = (Term){.tag = VM_LIT, .i = LHS};
   // in ...
   prg[7] = (Term){.tag = VM_LAM, .t = &prg[8]};
-  // let y = RHS in ...
+  // let y = 5 in ...
   prg[8] = (Term){.tag = VM_APP, .t1 = &prg[10], .t2 = &prg[9]};
-  // RHS
+  // 5
   prg[9] = (Term){.tag = VM_LIT, .i = RHS};
   // in ...
   prg[10] = (Term){.tag = VM_LAM, .t = &prg[11]};
