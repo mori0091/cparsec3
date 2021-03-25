@@ -2,7 +2,6 @@
 #pragma once
 
 enum TermTag {
-  VM_LET, // Let V in E
   VM_APP, // App M N
   VM_LAM, // Lam E
   VM_VAR, // Var n
@@ -14,10 +13,6 @@ typedef struct Term Term;
 struct Term {
   enum TermTag tag;
   union {
-    struct /* Let */ {
-      Term* v;
-      Term* e;
-    };
     struct /* App */ {
       Term* t1;
       Term* t2;
