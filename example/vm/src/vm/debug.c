@@ -4,6 +4,9 @@
 
 inline static void printTerm(Term t) {
   switch (t.tag) {
+  case VM_LET:
+    printf("LET {v:%p, e:%p}", (void*)t.v, (void*)t.e);
+    break;
   case VM_APP:
     printf("APP {t1:%p, t2:%p}", (void*)t.t1, (void*)t.t2);
     break;
