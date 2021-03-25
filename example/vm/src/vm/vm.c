@@ -92,6 +92,15 @@ static inline void heapUpdate(Heap* href, Adr a, Closure c) {
   href->array.data[(size_t)a] = c;
 }
 
+static inline VMState runLet(VMState s) {
+  Closure v = {.t = *s.c.t.v, .es = s.c.es};
+  Closure e = {.t = *s.c.t.e, .es = s.c.es};
+  Adr a = heapNew(&s.h, v);
+  s.c = e;
+  s.c.es = push(a, s.c.es);
+  return s;
+}
+
 static inline VMState runApp(VMState s) {
   Closure c1 = {.t = *s.c.t.t1, .es = s.c.es};
   Closure c2 = {.t = *s.c.t.t2, .es = s.c.es};
@@ -124,6 +133,8 @@ static inline VMState runUpdate(VMState s) {
 
 VMState runState(VMState s) {
   switch (s.c.t.tag) {
+  case VM_LET:
+    return runLet(s);
   case VM_APP:
     return runApp(s);
   case VM_VAR:
