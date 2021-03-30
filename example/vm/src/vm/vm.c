@@ -2,17 +2,38 @@
 
 #include <assert.h>
 
-#include "vm/vm.h"
 #include "vm/debug.h"
+#include "vm/vm.h"
 
-impl_List(Update);
+impl_Mem(Update);
+impl_Array(Update);
+
 impl_Mem(Closure);
 impl_Array(Closure);
+
+impl_Mem(Cell);
+impl_Array(Cell);
 
 /** panic! */
 void panic(String msg) {
   printf("panic: %s\n", msg);
   abort();
+}
+
+/** garbage collector (not implemented yet) */
+static void runGC(void) {
+  panic("heap memory exhausted");
+}
+
+/** custom made list constructor */
+static List(Adr) cons(Adr a, List(Adr) as, CellHeap* cellHeap) {
+  if (cellHeap->size >= cellHeap->array.length) {
+    runGC();
+  }
+  List(Adr) bs = &cellHeap->array.data[cellHeap->size++];
+  bs->head = a;
+  bs->tail = as;
+  return bs;
 }
 
 /** get n-th element (for Env) */
@@ -29,8 +50,8 @@ static Adr nth(size_t n, Env es) {
 }
 
 /** push (for AStack) */
-static inline AStack push(Adr a, AStack as) {
-  return trait(List(Adr)).cons(a, as);
+static inline AStack push(Adr a, AStack as, CellHeap* cellHeap) {
+  return cons(a, as, cellHeap);
 }
 
 /** move head of AStack to Env ; <es, a::as> -> <a::es, as> */
@@ -38,31 +59,31 @@ static inline void moveHead(Env* dst, AStack* src) {
   assert(dst && src && "null pointer");
   assert(*src && "empty list / stack underflow");
   List(Adr) es = *src;
-  *src = (*src)->tail;
+  *src = es->tail;
   es->tail = *dst;
   *dst = es;
 }
 
 /** push/save (for UStack) */
 static inline UStack save(AStack as, Adr a, UStack us) {
+  if (us.size >= us.array.length) {
+    panic("stack overflow");
+  }
   Update u = {.as = as, .a = a};
-  return trait(List(Update)).cons(u, us);
+  us.array.data[us.size++] = u;
+  return us;
 }
 
 /** pop/restore (for UStack) */
 static inline UStack restore(AStack* asref, Adr* aref, UStack us) {
   assert(asref && aref && "null pointer");
-  if (!us) {
+  if (!us.size) {
     panic("empty list / stack underflow");
   }
-  *asref = us->head.as;
-  *aref = us->head.a;
-  return trait(List(Update)).drop(1, us);
-}
-
-static inline void runGC(void) {
-  // GC is not implemented yet.
-  panic("heap memory exhausted");
+  Update u = us.array.data[--us.size];
+  *asref = u.as;
+  *aref = u.a;
+  return us;
 }
 
 static inline Adr heapNew(Heap* href, Closure c) {
@@ -70,6 +91,10 @@ static inline Adr heapNew(Heap* href, Closure c) {
   if (href->size >= href->array.length) {
     // heap memory is full! now start GC!
     runGC();
+  }
+  if (c.t.tag == VM_LIT) {
+    // literals need not its own environment
+    c.es = NULL;
   }
   size_t a = href->size++;
   href->array.data[a] = c;
@@ -97,7 +122,7 @@ static inline VMState runLet(VMState s) {
   Closure e = {.t = *s.c.t.e, .es = s.c.es};
   Adr a = heapNew(&s.h, v);
   s.c = e;
-  s.c.es = push(a, s.c.es);
+  s.c.es = push(a, s.c.es, &s.cellHeap);
   return s;
 }
 
@@ -106,7 +131,7 @@ static inline VMState runApp(VMState s) {
   Closure c2 = {.t = *s.c.t.t2, .es = s.c.es};
   Adr a = heapNew(&s.h, c2);
   s.c = c1;
-  s.as = push(a, s.as);
+  s.as = push(a, s.as, &s.cellHeap);
   return s;
 }
 
@@ -119,6 +144,11 @@ static inline VMState runLam(VMState s) {
 static inline VMState runAccess(VMState s) {
   Adr a = nth(s.c.t.n, s.c.es);
   s.c = heapAt(&s.h, a);
+  if (s.c.t.tag == VM_LIT) {
+    // no need to update
+    return s;
+  }
+  // schedule an update
   s.us = save(s.as, a, s.us);
   s.as = NULL;
   return s;
@@ -145,7 +175,7 @@ VMState runState(VMState s) {
     }
     /* fall through */
   default:
-    if (s.us) {
+    if (s.us.size) {
       return runUpdate(s);
     }
   }
@@ -167,8 +197,9 @@ inline static VMState runFn2(VMState s) {
   if (sl.c.t.tag != VM_LIT) {
     panic("invalid term : non-literal lhs");
   }
-  Term t = {.tag = VM_LIT, .i = s.c.t.f(sl.c.t.i, sr.c.t.i)};
-  s.c.t = t;
+  s.c.t.tag = VM_LIT;
+  s.c.t.i = s.c.t.f(sl.c.t.i, sr.c.t.i);
+  s.c.es = NULL; // literals need not its own environment
   return s;
 }
 
@@ -179,12 +210,12 @@ VMState evalWHNF(VMState s) {
     case VM_FN2:
       return runFn2(s);
     case VM_LAM:
-      if (!s.as && !s.us) {
+      if (!s.as && !s.us.size) {
         return s;
       }
       break;
     case VM_LIT:
-      if (!s.us) {
+      if (!s.us.size) {
         return s;
       }
       break;
@@ -199,8 +230,27 @@ VMState evalWHNF(VMState s) {
 
 Term testVM(Term t) {
   g_scoped(MemCtx) _ = mem_ctx_begin();
-  Heap heap = {.array = trait(Array(Closure)).create(1024), .size = 0};
-  VMState s = {.c = {t, NULL}, .as = NULL, .us = NULL, .h = heap};
+
+  CellHeap cellHeap = {
+      .array = trait(Array(Cell)).create(256),
+      .size = 0,
+  };
+  UStack us = {
+      .array = trait(Array(Update)).create(256),
+      .size = 0,
+  };
+  Heap heap = {
+      .array = trait(Array(Closure)).create(256),
+      .size = 0,
+  };
+
+  VMState s = {
+      .c = {t, NULL},
+      .as = NULL,
+      .us = us,
+      .h = heap,
+      .cellHeap = cellHeap,
+  };
   s = evalWHNF(s);
   dumpVMState(s);
   return s.c.t;
