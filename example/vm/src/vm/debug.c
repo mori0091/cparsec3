@@ -29,7 +29,7 @@ inline static void printTerm(Term t) {
 }
 
 static void printEnv(Env es) {
-  /* printf("%p: ", (void*)es); */
+  printf("%p:", (void*)es);
   printf("[");
   if (es) {
     printf("%zu", (size_t)es->head);
@@ -52,17 +52,36 @@ inline static void printUpdate(Update u) {
 }
 
 static void printUStack(UStack us) {
-  /* printf("%p: ", (void*)us); */
   printf("[");
-  if (us) {
-    printUpdate(us->head);
-    while (us->tail) {
-      us = us->tail;
+  if (us.size) {
+    printUpdate(us.array.data[--us.size]);
+    while (us.size) {
       printf(", ");
-      printUpdate(us->head);
+      printUpdate(us.array.data[--us.size]);
     }
   }
   printf("]");
+}
+
+static void dumpHeap(Heap h) {
+  printf("vm: heap used %zu / %zu\n", h.size, h.array.length);
+  for (size_t a = 0; a < h.size; ++a) {
+    printf("%5zu.t : ", a);
+    printTerm(h.array.data[a].t);
+    printf("\n");
+    printf("%5s.es: ", "");
+    printEnv(h.array.data[a].es);
+    printf("\n");
+  }
+}
+
+static void dumpCellHeap(CellHeap ch) {
+  printf("vm: cell heap used %zu / %zu\n", ch.size, ch.array.length);
+  for (size_t i = 0; i < ch.size; ++i) {
+    Cell* p = &ch.array.data[i];
+    printf("    ");
+    printf("%p:{head:%zu, tail:%p}\n", (void*)p, p->head, (void*)p->tail);
+  }
 }
 
 void dumpVMState(VMState s) {
@@ -78,14 +97,7 @@ void dumpVMState(VMState s) {
   printf("vm:   us: ");
   printUStack(s.us);
   printf("\n");
-  printf("vm: heap used %zu / %zu\n", s.h.size, s.h.array.length);
-  for (size_t a = 0; a < s.h.size; ++a) {
-    printf("%5zu.t : ", a);
-    printTerm(s.h.array.data[a].t);
-    printf("\n");
-    printf("%5s.es: ", "");
-    printEnv(s.h.array.data[a].es);
-    printf("\n");
-  }
+  dumpHeap(s.h);
+  dumpCellHeap(s.cellHeap);
   printf("\n");
 }
