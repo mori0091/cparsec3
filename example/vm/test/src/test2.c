@@ -1,6 +1,8 @@
 /* -*- coding: utf-8-unix -*- */
 
-#include "vm/vm.h"
+#include <il/term_graph_easy.h>
+#include <vm/vm.h>
+
 #include <testit.h>
 
 /**
@@ -24,40 +26,15 @@
  *       instead of `APP (LAM e) v`.
  */
 static Term test2(int (*F)(int, int), int LHS, int RHS) {
-  // let f = lam lam F in
-  // let x = LHS in
-  // let y = RHS in
-  // f x y
-  Term prg[16] = {0};
-  // let f = lam lam F in ...
-  prg[0] = (Term){.tag = VM_LET, .v = &prg[1], .e = &prg[5]};
-  // lam lam F
-  prg[1] = (Term){.tag = VM_LAM, .t = &prg[2]};
-  prg[2] = (Term){.tag = VM_LAM, .t = &prg[3]};
-  prg[3] = (Term){.tag = VM_FN2, .f = F};
-  // in
-  // let x = LHS in ...
-  prg[5] = (Term){.tag = VM_LET, .v = &prg[6], .e = &prg[7]};
-  // LHS
-  prg[6] = (Term){.tag = VM_LIT, .i = LHS};
-  // in
-  // let y = RHS in ...
-  prg[7] = (Term){.tag = VM_LET, .v = &prg[8], .e = &prg[9]};
-  // RHS
-  prg[8] = (Term){.tag = VM_LIT, .i = RHS};
-  // in
-  // f x y
-  prg[9] = (Term){.tag = VM_APP, .t1 = &prg[11], .t2 = &prg[10]};
-  // y
-  prg[10] = (Term){.tag = VM_VAR, .n = 0};
-  // f x
-  prg[11] = (Term){.tag = VM_APP, .t1 = &prg[13], .t2 = &prg[12]};
-  // x
-  prg[12] = (Term){.tag = VM_VAR, .n = 1};
-  // f
-  prg[13] = (Term){.tag = VM_VAR, .n = 2};
-
-  return testVM(prg[0]);
+  IL_TERM_GRAPH_LOCAL_BUFFER(384);
+  /* clang-format off */
+  Term* prg = let(lam(lam(f2(F))),             // let f = lam lam F in
+              let(lit(LHS),                    // let x = LHS in
+              let(lit(RHS),                    // let y = RHS in
+              app(app(var(2), var(1)), var(0)) // f x y
+              )));
+  /* clang-format on */
+  return testVM(*prg);
 }
 
 test("iadd a b : primitive integer addition\n"
