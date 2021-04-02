@@ -1,0 +1,85 @@
+# -*- coding: utf-8-unix -*-
+#+STARTUP: showall indent
+
+* VM State
+A VM state is denoted with 4 components: ~c~ ~as~ ~us~ ~h~.
+- /closure/ ~c~         :: 
+  A pair of /term/ ~t~ and its /environment/ ~es~. \\
+  /closure/ is usually denoted as ~{t, es}~.
+- /argument stack/ ~as~ :: 
+  A list / stack of arguments' /address/. \\
+  Each /address/ refers to corresponding /closure/ stored in /heap memory/ ~h~.
+- /update stack/ ~us~   :: 
+  A list / stack of /scheduled update/. \\
+  /scheduled update/ is denoted as ~{a, as}~ a pair of address ~a~ of /closure/,
+  that will be replaced with resulting /closure/ later, and saved /argument
+  stack/ ~as~.
+- /heap memory/ ~h~     :: 
+  A managed memory / storage that owns all accessible set of /closures/. \\
+  /closure/ in the /heap/ is identified by its corresponding /address/.
+
+* Syntax / Notation for describing VM State
+Here is the syntax / notation for describing VM State. \\
+These are used in the next section to denotes state and dynamics of VM.
+
+- VM state ::
+  ~c~ ~as~ ~us~ ~h~
+- term ::
+  ~M~, ~N~, ~E~, ~Let N E~, ~App M N~, ~Lam E~, ~Lit L~, ~Var 0~, or ~Var n~
+- literal :: 
+  ~L~, ~K~
+- natural number ::
+  ~0~, ~n~, ~(1+n)~
+- address :: 
+  ~a~
+- list / stack (may or may not empty) ::
+  ~as~, ~es~, ~us~, ~xs~
+- empty list / stack ::
+  ~[]~
+- non empty list / stack (a pair of the 1st element ~x~ and subsequent list ~xs~) ::
+  ~x::xs~
+- environment ::
+  ~[]~, ~es~, ~a::es~
+- argument stack ::
+  ~[]~, ~as~, ~a::as~
+- update stack ::
+  ~[]~, ~us~, ~{a, as}::us~
+- a pair of ~x~ and ~y~ ::
+  ~{x,y}~
+- undefined / invalid object / unused memory slot ::
+  ~{}~
+- a heap memory, that may or may not owns some closures :: 
+  ~h~
+- a heap memory, that owns closure ~c~ identified by address ~a~ ::
+  ~h[a->c]~
+- a heap memory, that owns no closure identified by address ~a~ ::
+  ~h[a->{}]~
+
+* VM State Transition
+
+The below table shows *Dynamics of VM state transision*.
+- The 1st column is type of transision (just for readability),
+- /before/ column is a VM state before transision,
+- /after/ column is a VM state after transision.
+
+#+caption: Dynamics of VM state transision
+|          | /before/                                    | /after/                                       | remarks                                         |
+|----------+---------------------------------------------+-----------------------------------------------+-------------------------------------------------|
+| /Let/    | ~{Let N E, es}~ ~as~ ~us~ ~h[a->{}]~        | ~{E, a::es}~ ~as~ ~us~ ~h[a->{N, es}]~        | _{~Let N E~ is short-hand of ~App (Lam E) N~}   |
+|----------+---------------------------------------------+-----------------------------------------------+-------------------------------------------------|
+| /App/    | ~{App M N, es}~ ~as~ ~us~ ~h[a->{}]~        | ~{M, es}~ ~a::as~ ~us~ ~h[a->{N, es}]~        | _{~a~ is fresh addess}                          |
+| /App/    | ~{App M (Lit L), es}~ ~as~ ~us~ ~h[a->{}]~  | ~{M, es}~ ~a::as~ ~us~ ~h[a->{Lit L, []}]~    | _{/App/ transision specialized for literals}    |
+| /Lam/    | ~{Lam E, es}~ ~a::as~ ~us~ ~h~              | ~{E, a::es}~ ~as~ ~us~ ~h~                    |                                                 |
+| /Skip/   | ~{Var (1+n), a::es}~ ~as~ ~us~ ~h~          | ~{Var n, es}~ ~as~ ~us~ ~h~                   |                                                 |
+| /Access/ | ~{Var 0, a::es}~ ~as~ ~us~ ~h[a->c]~        | ~c~ ~[]~ ~{a, as}::us~ ~h[a->c]~              |                                                 |
+| /Update/ | ~{Lam E, es}~ ~[]~ ~{a, as}::us~ ~h[a->c]~  | ~{Lam E, es}~ ~as~ ~us~ ~h[a->{Lam E, es}]~   |                                                 |
+| /Update/ | ~{Lit L, es}~ ~[]~ ~{a, as}::us~ ~h[a->c]~  | ~{Lit L, es}~ ~as~ ~us~ ~h[a->{Lit L, []}]~   | _{/Update/ transision specialized for literals} |
+|----------+---------------------------------------------+-----------------------------------------------+-------------------------------------------------|
+| /Done/   | ~{Lam E, es}~ ~[]~ ~[]~ ~h~                 | ← /end of evaluation/                        |                                                 |
+| /Done/   | ~{Lit L, es}~ ~[]~ ~[]~ ~h~                 | ← /end of evaluation/                        |                                                 |
+|----------+---------------------------------------------+-----------------------------------------------+-------------------------------------------------|
+| /Error/  | ~{Lit L, es}~ ~a::as~ ~us~ ~h~              | ← /cannot apply/                             | _{ill-formed /Lam/ transision}                  |
+| /Error/  | ~{Var n, []}~ ~as~ ~us~ ~h~                 | ← /variable not found (index out of bounds)/ | _{ill-formed /Access/ transision}               |
+| /Error/  | ~{Var 0, a::es}~ ~as~ ~us~ ~h[a->{}]~       | ← /dangling pointer (read)/                  | _{ill-formed /Access/ transision}               |
+| /Error/  | ~{Lam E, es}~ ~[]~ ~{a, as}::us~ ~h[a->{}]~ | ← /dangling pointer (write)/                 | _{ill-formed /Update/ transision}               |
+| /Error/  | ~{Lit L, es}~ ~[]~ ~{a, as}::us~ ~h[a->{}]~ | ← /dangling pointer (write)/                 | _{ill-formed /Update/ transision}               |
