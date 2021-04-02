@@ -1,7 +1,9 @@
 /* -*- coding: utf-8-unix -*- */
 
+#include <il/term_graph_easy.h>
+#include <vm/vm.h>
+
 #include <testit.h>
-#include "vm/vm.h"
 
 /**
  * \brief Tests the code returns expected value.
@@ -25,39 +27,21 @@ static Term test1(int (*F)(int, int), int LHS, int RHS) {
   // let x = LHS in
   // let y = RHS in
   // f x y
-  Term prg[16] = {0};
-  // let f = lam lam F in ...
-  prg[0] = (Term){.tag = VM_APP, .t1 = &prg[4], .t2 = &prg[1]};
-  // lam lam F
-  prg[1] = (Term){.tag = VM_LAM, .t = &prg[2]};
-  prg[2] = (Term){.tag = VM_LAM, .t = &prg[3]};
-  prg[3] = (Term){.tag = VM_FN2, .f = F};
-  // in ...
-  prg[4] = (Term){.tag = VM_LAM, .t = &prg[5]};
-  // let x = LHS in ...
-  prg[5] = (Term){.tag = VM_APP, .t1 = &prg[7], .t2 = &prg[6]};
-  // LHS
-  prg[6] = (Term){.tag = VM_LIT, .i = LHS};
-  // in ...
-  prg[7] = (Term){.tag = VM_LAM, .t = &prg[8]};
-  // let y = RHS in ...
-  prg[8] = (Term){.tag = VM_APP, .t1 = &prg[10], .t2 = &prg[9]};
-  // RHS
-  prg[9] = (Term){.tag = VM_LIT, .i = RHS};
-  // in ...
-  prg[10] = (Term){.tag = VM_LAM, .t = &prg[11]};
-  // f x y
-  prg[11] = (Term){.tag = VM_APP, .t1 = &prg[13], .t2 = &prg[12]};
-  // y
-  prg[12] = (Term){.tag = VM_VAR, .n = 0};
-  // f x
-  prg[13] = (Term){.tag = VM_APP, .t1 = &prg[15], .t2 = &prg[14]};
-  // x
-  prg[14] = (Term){.tag = VM_VAR, .n = 1};
-  // f
-  prg[15] = (Term){.tag = VM_VAR, .n = 2};
-
-  return testVM(prg[0]);
+  // ----
+  // Note that `let x = V in E` is `app (lam E) x where x = V`
+  // ----
+  IL_TERM_GRAPH_LOCAL_BUFFER(384);
+  /* clang-format off */
+  Term* prg = app(lam(
+              app(lam(
+              app(lam(
+                  app(app(var(2), var(1)), var(0))), // f x y where
+                  lit(RHS))),                        //   y = RHS
+                  lit(LHS))),                        //   x = LHS
+                  lam(lam(f2(F)))                    //   f = lam lam F
+                  );
+  /* clang-format on */
+  return testVM(*prg);
 }
 
 test("iadd a b : primitive integer addition\n"
