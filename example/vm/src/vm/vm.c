@@ -87,6 +87,10 @@ static inline UStack restore(AStack* asref, Adr* aref, UStack us) {
 }
 
 static inline Adr heapNew(Heap* href, Closure c) {
+  if (c.t.tag == VM_VAR) {
+    // short circuit (no need to allocate)
+    return nth(c.t.n, c.es);
+  }
   assert(href && "null pointer");
   if (href->size >= href->array.length) {
     // heap memory is full! now start GC!
@@ -144,14 +148,17 @@ static inline VMState runLam(VMState s) {
 static inline VMState runAccess(VMState s) {
   Adr a = nth(s.c.t.n, s.c.es);
   s.c = heapAt(&s.h, a);
-  if (s.c.t.tag == VM_LIT) {
+  switch (s.c.t.tag) {
+  case VM_LAM:
+  case VM_LIT:
     // no need to update
     return s;
+  default:
+    // schedule an update
+    s.us = save(s.as, a, s.us);
+    s.as = NULL;
+    return s;
   }
-  // schedule an update
-  s.us = save(s.as, a, s.us);
-  s.as = NULL;
-  return s;
 }
 
 static inline VMState runUpdate(VMState s) {
